@@ -5,6 +5,7 @@ from pyserini.analysis.pyanalysis import get_lucene_analyzer, Analyzer
 
 import re
 
+
 def analyzer_string(string, stemming=True, stemmer='porter', stopwords=True):
     """ Build list of token using Lucene Analyzers which allows stemming and removal of stopwords. """
     analyzer = Analyzer(get_lucene_analyzer(stemming=stemming, stemmer=stemmer, stopwords=stopwords))
