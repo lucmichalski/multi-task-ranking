@@ -1,0 +1,47 @@
+Commands to run to make files read/write
+
+- end of scripts groupwrite permissons (run chmod -R 775 *)
+- copy scp (chmod -R 775 * && chmod -R +w * && chgrp -R nfsnobody *)
+
+
+################################################
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-task-ranking-search
+  namespace: imackieproject
+spec:
+  volumes:
+  - name: nfs-access
+    persistentVolumeClaim:
+      claimName: imackievol1claim
+  containers:
+  - env:
+    - name: TOPIC_READER
+      value: Car
+    - name: INDEX
+      value: /nfs/trec_car/index/anserini_pages/lucene-index.car17v2.0.pages.anserini.full_index.v1
+    - name: TOPICS
+      value: /nfs/trec_car/data/entity_ranking/test_hierarchical.topics
+    - name: OUTPUT
+      value: /nfs/trec_car/data/entity_ranking/test_hierarchical_anserini_10.run
+    - name: HITS
+      value: '10'
+    - name: MODEL
+      value: -bm25
+    name: multi-task-ranking-search-container
+    image: iainmackie/multi-task-ranking-search:v2
+    imagePullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: "10000m"
+        memory: "12Gi"
+      limits:
+        cpu: "16000m"
+        memory: "128Gi"
+    volumeMounts:
+    - mountPath: /nfs/
+      name: nfs-access
+  restartPolicy: Never
+
+################################################

@@ -1,0 +1,11 @@
+FROM iainmackie/multi-task-ranking-base-image:v1
+
+MAINTAINER iain mackie
+
+CMD anserini/target/appassembler/bin/SearchCollection \
+    -topicreader ${TOPIC_READER}  \
+    -index ${INDEX} \
+    -topics ${TOPICS} \
+    -output ${OUTPUT} \
+    -hits ${HITS} \
+    ${MODEL}
