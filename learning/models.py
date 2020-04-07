@@ -54,7 +54,7 @@ class BertMultiTaskRanker(BertPreTrainedModel):
                                                 token_type_ids=token_type_ids, position_ids=position_ids,
                                                 head_mask=head_mask, inputs_embeds=inputs_embeds)
         # Calculate logits.
-        logits = sigmoid(self.passage_head.forward(input=cls_vector))
+        logits = sigmoid(self.passage_head(cls_vector))
         # Calculate loss.
         loss = self.__get_MSE(logits=logits, labels=labels)
 
@@ -69,7 +69,7 @@ class BertMultiTaskRanker(BertPreTrainedModel):
                                                 token_type_ids=token_type_ids, position_ids=position_ids,
                                                 head_mask=head_mask, inputs_embeds=inputs_embeds)
         # Calculate logits.
-        logits = sigmoid(self.entity_head.forward(input=cls_vector))
+        logits = sigmoid(self.entity_head(cls_vector))
         # Calculate loss.
         loss = self.__get_MSE(logits=logits, labels=labels)
 
