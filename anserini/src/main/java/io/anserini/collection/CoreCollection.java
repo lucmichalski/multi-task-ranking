@@ -19,6 +19,7 @@ package io.anserini.collection;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.tukaani.xz.XZInputStream;
@@ -28,9 +29,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * A document collection in the
@@ -47,9 +52,8 @@ import java.util.Set;
 public class CoreCollection extends DocumentCollection<CoreCollection.Document> {
   private static final Logger LOG = LogManager.getLogger(CoreCollection.class);
 
-  public CoreCollection(Path path){
-    this.path = path;
-    this.allowedFileSuffix = Set.of(".json.xz", "json");
+  public CoreCollection(){
+    this.allowedFileSuffix = new HashSet<>(Arrays.asList(".json.xz"));
   }
 
   @Override
@@ -58,24 +62,17 @@ public class CoreCollection extends DocumentCollection<CoreCollection.Document> 
   }
 
   /**
-   * A file in a Core collection, typically containing multiple documents.
+   * A file in a JSON collection, typically containing multiple documents.
    */
   public static class Segment extends FileSegment<CoreCollection.Document> {
     private JsonNode node = null;
     private Iterator<JsonNode> iter = null; // iterator for JSON document array
     private MappingIterator<JsonNode> iterator; // iterator for JSON line objects
 
-    public Segment(Path path) throws IOException {
+    protected Segment(Path path) throws IOException {
       super(path);
-
-      if (path.endsWith(".xz")) {
-        bufferedReader = new BufferedReader(new InputStreamReader(
-          new XZInputStream(new FileInputStream(path.toString()))));
-      } else {
-        bufferedReader = new BufferedReader(new InputStreamReader(
-          new FileInputStream(path.toString())));
-      }
-
+      bufferedReader = new BufferedReader(new InputStreamReader(
+              new XZInputStream(new FileInputStream(path.toString()))));
       ObjectMapper mapper = new ObjectMapper();
       iterator = mapper.readerFor(JsonNode.class).readValues(bufferedReader);
       if (iterator.hasNext()) {
@@ -99,6 +96,7 @@ public class CoreCollection extends DocumentCollection<CoreCollection.Document> 
         }
       } else if (node.isArray()) {
         if (iter != null && iter.hasNext()) {
+          JsonNode json = iter.next();
           bufferedRecord = new CoreCollection.Document(node);
         } else {
           throw new NoSuchElementException("Reached end of JsonNode iterator");
@@ -111,18 +109,33 @@ public class CoreCollection extends DocumentCollection<CoreCollection.Document> 
   }
 
   /**
-   * A document in a Core collection.
+   * A document in a JSON collection.
    */
-  public static class Document extends SourceDocument {
+  public static class Document implements MultifieldSourceDocument {
     private String id;
     private String contents;
-    private JsonNode jsonNode;
+    private Map<String, String> fields;
 
     public Document(JsonNode json) {
-      id = (getJsonValue(json, "doi").equals("")) ?
-        getJsonValue(json, "coreId") : getJsonValue(json, "doi");
-      contents = getJsonValue(json, "title") + " " + getJsonValue(json, "abstract");
-      jsonNode = json;
+      this.fields = new HashMap<>();
+
+      json.fields().forEachRemaining( e -> {
+        if ("coreId".equals(e.getKey())) {
+          this.id = (json.get("doi").asText().equals("null")) ? json.get("coreId").asText() :
+                  "doi:" + json.get("doi").asText();
+        } else if ("abstract".equals(e.getKey())) {
+          this.contents = json.get("title").asText() + "\n" + json.get("abstract").asText();
+        } else if (e.getValue() instanceof ArrayNode) {
+          ArrayNode arrayField = (ArrayNode) e.getValue();
+          StringJoiner sj = new StringJoiner("::");
+          arrayField.elements().forEachRemaining( arrayElement -> {
+            sj.add(arrayElement.asText());
+          });
+          this.fields.put(e.getKey(), sj.toString());
+        } else {
+          this.fields.put(e.getKey(), e.getValue().asText());
+        }
+      });
     }
 
     @Override
@@ -140,15 +153,9 @@ public class CoreCollection extends DocumentCollection<CoreCollection.Document> 
       return true;
     }
 
-    public JsonNode jsonNode() {
-      return jsonNode;
-    }
-
-    public String getJsonValue(JsonNode json, String key) {
-      if (!json.has(key) || json.get(key).asText() == "null") {
-        return "";
-      }
-      return json.get(key).asText();
+    @Override
+    public Map<String, String> fields() {
+      return fields;
     }
   }
 }

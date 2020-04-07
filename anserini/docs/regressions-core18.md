@@ -10,7 +10,7 @@ Typical indexing command:
 
 ```
 nohup sh target/appassembler/bin/IndexCollection -collection WashingtonPostCollection -input /path/to/core18 \
- -index lucene-index.core18.pos+docvectors+rawdocs -generator WashingtonPostGenerator -threads 1 \
+ -index lucene-index.core18.pos+docvectors+rawdocs -generator WapoGenerator -threads 16 \
  -storePositions -storeDocvectors -storeRawDocs >& log.core18.pos+docvectors+rawdocs &
 ```
 
@@ -39,19 +39,19 @@ nohup target/appassembler/bin/SearchCollection -index lucene-index.core18.pos+do
 
 nohup target/appassembler/bin/SearchCollection -index lucene-index.core18.pos+docvectors+rawdocs \
  -topicreader Trec -topics src/main/resources/topics-and-qrels/topics.core18.txt \
- -bm25 -axiom -axiom.deterministic -rerankCutoff 20 -output run.core18.bm25+ax.topics.core18.txt &
+ -bm25 -axiom -rerankCutoff 20 -axiom.deterministic -output run.core18.bm25+ax.topics.core18.txt &
 
 nohup target/appassembler/bin/SearchCollection -index lucene-index.core18.pos+docvectors+rawdocs \
  -topicreader Trec -topics src/main/resources/topics-and-qrels/topics.core18.txt \
- -qld -output run.core18.ql.topics.core18.txt &
+ -ql -output run.core18.ql.topics.core18.txt &
 
 nohup target/appassembler/bin/SearchCollection -index lucene-index.core18.pos+docvectors+rawdocs \
  -topicreader Trec -topics src/main/resources/topics-and-qrels/topics.core18.txt \
- -qld -rm3 -output run.core18.ql+rm3.topics.core18.txt &
+ -ql -rm3 -output run.core18.ql+rm3.topics.core18.txt &
 
 nohup target/appassembler/bin/SearchCollection -index lucene-index.core18.pos+docvectors+rawdocs \
  -topicreader Trec -topics src/main/resources/topics-and-qrels/topics.core18.txt \
- -qld -axiom -axiom.deterministic -rerankCutoff 20 -output run.core18.ql+ax.topics.core18.txt &
+ -ql -axiom -rerankCutoff 20 -axiom.deterministic -output run.core18.ql+ax.topics.core18.txt &
 ```
 
 Evaluation can be performed using `trec_eval`:
@@ -85,7 +85,5 @@ P30                                     | BM25      | +RM3      | +Ax       | QL
 
 ## Replication Log
 
-+ Results replicated by [@andrewyates](https://github.com/andrewyates) on 2018-11-30 (commit [`c1aac5`](https://github.com/castorini/Anserini/commit/c1aac5e353e2ab77db3e7106cb4c017a09ce0fe9))
-+ Results replicated by [@chriskamphuis](https://github.com/chriskamphuis) on 2019-09-07 (commit [`61f6f20`](https://github.com/castorini/anserini/commit/61f6f20ff6872484966ea1badcdcdcebf1eea852))
-+ Results replicated by [@nikhilro](https://github.com/nikhilro) on 2020-01-26 (commit [`d5ee069`](https://github.com/castorini/anserini/commit/d5ee069399e6a306d7685bda756c1f19db721156))
-+ Results replicated by [@edwinzhng](https://github.com/edwinzhng) on 2020-01-26 (commit [`7b76dfb`](https://github.com/castorini/anserini/commit/7b76dfbea7e0c01a3a5dc13e74f54852c780ec9b))
+* Results replicated by [@andrewyates](https://github.com/andrewyates) on 2018-11-30 (commit [`c1aac5`](https://github.com/castorini/Anserini/commit/c1aac5e353e2ab77db3e7106cb4c017a09ce0fe9))
+* Results replicated by [@chriskamphuis](https://github.com/chriskamphuis) on 2019-09-07 (commit [`61f6f20`](https://github.com/castorini/anserini/commit/61f6f20ff6872484966ea1badcdcdcebf1eea852))

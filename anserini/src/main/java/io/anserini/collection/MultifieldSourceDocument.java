@@ -18,11 +18,11 @@ package io.anserini.collection;
 
 import java.util.Map;
 
-public abstract class MultifieldSourceDocument extends SourceDocument {
+public interface MultifieldSourceDocument extends SourceDocument {
   /**
    * Returns a map of fields associated with this document.
    *
    * @return a map of fields associated with this document
    */
-  public abstract Map<String, String> fields();
+  Map<String, String> fields();
 }

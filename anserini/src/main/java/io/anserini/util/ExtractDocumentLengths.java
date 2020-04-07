@@ -16,7 +16,6 @@
 
 package io.anserini.util;
 
-import io.anserini.index.IndexArgs;
 import io.anserini.index.NotStoredException;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -32,12 +31,10 @@ import java.io.PrintStream;
 import java.nio.file.Paths;
 
 /**
- * Utility for extracting the document length and the number of unique terms from every document in the index using the
- * indexed term vector. Outputs both the exact values and the value under Lucene's lossy compression scheme that encodes
- * an integer into a byte. With Lucene's BM25 implementation, the lossy document length should be exactly the same as
- * the stored norm of a document. Note that the term vector <i>must</i> be indexed in order for this utility to work;
- * otherwise, there is no other way to recover the <i>exact</i> document length (with Lucene's default BM25
- * implementation).
+ * Utility for extracting the document length and the number of unique terms from every document in the index,
+ * using the indexed term vector (if available in the index). Outputs both the exact values and the value under
+ * Lucene's lossy compression scheme that encodes an integer into a byte. With Lucene's BM25 implementation,
+ * the lossy document length should be exactly the same as the stored norm of a document.
  */
 public class ExtractDocumentLengths {
 
@@ -58,8 +55,6 @@ public class ExtractDocumentLengths {
     } catch (CmdLineException e) {
       System.err.println(e.getMessage());
       parser.printUsage(System.err);
-      System.err.println(String.format("Example: %s %s",
-          ExtractDocumentLengths.class.getSimpleName(), parser.printExample(OptionHandlerFilter.REQUIRED)));
       return;
     }
 
@@ -69,20 +64,12 @@ public class ExtractDocumentLengths {
     PrintStream out = new PrintStream(new FileOutputStream(new File(myArgs.output)));
 
     int numDocs = reader.numDocs();
-    long lossyTotalTerms = 0;
-    long exactTotalTerms = 0;
-
     out.println("docid\tdoc_length\tunique_term_count\tlossy_doc_length\tlossy_unique_term_count");
     for (int i = 0; i < numDocs; i++) {
-      Terms terms = reader.getTermVector(i, IndexArgs.CONTENTS);
+      Terms terms = reader.getTermVector(i, "contents");
       if (terms == null) {
-        // It could be the case that TermVectors weren't stored when constructing the index, or we're just missing a
-        // TermVector for a zero-length document. Warn, but don't throw exception.
-        System.err.println(String.format("Warning: TermVector not available for docid %d.", i));
-        out.println(String.format("%d\t0\t0\t0\t0", i));
-        continue;
+        throw new NotStoredException("Term vectors not available!");
       }
-
       long exactDoclength = terms.getSumTotalTermFreq();
       long exactTermCount = terms.size();
       // Uses Lucene's method of encoding an integer into a byte, and the decoding it again.
@@ -91,14 +78,7 @@ public class ExtractDocumentLengths {
       int lossyDoclength = SmallFloat.byte4ToInt(SmallFloat.intToByte4((int) exactDoclength));
       int lossyTermCount = SmallFloat.byte4ToInt(SmallFloat.intToByte4((int) exactTermCount));
       out.println(String.format("%d\t%d\t%d\t%d\t%d", i, exactDoclength, exactTermCount, lossyDoclength, lossyTermCount));
-      lossyTotalTerms += lossyDoclength;
-      exactTotalTerms += exactDoclength;
     }
-
-    System.out.println("Total number of terms in collection (sum of doclengths):");
-    System.out.println("Lossy: " + lossyTotalTerms);
-    System.out.println("Exact: " + exactTotalTerms);
-
     out.flush();
     out.close();
     reader.close();

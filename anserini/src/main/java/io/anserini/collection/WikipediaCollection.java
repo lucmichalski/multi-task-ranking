@@ -16,6 +16,8 @@
 
 package io.anserini.collection;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wikiclean.WikiClean;
 import org.wikiclean.WikiClean.WikiLanguage;
 import org.wikiclean.WikipediaArticlesDump;
@@ -34,8 +36,9 @@ import java.util.Iterator;
  */
 public class WikipediaCollection extends DocumentCollection<WikipediaCollection.Document> {
 
-  public WikipediaCollection(Path path){
-    this.path = path;
+  private static final Logger LOG = LogManager.getLogger(WikipediaCollection.class);
+
+  public WikipediaCollection(){
     this.allowedFileSuffix = new HashSet<>(Arrays.asList(".bz2"));
   }
 
@@ -51,7 +54,7 @@ public class WikipediaCollection extends DocumentCollection<WikipediaCollection.
     private final Iterator<String> iter;
     private final WikiClean cleaner;
 
-    public Segment(Path path) throws IOException {
+    protected Segment(Path path) throws IOException {
       super(path);
       iter = new WikipediaArticlesDump(new File(path.toString())).iterator();
       cleaner = new WikiClean.Builder()
@@ -90,7 +93,7 @@ public class WikipediaCollection extends DocumentCollection<WikipediaCollection.
   /**
    * A Wikipedia article. The article title serves as the id.
    */
-  public static class Document extends SourceDocument {
+  public static class Document implements SourceDocument {
     private final String title;
     private final String contents;
 

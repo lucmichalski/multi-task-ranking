@@ -48,9 +48,9 @@ import java.util.Optional;
  * stored in JSON format. The collection is 1.5GB compressed, 5.9GB uncompressed.
  */
 public class WashingtonPostCollection extends DocumentCollection<WashingtonPostCollection.Document> {
+  private static final Logger LOG = LogManager.getLogger(WashingtonPostCollection.class);
 
-  public WashingtonPostCollection(Path path){
-    this.path = path;
+  public WashingtonPostCollection(){
     this.allowedFileSuffix = new HashSet<>(Arrays.asList(".txt", ".jl"));
   }
 
@@ -66,7 +66,7 @@ public class WashingtonPostCollection extends DocumentCollection<WashingtonPostC
   public static class Segment extends FileSegment<Document> {
     private String fileName;
 
-    public Segment(Path path) throws IOException {
+    protected Segment(Path path) throws IOException {
       super(path);
       this.fileName = path.toString();
       this.bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(this.fileName), "utf-8"));
@@ -110,7 +110,7 @@ public class WashingtonPostCollection extends DocumentCollection<WashingtonPostC
   /**
    * A document from the <a href="https://trec.nist.gov/data/wapost/">TREC Washington Post Corpus</a>.
    */
-  public static class Document extends SourceDocument {
+  public static class Document implements SourceDocument {
     private static final Logger LOG = LogManager.getLogger(Document.class);
 
     // Required fields

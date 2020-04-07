@@ -52,6 +52,10 @@
 
 package io.anserini.collection;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.tools.ant.filters.StringInputStream;
+
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -60,28 +64,35 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
+import java.util.NoSuchElementException;
 
 /**
  * An instance of the <a href="https://www.lemurproject.org/clueweb12.php/">ClueWeb12 collection</a>.
  * This can be used to read the complete ClueWeb12 collection or the smaller ClueWeb12-B13 subset.
  */
 public class ClueWeb12Collection extends DocumentCollection<ClueWeb12Collection.Document> {
+  private static final Logger LOG = LogManager.getLogger(ClueWeb12Collection.class);
 
-  public ClueWeb12Collection(Path path) {
-    this.path = path;
-    this.allowedFileSuffix = Set.of(".warc.gz");
-    this.skippedDir = Set.of("OtherData");
+  public ClueWeb12Collection(){
+    this.allowedFileSuffix = new HashSet<>(Arrays.asList(".warc.gz"));
+    this.skippedDir = new HashSet<>(Arrays.asList("OtherData"));
   }
 
   @Override
   public FileSegment<ClueWeb12Collection.Document> createFileSegment(Path p) throws IOException {
     return new Segment(p);
+  }
+
+  public FileSegment<ClueWeb12Collection.Document> createFileSegment(String raw) {
+    return new Segment(raw);
   }
 
   /**
@@ -90,9 +101,15 @@ public class ClueWeb12Collection extends DocumentCollection<ClueWeb12Collection.
   public static class Segment extends FileSegment<ClueWeb12Collection.Document> {
     protected DataInputStream stream;
 
-    public Segment(Path path) throws IOException {
+    protected Segment(Path path) throws IOException {
       super(path);
-      this.stream = new DataInputStream(new GZIPInputStream(Files.newInputStream(path, StandardOpenOption.READ)));
+      this.stream = new DataInputStream(
+              new GZIPInputStream(Files.newInputStream(path, StandardOpenOption.READ)));
+    }
+
+    protected Segment(String raw) {
+      super(null);
+      this.stream = new DataInputStream(new StringInputStream(raw));
     }
 
     @Override
@@ -101,15 +118,11 @@ public class ClueWeb12Collection extends DocumentCollection<ClueWeb12Collection.
     }
 
     @Override
-    public void close() {
-      try {
-        if (stream != null) {
-          stream.close();
-        }
-        super.close();
-      } catch (IOException e) {
-        // There's really nothing to be done, so just silently eat the exception.
+    public void close() throws IOException {
+      if (stream != null) {
+        stream.close();
       }
+      super.close();
     }
 
     /**

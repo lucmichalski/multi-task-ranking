@@ -18,9 +18,9 @@ package io.anserini.search;
 
 import io.anserini.analysis.AnalyzerUtils;
 import io.anserini.analysis.TweetAnalyzer;
-import io.anserini.index.IndexArgs;
 import io.anserini.index.IndexCollection;
 import io.anserini.index.IndexReaderUtils;
+import io.anserini.index.generator.LuceneDocumentGenerator;
 import io.anserini.index.generator.TweetGenerator;
 import io.anserini.rerank.RerankerCascade;
 import io.anserini.rerank.RerankerContext;
@@ -62,7 +62,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
@@ -78,10 +77,10 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class SimpleSearcher implements Closeable {
   public static final Sort BREAK_SCORE_TIES_BY_DOCID =
-      new Sort(SortField.FIELD_SCORE, new SortField(IndexArgs.ID, SortField.Type.STRING_VAL));
+      new Sort(SortField.FIELD_SCORE, new SortField(LuceneDocumentGenerator.FIELD_ID, SortField.Type.STRING_VAL));
   public static final Sort BREAK_SCORE_TIES_BY_TWEETID =
       new Sort(SortField.FIELD_SCORE,
-          new SortField(TweetGenerator.TweetField.ID_LONG.name, SortField.Type.LONG, true));
+          new SortField(TweetGenerator.StatusField.ID_LONG.name, SortField.Type.LONG, true));
   private static final Logger LOG = LogManager.getLogger(SimpleSearcher.class);
 
   private final IndexReader reader;
@@ -93,33 +92,21 @@ public class SimpleSearcher implements Closeable {
 
   private IndexSearcher searcher = null;
 
-  /**
-   * This class is meant to serve as the bridge between Anserini and Pyserini.
-   * Note that we are adopting Python naming conventions here on purpose.
-   */
   public class Result {
     public String docid;
-    public int lucene_docid;
+    public int ldocid;
     public float score;
-    public String contents;
-    public String raw;
-    public Document lucene_document;
+    public String content;
 
-    public Result(String docid, int lucene_docid, float score, String contents, String raw, Document lucene_document) {
+    public Result(String docid, int ldocid, float score, String content) {
       this.docid = docid;
-      this.lucene_docid = lucene_docid;
+      this.ldocid = ldocid;
       this.score = score;
-      this.contents = contents;
-      this.raw = raw;
-      this.lucene_document = lucene_document;
+      this.content = content;
     }
   }
 
   public SimpleSearcher(String indexDir) throws IOException {
-    this(indexDir, IndexCollection.DEFAULT_ANALYZER);
-  }
-
-  public SimpleSearcher(String indexDir, Analyzer analyzer) throws IOException {
     Path indexPath = Paths.get(indexDir);
 
     if (!Files.exists(indexPath) || !Files.isDirectory(indexPath) || !Files.isReadable(indexPath)) {
@@ -128,7 +115,7 @@ public class SimpleSearcher implements Closeable {
 
     this.reader = DirectoryReader.open(FSDirectory.open(indexPath));
     this.similarity = new BM25Similarity(0.9f, 0.4f);
-    this.analyzer = analyzer;
+    this.analyzer = IndexCollection.DEFAULT_ANALYZER;
     this.searchtweets = false;
     this.isRerank = false;
     cascade = new RerankerCascade();
@@ -138,14 +125,6 @@ public class SimpleSearcher implements Closeable {
   public void setSearchTweets(boolean flag) {
      this.searchtweets = flag;
      this.analyzer = flag? new TweetAnalyzer(true) : new EnglishAnalyzer();
-  }
-
-  public void setAnalyzer(Analyzer analyzer) {
-    this.analyzer = analyzer;
-  }
-
-  public Analyzer getAnalyzer(){
-    return this.analyzer;
   }
 
   public void setLanguage(String language) {
@@ -182,9 +161,8 @@ public class SimpleSearcher implements Closeable {
 
   public void setRM3Reranker(int fbTerms, int fbDocs, float originalQueryWeight, boolean rm3_outputQuery) {
     isRerank = true;
-    cascade = new RerankerCascade("rm3");
-    cascade.add(new Rm3Reranker(this.analyzer, IndexArgs.CONTENTS,
-        fbTerms, fbDocs, originalQueryWeight, rm3_outputQuery));
+    cascade = new RerankerCascade();
+    cascade.add(new Rm3Reranker(this.analyzer, LuceneDocumentGenerator.FIELD_BODY, fbTerms, fbDocs, originalQueryWeight, rm3_outputQuery));
     cascade.add(new ScoreTiesAdjusterReranker());
   }
 
@@ -210,27 +188,10 @@ public class SimpleSearcher implements Closeable {
   }
 
   public Map<String, Result[]> batchSearch(List<String> queries, List<String> qids, int k, int threads) {
-    return batchSearchFields(queries, qids, k, -1, threads, new HashMap<>());
+    return batchSearch(queries, qids, k, -1, threads);
   }
 
   public Map<String, Result[]> batchSearch(List<String> queries, List<String> qids, int k, long t, int threads) {
-    return batchSearchFields(queries, qids, k, t, threads, new HashMap<>());
-  }
-
-  public Map<String, Result[]> batchSearchFields(List<String> queries, List<String> qids, int k, int threads,
-                                                 Map<String, Float> fields) {
-    return batchSearchFields(queries, qids, k, -1, threads, fields);
-  }
-
-  public Map<String, Result[]> batchSearchFields(List<String> queries, List<String> qids, int k, long t, int threads,
-                                                 Map<String, Float> fields) {
-    // Create the IndexSearcher here, if needed. We do it here because if we leave the creation to the search
-    // method, we might end up with a race condition as multiple threads try to concurrently create the IndexSearcher.
-    if (searcher == null) {
-      searcher = new IndexSearcher(reader);
-      searcher.setSimilarity(similarity);
-    }
-
     ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threads);
     ConcurrentHashMap<String, Result[]> results = new ConcurrentHashMap<>();
 
@@ -242,11 +203,7 @@ public class SimpleSearcher implements Closeable {
       String qid = qids.get(q);
       executor.execute(() -> {
         try {
-          if (fields.size() > 0) {
-            results.put(qid, searchFields(query, fields, k, t));
-          } else {
-            results.put(qid, search(query, k, t));
-          }
+          results.put(qid, search(query, k, t));
         } catch (IOException e) {
           throw new CompletionException(e);
         }
@@ -278,7 +235,7 @@ public class SimpleSearcher implements Closeable {
       throw new RuntimeException("queryCount = " + queryCnt +
               " is not equal to completedTaskCount =  " + executor.getCompletedTaskCount());
     }
-
+    
     return results;
   }
 
@@ -291,15 +248,14 @@ public class SimpleSearcher implements Closeable {
   }
 
   public Result[] search(String q, int k, long t) throws IOException {
-    Query query = new BagOfWordsQueryGenerator().buildQuery(IndexArgs.CONTENTS, analyzer, q);
-    List<String> queryTokens = AnalyzerUtils.analyze(analyzer, q);
+    Query query = new BagOfWordsQueryGenerator().buildQuery(LuceneDocumentGenerator.FIELD_BODY, analyzer, q);
+    List<String> queryTokens = AnalyzerUtils.tokenize(analyzer, q);
 
     return search(query, queryTokens, q, k, t);
   }
 
-  protected Result[] search(Query query, List<String> queryTokens, String queryString, int k,
-                            long t) throws IOException {
-    // Create an IndexSearch only once. Note that the object is thread safe.
+  protected Result[] search(Query query, List<String> queryTokens, String queryString, int k, long t) throws IOException {
+    // Initialize an index searcher only once
     if (searcher == null) {
       searcher = new IndexSearcher(reader);
       searcher.setSimilarity(similarity);
@@ -317,26 +273,20 @@ public class SimpleSearcher implements Closeable {
         // Do not consider the tweets with tweet ids that are beyond the queryTweetTime
         // <querytweettime> tag contains the timestamp of the query in terms of the
         // chronologically nearest tweet id within the corpus
-        Query filter = LongPoint.newRangeQuery(TweetGenerator.TweetField.ID_LONG.name, 0L, t);
+        Query filter = LongPoint.newRangeQuery(TweetGenerator.StatusField.ID_LONG.name, 0L, t);
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         builder.add(filter, BooleanClause.Occur.FILTER);
         builder.add(query, BooleanClause.Occur.MUST);
         Query compositeQuery = builder.build();
-        rs = searcher.search(compositeQuery, isRerank ? searchArgs.rerankcutoff :
-            k, BREAK_SCORE_TIES_BY_TWEETID, true);
-        context = new RerankerContext<>(searcher, null, compositeQuery, null,
-            queryString, queryTokens, filter, searchArgs);
+        rs = searcher.search(compositeQuery, isRerank ? searchArgs.rerankcutoff : k, BREAK_SCORE_TIES_BY_TWEETID, true);
+        context = new RerankerContext<>(searcher, null, compositeQuery, null, queryString, queryTokens, filter, searchArgs);
       } else {
-        rs = searcher.search(query,
-            isRerank ? searchArgs.rerankcutoff : k, BREAK_SCORE_TIES_BY_TWEETID, true);
-        context = new RerankerContext<>(searcher, null, query, null,
-            queryString, queryTokens, null, searchArgs);
+        rs = searcher.search(query, isRerank ? searchArgs.rerankcutoff : k, BREAK_SCORE_TIES_BY_TWEETID, true);
+        context = new RerankerContext<>(searcher, null, query, null, queryString, queryTokens, null, searchArgs);
       }
     } else {
-      rs = searcher.search(query,
-          isRerank ? searchArgs.rerankcutoff : k, BREAK_SCORE_TIES_BY_DOCID, true);
-      context = new RerankerContext<>(searcher, null, query, null,
-          queryString, queryTokens, null, searchArgs);
+      rs = searcher.search(query, isRerank ? searchArgs.rerankcutoff : k, BREAK_SCORE_TIES_BY_DOCID, true);
+      context = new RerankerContext<>(searcher, null, query, null, queryString, queryTokens, null, searchArgs);
     }
 
     ScoredDocuments hits = cascade.run(ScoredDocuments.fromTopDocs(rs, searcher), context);
@@ -344,131 +294,95 @@ public class SimpleSearcher implements Closeable {
     Result[] results = new Result[hits.ids.length];
     for (int i = 0; i < hits.ids.length; i++) {
       Document doc = hits.documents[i];
-      String docid = doc.getField(IndexArgs.ID).stringValue();
+      String docid = doc.getField(LuceneDocumentGenerator.FIELD_ID).stringValue();
+      IndexableField field = doc.getField(LuceneDocumentGenerator.FIELD_RAW);
+      String content = field == null ? null : field.stringValue();
 
-      IndexableField field;
-      field = doc.getField(IndexArgs.CONTENTS);
-      String contents = field == null ? null : field.stringValue();
-
-      field = doc.getField(IndexArgs.RAW);
-      String raw = field == null ? null : field.stringValue();
-
-      results[i] = new Result(docid, hits.ids[i], hits.scores[i], contents, raw, doc);
+      results[i] = new Result(docid, hits.ids[i], hits.scores[i], content);
     }
 
     return results;
   }
 
-  public Result[] searchFields(String q, Map<String, Float> fields, int k) throws IOException {
-    return searchFields(q, fields, k, -1);
-  }
-
   // searching both the defaults contents fields and another field with weight boost
-  // this is used for MS MARCO experiments with document expansion.
-  public Result[] searchFields(String q, Map<String, Float> fields, int k, long t) throws IOException {
+  // this is used for MS MACRO experiments with query expansion.
+  // TODO: "fields" should probably changed to a map of fields to boosts for extensibility
+  public Result[] searchFields(String q, String f, float boost, int k) throws IOException {
     IndexSearcher searcher = new IndexSearcher(reader);
     searcher.setSimilarity(similarity);
 
-    Query queryContents = new BagOfWordsQueryGenerator().buildQuery(IndexArgs.CONTENTS, analyzer, q);
-    BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder()
-        .add(queryContents, BooleanClause.Occur.SHOULD);
+    Query queryContents = new BagOfWordsQueryGenerator().buildQuery(LuceneDocumentGenerator.FIELD_BODY, analyzer, q);
+    Query queryField = new BagOfWordsQueryGenerator().buildQuery(f, analyzer, q);
+    BooleanQuery query = new BooleanQuery.Builder()
+        .add(queryContents, BooleanClause.Occur.SHOULD)
+        .add(new BoostQuery(queryField, boost), BooleanClause.Occur.SHOULD).build();
 
-    for (Map.Entry<String, Float> entry : fields.entrySet()) {
-      Query queryField = new BagOfWordsQueryGenerator().buildQuery(entry.getKey(), analyzer, q);
-      queryBuilder.add(new BoostQuery(queryField, entry.getValue()), BooleanClause.Occur.SHOULD);
-    }
-
-    BooleanQuery query = queryBuilder.build();
-    List<String> queryTokens = AnalyzerUtils.analyze(analyzer, q);
+    List<String> queryTokens = AnalyzerUtils.tokenize(analyzer, q);
 
     return search(query, queryTokens, q, k, -1);
   }
 
   /**
    * Fetches the Lucene {@link Document} based on an internal Lucene docid.
-   * The method is named to be consistent with Lucene's {@link IndexReader#document(int)}, contra Java's standard
-   * method naming conventions.
-   *
    * @param ldocid internal Lucene docid
    * @return corresponding Lucene {@link Document}
    */
-  public Document document(int ldocid) {
+  public Document doc(int ldocid) {
     try {
+      if (ldocid >= reader.maxDoc())
+        return null;
+
       return reader.document(ldocid);
-    } catch (Exception e) {
-      // Eat any exceptions and just return null.
+    } catch (IOException e) {
       return null;
     }
   }
 
   /**
    * Fetches the Lucene {@link Document} based on a collection docid.
-   * The method is named to be consistent with Lucene's {@link IndexReader#document(int)}, contra Java's standard
-   * method naming conventions.
-   *
    * @param docid collection docid
    * @return corresponding Lucene {@link Document}
    */
-  public Document document(String docid) {
-    return IndexReaderUtils.document(reader, docid);
-  }
-
-  /**
-   * Returns the "contents" field of a document based on an internal Lucene docid.
-   * The method is named to be consistent with Lucene's {@link IndexReader#document(int)}, contra Java's standard
-   * method naming conventions.
-   *
-   * @param ldocid internal Lucene docid
-   * @return the "contents" field the document
-   */
-  public String documentContents(int ldocid) {
+  public Document doc(String docid) {
     try {
-      return reader.document(ldocid).get(IndexArgs.CONTENTS);
-    } catch (Exception e) {
-      // Eat any exceptions and just return null.
+      int ldocid = IndexReaderUtils.convertDocidToLuceneDocid(reader, docid);
+      if (ldocid == -1)
+        return null;
+
+      return reader.document(ldocid);
+    } catch (IOException e) {
       return null;
     }
   }
 
   /**
-   * Returns the "contents" field of a document based on a collection docid.
-   * The method is named to be consistent with Lucene's {@link IndexReader#document(int)}, contra Java's standard
-   * method naming conventions.
-   *
-   * @param docid collection docid
-   * @return the "contents" field the document
-   */
-  public String documentContents(String docid) {
-    return IndexReaderUtils.documentContents(reader, docid);
-  }
-
-  /**
-   * Returns the "raw" field of a document based on an internal Lucene docid.
-   * The method is named to be consistent with Lucene's {@link IndexReader#document(int)}, contra Java's standard
-   * method naming conventions.
-   *
+   * Returns the raw contents of a document based on an internal Lucene docid.
    * @param ldocid internal Lucene docid
-   * @return the "raw" field the document
+   * @return raw contents of the document
    */
-  public String documentRaw(int ldocid) {
-    try {
-      return reader.document(ldocid).get(IndexArgs.RAW);
-    } catch (Exception e) {
-      // Eat any exceptions and just return null.
+  public String getContents(int ldocid) {
+    Document doc = doc(ldocid);
+    if (doc == null) {
       return null;
     }
+
+    IndexableField field = doc.getField(LuceneDocumentGenerator.FIELD_RAW);
+    return field == null ? null : field.stringValue();
   }
 
   /**
-   * Returns the "raw" field of a document based on a collection docid.
-   * The method is named to be consistent with Lucene's {@link IndexReader#document(int)}, contra Java's standard
-   * method naming conventions.
-   *
+   * Returns the raw contents of a document based on a collection docid.
    * @param docid collection docid
-   * @return the "raw" field the document
+   * @return raw contents of the document
    */
-  public String documentRaw(String docid) {
-    return IndexReaderUtils.documentRaw(reader, docid);
+  public String getContents(String docid) {
+    Document doc = doc(docid);
+    if (doc == null) {
+      return null;
+    }
+
+    IndexableField field = doc.getField(LuceneDocumentGenerator.FIELD_RAW);
+    return field == null ? null : field.stringValue();
   }
 
 }

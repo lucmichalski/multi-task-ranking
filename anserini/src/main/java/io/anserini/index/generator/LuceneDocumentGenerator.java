@@ -42,6 +42,10 @@ import org.apache.lucene.util.BytesRef;
 public class LuceneDocumentGenerator<T extends SourceDocument> {
   private static final Logger LOG = LogManager.getLogger(LuceneDocumentGenerator.class);
 
+  public static final String FIELD_RAW = "raw";
+  public static final String FIELD_BODY = "contents";
+  public static final String FIELD_ID = "id";
+
   private final StringTransform transform;
 
   protected IndexCollection.Counters counters;
@@ -119,12 +123,12 @@ public class LuceneDocumentGenerator<T extends SourceDocument> {
     final Document document = new Document();
 
     // Store the collection docid.
-    document.add(new StringField(IndexArgs.ID, id, Field.Store.YES));
+    document.add(new StringField(FIELD_ID, id, Field.Store.YES));
     // This is needed to break score ties by docid.
-    document.add(new SortedDocValuesField(IndexArgs.ID, new BytesRef(id)));
+    document.add(new SortedDocValuesField(FIELD_ID, new BytesRef(id)));
 
     if (args.storeRawDocs) {
-      document.add(new StoredField(IndexArgs.RAW, src.content()));
+      document.add(new StoredField(FIELD_RAW, src.content()));
     }
 
     FieldType fieldType = new FieldType();
@@ -143,12 +147,27 @@ public class LuceneDocumentGenerator<T extends SourceDocument> {
       fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
     }
 
-    document.add(new Field(IndexArgs.CONTENTS, contents, fieldType));
+    document.add(new Field(FIELD_BODY, contents, fieldType));
 
     // If this document has other fields, then we want to index it also.
     // Currently we just use all the settings of the main "content" field.
     if (src instanceof MultifieldSourceDocument) {
       ((MultifieldSourceDocument) src).fields().forEach((k, v) -> {
+        FieldType type = new FieldType();
+
+        type.setStored(args.storeTransformedDocs);
+
+        if (args.storeDocvectors) {
+          type.setStoreTermVectors(true);
+          type.setStoreTermVectorPositions(true);
+        }
+
+        if (args.storePositions) {
+          type.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+        } else {
+          type.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
+        }
+
         document.add(new Field(k, v, fieldType));
       });
     }

@@ -16,7 +16,8 @@
 
 package io.anserini.util;
 
-import io.anserini.index.IndexArgs;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiTerms;
@@ -40,6 +41,7 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 
 public class ExtractTopDfTerms {
+  private static final Logger LOG = LogManager.getLogger(ExtractTopDfTerms.class);
 
   public static class Args {
     @Option(name = "-index", metaVar = "[path]", required = true, usage = "Lucene index")
@@ -48,8 +50,8 @@ public class ExtractTopDfTerms {
     @Option(name = "-output", metaVar = "[file]", required = true, usage = "output file")
     String output;
 
-    @Option(name = "-field", metaVar = "[name]", usage = "field")
-    String field = IndexArgs.CONTENTS;
+    @Option(name = "-field", metaVar = "[name]", required = true, usage = "field")
+    String field;
 
     @Option(name = "-k", metaVar = "[num]", usage = "number of terms to keep")
     int topK = 100;
@@ -64,7 +66,6 @@ public class ExtractTopDfTerms {
       this.value = v;
     }
   }
-
   public static void main(String[] args) throws Exception {
     Args myArgs = new Args();
     CmdLineParser parser = new CmdLineParser(myArgs, ParserProperties.defaults().withUsageWidth(90));
@@ -74,8 +75,7 @@ public class ExtractTopDfTerms {
     } catch (CmdLineException e) {
       System.err.println(e.getMessage());
       parser.printUsage(System.err);
-      System.err.println(String.format("Example: %s %s",
-          ExtractTopDfTerms.class.getSimpleName(), parser.printExample(OptionHandlerFilter.REQUIRED)));
+      System.err.println("Example: ExtractTopDfTerms" + parser.printExample(OptionHandlerFilter.REQUIRED));
       return;
     }
 
@@ -83,15 +83,18 @@ public class ExtractTopDfTerms {
     IndexReader reader = DirectoryReader.open(dir);
     int numDocs = reader.numDocs();
 
-    Comparator<Pair> comp = (Pair p1, Pair p2) -> {
-      if (p1.value == p2.value) {
-        return p1.key.compareTo(p2.key);
-      } else return (p1.value < p2.value) ? -1 : 1;
+    Comparator<Pair> comp = new Comparator<Pair>(){
+      @Override
+      public int compare(Pair p1, Pair p2) {
+        if (p1.value == p2.value) {
+          return p1.key.compareTo(p2.key);
+        } else return (p1.value < p2.value) ? -1 : 1;
+      }
     };
 
-    PriorityQueue<Pair> queue = new PriorityQueue<>(myArgs.topK, comp);
+    PriorityQueue<Pair> queue = new PriorityQueue<Pair>(myArgs.topK, comp);
 
-    System.out.println("Starting to iterate through all terms...");
+    LOG.info("Starting to iterate through all terms...");
     Terms terms = MultiTerms.getTerms(reader, myArgs.field);
     TermsEnum termsEnum = terms.iterator();
     BytesRef text;
@@ -112,11 +115,10 @@ public class ExtractTopDfTerms {
 
       cnt++;
       if (cnt % 1000000 == 0) {
-        System.out.println("At term " + term);
+        LOG.info("At term " + term);
       }
     }
 
-    // Note that we print out the top k in increasing df, i.e., highest df term last.
     PrintStream out = new PrintStream(new FileOutputStream(new File(myArgs.output)));
     Pair pair;
     while ((pair = queue.poll()) != null) {
@@ -124,6 +126,6 @@ public class ExtractTopDfTerms {
     }
     out.close();
 
-    System.out.println("Done!");
+    LOG.info("Done!");
   }
 }

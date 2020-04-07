@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -49,10 +51,7 @@ import java.util.zip.GZIPInputStream;
  * A collection of tweets.
  */
 public class TweetCollection extends DocumentCollection<TweetCollection.Document> {
-
-  public TweetCollection(Path path) {
-    this.path = path;
-  }
+  private static final Logger LOG = LogManager.getLogger(TweetCollection.class);
 
   @Override
   public FileSegment<TweetCollection.Document> createFileSegment(Path p) throws IOException {
@@ -65,7 +64,7 @@ public class TweetCollection extends DocumentCollection<TweetCollection.Document
   public static class Segment extends FileSegment<TweetCollection.Document> {
     private static final String DATE_FORMAT = "E MMM dd HH:mm:ss ZZZZZ yyyy"; // "Fri Mar 29 11:03:41 +0000 2013"
 
-    public Segment(Path path) throws IOException {
+    protected Segment(Path path) throws IOException {
       super(path);
       this.bufferedReader = null;
       String fileName = path.toString();
@@ -202,7 +201,7 @@ public class TweetCollection extends DocumentCollection<TweetCollection.Document
   /**
    * A tweet (i.e., status).
    */
-  public static class Document extends SourceDocument {
+  public static class Document implements SourceDocument {
     // Required fields
     protected String screenName;
     protected int followersCount;

@@ -68,8 +68,7 @@ import java.util.NoSuchElementException;
 public class JsonCollection extends DocumentCollection<JsonCollection.Document> {
   private static final Logger LOG = LogManager.getLogger(JsonCollection.class);
 
-  public JsonCollection(Path path){
-    this.path = path;
+  public JsonCollection(){
     this.allowedFileSuffix = new HashSet<>(Arrays.asList(".json", ".jsonl"));
   }
 
@@ -86,7 +85,7 @@ public class JsonCollection extends DocumentCollection<JsonCollection.Document> 
     private Iterator<JsonNode> iter = null; // iterator for JSON document array
     private MappingIterator<JsonNode> iterator; // iterator for JSON line objects
 
-    public Segment(Path path) throws IOException {
+    protected Segment(Path path) throws IOException {
       super(path);
       bufferedReader = new BufferedReader(new FileReader(path.toString()));
       ObjectMapper mapper = new ObjectMapper();
@@ -127,7 +126,7 @@ public class JsonCollection extends DocumentCollection<JsonCollection.Document> 
   /**
    * A document in a JSON collection.
    */
-  public static class Document extends MultifieldSourceDocument {
+  public static class Document implements MultifieldSourceDocument {
     private String id;
     private String contents;
     private Map<String, String> fields;
@@ -148,17 +147,11 @@ public class JsonCollection extends DocumentCollection<JsonCollection.Document> 
 
     @Override
     public String id() {
-      if (id == null) {
-        throw new RuntimeException("JSON document has no \"id\" field");
-      }
       return id;
     }
 
     @Override
     public String content() {
-      if (contents == null) {
-        throw new RuntimeException("JSON document has no \"contents\" field");
-      }
       return contents;
     }
 

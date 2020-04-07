@@ -16,19 +16,18 @@
 
 package io.anserini.util;
 
-import io.anserini.IndexerWithEmptyDocumentTestBase;
+import io.anserini.IndexerTestBase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-public class ExtractDocumentLengthsTest extends IndexerWithEmptyDocumentTestBase {
+public class ExtractDocumentLengthsTest extends IndexerTestBase {
   private static final Random rand = new Random();
   private String randomFileName;
 
@@ -43,38 +42,19 @@ public class ExtractDocumentLengthsTest extends IndexerWithEmptyDocumentTestBase
   @Override
   public void tearDown() throws Exception {
     super.tearDown();
-    if (new File(randomFileName).exists()) {
-      Files.delete(Paths.get(randomFileName));
-    }
-  }
-
-  @Test
-  public void testEmptyArgs() throws Exception {
-    redirectStderr();
-    ExtractDocumentLengths.main(new String[] {});
-    restoreStderr();
-
-    assertTrue(redirectedStderr.toString().startsWith("Option \"-index\" is required"));
+    Files.delete(Paths.get(randomFileName));
   }
 
   @Test
   public void test() throws Exception {
     // See: https://github.com/castorini/anserini/issues/903
     Locale.setDefault(Locale.US);
-    redirectStdout();
-    redirectStderr(); // redirecting to be quiet
     ExtractDocumentLengths.main(new String[] {"-index", tempDir1.toString(), "-output", randomFileName});
-    restoreStdout();
-    restoreStderr();
-
-    assertEquals("Total number of terms in collection (sum of doclengths):\nLossy: 12\nExact: 12\n",
-        redirectedStdout.toString());
 
     List<String> lines = Files.readAllLines(Paths.get(randomFileName));
-    assertEquals(5, lines.size());
-    assertEquals("0\t8\t5\t8\t5", lines.get(1));
+    assertEquals(4, lines.size());
+    assertEquals("0\t7\t4\t7\t4", lines.get(1));
     assertEquals("1\t2\t2\t2\t2", lines.get(2));
     assertEquals("2\t2\t2\t2\t2", lines.get(3));
-    assertEquals("3\t0\t0\t0\t0", lines.get(4));
   }
 }

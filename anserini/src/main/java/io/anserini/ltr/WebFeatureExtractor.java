@@ -16,7 +16,7 @@
 
 package io.anserini.ltr;
 
-import io.anserini.index.IndexArgs;
+import io.anserini.index.generator.LuceneDocumentGenerator;
 import io.anserini.ltr.feature.FeatureExtractors;
 import io.anserini.ltr.feature.OrderedSequentialPairsFeatureExtractor;
 import io.anserini.ltr.feature.UnigramFeatureExtractor;
@@ -110,12 +110,12 @@ public class WebFeatureExtractor extends BaseFeatureExtractor {
 
   @Override
   protected String getIdField() {
-    return IndexArgs.ID;
+    return LuceneDocumentGenerator.FIELD_ID;
   }
 
   @Override
   protected String getTermVectorField() {
-    return IndexArgs.CONTENTS;
+    return LuceneDocumentGenerator.FIELD_BODY;
   }
 
   public static FeatureExtractors getDefaultExtractors() {

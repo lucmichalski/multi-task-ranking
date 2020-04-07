@@ -19,42 +19,26 @@ package io.anserini.collection;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
-// Since the CACM collection is checked into our repo, we can directly test against it.
+// Since the CACM collection is checked into our repo, we can directly test it.
 public class HtmlCollectionTest {
 
   @Test
-  public void testCompressedCACM1() {
-    HtmlCollection collection = new HtmlCollection(Paths.get("src/main/resources/cacm/"));
-    Iterator<FileSegment<HtmlCollection.Document>> segmentIter = collection.iterator();
-    Iterator<HtmlCollection.Document> docIter = segmentIter.next().iterator();
+  public void testCACM() throws IOException {
+    HtmlCollection cacm = new HtmlCollection();
+    FileSegment<HtmlCollection.Document> segment =
+        cacm.createFileSegment(Paths.get("src/main/resources/cacm/cacm.tar.gz"));
+    Iterator<HtmlCollection.Document> iter = segment.iterator();
 
     AtomicInteger cnt = new AtomicInteger();
-    docIter.forEachRemaining(d -> cnt.getAndIncrement());
-    assertEquals(3204, cnt.get());
-
-    assertFalse(segmentIter.hasNext());
-  }
-
-  @Test
-  public void testCompressedCACM2() throws IOException {
-    HtmlCollection collection = new HtmlCollection(Paths.get("src/main/resources/cacm/"));
-    List<Path> paths = collection.getSegmentPaths();
-
-    assertEquals(1, paths.size());
-    Iterator<HtmlCollection.Document> docIter = new HtmlCollection.Segment(paths.get(0)).iterator();
-
-    AtomicInteger cnt = new AtomicInteger();
-    docIter.forEachRemaining(d -> cnt.getAndIncrement());
+    iter.forEachRemaining(d -> {
+      cnt.getAndIncrement();
+    });
     assertEquals(3204, cnt.get());
   }
-
 }

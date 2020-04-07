@@ -25,39 +25,21 @@ public class ApproximateNearestNeighborSearchTest {
 
   @Test
   public void searchFWTest() throws Exception {
-    String path = "target/idx-sample-fw" + System.currentTimeMillis();
+    String path = "target/idx-sample-fw";
     String encoding = "fw";
-    IndexVectorsTest.createIndex(path, encoding, false);
+    IndexVectorsTest.createIndex(path, encoding);
     String[] args = new String[]{"-encoding", encoding, "-input", "src/test/resources/mini-word-vectors.txt", "-path",
         path, "-word", "foo"};
-    ApproximateNearestNeighborSearch.main(args);
-  }
-
-  @Test
-  public void searchFWStoredTest() throws Exception {
-    String path = "target/idx-sample-fw-stored" + System.currentTimeMillis();
-    String encoding = "fw";
-    IndexVectorsTest.createIndex(path, encoding, true);
-    String[] args = new String[]{"-encoding", encoding, "-stored", "-path", path, "-word", "foo"};
     ApproximateNearestNeighborSearch.main(args);
   }
 
   @Test
   public void searchLLTest() throws Exception {
-    String path = "target/idx-sample-ll" + System.currentTimeMillis();
+    String path = "target/idx-sample-ll";
     String encoding = "lexlsh";
-    IndexVectorsTest.createIndex(path, encoding, false);
+    IndexVectorsTest.createIndex(path, encoding);
     String[] args = new String[]{"-encoding", encoding, "-input", "src/test/resources/mini-word-vectors.txt", "-path",
         path, "-word", "foo"};
-    ApproximateNearestNeighborSearch.main(args);
-  }
-
-  @Test
-  public void searchLLStoredTest() throws Exception {
-    String path = "target/idx-sample-ll" + System.currentTimeMillis();
-    String encoding = "lexlsh";
-    IndexVectorsTest.createIndex(path, encoding, true);
-    String[] args = new String[]{"-encoding", encoding, "-stored", "-path", path, "-word", "foo"};
     ApproximateNearestNeighborSearch.main(args);
   }
 

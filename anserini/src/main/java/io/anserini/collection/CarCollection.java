@@ -36,8 +36,7 @@ import java.util.Iterator;
  */
 public class CarCollection extends DocumentCollection<CarCollection.Document> {
 
-  public CarCollection(Path path) {
-    this.path = path;
+  public CarCollection(){
     this.allowedFileSuffix = new HashSet<>(Arrays.asList(".cbor"));
   }
 
@@ -53,7 +52,7 @@ public class CarCollection extends DocumentCollection<CarCollection.Document> {
     private final FileInputStream stream;
     private final Iterator<Data.Paragraph> iter;
 
-    public Segment(Path path) throws IOException {
+    protected Segment(Path path) throws IOException {
       super(path);
       stream = new FileInputStream(new File(path.toString()));
       iter = DeserializeData.iterableParagraphs(stream).iterator();
@@ -76,7 +75,7 @@ public class CarCollection extends DocumentCollection<CarCollection.Document> {
    * The paraID serves as the id.
    * See <a href="http://trec-car.cs.unh.edu/datareleases/">this reference</a> for details.
    */
-  public static class Document extends SourceDocument {
+  public static class Document implements SourceDocument {
     private final String paraID;
     private final String paragraph;
 

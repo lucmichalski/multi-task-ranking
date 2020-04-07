@@ -16,7 +16,6 @@
 
 package io.anserini.search;
 
-import io.anserini.index.IndexArgs;
 import io.anserini.index.generator.TweetGenerator;
 import io.anserini.rerank.ScoredDocuments;
 import io.anserini.rerank.lib.ScoreTiesAdjusterReranker;
@@ -62,6 +61,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+
+import static io.anserini.index.generator.LuceneDocumentGenerator.FIELD_ID;
 
 /*
 * Entry point of the Retrieval.
@@ -162,7 +163,7 @@ public final class SearchElastic implements Closeable {
            */
           for (int i = 0; i < docs.documents.length; i++) {
             out.println(String.format(Locale.US, "%s Q0 %s %d %f %s", qid,
-                    docs.documents[i].getField(IndexArgs.ID).stringValue(), (i + 1), docs.scores[i], runTag));
+                    docs.documents[i].getField(FIELD_ID).stringValue(), (i + 1), docs.scores[i], runTag));
           }
         }
         out.flush();
@@ -236,7 +237,7 @@ public final class SearchElastic implements Closeable {
     sourceBuilder.query(query);
     sourceBuilder.size(args.hits);
     sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
-    sourceBuilder.sort(new FieldSortBuilder(IndexArgs.ID).order(SortOrder.ASC));
+    sourceBuilder.sort(new FieldSortBuilder(FIELD_ID).order(SortOrder.ASC));
     searchRequest.source(sourceBuilder);
 
     try {
@@ -265,7 +266,7 @@ public final class SearchElastic implements Closeable {
     // <querytweettime> tag contains the timestamp of the query in terms of the
     // chronologically nearest tweet id within the corpus
     RangeQueryBuilder queryTweetTime = QueryBuilders
-            .rangeQuery(TweetGenerator.TweetField.ID_LONG.name)
+            .rangeQuery(TweetGenerator.StatusField.ID_LONG.name)
             .from(0L)
             .to(t);
 
@@ -283,7 +284,7 @@ public final class SearchElastic implements Closeable {
     sourceBuilder.query(query);
     sourceBuilder.size(args.hits);
     sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
-    sourceBuilder.sort(new FieldSortBuilder(TweetGenerator.TweetField.ID_LONG.name).order(SortOrder.DESC));
+    sourceBuilder.sort(new FieldSortBuilder(TweetGenerator.StatusField.ID_LONG.name).order(SortOrder.DESC));
     searchRequest.source(sourceBuilder);
 
     try {
