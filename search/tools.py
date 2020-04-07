@@ -3,6 +3,7 @@ from pyserini.search import pysearch
 from pyserini.index import pyutils
 from pyserini.analysis.pyanalysis import get_lucene_analyzer, Analyzer
 
+import re
 
 def analyzer_string(string, stemming=True, stemmer='porter', stopwords=True):
     """ Build list of token using Lucene Analyzers which allows stemming and removal of stopwords. """
@@ -37,16 +38,48 @@ def search_bm25_with_rm3(index_path, query,  hits=10, b=0.9, k1=0.5, fb_terms=10
     return [(h.docid, h.score) for h in searcher.search(q=query, k=hits)]
 
 
+def process_query(q):
+    """ Process query with TREC CAR format. """
+    # Remove "enwiki:" from begging of string.
+    q = q[7:]
+    # Add spaces for special character.
+    q = q.replace('%20', ' ')
+    q = q.replace('/', ' ')
+    q = q.replace('-', ' ')
+    # Remove bad UTF-8 encoding.
+    return re.sub(r'[^A-Za-z0-9 ]+', '', q)
+
+
+def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.9, k1=0.5):
+    """ Write TREC RUN file using BM25. """
+    searcher = pysearch.SimpleSearcher(index_dir=index_path)
+    searcher.set_bm25_similarity(b=b, k1=k1)
+
+    with open(topics_path, 'r') as f_topics:
+        with open(run_path, 'a+') as f_run:
+            # Loop over topics.
+            for line in f_topics:
+                rank = 1
+                # Process query.
+                query = line.split()[0]
+                processed_query = process_query(q=query)
+                for hit in searcher.search(q=processed_query, k=hits):
+                    # Create and write run file.
+                    run_line = " ".join((query, "Q0", hit.docid, str(rank), str(hit.score), "PYSERINI")) + '\n'
+                    f_run.write(run_line)
+                    # Next rank.
+                    rank += 1
 
 if __name__ == '__main__':
 
+    import os
+
     index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    query = 'Love  cats and dogs'
+    query = 'Love cats and dogs'
+    topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.topics')
+    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.run')
     hits = 10
-    print(search_simple(index_path, query, hits))
-    print(search_bm25(index_path, query, hits))
-    print(search_bm25_with_rm3(index_path, query, hits))
-    print(analyzer_string(string=query, stemming=True, stemmer='porter', stopwords=True))
+    write_run_file_from_topics(index_path, topics_path, run_path, hits)
 
 
 
