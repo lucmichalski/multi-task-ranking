@@ -52,10 +52,6 @@
 
 package io.anserini.collection;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.tools.ant.filters.StringInputStream;
-
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -65,11 +61,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -81,19 +74,15 @@ import java.util.zip.GZIPInputStream;
  * This can be used to read the complete ClueWeb09 collection or the smaller ClueWeb09b subset.
  */
 public class ClueWeb09Collection extends DocumentCollection<ClueWeb09Collection.Document> {
-  private static final Logger LOG = LogManager.getLogger(ClueWeb09Collection.class);
 
-  public ClueWeb09Collection(){
-    this.allowedFileSuffix = new HashSet<>(Arrays.asList(".warc.gz"));
+  public ClueWeb09Collection(Path path) {
+    this.path = path;
+    this.allowedFileSuffix = Set.of(".warc.gz");
   }
 
   @Override
   public FileSegment<ClueWeb09Collection.Document> createFileSegment(Path p) throws IOException {
     return new Segment(p);
-  }
-
-  public FileSegment<ClueWeb09Collection.Document> createFileSegment(String raw) {
-    return new Segment(raw);
   }
 
   /**
@@ -109,15 +98,9 @@ public class ClueWeb09Collection extends DocumentCollection<ClueWeb09Collection.
 
     protected DataInputStream stream;
 
-    protected Segment(Path path) throws IOException {
+    public Segment(Path path) throws IOException {
       super(path);
-      this.stream = new DataInputStream(
-              new GZIPInputStream(Files.newInputStream(path, StandardOpenOption.READ)));
-    }
-
-    protected Segment(String raw) {
-      super(null);
-      this.stream = new DataInputStream(new StringInputStream(raw));
+      this.stream = new DataInputStream(new GZIPInputStream(Files.newInputStream(path, StandardOpenOption.READ)));
     }
 
     @Override
@@ -126,11 +109,15 @@ public class ClueWeb09Collection extends DocumentCollection<ClueWeb09Collection.
     }
 
     @Override
-    public void close() throws IOException {
-      if (stream != null) {
-        stream.close();
+    public void close() {
+      try {
+        if (stream != null) {
+          stream.close();
+        }
+        super.close();
+      } catch (IOException e) {
+        // There's really nothing to be done, so just silently eat the exception.
       }
-      super.close();
     }
 
     /**
@@ -358,7 +345,7 @@ public class ClueWeb09Collection extends DocumentCollection<ClueWeb09Collection.
    * A document from the <a href="https://www.lemurproject.org/clueweb09.php/">ClueWeb09 collection</a>.
    * This class derives from tools provided by CMU for reading the ClueWeb09 collection.
    */
-  public static class Document implements SourceDocument {
+  public static class Document extends SourceDocument {
     public static final String WARC_VERSION = "WARC/0.18";
     protected final static String NEWLINE = "\n";
 

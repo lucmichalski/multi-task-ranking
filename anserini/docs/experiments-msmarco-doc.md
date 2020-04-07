@@ -112,7 +112,7 @@ To perform a run with these parameters, issue the following command:
 
 ```
 target/appassembler/bin/SearchCollection -topicreader TsvString -index lucene-index.msmarco-doc.pos+docvectors+rawdocs \
- -topics msmarco-doc/msmarco-docdev-queries.tsv -output run.msmarco-doc.dev.bm25.tuned.txt -bm25 -k1 3.44 -b 0.87
+ -topics msmarco-doc/msmarco-docdev-queries.tsv -output run.msmarco-doc.dev.bm25.tuned.txt -bm25 -bm25.k1 3.44 -bm25.b 0.87
 ```
 
 Here's the comparison between the Anserini default and tuned parameters:
@@ -127,3 +127,5 @@ As expected, BM25 tuning makes a big difference!
 ## Replication Log
 
 + Results replicated by [@edwinzhng](https://github.com/edwinzhng) on 2020-01-14 (commit [`3964169`](https://github.com/castorini/anserini/commit/3964169bf82a3783f9298907d9794f0bddf306f0))
++ Results replicated by [@nikhilro](https://github.com/nikhilro) on 2020-01-21 (commit [`631589e`](https://github.com/castorini/anserini/commit/631589e9e08326373f46555e007e6c302c19126d))
++ Results replicated by [@yuki617](https://github.com/yuki617) on 2020-03-29 (commit [`074723c`](https://github.com/castorini/anserini/commit/074723cbb10660fb9be2bfe6325739ab5fe0dd8d))

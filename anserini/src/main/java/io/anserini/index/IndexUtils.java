@@ -16,7 +16,6 @@
 
 package io.anserini.index;
 
-import io.anserini.index.generator.LuceneDocumentGenerator;
 import io.anserini.index.generator.TweetGenerator;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -45,12 +44,9 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.DocValuesFieldExistsQuery;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
-import org.jsoup.Jsoup;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -159,14 +155,14 @@ public class IndexUtils {
   }
 
   void printIndexStats() throws IOException {
-    Terms terms = MultiTerms.getTerms(reader, LuceneDocumentGenerator.FIELD_BODY);
+    Terms terms = MultiTerms.getTerms(reader, IndexArgs.CONTENTS);
 
     System.out.println("Index statistics");
     System.out.println("----------------");
     System.out.println("documents:             " + reader.numDocs());
-    System.out.println("documents (non-empty): " + reader.getDocCount(LuceneDocumentGenerator.FIELD_BODY));
+    System.out.println("documents (non-empty): " + reader.getDocCount(IndexArgs.CONTENTS));
     System.out.println("unique terms:          " + terms.size());
-    System.out.println("total terms:           " + reader.getSumTotalTermFreq(LuceneDocumentGenerator.FIELD_BODY));
+    System.out.println("total terms:           " + reader.getSumTotalTermFreq(IndexArgs.CONTENTS));
 
     System.out.println("stored fields:");
 
@@ -179,16 +175,16 @@ public class IndexUtils {
 
   public void printTermCounts(String termStr) throws IOException, ParseException {
     EnglishAnalyzer ea = new EnglishAnalyzer(CharArraySet.EMPTY_SET);
-    QueryParser qp = new QueryParser(LuceneDocumentGenerator.FIELD_BODY, ea);
+    QueryParser qp = new QueryParser(IndexArgs.CONTENTS, ea);
     TermQuery q = (TermQuery)qp.parse(termStr);
     Term t = q.getTerm();
 
     System.out.println("raw term:             " + termStr);
-    System.out.println("stemmed term:         " + q.toString(LuceneDocumentGenerator.FIELD_BODY));
+    System.out.println("stemmed term:         " + q.toString(IndexArgs.CONTENTS));
     System.out.println("collection frequency: " + reader.totalTermFreq(t));
     System.out.println("document frequency:   " + reader.docFreq(t));
 
-    PostingsEnum postingsEnum = MultiTerms.getTermPostingsEnum(reader, LuceneDocumentGenerator.FIELD_BODY, t.bytes());
+    PostingsEnum postingsEnum = MultiTerms.getTermPostingsEnum(reader, IndexArgs.CONTENTS, t.bytes());
     System.out.println("postings:\n");
     while (postingsEnum.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
       System.out.printf("\t%s, %s\n", postingsEnum.docID(), postingsEnum.freq());
@@ -196,8 +192,7 @@ public class IndexUtils {
   }
 
   public void printDocumentVector(String docid) throws IOException, NotStoredException {
-    Terms terms = reader.getTermVector(convertDocidToLuceneDocid(docid),
-        LuceneDocumentGenerator.FIELD_BODY);
+    Terms terms = reader.getTermVector(IndexReaderUtils.convertDocidToLuceneDocid(reader, docid), IndexArgs.CONTENTS);
     if (terms == null) {
       throw new NotStoredException("Document vector not stored!");
     }
@@ -223,20 +218,20 @@ public class IndexUtils {
 
     Map<Term, Integer> docFreqMap = new HashMap<>();
 
-    int numNonEmptyDocs = reader.getDocCount(LuceneDocumentGenerator.FIELD_BODY);
+    int numNonEmptyDocs = reader.getDocCount(IndexArgs.CONTENTS);
 
     String docid;
     int counter = 0;
     while ((docid = bRdr.readLine()) != null) {
       counter++;
 
-      int internalDocid = convertDocidToLuceneDocid(docid);
+      int internalDocid = IndexReaderUtils.convertDocidToLuceneDocid(reader, docid);
       if (internalDocid == -1) {
         continue;
       }
 
       // get term frequency
-      Terms terms = reader.getTermVector(internalDocid, LuceneDocumentGenerator.FIELD_BODY);
+      Terms terms = reader.getTermVector(internalDocid, IndexArgs.CONTENTS);
       if (terms == null) {
         // We do not throw exception here because there are some
         //  collections in which part of documents don't have document vectors
@@ -256,7 +251,7 @@ public class IndexUtils {
       // iterate every term and write and store in Map
       Map<String, String> docVectors = new HashMap<>();
       while ((te.next()) != null) {
-        term = new Term(LuceneDocumentGenerator.FIELD_BODY, te.term());
+        term = new Term(IndexArgs.CONTENTS, te.term());
         freq = te.totalTermFreq();
 
         switch (weight) {
@@ -306,14 +301,13 @@ public class IndexUtils {
   }
 
   public void getAllDocids(Compression compression) throws IOException {
-    Query q = new DocValuesFieldExistsQuery(LuceneDocumentGenerator.FIELD_ID);
     IndexSearcher searcher = new IndexSearcher(reader);
     ScoreDoc[] scoreDocs;
     try {
-      scoreDocs = searcher.search(new DocValuesFieldExistsQuery(LuceneDocumentGenerator.FIELD_ID), reader.maxDoc(),
+      scoreDocs = searcher.search(new DocValuesFieldExistsQuery(IndexArgs.ID), reader.maxDoc(),
           BREAK_SCORE_TIES_BY_DOCID).scoreDocs;
     } catch (IllegalStateException e) { // because this is tweets collection
-      scoreDocs = searcher.search(new DocValuesFieldExistsQuery(TweetGenerator.StatusField.ID_LONG.name), reader.maxDoc(),
+      scoreDocs = searcher.search(new DocValuesFieldExistsQuery(TweetGenerator.TweetField.ID_LONG.name), reader.maxDoc(),
           BREAK_SCORE_TIES_BY_TWEETID).scoreDocs;
     }
 
@@ -341,7 +335,7 @@ public class IndexUtils {
     }
     for (int i = 0; i < scoreDocs.length; i++) {
       StringBuilder builder = new StringBuilder();
-      builder.append(searcher.doc(scoreDocs[i].doc).getField(LuceneDocumentGenerator.FIELD_ID).stringValue()).append("\n");
+      builder.append(searcher.doc(scoreDocs[i].doc).getField(IndexArgs.ID).stringValue()).append("\n");
       outStream.write(builder.toString().getBytes(StandardCharsets.UTF_8));
     }
     outStream.close();
@@ -349,8 +343,8 @@ public class IndexUtils {
   }
 
   public String getRawDocument(String docid) throws IOException, NotStoredException {
-    Document d = reader.document(convertDocidToLuceneDocid(docid));
-    IndexableField doc = d.getField(LuceneDocumentGenerator.FIELD_RAW);
+    Document d = reader.document(IndexReaderUtils.convertDocidToLuceneDocid(reader, docid));
+    IndexableField doc = d.getField(IndexArgs.RAW);
     if (doc == null) {
       throw new NotStoredException("Raw documents not stored!");
     }
@@ -386,8 +380,8 @@ public class IndexUtils {
       @Override
       public void run() {
         try {
-          Document d = reader.document(convertDocidToLuceneDocid(docid));
-          IndexableField doc = d.getField(LuceneDocumentGenerator.FIELD_RAW);
+          Document d = reader.document(IndexReaderUtils.convertDocidToLuceneDocid(reader, docid));
+          IndexableField doc = d.getField(IndexArgs.RAW);
           if (doc == null) {
             LOG.error("Raw documents not stored: " + docid);
           }
@@ -429,40 +423,6 @@ public class IndexUtils {
     }
 
     LOG.info(String.format("Raw documents are output to: %s", outputDir));
-  }
-
-  public String getTransformedDocument(String docid) throws IOException, NotStoredException {
-    Document d = reader.document(convertDocidToLuceneDocid(docid));
-    IndexableField doc = d.getField(LuceneDocumentGenerator.FIELD_BODY);
-    if (doc == null) {
-      throw new NotStoredException("Transformed documents not stored!");
-    }
-    return doc.stringValue();
-  }
-
-  public int convertDocidToLuceneDocid(String docid) throws IOException {
-    IndexSearcher searcher = new IndexSearcher(reader);
-
-    Query q = new TermQuery(new Term(LuceneDocumentGenerator.FIELD_ID, docid));
-    TopDocs rs = searcher.search(q, 1);
-    ScoreDoc[] hits = rs.scoreDocs;
-
-    if (hits == null || hits.length == 0) {
-      LOG.warn(String.format("Docid %s not found!", docid));
-      return -1;
-    }
-
-    return hits[0].doc;
-  }
-
-  public String convertLuceneDocidToDocid(int docid) throws IOException {
-    Document d = reader.document(docid);
-    IndexableField doc = d.getField(LuceneDocumentGenerator.FIELD_ID);
-    if (doc == null) {
-      // Really shouldn't happen!
-      throw new RuntimeException();
-    }
-    return doc.stringValue();
   }
 
   public static void main(String[] argv) throws Exception{
@@ -511,18 +471,6 @@ public class IndexUtils {
 
     if (args.rawDocsWithDocid != null) {
       util.dumpRawDocuments(args.rawDocs, true);
-    }
-
-    if (args.transformedDoc != null) {
-      System.out.println(util.getTransformedDocument(args.transformedDoc));
-    }
-
-    if (args.lookupDocid != null) {
-      System.out.println(util.convertDocidToLuceneDocid(args.lookupDocid));
-    }
-
-    if (args.lookupLuceneDocid > 0) {
-      System.out.println(util.convertLuceneDocidToDocid(args.lookupLuceneDocid));
     }
   }
 }

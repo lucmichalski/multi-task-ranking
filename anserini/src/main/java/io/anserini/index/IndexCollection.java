@@ -20,13 +20,13 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
-import io.anserini.analysis.EnglishStemmingAnalyzer;
+import io.anserini.analysis.DefaultEnglishAnalyzer;
 import io.anserini.analysis.TweetAnalyzer;
 import io.anserini.collection.DocumentCollection;
 import io.anserini.collection.FileSegment;
 import io.anserini.collection.SourceDocument;
 import io.anserini.index.generator.LuceneDocumentGenerator;
-import io.anserini.index.generator.WapoGenerator;
+import io.anserini.index.generator.WashingtonPostGenerator;
 import io.anserini.search.similarity.AccurateBM25Similarity;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -101,11 +101,12 @@ public final class IndexCollection {
 
   private static final int TIMEOUT = 600 * 1000;
   // This is the default analyzer used, unless another stemming algorithm or language is specified.
-  public static final Analyzer DEFAULT_ANALYZER = new EnglishStemmingAnalyzer("porter");
+  public static final Analyzer DEFAULT_ANALYZER = DefaultEnglishAnalyzer.newDefaultInstance();
 
   // When duplicates of these fields are attempted to be indexed in Solr, they are ignored. This allows some fields to be multi-valued, but not others.
   // Stored vs. indexed vs. doc values vs. multi-valued vs. ... are controlled via config, rather than code, in Solr.
-  private static final List<String> IGNORED_DUPLICATE_FIELDS = Lists.newArrayList(WapoGenerator.WapoField.PUBLISHED_DATE.name);
+  private static final List<String> IGNORED_DUPLICATE_FIELDS =
+      Lists.newArrayList(WashingtonPostGenerator.WashingtonPostField.PUBLISHED_DATE.name);
 
   public final class Counters {
     /**
@@ -239,13 +240,8 @@ public final class IndexCollection {
       } catch (Exception e) {
         LOG.error(Thread.currentThread().getName() + ": Unexpected Exception:", e);
       } finally {
-        // clean up resources
-        try {
-          if (fileSegment != null){
+        if (fileSegment != null) {
             fileSegment.close();
-          }
-        } catch (IOException io) {
-          LOG.error("IOException closing segment: " + io.getMessage());
         }
       }
     }
@@ -362,16 +358,10 @@ public final class IndexCollection {
       } catch (Exception e) {
         LOG.error(Thread.currentThread().getName() + ": Unexpected Exception:", e);
       } finally {
-        // clean up resources
-        try {
-          if (fileSegment != null){
-            fileSegment.close();
-          }
-        } catch (IOException io) {
-          LOG.error("IOException closing segment: " + io.getMessage());
+        if (fileSegment != null) {
+          fileSegment.close();
         }
       }
-
     }
 
     private void flush() {
@@ -535,13 +525,8 @@ public final class IndexCollection {
       } catch (Exception e) {
         LOG.error(Thread.currentThread().getName() + ": Unexpected Exception:", e);
       } finally {
-        // clean up resources
-        try {
-          if (fileSegment != null){
-            fileSegment.close();
-          }
-        } catch (IOException io) {
-          LOG.error("IOException closing segment: " + io.getMessage());
+        if (fileSegment != null){
+          fileSegment.close();
         }
       }
     }
@@ -604,6 +589,7 @@ public final class IndexCollection {
   private ObjectPool<SolrClient> solrPool;
   private ObjectPool<RestHighLevelClient> esPool;
 
+  @SuppressWarnings("unchecked")
   public IndexCollection(IndexArgs args) throws Exception {
     this.args = args;
 
@@ -676,9 +662,8 @@ public final class IndexCollection {
     this.generatorClass = Class.forName("io.anserini.index.generator." + args.generatorClass);
     this.collectionClass = Class.forName("io.anserini.collection." + args.collectionClass);
 
-    // There's only one constructor, so this is safe-ish... skipping any sort of error checking.
-    collection = (DocumentCollection) this.collectionClass.getDeclaredConstructors()[0].newInstance();
-    collection.setCollectionPath(collectionPath);
+    // Initialize the collection.
+    collection = (DocumentCollection) this.collectionClass.getConstructor(Path.class).newInstance(collectionPath);
 
     if (args.whitelist != null) {
       List<String> lines = FileUtils.readLines(new File(args.whitelist), "utf-8");
@@ -719,8 +704,9 @@ public final class IndexCollection {
       final BengaliAnalyzer bengaliAnalyzer = new BengaliAnalyzer();
       final GermanAnalyzer germanAnalyzer = new GermanAnalyzer();
       final SpanishAnalyzer spanishAnalyzer = new SpanishAnalyzer();
-      final EnglishStemmingAnalyzer analyzer = args.keepStopwords ?
-          new EnglishStemmingAnalyzer(args.stemmer, CharArraySet.EMPTY_SET) : new EnglishStemmingAnalyzer(args.stemmer);
+      final DefaultEnglishAnalyzer analyzer = args.keepStopwords ?
+          DefaultEnglishAnalyzer.newStemmingInstance(args.stemmer, CharArraySet.EMPTY_SET) :
+          DefaultEnglishAnalyzer.newStemmingInstance(args.stemmer);
       final TweetAnalyzer tweetAnalyzer = new TweetAnalyzer(args.tweetStemming);
 
       final IndexWriterConfig config;
@@ -760,7 +746,7 @@ public final class IndexCollection {
     LOG.info("Thread pool with " + numThreads + " threads initialized.");
 
     LOG.info("Initializing collection in " + collectionPath.toString());
-    final List segmentPaths = collection.discover(collection.getCollectionPath());
+    final List segmentPaths = collection.getSegmentPaths();
     final int segmentCnt = segmentPaths.size();
     LOG.info(String.format("%,d %s found", segmentCnt, (segmentCnt == 1 ? "file" : "files" )));
     LOG.info("Starting to index...");

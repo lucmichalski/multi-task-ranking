@@ -66,7 +66,8 @@ import java.util.zip.GZIPInputStream;
 public class TrecCollection extends DocumentCollection<TrecCollection.Document> {
   private static final Logger LOG = LogManager.getLogger(TrecCollection.class);
 
-  public TrecCollection(){
+  public TrecCollection(Path path) {
+    this.path = path;
     this.skippedFilePrefix = new HashSet<>(Arrays.asList("readme"));
     this.skippedDir = new HashSet<>(Arrays.asList("cr", "dtd", "dtds"));
   }
@@ -84,7 +85,7 @@ public class TrecCollection extends DocumentCollection<TrecCollection.Document> 
   public static class Segment<T extends Document> extends FileSegment<T>{
     private static final Pattern ID_PATTERN = Pattern.compile(".*id=\\\"([^\\\"]+)\\\".*");
 
-    protected Segment(Path path) throws IOException {
+    public Segment(Path path) throws IOException {
       super(path);
       this.bufferedReader = null;
       String fileName = path.toString();
@@ -189,7 +190,7 @@ public class TrecCollection extends DocumentCollection<TrecCollection.Document> 
   /**
    * A document in a classic TREC <i>ad hoc</i> document collection.
    */
-  public static class Document implements SourceDocument {
+  public static class Document extends SourceDocument {
 
     protected static final String DOCNO = "<DOCNO>";
     protected static final String TERMINATING_DOCNO = "</DOCNO>";
