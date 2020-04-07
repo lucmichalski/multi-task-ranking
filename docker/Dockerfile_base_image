@@ -31,12 +31,12 @@ ENV MAVEN_HOME /opt/maven
 
 # Install & build anserini
 WORKDIR /home/
-RUN git clone https://github.com/iain-mackie/multi-task-ranking
-WORKDIR /home/multi-task-ranking/anserini/
+COPY ./anserini /home/anserini/
+WORKDIR /home/anserini/
 RUN mvn clean package appassembler:assemble -DskipTests -Dmaven.javadoc.skip=true
-WORKDIR /home/multi-task-ranking/anserini/eval/
+WORKDIR /home/anserini/eval/
 RUN tar xvfz trec_eval.9.0.4.tar.gz
-WORKDIR /home/multi-task-ranking/anserini/eval/trec_eval.9.0.4/
+WORKDIR /home/anserini/eval/trec_eval.9.0.4/
 RUN make
 WORKDIR /home/
 
