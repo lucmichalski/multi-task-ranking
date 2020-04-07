@@ -60,7 +60,7 @@ class BertMultiTaskRanker(BertPreTrainedModel):
                                           inputs_embeds=inputs_embeds)
         pooled_output = self.__get_BERT_pooled_outputs(outputs=outputs)
 
-        logits = sigmoid(self.passage_head(pooled_output))
+        logits = sigmoid(self.entity_head(pooled_output))
         outputs = (logits,) + outputs[2:]  # add hidden states and attention if they are here
 
         # Add loss to outputs at index #0.
