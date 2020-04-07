@@ -1,0 +1,8 @@
+numpy
+torch>=1.0.0
+tensorflow>=2.0
+transformers
+lmdb
+cbor
+pyserini==0.8.1.0
+torch

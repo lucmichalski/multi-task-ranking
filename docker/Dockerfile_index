@@ -2,7 +2,7 @@ FROM iainmackie/multi-task-ranking-base-image:v1
 
 MAINTAINER iain mackie
 
-CMD target/appassembler/bin/IndexCollection \
+CMD anserini/target/appassembler/bin/IndexCollection \
     -collection ${COLLECTION} \
     -generator LuceneDocumentGenerator \
     -input ${INPUT} \
