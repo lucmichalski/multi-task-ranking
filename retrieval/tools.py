@@ -3,6 +3,7 @@ from pyserini.search import pysearch
 from pyserini.index import pyutils
 from pyserini.analysis.pyanalysis import get_lucene_analyzer, Analyzer
 
+import pandas as pd
 import numpy as np
 import urllib
 import math
@@ -344,12 +345,57 @@ class Eval:
             for k, v in eval_metric.items():
                 f_eval.write(k + ' ' + str(round(v, 4)) + '\n')
 
-
+        return eval_metric
 
 
 ###############################################################################
 ############################# Pipeline Class ##################################
 ###############################################################################
+
+
+class Pipeline:
+
+    def search_BM25_tune_parameter(self, index_path, topics_path, results_dir, hits=10, b_list=np.arange(0.0, 1.1, 0.1),
+                                   k1_list=np.arange(0.0, 3.2, 0.2)):
+        """ """
+        # Make results directory if does not exist
+        if not os.path.isdir(results_dir):
+            os.mkdir(results_dir)
+
+        parameter_results = {}
+        for k1 in k1_list:
+            for b in b_list:
+
+                # Run path for tune_parameter.
+                run_path = os.path.join(results_dir, 'search_BM25_tune_parameter_k1={}_b={}.run'.format(round(k1, 2), round(b, 2)))
+
+                # Search with evaluated parameters.
+                searcher_config = {
+                    'BM25': {'k1': k1, 'b': b}
+                }
+                search = Search(index_path=index_path, searcher_config=searcher_config)
+                search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits)
+
+                # Evaluate with evaluated runs.
+                eval_config = {
+                    'map': {'k': None},
+                    'Rprec': {'k': None},
+                    'recip_rank': {'k': None},
+                    'P': {'k': 20},
+                    'recall': {'k': 40},
+                    'ndcg': {'k': 20},
+                }
+                eval = Eval()
+                eval_metric = eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
+                print('k1: {} & b {}: {}'.format(k1, b, eval_metric))
+
+                parameter_results['k1={}&b={}'.format(k1, b)] = eval_metric
+
+        df = pd.DataFrame(parameter_results).round(4)
+        print(df)
+        run_path = os.path.join(results_dir, 'results_df.csv')
+        df.to_csv(run_path)
+
 
 
 if __name__ == '__main__':
@@ -359,20 +405,26 @@ if __name__ == '__main__':
     topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.topics')
     run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.run')
     qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.qrels')
+    results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
     hits = 10
 
     # search = Search()
     # search.write_run_from_topics(index_path, topics_path, run_path, hits)
-    eval_config = {
-        'map': {'k': None},
-        'Rprec': {'k': None},
-        'recip_rank': {'k': None},
-        'P': {'k': 20},
-        'recall': {'k': 40},
-        'ndcg': {'k': 20},
-    }
+    # eval_config = {
+    #     'map': {'k': None},
+    #     'Rprec': {'k': None},
+    #     'recip_rank': {'k': None},
+    #     'P': {'k': 20},
+    #     'recall': {'k': 40},
+    #     'ndcg': {'k': 20},
+    # }
+    #
+    # eval = Eval()
+    # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
 
-    eval = Eval()
-    eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
+    pipeline = Pipeline()
+
+    pipeline.search_BM25_tune_parameter(index_path=index_path, topics_path=topics_path, results_dir=results_dir,
+                                        hits=2, b_list=np.arange(0.0, 1.1, 0.5), k1_list=np.arange(0.0, 3.2, 1.4))
 
 
