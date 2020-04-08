@@ -61,7 +61,7 @@ def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.9, k
     print("  Using topics: {}".format(topics_path))
     print("  Create run file: {}".format(run_path))
     with open(topics_path, "r") as f_topics:
-        with open(run_path, "a+") as f_run:
+        with open(run_path, "w") as f_run:
             # Loop over topics.
             steps = 0
             for line in f_topics:
