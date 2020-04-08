@@ -51,25 +51,33 @@ def process_query(q):
     return re.sub(r'[^A-Za-z0-9 ]+', '', q)
 
 
-def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.9, k1=0.5):
+def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.9, k1=0.5, printing_step=100):
     """ Write TREC RUN file using BM25. """
+    print("Building searcher")
     searcher = pysearch.SimpleSearcher(index_dir=index_path)
     searcher.set_bm25_similarity(b=b, k1=k1)
 
+    print("Beginning run.")
+    print("  Using topics: {}".format(topics_path))
+    print("  Create run file: {}".format(run_path))
     with open(topics_path, 'r') as f_topics:
         with open(run_path, 'a+') as f_run:
             # Loop over topics.
-            for line in f_topics:
+            for i, line in enumerate(f_topics):
                 rank = 1
                 # Process query.
                 query = line.split()[0]
-                processed_query = process_query(q=query)
-                for hit in searcher.search(q=processed_query, k=hits):
+                #processed_query = process_query(q=query)
+                for hit in searcher.search(q=query, k=hits):
                     # Create and write run file.
                     run_line = " ".join((query, "Q0", hit.docid, str(rank), str(hit.score), "PYSERINI")) + '\n'
                     f_run.write(run_line)
                     # Next rank.
                     rank += 1
+                if (i % printing_step == 0) and (i != 0):
+                    print('Processed query #{}: {}').format(i+1, query)
+    print("Completed run - written to run file: {}".format(run_path))
+
 
 if __name__ == '__main__':
 
