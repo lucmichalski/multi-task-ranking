@@ -208,7 +208,8 @@ class Eval:
         return 1.0
 
 
-    def get_dcg(self, run, R, k=20):
+    def get_dcg(self, run, R=None, k=20):
+        """ Calculate discount cumulative gain (DCG) at kth rank. """
         if k != None:
             run = run[:k]
         score = 0.0
@@ -218,7 +219,7 @@ class Eval:
 
 
     def get_ndcg(self, run, R, k=20):
-        """ Calculate normalised discount cumulative gain (NDCG) at kth rank. """
+        """ Calculate normalised discount cumulative gain (nDCG) at kth rank. """
         if R > 0:
             # Initialise discount cumulative gain.
             dcg = self.get_dcg(run=run, R=R, k=k)
@@ -285,7 +286,7 @@ class Eval:
                 # Calculate metric.
                 metric = self.implemented_metrics[m](run=run, k=eval_config[m]['k'], R=R)
                 # Append metric label and metric to string.
-                query_metrics += metric_label + ' ' + str(metric) + ' '
+                query_metrics += metric_label + ' ' + str(round(metric, 4)) + ' '
 
         return query_metrics
 
@@ -361,7 +362,7 @@ class Eval:
         eval_path = run_path + '.eval'
         with open(eval_path, 'w') as f_eval:
             for k, v in eval_metric.items():
-                f_eval.write(k + ' ' + str(v) + '\n')
+                f_eval.write(k + ' ' + str(round(v, 4)) + '\n')
 
 
 
