@@ -56,9 +56,11 @@ def process_query(q):
 def process_query_light(q):
     """ Process query with TREC CAR format. """
     # Remove "enwiki:" from begging of string.
+    assert q[:7] == "enwiki:"
     q = q[7:]
     # Add spaces for special character.
     q = q.replace('%20', ' ')
+    q = q.replace('/', ' ')
     # Remove bad UTF-8 encoding.
     return q
 
@@ -71,7 +73,7 @@ def decode_query(q, encoding='utf-8'):
     return url
 
 
-def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.9, k1=0.5, printing_step=100):
+def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.4, k1=0.9, printing_step=100):
     """ Write TREC RUN file using BM25. """
     print("Building searcher")
     searcher = pysearch.SimpleSearcher(index_dir=index_path)
