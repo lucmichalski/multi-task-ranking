@@ -41,7 +41,7 @@ if __name__ == '__main__':
                                         topics_path=entity_test_topics_path,
                                         qrels_path=entity_test_qrels_path,
                                         results_dir=results_dir,
-                                        hits=2,
+                                        hits=1000,
                                         b_list=np.arange(0.0, 1.1, 0.1),
                                         k1_list=np.arange(0.0, 3.2, 0.2))
 
