@@ -23,7 +23,7 @@ import logging
 
 import yaml
 
-from search import Search
+from retrieval import Search
 from evaluation import Evaluation
 from effectiveness import Effectiveness
 from coverage import Coverage
