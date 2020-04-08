@@ -13,7 +13,7 @@ if __name__ == '__main__':
     entity_test_topics_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical.topics'
     entity_test_qrels_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical.qrels'
 
-    results_dir = 'nfs/trec_car/data/entity_ranking/entity_parameter_tuning'
+    results_dir = 'nfs/trec_car/data/entity_ranking/entity_parameter_tuning/'
 
     # run_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical_passage_pyserini_10.run'
     hits = 1000
@@ -40,7 +40,9 @@ if __name__ == '__main__':
     pipeline.search_BM25_tune_parameter(index_path=entity_index_path,
                                         topics_path=entity_test_topics_path,
                                         results_dir=results_dir,
-                                        hits=2, b_list=np.arange(0.0, 1.1, 0.1), k1_list=np.arange(0.0, 3.2, 0.2))
+                                        hits=2,
+                                        b_list=np.arange(0.0, 1.1, 0.1),
+                                        k1_list=np.arange(0.0, 3.2, 0.2))
 
 
 
