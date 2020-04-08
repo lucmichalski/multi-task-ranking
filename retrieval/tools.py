@@ -5,7 +5,7 @@ from pyserini.analysis.pyanalysis import get_lucene_analyzer, Analyzer
 
 import numpy as np
 import urllib
-import re
+import math
 import os
 
 
@@ -208,27 +208,23 @@ class Eval:
         return 1.0
 
 
-    def get_ndcg(self, run, R, k=20):
-        """ Calculate normalised discount cumulative gain (NDCG) at kth rank. """
-        R_run = sum(run)
+    def get_dcg(self, run, R, k=20):
         if k != None:
             run = run[:k]
-        # Initialise discount cumulative gain.
-        dcg = 0
-        # Initialise perfect discount cumulative gain.
-        i_dcg = 0
-        if (R_run > 0) and (R > 0):
-            for i, r in enumerate(run):
-                if i == 0:
-                    if (i + 1) <= R:
-                        i_dcg += 1
-                    dcg += r
-                else:
-                    discount = np.log2(i + 1)
-                    if (i + 1) <= R:
-                        i_dcg += 1 / discount
-                    dcg += r / discount
-            # Normalise cumulative gain by dividing 'discount cumulative gain' by 'perfect discount cumulative gain'.
+        score = 0.0
+        for order, rank in enumerate(run):
+            score += float(rank) / math.log((order + 2))
+        return score
+
+
+    def get_ndcg(self, run, R, k=20):
+        """ Calculate normalised discount cumulative gain (NDCG) at kth rank. """
+        if R > 0:
+            # Initialise discount cumulative gain.
+            dcg = self.get_dcg(run=run, R=R, k=k)
+            # Initialise perfect discount cumulative gain.
+            i_run = [1] * R + [0] * (len(run) - R)
+            i_dcg = self.get_dcg(run=i_run, R=R, k=k)
             return dcg / i_dcg
         else:
             return 0.0
