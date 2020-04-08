@@ -324,13 +324,13 @@ class Eval:
         query_counter = 0
         with open(eval_by_query_path, 'r') as f_eval_by_query:
             for query_metrics in f_eval_by_query:
-                data = query_metrics.split()
+                data = query_metrics.split()[1:]
                 # For index and data item in query metric.
                 for i, d in enumerate(data):
                     # If string of implemented_metrics is substring of data item --> update eval dict.
-                    for k in self.implemented_metrics.keys():
-                        if k in d:
-                            if k not in eval_metric_sum:
+                    for m in self.implemented_metrics.keys():
+                        if m in d:
+                            if m not in eval_metric_sum:
                                 eval_metric_sum[d] = 0
                             # Update
                             eval_metric_sum[d] += float(data[i+1])
@@ -368,9 +368,9 @@ if __name__ == '__main__':
     # search.write_run_from_topics(index_path, topics_path, run_path, hits)
     eval_config = {
         'map': {'k': None},
-        'r_prec': {'k': None},
+        'Rprec': {'k': None},
         'recip_rank': {'k': None},
-        'precision': {'k': 20},
+        'P': {'k': 20},
         'recall': {'k': 40},
         'ndcg': {'k': 20},
     }
