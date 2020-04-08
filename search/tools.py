@@ -4,6 +4,8 @@ from pyserini.index import pyutils
 from pyserini.analysis.pyanalysis import get_lucene_analyzer, Analyzer
 
 import re
+import urllib
+
 
 
 def analyzer_string(string, stemming=True, stemmer='porter', stopwords=True):
@@ -51,6 +53,24 @@ def process_query(q):
     return re.sub(r'[^A-Za-z0-9 ]+', '', q)
 
 
+def process_query_light(q):
+    """ Process query with TREC CAR format. """
+    # Remove "enwiki:" from begging of string.
+    q = q[7:]
+    # Add spaces for special character.
+    q = q.replace('%20', ' ')
+    # Remove bad UTF-8 encoding.
+    return q
+
+
+def decode_query(q, encoding='utf-8'):
+    """ Process query with TREC CAR format. """
+    # Remove "enwiki:" from begging of string.
+    assert q[:7] == "enwiki:"
+    url = urllib.parse.unquote(string=q[7:], encoding=encoding)
+    return url
+
+
 def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.9, k1=0.5, printing_step=100):
     """ Write TREC RUN file using BM25. """
     print("Building searcher")
@@ -58,8 +78,8 @@ def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.9, k
     searcher.set_bm25_similarity(b=b, k1=k1)
 
     print("Beginning run.")
-    print("  Using topics: {}".format(topics_path))
-    print("  Create run file: {}".format(run_path))
+    print("-> Using topics: {}".format(topics_path))
+    print("-> Create run file: {}".format(run_path))
     with open(topics_path, "r") as f_topics:
         with open(run_path, "w") as f_run:
             # Loop over topics.
@@ -69,7 +89,10 @@ def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.9, k
                 # Process query.
                 query = line.split()[0]
                 #processed_query = process_query(q=query)
-                for hit in searcher.search(q=query, k=hits):
+                processed_query = process_query_light(q=query)
+                print(query)
+                print(processed_query)
+                for hit in searcher.search(q=processed_query, k=hits):
                     # Create and write run file.
                     run_line = " ".join((query, "Q0", hit.docid, str(rank), str(hit.score), "PYSERINI")) + '\n'
                     f_run.write(run_line)
