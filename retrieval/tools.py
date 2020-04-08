@@ -208,17 +208,38 @@ class Eval:
         return 1.0
 
 
+    def get_ndcg(self, run, R, k=20):
+        """ Calculate normalised discount cumulative gain (NDCG) at kth rank. """
+        R_run = sum(run)
+        if k != None:
+            run = run[:k]
+        # Initialise discount cumulative gain.
+        dcg = 0
+        # Initialise perfect discount cumulative gain.
+        i_dcg = 0
+        if (R_run > 0) and (R > 0):
+            for i, r in enumerate(run):
+                if i == 0:
+                    if (i + 1) <= R:
+                        i_dcg += 1
+                    dcg += r
+                else:
+                    discount = np.log2(i + 1)
+                    if (i + 1) <= R:
+                        i_dcg += 1 / discount
+                    dcg += r / discount
+            # Normalise cumulative gain by dividing 'discount cumulative gain' by 'perfect discount cumulative gain'.
+            return dcg / i_dcg
+        else:
+            return 0.0
+
     # def get_ndcg(self, run, R, k=20):
-    #     """ Calculate normalised discount cumulative gain (NDCG) at kth rank. """
-    #     R_run = sum(run)
-    #     if k != None:
-    #         run = run[:k]
-    #     # Initialise discount cumulative gain.
-    #     dcg = 0
-    #     # Initialise perfect discount cumulative gain.
-    #     i_dcg = 0
-    #     if (R_run > 0) and (R > 0):
-    #         for i, r in enumerate(run):
+    #
+    #     k_run = run[:k]
+    #     i_dcg, dcg = 0, 0
+    #     num_rel = sum(run)
+    #     if (num_rel > 0) and (R > 0):
+    #         for i, r in enumerate(k_run):
     #             if i == 0:
     #                 if (i + 1) <= R:
     #                     i_dcg += 1
@@ -228,30 +249,9 @@ class Eval:
     #                 if (i + 1) <= R:
     #                     i_dcg += 1 / discount
     #                 dcg += r / discount
-    #         # Normalise cumulative gain by dividing 'discount cumulative gain' by 'perfect discount cumulative gain'.
     #         return dcg / i_dcg
     #     else:
-    #         return 0.0
-
-    def get_ndcg(self, run, R, k=20):
-
-        k_run = run[:k]
-        i_dcg, dcg = 0, 0
-        num_rel = sum(run)
-        if (num_rel > 0) and (R > 0):
-            for i, r in enumerate(k_run):
-                if i == 0:
-                    if (i + 1) <= R:
-                        i_dcg += 1
-                    dcg += r
-                else:
-                    discount = np.log2(i + 2)
-                    if (i + 1) <= R:
-                        i_dcg += 1 / discount
-                    dcg += r / discount
-            return dcg / i_dcg
-        else:
-            return 0
+    #         return 0
 
 
     def get_qrels_dict(self, qrels_path):
