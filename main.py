@@ -16,9 +16,9 @@ if __name__ == '__main__':
 
     eval_config = {
         'map': {'k': None},
-        'r_prec': {'k': None},
+        'Rprec': {'k': None},
         'recip_rank': {'k': None},
-        'precision': {'k': 20},
+        'P': {'k': 20},
         'recall': {'k': 40},
         'ndcg': {'k': 20},
     }

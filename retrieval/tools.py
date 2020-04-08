@@ -142,9 +142,9 @@ class Eval:
         """  """
         self.implemented_metrics = {
             'map':          self.get_map,
-            'r_prec':       self.get_Rprec,
+            'Rprec':        self.get_Rprec,
             'recip_rank':   self.get_recip_rank,
-            'precision':    self.get_P,
+            'P':            self.get_P,
             'recall':       self.get_recall,
             'ndcg':         self.get_ndcg
         }
