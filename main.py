@@ -5,7 +5,7 @@ from retrieval.tools import Search
 if __name__ == '__main__':
     index_path = '/nfs/trec_car/index/anserini_pages/lucene-index.car17v2.0.pages.anserini.full_index.v1'
     topics_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical.topics'
-    run_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical_10_pyserini_class.run'
+    run_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical_pyserini_10.run'
     hits = 10
     searcher_settings = {
         'BM25':

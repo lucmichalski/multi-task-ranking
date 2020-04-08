@@ -22,21 +22,32 @@ class Search:
         # Initialise index_utils for accessing index information.
         self.index_utils = pyutils.IndexReaderUtils(self.index_path)
         # Initialise searcher configuration with searcher_settings dict. If no settings -> use SimpleSearcher.
-        self.searcher = pysearch.SimpleSearcher(index_dir=self.index_path)
+        self.searcher = self.__build_searcher(searcher_settings=searcher_settings)
+
+
+    def __build_searcher(self, searcher_settings):
+        searcher = pysearch.SimpleSearcher(index_dir=self.index_path)
         if isinstance(searcher_settings, dict):
             # BM25 configuration.
             if 'BM25' in searcher_settings:
-                self.searcher.set_bm25_similarity(b=searcher_settings['BM25']['b'], k1=searcher_settings['BM25']['k1'])
+                print('Using BM25 search model:\n{}'.format(searcher_settings))
+                searcher.set_bm25_similarity(b=searcher_settings['BM25']['b'], k1=searcher_settings['BM25']['k1'])
             # BM25 with RM3 query expansion configuration.
             elif 'BM25+RM3' in searcher_settings:
-                self.searcher.set_bm25_similarity(b=searcher_settings['BM25+RM3']['BM25']['b'],
-                                                  k1=searcher_settings['BM25+RM3']['BM25']['k1'])
-                self.searcher.set_rm3_reranker(fb_terms=searcher_settings['BM25+RM3']['RM3']['fb_terms'],
-                                               fb_docs=searcher_settings['BM25+RM3']['RM3']['fb_docs'],
-                                               original_query_weight=searcher_settings['BM25+RM3']['RM3']['original_query_weight'])
+                print('Using BM25+RM3 search model:\n{}'.format(searcher_settings))
+                searcher.set_bm25_similarity(b=searcher_settings['BM25+RM3']['BM25']['b'],
+                                             k1=searcher_settings['BM25+RM3']['BM25']['k1'])
+                searcher.set_rm3_reranker(fb_terms=searcher_settings['BM25+RM3']['RM3']['fb_terms'],
+                                          fb_docs=searcher_settings['BM25+RM3']['RM3']['fb_docs'],
+                                          original_query_weight=searcher_settings['BM25+RM3']['RM3']['original_query_weight'])
             else:
-                print('NOT VALID searcher_settings --> will use simple search')
+                print('NOT VALID searcher_settings --> will use simple search:\n{}'.format(searcher_settings))
                 raise
+
+            return searcher
+        else:
+            print('Using SimpleSearcher default')
+            return searcher
 
 
     def analyzer_string(self, string, stemming=True, stemmer='porter', stopwords=True):
