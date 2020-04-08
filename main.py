@@ -11,7 +11,7 @@ if __name__ == '__main__':
         'BM25':
             {
                 'k1': 0.9,
-                'b': 0.9
+                'b': 0.4
             }
     }
     search = Search(index_path=index_path, searcher_settings=searcher_settings)
