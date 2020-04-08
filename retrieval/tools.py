@@ -230,26 +230,6 @@ class Eval:
         else:
             return 0.0
 
-    # def get_ndcg(self, run, R, k=20):
-    #
-    #     k_run = run[:k]
-    #     i_dcg, dcg = 0, 0
-    #     num_rel = sum(run)
-    #     if (num_rel > 0) and (R > 0):
-    #         for i, r in enumerate(k_run):
-    #             if i == 0:
-    #                 if (i + 1) <= R:
-    #                     i_dcg += 1
-    #                 dcg += r
-    #             else:
-    #                 discount = np.log2(i + 2)
-    #                 if (i + 1) <= R:
-    #                     i_dcg += 1 / discount
-    #                 dcg += r / discount
-    #         return dcg / i_dcg
-    #     else:
-    #         return 0
-
 
     def get_qrels_dict(self, qrels_path):
         """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}. """
