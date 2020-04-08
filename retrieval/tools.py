@@ -355,7 +355,7 @@ class Eval:
 
 class Pipeline:
 
-    def search_BM25_tune_parameter(self, index_path, topics_path, results_dir, hits=10, b_list=np.arange(0.0, 1.1, 0.1),
+    def search_BM25_tune_parameter(self, index_path, qrels_path, topics_path, results_dir, hits=10, b_list=np.arange(0.0, 1.1, 0.1),
                                    k1_list=np.arange(0.0, 3.2, 0.2)):
         """ """
         # Make results directory if does not exist

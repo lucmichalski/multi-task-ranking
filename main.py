@@ -39,6 +39,7 @@ if __name__ == '__main__':
 
     pipeline.search_BM25_tune_parameter(index_path=entity_index_path,
                                         topics_path=entity_test_topics_path,
+                                        qrels_path=entity_test_qrels_path,
                                         results_dir=results_dir,
                                         hits=2,
                                         b_list=np.arange(0.0, 1.1, 0.1),
