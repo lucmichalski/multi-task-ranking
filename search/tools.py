@@ -42,35 +42,21 @@ def search_bm25_with_rm3(index_path, query,  hits=10, b=0.9, k1=0.5, fb_terms=10
 
 
 def process_query(q):
-    """ Process query with TREC CAR format. """
-    # Remove "enwiki:" from begging of string.
-    q = q[7:]
-    # Add spaces for special character.
-    q = q.replace('%20', ' ')
-    q = q.replace('/', ' ')
-    q = q.replace('-', ' ')
-    # Remove bad UTF-8 encoding.
-    return re.sub(r'[^A-Za-z0-9 ]+', '', q)
-
-
-def process_query_light(q):
-    """ Process query with TREC CAR format. """
+    """ Process query from TREC CAR format. """
     # Remove "enwiki:" from begging of string.
     assert q[:7] == "enwiki:"
     q = q[7:]
     # Add spaces for special character.
     q = q.replace('%20', ' ')
     q = q.replace('/', ' ')
-    # Remove bad UTF-8 encoding.
     return q
 
 
 def decode_query(q, encoding='utf-8'):
-    """ Process query with TREC CAR format. """
+    """ Process query using ut-8 decoding from TREC CAR format. """
     # Remove "enwiki:" from begging of string.
     assert q[:7] == "enwiki:"
-    url = urllib.parse.unquote(string=q[7:], encoding=encoding)
-    return url
+    return urllib.parse.unquote(string=q[7:], encoding=encoding)
 
 
 def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.4, k1=0.9, printing_step=100):
@@ -90,10 +76,7 @@ def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.4, k
                 rank = 1
                 # Process query.
                 query = line.split()[0]
-                #processed_query = process_query(q=query)
-                processed_query = process_query_light(q=query)
-                print(query)
-                print(processed_query)
+                processed_query = process_query(q=query)
                 for hit in searcher.search(q=processed_query, k=hits):
                     # Create and write run file.
                     run_line = " ".join((query, "Q0", hit.docid, str(rank), str(hit.score), "PYSERINI")) + '\n'
@@ -104,6 +87,7 @@ def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.4, k
                 if (steps % printing_step == 0):
                     print("Processed query #{}: {}".format(steps, query))
     print("Completed run - written to run file: {}".format(run_path))
+
 
 
 if __name__ == '__main__':
