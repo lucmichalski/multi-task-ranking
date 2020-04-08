@@ -330,7 +330,7 @@ class Eval:
                     # If string of implemented_metrics is substring of data item --> update eval dict.
                     for m in self.implemented_metrics.keys():
                         if m in d:
-                            if m not in eval_metric_sum:
+                            if d not in eval_metric_sum:
                                 eval_metric_sum[d] = 0
                             # Update
                             eval_metric_sum[d] += float(data[i+1])
