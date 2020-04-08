@@ -13,7 +13,7 @@ if __name__ == '__main__':
     entity_test_topics_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical.topics'
     entity_test_qrels_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical.qrels'
 
-    results_dir = 'nfs/trec_car/data/entity_ranking/entity_parameter_tuning/'
+    results_dir = '/nfs/trec_car/data/entity_ranking/entity_parameter_tuning/'
 
     # run_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical_passage_pyserini_10.run'
     hits = 1000
