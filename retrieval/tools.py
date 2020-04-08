@@ -210,13 +210,13 @@ class Eval:
 
     def get_ndcg(self, run, R, k=20):
         """ Calculate normalised discount cumulative gain (NDCG) at kth rank. """
+        R_run = sum(run)
         if k != None:
             run = run[:k]
         # Initialise discount cumulative gain.
         dcg = 0
         # Initialise perfect discount cumulative gain.
         i_dcg = 0
-        R_run = sum(run)
         if (R_run > 0) and (R > 0):
             for i, r in enumerate(run):
                 if i == 0:
