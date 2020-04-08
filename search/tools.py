@@ -63,7 +63,7 @@ def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.9, k
     with open(topics_path, 'r') as f_topics:
         with open(run_path, 'a+') as f_run:
             # Loop over topics.
-            steps = 1
+            steps = 0
             for line in f_topics:
                 rank = 1
                 # Process query.
@@ -75,7 +75,8 @@ def write_run_file_from_topics(index_path, topics_path, run_path, hits, b=0.9, k
                     f_run.write(run_line)
                     # Next rank.
                     rank += 1
-                if (steps % printing_step == 0) and (steps != 0):
+                steps += 1
+                if (steps % printing_step == 0):
                     print('Processed query #{}: {}').format(steps, query)
     print("Completed run - written to run file: {}".format(run_path))
 
