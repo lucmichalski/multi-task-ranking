@@ -279,7 +279,7 @@ class Eval:
                 # Calculate metric.
                 metric = self.implemented_metrics[m](run=run, k=eval_config[m]['k'], R=R)
                 # Append metric label and metric to string.
-                query_metrics += metric_label + ' ' + "{:.4f}".format(metric) + ' '
+                query_metrics += metric_label + ' ' + "{:.6f}".format(metric) + ' '
 
         return query_metrics
 
