@@ -86,22 +86,12 @@ class Search:
 
 
     def __process_query(self, q):
-        """ Process query from TREC CAR format. """
+        """ Simple processing of query from TREC CAR format i.e. leave in utf-8 except space characters. """
         # Remove "enwiki:" from begging of string.
-        assert q[:7] == "enwiki:"
-        q = q[7:]
-        # Add spaces for special character.
-        q = q.replace('%20', ' ')
-        q = q.replace('/', ' ')
-        return q
-
-
-    def __process_query_test(self, q):
-        """ Process query from TREC CAR format. """
-        # Remove "enwiki:" from begging of string.
-        assert q[:7] == "enwiki:"
-        q = q[7:]
-        # Add spaces for special character.
+        i = 7
+        assert q[:i] == "enwiki:"
+        q = q[i:]
+        # Add space for utf-8 space character.
         q = q.replace('%20', ' ')
         return q
 
@@ -109,11 +99,35 @@ class Search:
     def __decode_query(self, q, encoding='utf-8'):
         """ Process query using ut-8 decoding from TREC CAR format. """
         # Remove "enwiki:" from begging of string.
-        assert q[:7] == "enwiki:"
-        return urllib.parse.unquote(string=q[7:], encoding=encoding)
+        i = 7
+        assert q[:i] == "enwiki:"
+        return urllib.parse.unquote(string=q[i:], encoding=encoding)
 
 
-    def write_run_from_topics(self, topics_path, run_path, hits=10, printing_step=100):
+    def write_topics_from_qrels(self, qrels_path, topics_path=None):
+        """ Given a TREC standard QRELS file in 'qrels_path', write TREC standard TOPICS file in 'file_path'. """
+        # Build topics file path if None specified.
+        if topics_path == None:
+            # Assert ending of qrels path is ".qrels"
+            i = len(".qrels")
+            assert qrels_path[len(qrels_path)-i:] == ".qrels"
+            topics_path = qrels_path[:len(qrels_path)-i] + '.topics'
+
+        # Store queries already written to file.
+        written_queries = []
+        with open(topics_path, 'w') as topics_f:
+            with open(qrels_path, 'r') as qrels_f:
+                for line in qrels_f:
+                    # Extract query from QRELS file.
+                    query, _, _, _ = line.split(' ')
+                    if query not in written_queries:
+                        # Write query to TOPICS file.
+                        topics_f.write(query + '\n')
+                        # Add query to 'written_queries' list.
+                        written_queries.append(query)
+
+
+    def write_run_from_topics(self, topics_path, run_path, hits=10, printing_step=1000):
         """ Write TREC RUN file using BM25 from topics file. """
         print("Beginning run.")
         print("-> Using topics: {}".format(topics_path))
@@ -127,10 +141,14 @@ class Search:
                     # Process query.
                     query = line.split()[0]
 
+                    # Try to decode query correctly using URL utf-8 decoding. If this string causes an error within
+                    # Pyserini's SimpleSearcher.search() use basic string processing only dealing with space characters.
                     try:
                         decoded_query = self.__decode_query(q=query)
                         retrieved_hits = self.searcher.search(q=decoded_query, k=hits)
                     except ValueError:
+                        print("URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
+                        print("-> Using simple processing")
                         processed_query = self.__process_query(q=query)
                         retrieved_hits = self.searcher.search(q=processed_query, k=hits)
 
@@ -157,7 +175,7 @@ class Eval:
 
     # Implemented eval metrics.
     def __init__(self):
-        """  """
+        """ Map of metrics labels : calaulated functions """
         self.implemented_metrics = {
             'map':          self.get_map,
             'Rprec':        self.get_Rprec,
@@ -239,9 +257,9 @@ class Eval:
     def get_ndcg(self, run, R, k=20):
         """ Calculate normalised discount cumulative gain (nDCG) at kth rank. """
         if R > 0:
-            # Initialise discount cumulative gain.
+            # Calculate discount cumulative gain.
             dcg = self.get_dcg(run=run, R=R, k=k)
-            # Initialise perfect discount cumulative gain.
+            # Calculate perfect discount cumulative gain (i_dcg) from perfect run (i_run).
             i_run = [1] * R + [0] * (len(run) - R)
             i_dcg = self.get_dcg(run=i_run, R=R, k=k)
             return dcg / i_dcg
@@ -290,7 +308,7 @@ class Eval:
 
 
     def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_config):
-        """ TODO """
+        """ Given qrels and run paths calculate evaluation metrics by query and aggreated and write to file. """
         # Eval path assumed to be run path with eval identifier added.
         eval_by_query_path = run_path + '.eval.by_query'
         # build qrels dict {query: [rel#1, rel#2, etc.]}.
@@ -372,14 +390,16 @@ class Eval:
 
 class Pipeline:
 
-    def search_BM25_tune_parameter(self, index_path, qrels_path, topics_path, results_dir, hits=10, b_list=np.arange(0.0, 1.1, 0.1),
-                                   k1_list=np.arange(0.0, 3.2, 0.2)):
-        """ """
+    def search_BM25_tune_parameter(self, index_path, qrels_path, topics_path, results_dir, hits=10,
+                                   b_list=np.arange(0.0, 1.1, 0.1), k1_list=np.arange(0.0, 3.2, 0.2)):
+        """ Parameter search Pyserini BM25 algorithm (k1 & b parameters). """
         # Make results directory if does not exist
         if not os.path.isdir(results_dir):
             os.mkdir(results_dir)
 
+        # Store parameter results.
         parameter_results = {}
+        # Grid search of parameters.
         for k1 in k1_list:
             for b in b_list:
 
@@ -404,12 +424,18 @@ class Pipeline:
                 }
                 eval = Eval()
                 eval_metric = eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
-                print('k1: {} & b {}: {}'.format(k1, b, eval_metric))
+
+                print('Parameters (k1: {} & b {}): {}'.format(k1, b, eval_metric))
 
                 parameter_results['k1={}&b={}'.format(k1, b)] = eval_metric
 
+        # Create aggregate DataFrame.
         df = pd.DataFrame(parameter_results).round(4)
+        print('=====  Results Table =====')
         print(df)
+        print(df.index)
+
+        # Write aggregate DataFrame to csv.
         run_path = os.path.join(results_dir, 'results_df.csv')
         df.to_csv(run_path)
 
@@ -425,11 +451,11 @@ if __name__ == '__main__':
     results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
     hits = 10
 
-    searcher_config = {
-        'BM25': {'k1': 0.9, 'b': 0.4}
-    }
-    search = Search(index_path=index_path, searcher_config=searcher_config)
-    search.write_run_from_topics(index_path, topics_path, run_path, hits)
+    # searcher_config = {
+    #     'BM25': {'k1': 0.9, 'b': 0.4}
+    # }
+    # search = Search(index_path=index_path, searcher_config=searcher_config)
+    # search.write_run_from_topics(topics_path, run_path, hits)
     # eval_config = {
     #     'map': {'k': None},
     #     'Rprec': {'k': None},
@@ -442,9 +468,10 @@ if __name__ == '__main__':
     # eval = Eval()
     # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
 
-    # pipeline = Pipeline()
-    #
-    # pipeline.search_BM25_tune_parameter(index_path=index_path, topics_path=topics_path, results_dir=results_dir,
-    #                                     hits=2, b_list=np.arange(0.0, 1.1, 0.5), k1_list=np.arange(0.0, 3.2, 1.4))
+    pipeline = Pipeline()
+
+    pipeline.search_BM25_tune_parameter(index_path=index_path, topics_path=topics_path, qrels_path=qrels_path,
+                                        results_dir=results_dir, hits=2, b_list=np.arange(0.0, 1.1, 0.5),
+                                        k1_list=np.arange(0.0, 3.2, 1.6))
 
 

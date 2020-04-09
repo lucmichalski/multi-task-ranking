@@ -1,0 +1,6 @@
+map 0.0049
+Rprec 0.0057
+recip_rank 0.0361
+P_20 0.0022
+recall_40 0.0057
+ndcg_20 0.0094
