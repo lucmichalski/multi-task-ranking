@@ -114,7 +114,7 @@ class Search:
         return urllib.parse.unquote(string=q[7:], encoding=encoding)
 
 
-    def write_run_from_topics(self, topics_path, run_path, hits, printing_step=100):
+    def write_run_from_topics(self, topics_path, run_path, hits=10, printing_step=100):
         """ Write TREC RUN file using BM25 from topics file. """
         print("Beginning run.")
         print("-> Using topics: {}".format(topics_path))
@@ -130,12 +130,12 @@ class Search:
 
                     try:
                         decoded_query = self.__decode_query(q=query)
-                        hits = self.searcher.search(q=decoded_query, k=hits)
+                        retrieved_hits = self.searcher.search(q=decoded_query, k=hits)
                     except ValueError:
                         processed_query = self.__process_query(q=query)
-                        hits = self.searcher.search(q=processed_query, k=hits)
+                        retrieved_hits = self.searcher.search(q=processed_query, k=hits)
 
-                    for hit in hits:
+                    for hit in retrieved_hits:
                         # Create and write run file.
                         run_line = " ".join((query, "Q0", hit.docid, str(rank), "{:.6f}".format(hit.score), "PYSERINI")) + '\n'
                         f_run.write(run_line)
@@ -421,13 +421,16 @@ if __name__ == '__main__':
     index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
     query = 'Love cats and dogs'
     topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.topics')
-    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.run')
+    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.run.decode')
     qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.qrels')
     results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
     hits = 10
 
-    # search = Search()
-    # search.write_run_from_topics(index_path, topics_path, run_path, hits)
+    searcher_config = {
+        'BM25': {'k1': 0.9, 'b': 0.4}
+    }
+    search = Search(index_path=index_path, searcher_config=searcher_config)
+    search.write_run_from_topics(index_path, topics_path, run_path, hits)
     # eval_config = {
     #     'map': {'k': None},
     #     'Rprec': {'k': None},
@@ -440,9 +443,9 @@ if __name__ == '__main__':
     # eval = Eval()
     # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
 
-    pipeline = Pipeline()
-
-    pipeline.search_BM25_tune_parameter(index_path=index_path, topics_path=topics_path, results_dir=results_dir,
-                                        hits=2, b_list=np.arange(0.0, 1.1, 0.5), k1_list=np.arange(0.0, 3.2, 1.4))
+    # pipeline = Pipeline()
+    #
+    # pipeline.search_BM25_tune_parameter(index_path=index_path, topics_path=topics_path, results_dir=results_dir,
+    #                                     hits=2, b_list=np.arange(0.0, 1.1, 0.5), k1_list=np.arange(0.0, 3.2, 1.4))
 
 
