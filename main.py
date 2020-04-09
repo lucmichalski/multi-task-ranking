@@ -1,28 +1,22 @@
 
 
 from retrieval.tools import Search, Eval, Pipeline
-
+from static import Paths
 import numpy as np
 
 if __name__ == '__main__':
-    # passage_index_path = '/nfs/trec_car/index/anserini_paragraphs/lucene-index.car17v2.0.paragraphsv2'
-    # passage_test_topics_path = '/nfs/trec_car/data/bert_reranker_datasets/test.topics'
-    # passage_test_qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/test.qrels'
 
-    entity_index_path = '/nfs/trec_car/index/anserini_pages/lucene-index.car17v2.0.pages.anserini.full_index.v1'
-    entity_test_topics_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical.topics'
-    entity_test_qrels_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical.qrels'
 
-    results_dir = '/nfs/trec_car/data/entity_ranking/entity_parameter_tuning/'
-
+    results_dir = '/nfs/trec_car/data/entity_ranking/entity_parameter_tuning_2/'
+    #
     # run_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical_passage_pyserini_10.run'
-    hits = 1000
-
+    # hits = 1000
+    #
     # searcher_config = {
     #     'BM25': {'k1': 0.9, 'b': 0.4}
     # }
-    # search = Search(index_path=passage_index_path, searcher_config=searcher_config)
-    # search.write_run_from_topics(topics_path=passage_test_topics_path, run_path=run_path, hits=hits)
+    # search = Search(index_path=Paths.passage_index, searcher_config=searcher_config)
+    # search.write_run_from_topics(topics_path=Paths.passage_test_topics, run_path=run_path, hits=hits)
     #
     # eval_config = {
     #     'map': {'k': None},
@@ -34,16 +28,16 @@ if __name__ == '__main__':
     # }
     # eval = Eval()
     # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=passage_test_qrels_path, eval_config=eval_config)
-
+    #
     pipeline = Pipeline()
 
-    pipeline.search_BM25_tune_parameter(index_path=entity_index_path,
-                                        topics_path=entity_test_topics_path,
-                                        qrels_path=entity_test_qrels_path,
+    pipeline.search_BM25_tune_parameter(index_path=Paths.entity_index,
+                                        topics_path=Paths.entity_test_topics,
+                                        qrels_path=Paths.entity_test_qrels,
                                         results_dir=results_dir,
-                                        hits=1000,
-                                        b_list=np.arange(0.0, 1.1, 0.1),
-                                        k1_list=np.arange(0.0, 3.2, 0.2))
+                                        hits=100,
+                                        b_list=[0.15],
+                                        k1_list=[2.7, 3.0, 3.3, 3.6, 3.9, 4.2, 4.5, 4.8, 5.0])
 
 
 
