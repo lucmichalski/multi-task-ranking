@@ -128,7 +128,7 @@ class Search:
                     rank = 1
                     # Process query.
                     query = line.split()[0]
-                    processed_query = self.__process_query(q=query)
+                    processed_query = self.__decode_query(q=query)
                     for hit in self.searcher.search(q=processed_query, k=hits):
                         # Create and write run file.
                         run_line = " ".join((query, "Q0", hit.docid, str(rank), "{:.6f}".format(hit.score), "PYSERINI")) + '\n'
