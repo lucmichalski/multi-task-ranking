@@ -128,7 +128,7 @@ class Search:
                     rank = 1
                     # Process query.
                     query = line.split()[0]
-                    processed_query = self.__process_query_test(q=query)
+                    processed_query = self.__decode_query(q=query)
                     for hit in self.searcher.search(q=processed_query, k=hits):
                         # Create and write run file.
                         run_line = " ".join((query, "Q0", hit.docid, str(rank), "{:.6f}".format(hit.score), "PYSERINI")) + '\n'
@@ -319,7 +319,7 @@ class Eval:
                         # Build query metric string.
                         query_metrics = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
                         # Write query metric string to file.
-                        f_eval_by_query.write(query + ' ' + query_metrics + '\n')
+                        f_eval_by_query.write(run_query + ' ' + query_metrics + '\n')
                         # Start next query.
                         run_doc_ids = []
                         run = []
