@@ -103,7 +103,6 @@ class Search:
         q = q[7:]
         # Add spaces for special character.
         q = q.replace('%20', ' ')
-        q = q.replace('/', ' ')
         return q
 
 
