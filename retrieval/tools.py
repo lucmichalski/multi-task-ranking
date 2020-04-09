@@ -427,7 +427,7 @@ class Pipeline:
 
                 print('Parameters (k1: {} & b {}): {}'.format(k1, b, eval_metric))
 
-                parameter_results['k1={}&b={}'.format(k1, b)] = eval_metric
+                parameter_results['k1={:.3f}&b={:.3f}'.format(k1, b)] = eval_metric
 
         # Create aggregate DataFrame.
         df = pd.DataFrame(parameter_results).round(4)
