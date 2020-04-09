@@ -119,7 +119,7 @@ class Search:
                     processed_query = self.__process_query(q=query)
                     for hit in self.searcher.search(q=processed_query, k=hits):
                         # Create and write run file.
-                        run_line = " ".join((query, "Q0", hit.docid, str(rank), str(hit.score), "PYSERINI")) + '\n'
+                        run_line = " ".join((query, "Q0", hit.docid, str(rank), str(round(hit.score,6)), "PYSERINI")) + '\n'
                         f_run.write(run_line)
                         # Next rank.
                         rank += 1
