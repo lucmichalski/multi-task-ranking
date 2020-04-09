@@ -433,7 +433,6 @@ class Pipeline:
         df = pd.DataFrame(parameter_results).round(4)
         print('=====  Results Table =====')
         print(df)
-        print(df.index)
 
         # Write aggregate DataFrame to csv.
         run_path = os.path.join(results_dir, 'results_df.csv')
