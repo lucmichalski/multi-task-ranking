@@ -96,6 +96,18 @@ class Search:
         return q
 
 
+    def __process_query_test(self, q):
+        """ Process query from TREC CAR format. """
+        # Remove "enwiki:" from begging of string.
+        assert q[:7] == "enwiki:"
+        q = q[7:]
+        # Add spaces for special character.
+        q = q.replace('%20', ' ')
+        q = q.replace('/', ' ')
+        q = q.replace('-', ' ')
+        return q
+
+
     def __decode_query(self, q, encoding='utf-8'):
         """ Process query using ut-8 decoding from TREC CAR format. """
         # Remove "enwiki:" from begging of string.
@@ -116,7 +128,7 @@ class Search:
                     rank = 1
                     # Process query.
                     query = line.split()[0]
-                    processed_query = self.__process_query(q=query)
+                    processed_query = self.__process_query_test(q=query)
                     for hit in self.searcher.search(q=processed_query, k=hits):
                         # Create and write run file.
                         run_line = " ".join((query, "Q0", hit.docid, str(rank), "{:.6f}".format(hit.score), "PYSERINI")) + '\n'
