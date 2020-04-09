@@ -104,7 +104,6 @@ class Search:
         # Add spaces for special character.
         q = q.replace('%20', ' ')
         q = q.replace('/', ' ')
-        q = q.replace('-', ' ')
         return q
 
 
@@ -128,9 +127,15 @@ class Search:
                     rank = 1
                     # Process query.
                     query = line.split()[0]
-                    processed_query = self.__decode_query(q=query)
-                    print(query + '\t' + processed_query)
-                    for hit in self.searcher.search(q=processed_query, k=hits):
+
+                    try:
+                        decoded_query = self.__decode_query(q=query)
+                        hits = self.searcher.search(q=decoded_query, k=hits)
+                    except ValueError:
+                        processed_query = self.__process_query(q=query)
+                        hits = self.searcher.search(q=processed_query, k=hits)
+
+                    for hit in hits:
                         # Create and write run file.
                         run_line = " ".join((query, "Q0", hit.docid, str(rank), "{:.6f}".format(hit.score), "PYSERINI")) + '\n'
                         f_run.write(run_line)
