@@ -119,7 +119,7 @@ class Search:
                     processed_query = self.__process_query(q=query)
                     for hit in self.searcher.search(q=processed_query, k=hits):
                         # Create and write run file.
-                        run_line = " ".join((query, "Q0", hit.docid, str(rank), str(round(hit.score,6)), "PYSERINI")) + '\n'
+                        run_line = " ".join((query, "Q0", hit.docid, str(rank), "{:.6f}".format(hit.score), "PYSERINI")) + '\n'
                         f_run.write(run_line)
                         # Next rank.
                         rank += 1
@@ -267,7 +267,7 @@ class Eval:
                 # Calculate metric.
                 metric = self.implemented_metrics[m](run=run, k=eval_config[m]['k'], R=R)
                 # Append metric label and metric to string.
-                query_metrics += metric_label + ' ' + str(round(metric, 4)) + ' '
+                query_metrics += metric_label + ' ' + "{:.4f}".format(metric) + ' '
 
         return query_metrics
 
@@ -343,7 +343,7 @@ class Eval:
         eval_path = run_path + '.eval'
         with open(eval_path, 'w') as f_eval:
             for k, v in eval_metric.items():
-                f_eval.write(k + ' ' + str(round(v, 4)) + '\n')
+                f_eval.write(k + ' ' + "{:.4f}".format(v) + '\n')
 
         return eval_metric
 
@@ -367,7 +367,7 @@ class Pipeline:
             for b in b_list:
 
                 # Run path for tune_parameter.
-                run_path = os.path.join(results_dir, 'search_BM25_tune_parameter_k1={}_b={}.run'.format(round(k1, 2), round(b, 2)))
+                run_path = os.path.join(results_dir, 'search_BM25_tune_parameter_k1={:.2f}_b={:2f}.run'.format(k1, b))
 
                 # Search with evaluated parameters.
                 searcher_config = {
