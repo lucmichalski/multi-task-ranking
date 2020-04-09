@@ -7,7 +7,7 @@ import numpy as np
 if __name__ == '__main__':
 
 
-    results_dir = '/nfs/trec_car/data/entity_ranking/entity_parameter_tuning_2/'
+    results_dir = '/nfs/trec_car/data/entity_ranking/entity_parameter_tuning_3/'
     #
     # run_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical_passage_pyserini_10.run'
     # hits = 1000
@@ -37,7 +37,7 @@ if __name__ == '__main__':
                                         results_dir=results_dir,
                                         hits=100,
                                         b_list=[0.15],
-                                        k1_list=[2.7, 3.0, 3.3, 3.6, 3.9, 4.2, 4.5, 4.8, 5.0])
+                                        k1_list=[5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0])
 
 
 

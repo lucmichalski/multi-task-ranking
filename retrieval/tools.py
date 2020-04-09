@@ -400,8 +400,8 @@ class Pipeline:
         # Store parameter results.
         parameter_results = {}
         # Grid search of parameters.
-        for k1 in k1_list:
-            for b in b_list:
+        for b in b_list:
+            for k1 in k1_list:
 
                 # Run path for tune_parameter.
                 run_path = os.path.join(results_dir, 'search_BM25_tune_parameter_k1={:.2f}_b={:2f}.run'.format(k1, b))
