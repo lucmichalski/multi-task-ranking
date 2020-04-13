@@ -48,11 +48,11 @@ class TrecCarProcessing:
         qrels = collections.defaultdict(list)
         with open(self.qrels_path) as f_qrels:
             for i, line in enumerate(f_qrels):
-                topic_query, _, doc_id, relevance = line.rstrip().split(' ')
-                if int(relevance) >= 1:
-                    qrels[topic_query].append(doc_id)
-                if i % 100 == 0:
-                    print('Loading qrels {}'.format(i))
+                query, _, doc_id, _ = line.rstrip().split(' ')
+                qrels[query].append(doc_id)
+                if i % 1000 == 0:
+                    print('Loaded #{} lines in qrels file'.format(i))
+        print("Loaded qrels files (#{} lines".format(i))
         return qrels
 
 
