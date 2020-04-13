@@ -7,6 +7,7 @@ import collections
 import torch
 import time
 import six
+import os
 
 
 class TrecCarProcessing:
@@ -27,7 +28,8 @@ class TrecCarProcessing:
         self.attention_mask_list = []
         self.labels_list = []
         self.chuck_counter = 0
-        self.chuck_query_size = 0
+        self.topic_counter = 0
+        self.chuck_topic_size = 0
 
 
     def __convert_to_unicode(text):
@@ -99,9 +101,9 @@ class TrecCarProcessing:
 
 
 
-    def build_dataset(self, sequential=False, chuck_query_size=1e8):
+    def build_dataset(self, sequential=False, chuck_topic_size=1e8):
         """ """
-        self.chuck_query_size = chuck_query_size
+        self.chuck_topic_size = chuck_topic_size
         #start_time = time.time()
 
         with open(self.run_path) as f_run:
@@ -125,8 +127,8 @@ class TrecCarProcessing:
                                          topic_BERT_encodings=topic_BERT_encodings,
                                          topic_R_BERT_encodings=topic_R_BERT_encodings,
                                          topic_N_BERT_encodings=topic_N_BERT_encodings)
-                    self.chuck_counter += 1
-                    if self.chuck_counter % self.chuck_query_size == 0:
+                    self.topic_counter += 1
+                    if self.topic_counter % self.chuck_topic_size == 0:
                         print('WRITE DATA CHUCK')
                         self.__write_chuck_to_directory()
 
