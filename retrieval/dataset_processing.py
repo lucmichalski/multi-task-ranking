@@ -76,6 +76,15 @@ class TrecCarProcessing:
         return input_ids_list, token_type_ids_list, attention_mask_list, labels_list
 
 
+    def __process_topic(self, sequential, topic_BERT_encodings, topic_R_BERT_encodings, topic_N_BERT_encodings):
+        """ """
+        if sequential:
+            self.__process_sequential_topic(topic_BERT_encodings=topic_BERT_encodings)
+        else:
+            self.__process_non_sequential_topic(topic_R_BERT_encodings=topic_R_BERT_encodings,
+                                                topic_N_BERT_encodings=topic_N_BERT_encodings)
+
+
     def __write_chuck_to_directory(self):
         """ """
         input_ids_tensor = torch.tensor(self.input_ids_list)
@@ -87,24 +96,19 @@ class TrecCarProcessing:
 
         path = os.path.join(self.data_dir_path, 'tensor_dataset_chuck_{}.pt'.format(self.chuck_counter))
         print('saving tensor to: {}'.format(path))
-        torch.save(dataset, path)
+        torch.save(obj=dataset, f=path)
 
         self.input_ids_list = []
         self.token_type_ids_list = []
         self.attention_mask_list = []
         self.labels_list = []
 
-
-    def __process_topic(self, sequential, topic_BERT_encodings, topic_R_BERT_encodings, topic_N_BERT_encodings):
-        """ """
-
-
+        self.chuck_counter += 1
 
 
     def build_dataset(self, sequential=False, chuck_topic_size=1e8):
         """ """
         self.chuck_topic_size = chuck_topic_size
-        #start_time = time.time()
 
         with open(self.run_path) as f_run:
             # Stores data for sequential dataset
@@ -115,7 +119,7 @@ class TrecCarProcessing:
             topic_N_BERT_encodings = []
             # Store previous query so we know when a new topic began.
             topic_query = None
-            for i, line in enumerate(f_run):
+            for line in f_run:
                 # Unpack line in run file.
                 query, _, doc_id, rank, _, _ = line.split(' ')
 
@@ -137,9 +141,11 @@ class TrecCarProcessing:
                 # Extract text from index using doc_id.
                 text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
                 # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
-                BERT_encodings = self.tokenizer.encode_plus(text=decoded_query, text_pair=text, max_length=self.max_length,
-                                                            add_special_tokens=True, pad_to_max_length=True)
-
+                BERT_encodings = self.tokenizer.encode_plus(text=decoded_query,
+                                                            text_pair=text,
+                                                            max_length=self.max_length,
+                                                            add_special_tokens=True,
+                                                            pad_to_max_length=True)
                 # Append doc_id data topic
                 if sequential == True:
                     topic_BERT_encodings.append((query, doc_id, BERT_encodings))
@@ -163,8 +169,8 @@ if __name__ == '__main__':
     import os
 
     index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.run.decode')
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.qrels')
+    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.run')
+    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.qrels')
     data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
 
     # index_path = '/nfs/trec_car/index/anserini_paragraphs/lucene-index.car17v2.0.paragraphsv2'
