@@ -106,9 +106,11 @@ class TrecCarProcessing:
 
     def __process_non_sequential_topic(self):
         """ Process sequentially and even classes through sampling. Used for building training dataset. """
+        # Calculate number of relevant (R_count) and non relevant (N_count) documents in topic run.
         R_count = len(self.topic_R_BERT_encodings)
         N_count = len(self.topic_N_BERT_encodings)
-        print(R_count, N_count)
+
+        # If cannot balance classes (i.e. 0 relevant or 0 non relevant) do not add to dataset.
         if (R_count == 0) or (N_count == 0):
             self.topic_BERT_encodings = []
             self.__process_sequential_topic()
@@ -117,6 +119,7 @@ class TrecCarProcessing:
         def add_extra_sample(BERT_encodings, diff):
             """ Even classes by sampling extra from . """
             idx_list = list(range(len(BERT_encodings)))
+            # randomly sample diff number of samples.
             for idx in random.choices(idx_list, k=diff):
                 BERT_encodings.append(BERT_encodings[idx])
 
@@ -129,13 +132,9 @@ class TrecCarProcessing:
             diff = abs(R_count - N_count)
             add_extra_sample(BERT_encodings=self.topic_N_BERT_encodings, diff=diff)
 
-        print(len(self.topic_R_BERT_encodings), len(self.topic_N_BERT_encodings))
-
-        # Add topics and shuffle data
+        # Add topics and shuffle data.
         self.topic_BERT_encodings = self.topic_R_BERT_encodings + self.topic_N_BERT_encodings
-        print(self.topic_BERT_encodings)
         random.shuffle(self.topic_BERT_encodings)
-        print(self.topic_BERT_encodings)
 
         # Process sequentially topics.
         self.__process_sequential_topic()
