@@ -11,24 +11,36 @@ import os
 
 
 class TrecCarProcessing:
+    """ Process TREC CAR qrels and run files to Pytorch datasets. """
 
     def __init__(self, qrels_path, run_path, index_path, data_dir_path,
                  tokenizer=BertTokenizer.from_pretrained('bert-base-uncased'), max_length=512):
-
+        # Path to qrels file.
         self.qrels_path = qrels_path
+        # Path to run file.
         self.run_path = run_path
+        # Path to Anserini/Lucene index for accessing text.
         self.index_path = index_path
+        # Path to data directory to write output PyTorch file(s).
         self.data_dir_path = data_dir_path
+        # Initialise searching capabilities over Anserini/Lucene index.
         self.search_tools = SearchTools(index_path=self.index_path)
+        # Tokenizer function (text -> BERT tokens)
         self.tokenizer = tokenizer
+        # Max length of BERT tokens.
         self.max_length = max_length
+        # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
         self.qrels = self.get_qrels()
+        # Lists of BERT inputs
         self.input_ids_list = []
         self.token_type_ids_list = []
         self.attention_mask_list = []
         self.labels_list = []
+        # Counter of current chuck being processed.
         self.chuck_counter = 0
+        # Count number of topics being processed.
         self.topic_counter = 0
+        # Number of topics processed in each chuck before being processed.
         self.chuck_topic_size = 0
 
 
@@ -54,7 +66,7 @@ class TrecCarProcessing:
                 qrels[query].append(doc_id)
                 if i % 1000 == 0:
                     print('Loaded #{} lines in qrels file'.format(i))
-        print("Loaded qrels files (#{} lines".format(i))
+        print("Loaded qrels files (#{} lines)".format(i))
         return qrels
 
 
@@ -87,10 +99,16 @@ class TrecCarProcessing:
 
     def __write_chuck_to_directory(self):
         """ """
+        print('Building chuck #{}'.format(self.chuck_counter))
+
         input_ids_tensor = torch.tensor(self.input_ids_list)
         token_type_ids_tensor = torch.tensor(self.token_type_ids_list)
         attention_mask_tensor = torch.tensor(self.attention_mask_list)
         labels_tensor = torch.tensor(self.labels_list)
+        print('input_ids_tensor shape: {}'.format(input_ids_tensor.shape))
+        print('token_type_ids_tensor shape: {}'.format(token_type_ids_tensor.shape))
+        print('attention_mask_tensor shape: {}'.format(attention_mask_tensor.shape))
+        print('labels_tensor shape: {}'.format(labels_tensor.shape))
 
         dataset = TensorDataset(input_ids_tensor, token_type_ids_tensor, attention_mask_tensor, labels_tensor)
 
@@ -163,7 +181,9 @@ class TrecCarProcessing:
                              topic_BERT_encodings=topic_BERT_encodings,
                              topic_R_BERT_encodings=topic_R_BERT_encodings,
                              topic_N_BERT_encodings=topic_N_BERT_encodings)
+
         self.__write_chuck_to_directory()
+
 
 if __name__ == '__main__':
     import os
