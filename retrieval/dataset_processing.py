@@ -96,16 +96,7 @@ class TrecCarProcessing:
     def __process_topic(self, sequential, topic_BERT_encodings, topic_R_BERT_encodings, topic_N_BERT_encodings):
         """ """
 
-        if sequential:
-            self.__process_sequential_topic(topic_BERT_encodings=topic_BERT_encodings)
-        else:
-            self.__process_non_sequential_topic(topic_R_BERT_encodings=topic_R_BERT_encodings,
-                                                topic_N_BERT_encodings=topic_N_BERT_encodings)
 
-        self.chuck_counter += 1
-        if self.chuck_counter % self.chuck_query_size == 0:
-            print('WRITE DATA CHUCK')
-            self.__write_chuck_to_directory()
 
 
     def build_dataset(self, sequential=False, chuck_query_size=1e8):
@@ -129,10 +120,15 @@ class TrecCarProcessing:
                 # If final doc_id in topic -> process batch.
                 if (topic_query != None) and (topic_query != query):
                     print(topic_query)
+
                     self.__process_topic(sequential=sequential,
                                          topic_BERT_encodings=topic_BERT_encodings,
                                          topic_R_BERT_encodings=topic_R_BERT_encodings,
                                          topic_N_BERT_encodings=topic_N_BERT_encodings)
+                    self.chuck_counter += 1
+                    if self.chuck_counter % self.chuck_query_size == 0:
+                        print('WRITE DATA CHUCK')
+                        self.__write_chuck_to_directory()
 
                 # Decode query.
                 decoded_query = self.search_tools.decode_query(q=query)
@@ -159,7 +155,7 @@ class TrecCarProcessing:
                              topic_BERT_encodings=topic_BERT_encodings,
                              topic_R_BERT_encodings=topic_R_BERT_encodings,
                              topic_N_BERT_encodings=topic_N_BERT_encodings)
-
+        self.__write_chuck_to_directory()
 
 if __name__ == '__main__':
     import os
