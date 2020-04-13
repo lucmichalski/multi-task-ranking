@@ -99,7 +99,11 @@ class TrecCarProcessing:
 
     def __write_chuck_to_directory(self):
         """ """
+        if os.isdir(self.data_dir_path) == False:
+            os.mkdir(self.data_dir_path)
         print('Building chuck #{}'.format(self.chuck_counter))
+
+
 
         dataset = TensorDataset(torch.tensor(self.input_ids_list),
                                 torch.tensor(self.token_type_ids_list),

@@ -45,7 +45,7 @@ if __name__ == '__main__':
     index_path = '/nfs/trec_car/index/anserini_paragraphs/lucene-index.car17v2.0.paragraphsv2'
     run_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.run'
     qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.qrels'
-    data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/'
+    data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/test_chunks/'
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     max_length = 512
@@ -55,7 +55,7 @@ if __name__ == '__main__':
                                    data_dir_path=data_dir_path,
                                    tokenizer=tokenizer,
                                    max_length=max_length)
-    processing.build_dataset(sequential=True)
+    processing.build_dataset(sequential=True, chuck_topic_size=100)
 
 
 
