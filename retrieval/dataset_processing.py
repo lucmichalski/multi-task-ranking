@@ -73,9 +73,11 @@ class TrecCarProcessing:
     def __process_sequential_topic(self, topic_BERT_encodings):
         """ Process sequentially and do not even classes through sampling. Used for validation dataset. """
         for query, doc_id, BERT_encodings in topic_BERT_encodings:
+            # Append BERT model inputs.
             self.input_ids_list.append(BERT_encodings['input_ids'])
             self.token_type_ids_list.append(BERT_encodings['token_type_ids'])
             self.attention_mask_list.append(BERT_encodings['attention_mask'])
+            # Qrels, query and doc_id used to determine whether entry in relevant or not relevant.
             if doc_id in self.qrels[query]:
                 self.labels_list.append([1])
             else:
@@ -84,46 +86,53 @@ class TrecCarProcessing:
 
     def __process_non_sequential_topic(self, topic_R_BERT_encodings, topic_N_BERT_encodings):
         """ """
-        input_ids_list, token_type_ids_list, attention_mask_list, labels_list = [], [], [], []
-        return input_ids_list, token_type_ids_list, attention_mask_list, labels_list
+        pass
 
 
     def __process_topic(self, sequential, topic_BERT_encodings, topic_R_BERT_encodings, topic_N_BERT_encodings):
-        """ """
+        """ Process topic - whether sequential (validation) or not sequential (training). """
         if sequential:
+            # Sequential (validation dataset).
             self.__process_sequential_topic(topic_BERT_encodings=topic_BERT_encodings)
         else:
+            # Not sequential (training dataset).
             self.__process_non_sequential_topic(topic_R_BERT_encodings=topic_R_BERT_encodings,
                                                 topic_N_BERT_encodings=topic_N_BERT_encodings)
+        self.topic_counter += 1
 
 
     def __write_chuck_to_directory(self):
-        """ """
+        """ Write data chuck to Pytorch TensorDataset and initialise new data chuck."""
+        # Create data_dir_path if does not exist.
         if os.path.isdir(self.data_dir_path) == False:
+            print('Making directory: {}'.format())
             os.mkdir(self.data_dir_path)
+
         print('Building chuck #{}'.format(self.chuck_counter))
 
-
-
+        # Make tensor dataset from 4x tensors (input_ids, token_type_ids, attention_mask and labels).
         dataset = TensorDataset(torch.tensor(self.input_ids_list),
                                 torch.tensor(self.token_type_ids_list),
                                 torch.tensor(self.attention_mask_list),
                                 torch.tensor(self.labels_list))
 
+        # Save tensor dataset to data_dir_path.
         path = os.path.join(self.data_dir_path, 'tensor_dataset_chuck_{}.pt'.format(self.chuck_counter))
         print('saving tensor to: {}'.format(path))
         torch.save(obj=dataset, f=path)
 
+        # Initialise new data chuck.
+        self.chuck_counter += 1
+        # New lists of BERT inputs.
         self.input_ids_list = []
         self.token_type_ids_list = []
         self.attention_mask_list = []
         self.labels_list = []
 
-        self.chuck_counter += 1
-
 
     def build_dataset(self, sequential=False, chuck_topic_size=1e8):
-        """ """
+        """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
+        False (training dataset). """
         # Counter of current chuck being processed.
         self.chuck_counter = 0
         # Count number of topics being processed.
@@ -146,13 +155,13 @@ class TrecCarProcessing:
 
                 # If final doc_id in topic -> process batch.
                 if (topic_query != None) and (topic_query != query):
-                    print(topic_query)
 
+                    # Process topic
                     self.__process_topic(sequential=sequential,
                                          topic_BERT_encodings=topic_BERT_encodings,
                                          topic_R_BERT_encodings=topic_R_BERT_encodings,
                                          topic_N_BERT_encodings=topic_N_BERT_encodings)
-                    self.topic_counter += 1
+                    # If specified data chuck size -> write chuck to file.
                     if self.topic_counter % self.chuck_topic_size == 0:
                         print('WRITE DATA CHUCK')
                         self.__write_chuck_to_directory()
@@ -179,12 +188,13 @@ class TrecCarProcessing:
                 # Store query as topic query.
                 topic_query = query
 
-        # TODO
+        # Process any queries remaining.
         self.__process_topic(sequential=sequential,
                              topic_BERT_encodings=topic_BERT_encodings,
                              topic_R_BERT_encodings=topic_R_BERT_encodings,
                              topic_N_BERT_encodings=topic_N_BERT_encodings)
 
+        # write final chuck to file.
         self.__write_chuck_to_directory()
 
 
