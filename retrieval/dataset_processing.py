@@ -37,11 +37,11 @@ class TrecCarProcessing:
         self.attention_mask_list = []
         self.labels_list = []
         # Counter of current chuck being processed.
-        self.chuck_counter = 0
+        self.chuck_counter = None
         # Count number of topics being processed.
-        self.topic_counter = 0
+        self.topic_counter = None
         # Number of topics processed in each chuck before being processed.
-        self.chuck_topic_size = 0
+        self.chuck_topic_size = None
 
 
     def __convert_to_unicode(text):
@@ -126,6 +126,11 @@ class TrecCarProcessing:
 
     def build_dataset(self, sequential=False, chuck_topic_size=1e8):
         """ """
+        # Counter of current chuck being processed.
+        self.chuck_counter = 0
+        # Count number of topics being processed.
+        self.topic_counter = 0
+        # Number of topics processed in each chuck before being processed.
         self.chuck_topic_size = chuck_topic_size
 
         with open(self.run_path) as f_run:
