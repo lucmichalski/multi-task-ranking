@@ -128,7 +128,7 @@ class TrecCarProcessing:
 
                 # If final doc_id in topic -> process batch.
                 if (topic_query != None) and (topic_query != query):
-                    print('topic_query')
+                    print(topic_query)
                     self.__process_topic(sequential=sequential,
                                          topic_BERT_encodings=topic_BERT_encodings,
                                          topic_R_BERT_encodings=topic_R_BERT_encodings,
