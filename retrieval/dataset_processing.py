@@ -51,7 +51,7 @@ class TrecCarProcessing:
                 topic_query, _, doc_id, relevance = line.rstrip().split(' ')
                 if int(relevance) >= 1:
                     qrels[topic_query].append(doc_id)
-                if i % 10000 == 0:
+                if i % 100 == 0:
                     print('Loading qrels {}'.format(i))
         return qrels
 
