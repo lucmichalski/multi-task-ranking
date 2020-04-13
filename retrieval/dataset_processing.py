@@ -169,8 +169,8 @@ if __name__ == '__main__':
     # data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
 
     index_path = '/nfs/trec_car/index/anserini_paragraphs/lucene-index.car17v2.0.paragraphsv2'
-    run_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.run'
-    qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.qrels'
+    run_path = '/nfs/trec_car/data/bert_reranker_datasets/test_100.run'
+    qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/test_100.qrels'
     data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/'
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
