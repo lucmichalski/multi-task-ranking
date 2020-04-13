@@ -138,7 +138,7 @@ class TrecCarProcessing:
                 # Extract text from index using doc_id.
                 text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
                 # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
-                BERT_encodings = self.tokenizer.encode_plus(text=decoded_query, text_pair=text, max_length=max_length,
+                BERT_encodings = self.tokenizer.encode_plus(text=decoded_query, text_pair=text, max_length=self.max_length,
                                                             add_special_tokens=True, pad_to_max_length=True)
 
                 # Append doc_id data topic
