@@ -242,7 +242,6 @@ class TrecCarProcessing:
 
 
 if __name__ == '__main__':
-    import os
 
     index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
     run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.run')
