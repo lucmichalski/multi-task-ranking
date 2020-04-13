@@ -55,7 +55,7 @@ if __name__ == '__main__':
                                    data_dir_path=data_dir_path,
                                    tokenizer=tokenizer,
                                    max_length=max_length)
-    processing.build_dataset()
+    processing.build_dataset(sequential=True)
 
 
 
