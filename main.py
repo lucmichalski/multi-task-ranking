@@ -1,6 +1,6 @@
 
 
-from retrieval.tools import Search, Eval, Pipeline
+from retrieval.tools import SearchTools, EvalTools, Pipeline
 from metadata import EntityPaths, PassagePaths
 import numpy as np
 

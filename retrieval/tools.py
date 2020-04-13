@@ -15,7 +15,7 @@ import os
 ###############################################################################
 
 
-class Search:
+class SearchTools:
 
     """ Information retrieval search class using Pyserini. """
 
@@ -24,7 +24,6 @@ class Search:
 
 
     def __init__(self, index_path, searcher_config=None):
-
         # Initialise absolute path to Anserini (Lucene) index.
         print("Index path: {}".format(index_path))
         self.index_path = index_path
@@ -85,7 +84,7 @@ class Search:
         return self.__get_ranking_from_searcher(query=query, hits=hits)
 
 
-    def __process_query(self, q):
+    def process_query(self, q):
         """ Simple processing of query from TREC CAR format i.e. leave in utf-8 except space characters. """
         # Remove "enwiki:" from begging of string.
         i = 7
@@ -96,7 +95,7 @@ class Search:
         return q
 
 
-    def __decode_query(self, q, encoding='utf-8'):
+    def decode_query(self, q, encoding='utf-8'):
         """ Process query using ut-8 decoding from TREC CAR format. """
         # Remove "enwiki:" from begging of string.
         i = 7
@@ -144,12 +143,12 @@ class Search:
                     # Try to decode query correctly using URL utf-8 decoding. If this string causes an error within
                     # Pyserini's SimpleSearcher.search() use basic string processing only dealing with space characters.
                     try:
-                        decoded_query = self.__decode_query(q=query)
+                        decoded_query = self.decode_query(q=query)
                         retrieved_hits = self.searcher.search(q=decoded_query, k=hits)
                     except ValueError:
                         print("URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
                         print("-> Using simple processing")
-                        processed_query = self.__process_query(q=query)
+                        processed_query = self.process_query(q=query)
                         retrieved_hits = self.searcher.search(q=processed_query, k=hits)
 
                     for hit in retrieved_hits:
@@ -169,7 +168,7 @@ class Search:
 ###############################################################################
 
 
-class Eval:
+class EvalTools:
 
     """ Information retrieval eval class. """
 
@@ -317,7 +316,7 @@ class Eval:
         with open(eval_by_query_path, 'w') as f_eval_by_query:
             with open(run_path, 'r') as f_run:
                 # Store query of run (i.e. previous query).
-                run_query = None
+                topic_query = None
                 # Store 'doc_id' for each hit in ascending order i.e. rank=1, rank=2, etc.
                 run_doc_ids = []
                 # Store binary relevance {0, 1} of each 'doc_id'.
@@ -327,29 +326,29 @@ class Eval:
                     query, _, doc_id, _, _, _ = hit.split()
 
                     # If run batch complete.
-                    if (run_query != None) and (run_query != query):
+                    if (topic_query != None) and (topic_query != query):
                         # Assert query of run in qrels
-                        assert run_query in qrels_dict
+                        assert topic_query in qrels_dict
                         # For each doc_id find whether relevant (1) or not relevant (0), appending binary relevance to run.
                         for d in run_doc_ids:
-                            if d in qrels_dict[run_query]:
+                            if d in qrels_dict[topic_query]:
                                 run.append(1)
                             else:
                                 run.append(0)
 
                         # Calculate number of relevant docs in qrels (R).
-                        R = len(qrels_dict[run_query])
+                        R = len(qrels_dict[topic_query])
                         # Build query metric string.
                         query_metrics = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
                         # Write query metric string to file.
-                        f_eval_by_query.write(run_query + ' ' + query_metrics + '\n')
+                        f_eval_by_query.write(topic_query + ' ' + query_metrics + '\n')
                         # Start next query.
                         run_doc_ids = []
                         run = []
 
-                    # Add doc_id to run and map run_query->query.
+                    # Add doc_id to run and map topic_query->query.
                     run_doc_ids.append(doc_id)
-                    run_query = query
+                    topic_query = query
 
         # Store sum of metrics across all queries.
         eval_metric_sum = {}
@@ -410,8 +409,8 @@ class Pipeline:
                 searcher_config = {
                     'BM25': {'k1': k1, 'b': b}
                 }
-                search = Search(index_path=index_path, searcher_config=searcher_config)
-                search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits)
+                search_tools = SearchTools(index_path=index_path, searcher_config=searcher_config)
+                search_tools.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits)
 
                 # Evaluate with evaluated runs.
                 eval_config = {
@@ -422,7 +421,7 @@ class Pipeline:
                     'recall': {'k': 40},
                     'ndcg': {'k': 20},
                 }
-                eval = Eval()
+                eval = EvalTools()
                 eval_metric = eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
 
                 print('Parameters (k1: {} & b {}): {}'.format(k1, b, eval_metric))
