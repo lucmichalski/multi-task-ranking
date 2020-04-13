@@ -1,7 +1,7 @@
 
 
 from retrieval.tools import Search, Eval, Pipeline
-from static import Paths
+from metadata import EntityPaths, PassagePaths
 import numpy as np
 
 if __name__ == '__main__':
@@ -31,9 +31,9 @@ if __name__ == '__main__':
     #
     pipeline = Pipeline()
 
-    pipeline.search_BM25_tune_parameter(index_path=Paths.entity_index,
-                                        topics_path=Paths.entity_test_topics,
-                                        qrels_path=Paths.entity_test_qrels,
+    pipeline.search_BM25_tune_parameter(index_path=EntityPaths.entity_index,
+                                        topics_path=EntityPaths.entity_test_topics,
+                                        qrels_path=EntityPaths.entity_test_qrels,
                                         results_dir=results_dir,
                                         hits=1000,
                                         b_list=[0.1, 0.15, 0.2, 0.25],
