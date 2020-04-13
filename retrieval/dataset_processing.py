@@ -71,7 +71,7 @@ class TrecCarProcessing:
 
 
     def __process_sequential_topic(self, topic_BERT_encodings):
-        """ """
+        """ Process sequentially and do not even classes through sampling. Used for validation dataset. """
         for query, doc_id, BERT_encodings in topic_BERT_encodings:
             self.input_ids_list.append(BERT_encodings['input_ids'])
             self.token_type_ids_list.append(BERT_encodings['token_type_ids'])
@@ -101,16 +101,10 @@ class TrecCarProcessing:
         """ """
         print('Building chuck #{}'.format(self.chuck_counter))
 
-        input_ids_tensor = torch.tensor(self.input_ids_list)
-        token_type_ids_tensor = torch.tensor(self.token_type_ids_list)
-        attention_mask_tensor = torch.tensor(self.attention_mask_list)
-        labels_tensor = torch.tensor(self.labels_list)
-        print('input_ids_tensor shape: {}'.format(input_ids_tensor.shape))
-        print('token_type_ids_tensor shape: {}'.format(token_type_ids_tensor.shape))
-        print('attention_mask_tensor shape: {}'.format(attention_mask_tensor.shape))
-        print('labels_tensor shape: {}'.format(labels_tensor.shape))
-
-        dataset = TensorDataset(input_ids_tensor, token_type_ids_tensor, attention_mask_tensor, labels_tensor)
+        dataset = TensorDataset(torch.tensor(self.input_ids_list),
+                                torch.tensor(self.token_type_ids_list),
+                                torch.tensor(self.attention_mask_list),
+                                torch.tensor(self.labels_list))
 
         path = os.path.join(self.data_dir_path, 'tensor_dataset_chuck_{}.pt'.format(self.chuck_counter))
         print('saving tensor to: {}'.format(path))
