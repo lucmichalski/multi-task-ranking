@@ -99,7 +99,7 @@ class TrecCarProcessing:
 
     def __write_chuck_to_directory(self):
         """ """
-        if os.isdir(self.data_dir_path) == False:
+        if os.path.isdir(self.data_dir_path) == False:
             os.mkdir(self.data_dir_path)
         print('Building chuck #{}'.format(self.chuck_counter))
 
