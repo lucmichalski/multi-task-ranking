@@ -43,9 +43,9 @@ if __name__ == '__main__':
     #                                     k1_list=[4.5, 5.5, 6.5, 7.5, 8.5])
 
     index_path = '/nfs/trec_car/index/anserini_paragraphs/lucene-index.car17v2.0.paragraphsv2'
-    run_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.run'
-    qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.qrels'
-    data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/test_chunks/'
+    run_path = '/nfs/trec_car/data/bert_reranker_datasets/train_benchmarkY1.run'
+    qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/train_benchmarkY1.qrels'
+    data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/test_chunks_train/'
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     max_length = 512
@@ -55,7 +55,10 @@ if __name__ == '__main__':
                                    data_dir_path=data_dir_path,
                                    tokenizer=tokenizer,
                                    max_length=max_length)
-    processing.build_dataset(sequential=True, chuck_topic_size=100)
+
+    sequential = True
+    chuck_topic_size = 400
+    processing.build_dataset(sequential=sequential, chuck_topic_size=chuck_topic_size)
 
 
 

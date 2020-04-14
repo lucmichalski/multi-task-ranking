@@ -262,4 +262,4 @@ if __name__ == '__main__':
                                    tokenizer=tokenizer,
                                    max_length=max_length)
 
-    processing.build_dataset(sequential=True)
+    processing.build_dataset(sequential=True, chuck_topic_size=2)
