@@ -20,19 +20,17 @@ spec:
       claimName: imackievol1claim
   containers:
   - env:
-    - name: PATH
-      value: CarEntityCollection
     name: multi-task-ranking-python-main-container
-    image: iainmackie/multi-task-ranking-python-main:v1
+    image: iainmackie/multi-task-ranking-python-main:v2
     imagePullPolicy: IfNotPresent
     resources:
       requests:
         cpu: "10000m"
-        memory: "12Gi"
+        memory: "16Gi"
         nvidia.com/gpu: 1
       limits:
         cpu: "16000m"
-        memory: "128Gi"
+        memory: "16Gi"
         nvidia.com/gpu: 1
     volumeMounts:
     - mountPath: /nfs/
