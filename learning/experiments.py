@@ -54,36 +54,47 @@ class FineTuningReRanking:
         return list(itertools.chain(*l))
 
 
-    def run_experiment(self, epochs=1, lr=2e-5, eps=1e-8, weight_decay=0.01, num_warmup_steps=0, seed_val=42, experiments_dir=None, experiment_name=None, write=False, logging_steps=100):
-        """ """
-        # Set the seed value all over the place to make this reproducible.
-        random.seed(seed_val)
-        np.random.seed(seed_val)
-        torch.manual_seed(seed_val)
-        torch.cuda.manual_seed_all(seed_val)
-
-        # Define experiment_path directory to contain all logging, models and results.
-        experiment_path = os.path.join(experiments_dir, experiment_name)
-
-        if write:
-            # Make experiment_path if does not already exist.
-            if os.path.isdir(experiment_path) == False:
-                os.mkdir(experiment_path)
-            print('*** Starting logging ***')
-            logging_path = os.path.join(experiment_path, 'output.log')
-            logging.basicConfig(filename=logging_path, level=logging.DEBUG)
-
+    def __get_torch_device(self):
+        """ get torch device to use (GPU and CPU). If GPU possible set model to use GPU i.e. model.cuda() """
         # Use GPUs if available.
         if torch.cuda.is_available():
             # Tell PyTorch to use the GPU.
-            device = torch.device("cuda")
             logging.info('There are %d GPU(s) available.' % torch.cuda.device_count())
             logging.info('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
             self.model.cuda()
+            return torch.device("cuda")
         # Otherwise use CPU.
         else:
             logging.info('No GPU available, using the CPU instead.')
-            device = torch.device("cpu")
+            return torch.device("cpu")
+
+
+    def __unpack_batch(self, batch, device):
+        """ Unpack batch tensors (input_ids, token_type_ids, attention_mask, labels). """
+        b_input_ids = batch[0].to(device)
+        b_token_type_ids = batch[1].to(device)
+        b_attention_mask = batch[2].to(device)
+        b_labels = batch[3].to(device, dtype=torch.float)
+        return b_input_ids, b_token_type_ids, b_attention_mask, b_labels
+
+
+    def run_experiment(self, epochs=1, lr=2e-5, eps=1e-8, weight_decay=0.01, num_warmup_steps=0, experiments_dir=None,
+                       experiment_name=None, logging_steps=100):
+        """ """
+        # Define experiment_path directory to contain all logging, models and results.
+        experiment_path = os.path.join(experiments_dir, experiment_name)
+
+        # Make experiment_path if does not already exist.
+        if os.path.isdir(experiment_path) == False:
+            os.mkdir(experiment_path)
+
+        # Logging.
+        logging_path = os.path.join(experiment_path, 'output.log')
+        print('Starting logging: {}'.format(logging_path))
+        logging.basicConfig(filename=logging_path, level=logging.DEBUG)
+
+        # get torch device to use (GPU and CPU). If GPU possible set model to use GPU i.e. model.cuda().
+        device = self.__get_torch_device()
 
         # Log experiment parameters
         self.__log_parameters()
@@ -114,10 +125,8 @@ class FineTuningReRanking:
 
             for train_step, train_batch in enumerate(self.train_dataloader):
                 # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
-                b_input_ids = train_batch[0].to(device)
-                b_token_type_ids = train_batch[1].to(device)
-                b_attention_mask = train_batch[2].to(device)
-                b_labels = train_batch[3].to(device, dtype=torch.float)
+                b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch,
+                                                                                                device=device)
 
                 # Set gradient to zero.
                 self.model.zero_grad()
@@ -157,19 +166,14 @@ class FineTuningReRanking:
                     # Total number of dev batches.
                     num_dev_steps = len(self.dev_dataloader)
 
-                    # pred_list = []
-                    # label_list = []
-
                     # Set model to evaluation mode i.e. not weight updates.
                     self.model.eval()
 
                     for dev_step, dev_batch in enumerate(self.dev_dataloader):
 
                         # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
-                        b_input_ids = dev_batch[0].to(device)
-                        b_token_type_ids = dev_batch[1].to(device)
-                        b_attention_mask = dev_batch[2].to(device)
-                        b_labels = dev_batch[3].to(device, dtype=torch.float)
+                        b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(
+                            batch=dev_batch, device=device)
 
                         # With no gradients
                         with torch.no_grad():
@@ -179,13 +183,6 @@ class FineTuningReRanking:
                                                                              labels=b_labels)
                         # Update dev loss counter.
                         dev_loss += loss.mean().item()
-
-                        # if device == torch.device("cpu"):
-                        #     pred_list += self.__flatten_list(outputs[1].cpu().detach().numpy().tolist())
-                        #     label_list += dev_batch[3].cpu().numpy().tolist()
-                        # else:
-                        #     pred_list += self.__flatten_list(outputs[1].cpu().detach().numpy().tolist())
-                        #     label_list += self.__flatten_list(b_labels.cpu().numpy().tolist())
 
                     # Report the final accuracy for this validation run.
                     av_dev_loss = dev_loss / num_dev_steps
@@ -212,7 +209,6 @@ if __name__ == '__main__':
     seed_val = 42
     experiments_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data')
     experiment_name = 'test_exp_1'
-    write = True
     logging_steps = 100
 
     experiment.run_experiment(epochs=epochs,
@@ -223,5 +219,4 @@ if __name__ == '__main__':
                               seed_val=seed_val,
                               experiments_dir=experiments_dir,
                               experiment_name=experiment_name,
-                              write=write,
                               logging_steps=logging_steps)

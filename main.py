@@ -21,7 +21,6 @@ if __name__ == '__main__':
     eps = 1e-8
     weight_decay = 0.01
     num_warmup_steps = 0
-    seed_val = 42
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
     experiment_name = 'test_exp_2'
     write = True
@@ -32,7 +31,6 @@ if __name__ == '__main__':
                               eps=eps,
                               weight_decay=weight_decay,
                               num_warmup_steps=num_warmup_steps,
-                              seed_val=seed_val,
                               experiments_dir=experiments_dir,
                               experiment_name=experiment_name,
                               write=write,
