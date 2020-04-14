@@ -1,0 +1,40 @@
+Commands to run to make files read/write
+
+- end of scripts groupwrite permissons (run chmod -R 775 *)
+- copy scp (chmod -R 775 * && chmod -R +w * && chgrp -R nfsnobody *)
+
+################################################
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-task-ranking-python-main
+  namespace: imackieproject
+spec:
+  nodeSelector:
+    #node-role.ida/gputitan: "true"
+    node-role.ida/gpu2080ti: "true"
+  volumes:
+  - name: nfs-access
+    persistentVolumeClaim:
+      claimName: imackievol1claim
+  containers:
+  - env:
+    - name: PATH
+      value: CarEntityCollection
+    name: multi-task-ranking-python-main-container
+    image: iainmackie/multi-task-ranking-python-main:v1
+    imagePullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: "10000m"
+        memory: "12Gi"
+        nvidia.com/gpu: 1
+      limits:
+        cpu: "16000m"
+        memory: "128Gi"
+        nvidia.com/gpu: 1
+    volumeMounts:
+    - mountPath: /nfs/
+      name: nfs-access
+  restartPolicy: Never

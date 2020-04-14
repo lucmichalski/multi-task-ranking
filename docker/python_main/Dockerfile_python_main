@@ -1,0 +1,3 @@
+FROM iainmackie/multi-task-ranking-base-image:v1
+
+CMD python3 ${PATH}
