@@ -6,6 +6,7 @@ from transformers.optimization import AdamW
 from transformers import get_linear_schedule_with_warmup
 from torch.utils.data import DataLoader, SequentialSampler
 from torch import nn
+
 import numpy as np
 import torch
 import random
@@ -93,16 +94,16 @@ class FineTuningReRanking:
         scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps,
                                                     num_training_steps=num_train_steps)
 
-
         # Loop over epochs (1 -> epochs).
         for epoch_i in range(1, epochs + 1):
+
+            logging.info("=================================")
+            logging.info('======== Epoch {:} / {:} ========'.format(epoch_i, epochs))
+            logging.info("=================================")
 
             # ========================================
             #               Training
             # ========================================
-            logging.info("=================================")
-            logging.info('======== Epoch {:} / {:} ========'.format(epoch_i, epochs))
-            logging.info("=================================")
 
             # Time beginning training.
             train_start_time = time.time()
