@@ -25,9 +25,9 @@ if __name__ == '__main__':
     weight_decay = 0.01
     num_warmup_steps = 0
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'testing_training_and_validation_less_printing'
+    experiment_name = 'testing_training_and_validation_less_printing_v2'
     write = True
-    logging_steps = 1000
+    logging_steps = 600
 
     experiment.run_experiment_single_head(
                                     head_flag='entity',
