@@ -215,8 +215,6 @@ class FineTuningReRankingExperiments:
             original_topic.append(label_ground_truth)
             BERT_scores.append(score)
 
-            print(label[0], score, query, doc_id, label_ground_truth)
-
         if len(original_topic) > 0:
 
             topic_counter += 1
