@@ -35,4 +35,5 @@ spec:
     volumeMounts:
     - mountPath: /nfs/
       name: nfs-access
+  serviceAccount: containerroot
   restartPolicy: Never

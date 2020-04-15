@@ -36,7 +36,6 @@ if __name__ == '__main__':
                               num_warmup_steps=num_warmup_steps,
                               experiments_dir=experiments_dir,
                               experiment_name=experiment_name,
-                              write=write,
                               logging_steps=logging_steps)
 
 
