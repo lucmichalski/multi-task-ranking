@@ -7,7 +7,7 @@ from learning.experiments import FineTuningReRankingExperiments
 if __name__ == '__main__':
 
     train_data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/test_chunks_train/'
-    train_batch_size = 16
+    train_batch_size = 8
     dev_data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/test_chunks/'
     dev_batch_size = 64
     dev_qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.qrels'
