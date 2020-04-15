@@ -428,7 +428,7 @@ class FineTuningReRankingExperiments:
 
         self.__validation_run(head_flag=head_flag)
 
-        self.write_rerank_run(rerank_run_path)
+        self.write_rerank_run(rerank_run_path=rerank_run_path)
 
         if do_eval:
             self.eval_tools.write_eval_from_qrels_and_run(qrels_path=self.dev_qrels_path,
