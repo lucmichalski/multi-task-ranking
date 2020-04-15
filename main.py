@@ -7,9 +7,9 @@ from learning.experiments import FineTuningReRankingExperiments
 if __name__ == '__main__':
 
     train_data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/test_chunks_train/'
-    train_batch_size = 8
+    train_batch_size = 16
     dev_data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/test_chunks/'
-    dev_batch_size = 32
+    dev_batch_size = 64
     dev_qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.qrels'
     dev_run_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.run'
     experiment = FineTuningReRankingExperiments(train_data_dir_path=train_data_dir_path,
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     weight_decay = 0.01
     num_warmup_steps = 0
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_exp_2'
+    experiment_name = 'testing_training_and_validation'
     write = True
     logging_steps = 50
 
