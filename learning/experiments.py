@@ -9,9 +9,7 @@ from torch.utils.data import DataLoader, SequentialSampler
 from torch import nn
 
 import collections
-import numpy as np
 import torch
-import random
 import datetime
 import logging
 import itertools
@@ -25,17 +23,29 @@ class FineTuningReRankingExperiments:
 
     def __init__(self, model_path=None, train_data_dir_path=None, train_batch_size=None, dev_data_dir_path=None, dev_batch_size=None,
                  dev_qrels_path=None, dev_run_path=None):
+        # Load model from path or use pretrained_weights.
         self.model = self.__init_model(model_path=model_path)
+        # Initialise EvalTools.
         self.eval_tools = EvalTools()
+        # Build PyTorch Dataloader for training data.
         self.train_dataloader = self.__build_dataloader(data_dir_path=train_data_dir_path, batch_size=train_batch_size)
+        # Build PyTorch Dataloader for validation data.
         self.dev_dataloader = self.__build_dataloader(data_dir_path=dev_data_dir_path, batch_size=dev_batch_size)
+        # Store path of original dev/test run.
         self.dev_run_path = dev_run_path
+        # Store path of original dev/test qrels.
         self.dev_qrels_path = dev_qrels_path
+        # Dictionary from a qrels file. Key: query, value: list of relevant doc_ids.
         self.dev_qrels = self.__get_qrels(qrels_path=dev_qrels_path)
+        # List of tuples from run file (query, doc_id, R).
         self.dev_run_data = self.__get_run_data(run_path=dev_run_path)
+        # Store dev original labels. 1 = relevant, 0 = not relevant.
         self.dev_labels = None
+        # Store dev logits between 0-1.
         self.dev_logits = None
+        # Store torch device
         self.device = self.__get_torch_device()
+        # Evaluation config used in EvalTools.
         self.eval_config = {
             'map': {'k': None},
             'Rprec': {'k': None},
@@ -47,19 +57,21 @@ class FineTuningReRankingExperiments:
 
 
     def __get_qrels(self, qrels_path):
-        """ """
+        """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}."""
         return self.eval_tools.get_qrels_dict(qrels_path=qrels_path)
 
 
     def __get_run_data(self, run_path):
-        """ """
+        """ Reads run file returning list of tuples (query, doc_id, R) """
         run = []
         with open(run_path, 'r') as f_run:
             for line in f_run:
                 # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
                 query, _, doc_id, _, _, _ = line.split()
+                # Relevant
                 if doc_id in self.dev_qrels[query]:
                     R = 1.0
+                # Not relevant.
                 else:
                     R = 0.0
                 run.append((query, doc_id, R))
@@ -67,7 +79,7 @@ class FineTuningReRankingExperiments:
 
 
     def __init_model(self, model_path):
-        """ Initialise model with pre-trained weights."""
+        """ Initialise model with pre-trained weights or load from directory."""
         if model_path == None:
             return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
         else:
@@ -119,7 +131,7 @@ class FineTuningReRankingExperiments:
 
 
     def __update_dev_lables_and_logits(self, lables, logits):
-        """ . """
+        """ Update dev lables and logit lists from tensor. """
         if self.device == torch.device("cpu"):
             self.dev_labels += lables.cpu().numpy().tolist()
             self.dev_logits += self.__flatten_list(logits.cpu().detach().numpy().tolist())
@@ -132,7 +144,7 @@ class FineTuningReRankingExperiments:
 
 
     def __get_bert_topic(self, original_topic, scores):
-        """ """
+        """ Re-rank original topic based on BERT score. """
         bert_topic = []
         ordered_scores = sorted(list(set(scores)), reverse=True)
         for os in ordered_scores:
@@ -142,30 +154,33 @@ class FineTuningReRankingExperiments:
         return bert_topic
 
 
-    def __get_topics_metrics(self, original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum,
-                             topic_query, original_topic, BERT_scores, eval_config):
-        """ """
+    def __add_topic_metrics(self, original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum,
+                             topic_query, original_topic, BERT_scores):
+        """ Add metrics of topic to dict sums. """
+        # Get re-ranking BERT labels based on scores
         bert_topic = self.__get_bert_topic(original_topic=original_topic, scores=BERT_scores)
+        # Get re-ranking oracle i.e. [0,1,0,0,1,1] -> [1,1,1,0,0,0]
         oracle_topic = sorted(original_topic, reverse=True)
-
+        # Total number of relevant documents for query.
         R = len(self.dev_qrels[topic_query])
 
-        _, original_metrics = self.eval_tools.get_query_metrics(run=original_topic, R=R, eval_config=eval_config)
-        _, bert_metrics = self.eval_tools.get_query_metrics(run=bert_topic, R=R, eval_config=eval_config)
-        _, oracle_metrics = self.eval_tools.get_query_metrics(run=oracle_topic, R=R, eval_config=eval_config)
+        # Get metrics
+        _, original_metrics = self.eval_tools.get_query_metrics(run=original_topic, R=R, eval_config=self.eval_config)
+        _, bert_metrics = self.eval_tools.get_query_metrics(run=bert_topic, R=R, eval_config=self.eval_config)
+        _, oracle_metrics = self.eval_tools.get_query_metrics(run=oracle_topic, R=R, eval_config=self.eval_config)
 
         for k in original_metrics.keys():
-
+            # Original metrics
             if k in original_metrics_dict_sum:
                 original_metrics_dict_sum[k] += original_metrics[k]
             else:
                 original_metrics_dict_sum[k] = original_metrics[k]
-
+            # BERT metrics
             if k in bert_metrics_dict_sum:
                 bert_metrics_dict_sum[k] += bert_metrics[k]
             else:
                 bert_metrics_dict_sum[k] = bert_metrics[k]
-
+            # Re-ranking oracle metrics
             if k in oracle_metrics_dict_sum:
                 oracle_metrics_dict_sum[k] += oracle_metrics[k]
             else:
@@ -174,60 +189,61 @@ class FineTuningReRankingExperiments:
         return original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum
 
 
-    def __get_eval_metrics(self):
-        """ """
-        assert len(self.dev_labels) == len(self.dev_logits) == len(self.dev_run_data), \
-            "dev_labels len: {}, dev_logits len: {}, dev_run_data: {}".format(
-                len(self.dev_labels), len(self.dev_logits),len(self.dev_run_data))
+    def __log_eval_metrics(self):
+        """ Log evaluation metrics (original, BERT re-rank based on score and re-ranking oracle). """
+        # Assert validation outputs correct length.
+        self.__assert_dev_lists_correct_lengths()
 
+        # Metric dicts for original run, re-ranking based on BERT scores, and re-ranking oracle.
         original_metrics_dict_sum = {}
         bert_metrics_dict_sum = {}
         oracle_metrics_dict_sum = {}
 
+        # Store BERT score and original_topic (i.e. labels from original run).
         original_topic = []
         BERT_scores = []
 
+        # Store topic query and count number of topics.
         topic_query = None
         topic_counter = 0
 
         for label, score, dev_run_data in zip(self.dev_labels, self.dev_logits, self.dev_run_data):
+            # Unpack dev_run_data.
             query, doc_id, label_ground_truth = dev_run_data
-            #assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label[0])
-            assert label_ground_truth == label, "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label)
+            # Assert ordering looks correct.
+            self.__assert_label_is_correct(label_ground_truth=label_ground_truth, label=label)
 
             if (topic_query != None) and (topic_query != query):
-                # get topics of metrics
-                topic_counter += 1
-
+                # Add metrics of topic.
                 original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum = \
-                    self.__get_topics_metrics(original_metrics_dict_sum=original_metrics_dict_sum,
-                                              bert_metrics_dict_sum=bert_metrics_dict_sum,
-                                              oracle_metrics_dict_sum=oracle_metrics_dict_sum,
-                                              topic_query=topic_query,
-                                              original_topic=original_topic,
-                                              BERT_scores=BERT_scores,
-                                              eval_config=self.eval_config)
-
+                    self.__add_topic_metrics(original_metrics_dict_sum=original_metrics_dict_sum,
+                                             bert_metrics_dict_sum=bert_metrics_dict_sum,
+                                             oracle_metrics_dict_sum=oracle_metrics_dict_sum,
+                                             topic_query=topic_query,
+                                             original_topic=original_topic,
+                                             BERT_scores=BERT_scores)
+                topic_counter += 1
+                # Start new topic run.
                 original_topic = []
                 BERT_scores = []
 
+            # Update topic run.
             topic_query = query
             original_topic.append(label_ground_truth)
             BERT_scores.append(score)
 
+        # Add metrics of final topic.
         if len(original_topic) > 0:
-
-            topic_counter += 1
-
             original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum = \
-                self.__get_topics_metrics(original_metrics_dict_sum=original_metrics_dict_sum,
+                self.__add_topic_metrics(original_metrics_dict_sum=original_metrics_dict_sum,
                                           bert_metrics_dict_sum=bert_metrics_dict_sum,
                                           oracle_metrics_dict_sum=oracle_metrics_dict_sum,
                                           topic_query=topic_query,
                                           original_topic=original_topic,
-                                          BERT_scores=BERT_scores,
-                                          eval_config=self.eval_config)
+                                          BERT_scores=BERT_scores)
+            topic_counter += 1
 
+        # Mean metric dicts by dividing each metric by topic_counter.
         original_metrics_dict = {}
         bert_metrics_dict = {}
         oracle_metrics_dict = {}
@@ -236,13 +252,14 @@ class FineTuningReRankingExperiments:
             bert_metrics_dict[k] = bert_metrics_dict_sum[k] / topic_counter
             oracle_metrics_dict[k] = oracle_metrics_dict_sum[k] / topic_counter
 
+        # Log metrics.
         logging.info('Original: \t{}'.format(original_metrics_dict))
         logging.info('BERT:     \t{}'.format(bert_metrics_dict))
         logging.info('Oracle:   \t{}'.format(oracle_metrics_dict))
 
 
     def __validation_run(self, head_flag):
-        """ """
+        """ Run validation to build dev_labels/dev_logits and return average dev loss. ."""
         # Dev loss counter.
         dev_loss = 0
         # Total number of dev batches.
@@ -277,9 +294,10 @@ class FineTuningReRankingExperiments:
         return dev_loss / num_dev_steps
 
 
-    def run_experiment_single_head(self, head_flag='passage', epochs=1, lr=2e-5, eps=1e-8, weight_decay=0.01,
+    def run_experiment_single_head(self, head_flag, epochs=1, lr=2e-5, eps=1e-8, weight_decay=0.01,
                                    num_warmup_steps=0, experiments_dir=None, experiment_name=None, logging_steps=100):
-        """ """
+        """ Run training and validation for a single head. """
+
         # Define experiment_path directory to contain all logging, models and results.
         experiment_path = os.path.join(experiments_dir, experiment_name)
 
@@ -287,7 +305,7 @@ class FineTuningReRankingExperiments:
         if os.path.isdir(experiment_path) == False:
             os.mkdir(experiment_path)
 
-        # Logging.
+        # Start logging.
         logging_path = os.path.join(experiment_path, 'output.log')
         print('Starting logging: {}'.format(logging_path))
         logging.basicConfig(filename=logging_path, level=logging.DEBUG)
@@ -360,7 +378,7 @@ class FineTuningReRankingExperiments:
                     logging.info("Validation loss: {0:.5f}".format(av_dev_loss))
                     logging.info("Validation time: {:}".format(self.__format_time(time.time() - dev_start_time)))
 
-                    self.__get_eval_metrics()
+                    self.__log_eval_metrics()
 
                     # Save model and weights to directory.
                     model_dir = os.path.join(experiment_path, 'epoch{}_batch{}/'.format(epoch_i, train_step + 1))
@@ -372,68 +390,91 @@ class FineTuningReRankingExperiments:
                         self.save_pretrained(model_dir)
 
 
-    def run_grid_search(self):
-        """ """
-        pass
-
-
-    def __write_to_file(self, rerank_run_path, doc_ids, query, scores):
-
+    def __write_topic_to_file(self, rerank_run_path, doc_ids, query, scores):
+        """ Write topic to run file. """
         with open(rerank_run_path, "a+") as f_run:
+            # Build dict of {doc_ids: score}
             d = {i[0]: i[1] for i in zip(doc_ids, scores)}
+            # Order dict based on score
             od = collections.OrderedDict(sorted(d.items(), key=lambda item: item[1], reverse=True))
             rank = 1
-            for doc_id in od.keys():
-                output_line = " ".join((query, "Q0", str(doc_id), str(rank), "{:.6f}".format(od[doc_id]), "BERT")) + '\n'
-                f_run.write(output_line)
+            # Writing to file in ascending rank.
+            for doc_id, score in od.items():
+                f_run.write(" ".join((query, "Q0", str(doc_id), str(rank), "{:.6f}".format(score), "BERT")) + '\n')
                 rank += 1
 
 
-    def write_rerank_run(self, rerank_run_path):
-        """ """
+    def __assert_dev_lists_correct_lengths(self):
+        """ Assert dev_labels and dev_logits from validation are correct length i.e. length of original run file. """
         assert len(self.dev_labels) == len(self.dev_logits) == len(self.dev_run_data), \
             "dev_labels len: {}, dev_logits len: {}, dev_run_data: {}".format(
                 len(self.dev_labels), len(self.dev_logits), len(self.dev_run_data))
 
+
+    def __assert_label_is_correct(self, label_ground_truth, label):
+        """ Assert label from dataset (0,1) is the same as the original label.  Tests data ordering is consistent. """
+        if self.device == torch.device("cpu"):
+            assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth,
+                                                                                                 label[0])
+        elif self.device == torch.device("cuda"):
+            assert label_ground_truth == label, "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label)
+        else:
+            print("NOT VALID DEVICE")
+            raise
+
+
+    def write_rerank_to_run_file(self, rerank_run_path):
+        """ Process re-ranking from validation run and write to TREC run file. """
+        # Assert validation outputs correct length.
+        self.__assert_dev_lists_correct_lengths()
+
+        # Store BERT score and doc_id for each topic run.
         BERT_scores = []
         doc_ids = []
 
+        # Store topic query.
         topic_query = None
 
+        # Loop over dev_labels, dev_logits and dev_run_data.
         for label, score, dev_run_data in zip(self.dev_labels, self.dev_logits, self.dev_run_data):
+            # Unpack dev_run_data.
             query, doc_id, label_ground_truth = dev_run_data
-            #assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label[0])
-            assert label_ground_truth == label, "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label)
+            # Assert ordering looks correct.
+            self.__assert_label_is_correct(label_ground_truth=label_ground_truth, label=label)
 
             if (topic_query != None) and (topic_query != query):
-                # get topics of metrics
+                # End of topic run -> write to file.
+                self.__write_topic_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids,
+                                           scores=BERT_scores)
 
-                self.__write_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids, scores=BERT_scores)
-
+                # Start new topic run.
                 BERT_scores = []
                 doc_ids = []
 
+            # Update topic run.
             topic_query = query
             BERT_scores.append(score)
             doc_ids.append(doc_id)
 
+        # Write final topic run.
         if len(doc_ids) > 0:
-            self.__write_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids, scores=BERT_scores)
+            self.__write_topic_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids,
+                                       scores=BERT_scores)
 
 
     def inference(self, head_flag, rerank_run_path, do_eval=True):
-        """ """
-
+        """ Run inference and produce BERT re-ranking run and evaluation. """
+        # Run Validation.
         self.__validation_run(head_flag=head_flag)
 
-        self.write_rerank_run(rerank_run_path=rerank_run_path)
+        # Write re-ranking run
+        self.write_rerank_to_run_file(rerank_run_path=rerank_run_path)
 
+        # If 'do_eval' write eval files by query and overall.
         if do_eval:
             self.eval_tools.write_eval_from_qrels_and_run(qrels_path=self.dev_qrels_path,
                                                           run_path=rerank_run_path,
                                                           eval_config=self.eval_config)
-
-
 
 
 if __name__ == '__main__':
@@ -451,24 +492,26 @@ if __name__ == '__main__':
                                                 dev_qrels_path=dev_qrels_path,
                                                 dev_run_path=dev_run_path)
 
-    # epochs = 1
-    # lr = 5e-5
-    # eps = 1e-8
-    # weight_decay = 0.01
-    # num_warmup_steps = 0
-    # seed_val = 42
-    # experiments_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'exp')
-    # experiment_name = 'test_exp_2'
-    # logging_steps = 10
-    #
-    # experiment.run_experiment_single_head(epochs=epochs,
-    #                                       lr=lr,
-    #                                       eps=eps,
-    #                                       weight_decay=weight_decay,
-    #                                       num_warmup_steps=num_warmup_steps,
-    #                                       experiments_dir=experiments_dir,
-    #                                       experiment_name=experiment_name,
-    #                                       logging_steps=logging_steps)
+    epochs = 1
+    lr = 5e-3
+    eps = 1e-8
+    weight_decay = 0.01
+    num_warmup_steps = 0
+    seed_val = 42
+    experiments_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'exp')
+    experiment_name = 'test_exp_2'
+    logging_steps = 4
+    head_flag = 'entity'
 
-    rerank_run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'rerank.run')
-    experiment.inference(head_flag='passage', rerank_run_path=rerank_run_path)
+    experiment.run_experiment_single_head(head_flag=head_flag,
+                                          epochs=epochs,
+                                          lr=lr,
+                                          eps=eps,
+                                          weight_decay=weight_decay,
+                                          num_warmup_steps=num_warmup_steps,
+                                          experiments_dir=experiments_dir,
+                                          experiment_name=experiment_name,
+                                          logging_steps=logging_steps)
+    #
+    # rerank_run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'rerank.run')
+    # experiment.inference(head_flag='passage', rerank_run_path=rerank_run_path)

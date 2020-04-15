@@ -282,7 +282,7 @@ class EvalTools:
 
 
     def get_query_metrics(self, run, R, eval_config):
-        """ Build metrics from eval_config. """
+        """ Build metrics (string and dict representation) from eval_config. """
 
         # Assert a valid eval metric config.
         assert isinstance(eval_config, dict)
