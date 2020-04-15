@@ -419,8 +419,6 @@ class FineTuningReRankingExperiments:
             BERT_scores.append(score)
             doc_ids.append(doc_id)
 
-            print(label[0], score, query, doc_id, label_ground_truth)
-
         if len(original_topic) > 0:
             self.__write_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids, scores=BERT_scores)
 
