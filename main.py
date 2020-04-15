@@ -39,9 +39,3 @@ if __name__ == '__main__':
                                     experiments_dir=experiments_dir,
                                     experiment_name=experiment_name,
                                     logging_steps=logging_steps)
-
-
-
-
-
-

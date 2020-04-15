@@ -192,7 +192,8 @@ class FineTuningReRankingExperiments:
 
         for label, score, dev_run_data in zip(self.dev_labels, self.dev_logits, self.dev_run_data):
             query, doc_id, label_ground_truth = dev_run_data
-            assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label[0])
+            #assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label[0])
+            assert label_ground_truth == label, "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label)
 
             if (topic_query != None) and (topic_query != query):
                 # get topics of metrics
@@ -404,8 +405,8 @@ class FineTuningReRankingExperiments:
 
         for label, score, dev_run_data in zip(self.dev_labels, self.dev_logits, self.dev_run_data):
             query, doc_id, label_ground_truth = dev_run_data
-            assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth,
-                                                                                                 label[0])
+            #assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label[0])
+            assert label_ground_truth == label, "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label)
 
             if (topic_query != None) and (topic_query != query):
                 # get topics of metrics
@@ -435,9 +436,6 @@ class FineTuningReRankingExperiments:
         self.eval_tools.write_eval_from_qrels_and_run(qrels_path=self.dev_qrels_path,
                                                       run_path=rerank_run_path,
                                                       eval_config=self.eval_config)
-
-
-
 
 
 
