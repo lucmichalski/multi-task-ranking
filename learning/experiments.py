@@ -384,7 +384,7 @@ class FineTuningReRankingExperiments:
             od = collections.OrderedDict(sorted(d.items(), key=lambda item: item[1], reverse=True))
             rank = 1
             for doc_id in od.keys():
-                output_line = " ".join((query, "Q0", str(doc_id), str(rank), str(od[doc_id]), "BERT")) + '\n'
+                output_line = " ".join((query, "Q0", str(doc_id), str(rank), "{:.6f}".format(od[doc_id]), "BERT")) + '\n'
                 f_run.write(output_line)
                 rank += 1
 
@@ -421,6 +421,7 @@ class FineTuningReRankingExperiments:
 
         if len(original_topic) > 0:
             self.__write_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids, scores=BERT_scores)
+
 
     def inference(self, head_flag, rerank_run_path, do_eval=True):
         """ """
