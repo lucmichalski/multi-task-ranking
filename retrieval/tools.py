@@ -337,11 +337,15 @@ class EvalTools:
                                 run.append(1)
                             else:
                                 run.append(0)
-
+                        print('----------')
+                        print(topic_query)
+                        print(qrels_dict[topic_query])
+                        print([i for i in zip(run_doc_ids,run)])
                         # Calculate number of relevant docs in qrels (R).
                         R = len(qrels_dict[topic_query])
                         # Build query metric string.
                         query_metrics, _ = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
+                        print(query_metrics)
                         # Write query metric string to file.
                         f_eval_by_query.write(topic_query + ' ' + query_metrics + '\n')
                         # Start next query.
