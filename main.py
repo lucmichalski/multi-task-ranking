@@ -55,6 +55,6 @@ if __name__ == '__main__':
     #                                 experiments_dir=experiments_dir,
     #                                 experiment_name=experiment_name,
     #                                 logging_steps=logging_steps)
-    head_flag = 'entity'
-    rerank_run_path = '/nfs/trec_car/data/bert_reranker_datasets/test_runs/initial_new_pipeline.run'
+    head_flag = 'passage'
+    rerank_run_path = '/nfs/trec_car/data/bert_reranker_datasets/test_runs/initial_new_pipeline_passage.run'
     experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
