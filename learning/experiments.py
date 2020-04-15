@@ -395,7 +395,6 @@ class FineTuningReRankingExperiments:
             "dev_labels len: {}, dev_logits len: {}, dev_run_data: {}".format(
                 len(self.dev_labels), len(self.dev_logits), len(self.dev_run_data))
 
-        original_topic = []
         BERT_scores = []
         doc_ids = []
 
@@ -411,15 +410,14 @@ class FineTuningReRankingExperiments:
 
                 self.__write_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids, scores=BERT_scores)
 
-                original_topic = []
                 BERT_scores = []
+                doc_ids = []
 
             topic_query = query
-            original_topic.append(label_ground_truth)
             BERT_scores.append(score)
             doc_ids.append(doc_id)
 
-        if len(original_topic) > 0:
+        if len(doc_ids) > 0:
             self.__write_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids, scores=BERT_scores)
 
 
