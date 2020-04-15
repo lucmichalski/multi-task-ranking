@@ -27,16 +27,18 @@ if __name__ == '__main__':
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
     experiment_name = 'test_exp_2'
     write = True
-    logging_steps = 30
+    logging_steps = 50
 
-    experiment.run_experiment(epochs=epochs,
-                              lr=lr,
-                              eps=eps,
-                              weight_decay=weight_decay,
-                              num_warmup_steps=num_warmup_steps,
-                              experiments_dir=experiments_dir,
-                              experiment_name=experiment_name,
-                              logging_steps=logging_steps)
+    experiment.run_experiment_single_head(
+                                    head_flag='entity',
+                                    epochs=epochs,
+                                    lr=lr,
+                                    eps=eps,
+                                    weight_decay=weight_decay,
+                                    num_warmup_steps=num_warmup_steps,
+                                    experiments_dir=experiments_dir,
+                                    experiment_name=experiment_name,
+                                    logging_steps=logging_steps)
 
 
 

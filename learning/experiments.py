@@ -29,11 +29,21 @@ class FineTuningReRankingExperiments:
         self.eval_tools = EvalTools()
         self.train_dataloader = self.__build_dataloader(data_dir_path=train_data_dir_path, batch_size=train_batch_size)
         self.dev_dataloader = self.__build_dataloader(data_dir_path=dev_data_dir_path, batch_size=dev_batch_size)
+        self.dev_run_path = dev_run_path
+        self.dev_qrels_path = dev_qrels_path
         self.dev_qrels = self.__get_qrels(qrels_path=dev_qrels_path)
         self.dev_run_data = self.__get_run_data(run_path=dev_run_path)
         self.dev_labels = None
         self.dev_logits = None
         self.device = self.__get_torch_device()
+        self.eval_config = {
+            'map': {'k': None},
+            'Rprec': {'k': None},
+            'recip_rank': {'k': None},
+            'P': {'k': 20},
+            'recall': {'k': 40},
+            'ndcg': {'k': 20},
+        }
 
 
     def __get_qrels(self, qrels_path):
@@ -55,6 +65,7 @@ class FineTuningReRankingExperiments:
                 run.append((query, doc_id, R))
         return run
 
+
     def __init_model(self, model_path):
         """ Initialise model with pre-trained weights."""
         if model_path == None:
@@ -71,16 +82,6 @@ class FineTuningReRankingExperiments:
             return DataLoader(dataset, sampler=sampler, batch_size=batch_size)
         else:
             return None
-
-    def __log_parameters(self):
-        logging.info('--- EXPERIMENT PARAMETERS ---')
-        # setup_strings = ['epochs', 'lr', 'eps', 'weight_decay', 'num_warmup_steps', 'seed_val', 'write', 'exp_dir',
-        #                  'experiment_name', 'do_eval', 'logging_steps', 'run_path', 'qrels_path']
-        # setup_values = [epochs, lr, eps, weight_decay, num_warmup_steps, seed_val, write, exp_dir, experiment_name,
-        #                 do_eval, logging_steps, run_path, qrels_path]
-        # for i in zip(setup_strings, setup_values):
-        #     logging.info('{}: {}'.format(i[0], i[1]))
-        logging.info('-----------------------------')
 
 
     def __format_time(self, elapsed):
@@ -179,15 +180,6 @@ class FineTuningReRankingExperiments:
             "dev_labels len: {}, dev_logits len: {}, dev_run_data: {}".format(
                 len(self.dev_labels), len(self.dev_logits),len(self.dev_run_data))
 
-        eval_config = {
-            'map': {'k': None},
-            'Rprec': {'k': None},
-            'recip_rank': {'k': None},
-            'P': {'k': 20},
-            'recall': {'k': 40},
-            'ndcg': {'k': 20},
-        }
-
         original_metrics_dict_sum = {}
         bert_metrics_dict_sum = {}
         oracle_metrics_dict_sum = {}
@@ -206,14 +198,14 @@ class FineTuningReRankingExperiments:
                 # get topics of metrics
                 topic_counter += 1
 
-                original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum = self.__get_topics_metrics(
-                    original_metrics_dict_sum=original_metrics_dict_sum,
-                    bert_metrics_dict_sum=bert_metrics_dict_sum,
-                    oracle_metrics_dict_sum=oracle_metrics_dict_sum,
-                    topic_query=topic_query,
-                    original_topic=original_topic,
-                    BERT_scores=BERT_scores,
-                    eval_config=eval_config)
+                original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum = \
+                    self.__get_topics_metrics(original_metrics_dict_sum=original_metrics_dict_sum,
+                                              bert_metrics_dict_sum=bert_metrics_dict_sum,
+                                              oracle_metrics_dict_sum=oracle_metrics_dict_sum,
+                                              topic_query=topic_query,
+                                              original_topic=original_topic,
+                                              BERT_scores=BERT_scores,
+                                              eval_config=self.eval_config)
 
                 original_topic = []
                 BERT_scores = []
@@ -228,14 +220,14 @@ class FineTuningReRankingExperiments:
 
             topic_counter += 1
 
-            original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum = self.__get_topics_metrics(
-                original_metrics_dict_sum=original_metrics_dict_sum,
-                bert_metrics_dict_sum=bert_metrics_dict_sum,
-                oracle_metrics_dict_sum=oracle_metrics_dict_sum,
-                topic_query=topic_query,
-                original_topic=original_topic,
-                BERT_scores=BERT_scores,
-                eval_config=eval_config)
+            original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum = \
+                self.__get_topics_metrics(original_metrics_dict_sum=original_metrics_dict_sum,
+                                          bert_metrics_dict_sum=bert_metrics_dict_sum,
+                                          oracle_metrics_dict_sum=oracle_metrics_dict_sum,
+                                          topic_query=topic_query,
+                                          original_topic=original_topic,
+                                          BERT_scores=BERT_scores,
+                                          eval_config=self.eval_config)
 
         original_metrics_dict = {}
         bert_metrics_dict = {}
@@ -300,9 +292,6 @@ class FineTuningReRankingExperiments:
         logging_path = os.path.join(experiment_path, 'output.log')
         print('Starting logging: {}'.format(logging_path))
         logging.basicConfig(filename=logging_path, level=logging.DEBUG)
-
-        # Log experiment parameters
-        self.__log_parameters()
 
         # Initialise optimizer and scheduler for training.
         optimizer = AdamW(self.model.parameters(), lr=lr, eps=eps, weight_decay=weight_decay)
@@ -399,7 +388,7 @@ class FineTuningReRankingExperiments:
                 output_line = " ".join((query, "Q0", str(doc_id), str(rank), str(od[doc_id]), "BERT")) + '\n'
                 f_run.write(output_line)
                 rank += 1
-                
+
 
     def write_rerank_run(self, rerank_run_path):
         """ """
@@ -436,12 +425,16 @@ class FineTuningReRankingExperiments:
         if len(original_topic) > 0:
             self.__write_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids, scores=BERT_scores)
 
-    def inference(self, head_flag, rerank_run_path):
+    def inference(self, head_flag, rerank_run_path, do_eval=True):
         """ """
 
         self.__validation_run(head_flag=head_flag)
 
         self.write_rerank_run(rerank_run_path)
+
+        self.eval_tools.write_eval_from_qrels_and_run(qrels_path=self.dev_qrels_path,
+                                                      run_path=rerank_run_path,
+                                                      eval_config=self.eval_config)
 
 
 
