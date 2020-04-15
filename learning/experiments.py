@@ -192,6 +192,7 @@ class FineTuningReRankingExperiments:
 
         for label, score, dev_run_data in zip(self.dev_labels, self.dev_logits, self.dev_run_data):
             query, doc_id, label_ground_truth = dev_run_data
+            print(query, doc_id, label_ground_truth, label, score)
             #assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label[0])
             assert label_ground_truth == label, "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label)
 
