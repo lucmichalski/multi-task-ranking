@@ -126,6 +126,18 @@ class SearchTools:
                         written_queries.append(query)
 
 
+    def combine_multiple_qrels(self, qrels_path_list, combined_qrels_path, combined_topics_path=None):
+        """ """
+        with open(combined_qrels_path, 'w') as f_combined_qrels:
+            for qrels_path in qrels_path_list:
+                with open(qrels_path, 'r') as f_qrels:
+                    for line in f_qrels:
+                        f_combined_qrels.write(line)
+                    f_combined_qrels.write('\n')
+
+        self.write_topics_from_qrels(qrels_path=combined_qrels_path, topics_path=combined_topics_path)
+
+
     def write_run_from_topics(self, topics_path, run_path, hits=10, printing_step=1000):
         """ Write TREC RUN file using BM25 from topics file. """
         print("Beginning run.")
@@ -337,15 +349,11 @@ class EvalTools:
                                 run.append(1)
                             else:
                                 run.append(0)
-                        print('----------')
-                        print(topic_query)
-                        print(qrels_dict[topic_query])
-                        print([i for i in zip(run_doc_ids,run)])
+
                         # Calculate number of relevant docs in qrels (R).
                         R = len(qrels_dict[topic_query])
                         # Build query metric string.
                         query_metrics, _ = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
-                        print(query_metrics)
                         # Write query metric string to file.
                         f_eval_by_query.write(topic_query + ' ' + query_metrics + '\n')
                         # Start next query.
@@ -447,31 +455,33 @@ class Pipeline:
 
 if __name__ == '__main__':
 
-    # index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    # query = 'Love cats and dogs'
-    # topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.topics')
+    index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
+    query = 'Love cats and dogs'
+    topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.topics')
     run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.run')
     qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.qrels')
-    # results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
-    # hits = 10
-    #
-    # searcher_config = {
-    #     'BM25': {'k1': 0.9, 'b': 0.4}
-    # }
-    # search = Search(index_path=index_path, searcher_config=searcher_config)
-    # search.write_run_from_topics(topics_path, run_path, hits)
-    eval_config = {
-        'map': {'k': None},
-        'Rprec': {'k': None},
-        'recip_rank': {'k': None},
-        'P': {'k': 20},
-        'recall': {'k': 40},
-        'ndcg': {'k': 20},
+    results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
+    hits = 10
+
+    searcher_config = {
+        'BM25': {'k1': 0.9, 'b': 0.4}
     }
+    search = SearchTools(index_path=index_path, searcher_config=searcher_config)
+    # search.write_run_from_topics(topics_path, run_path, hits)
+    # eval_config = {
+    #     'map': {'k': None},
+    #     'Rprec': {'k': None},
+    #     'recip_rank': {'k': None},
+    #     'P': {'k': 20},
+    #     'recall': {'k': 40},
+    #     'ndcg': {'k': 20},
+    # }
+    #
+    # eval = EvalTools()
+    # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
+    dev = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'benchmarkY1_dev_entity.qrels')
 
-    eval = EvalTools()
-    eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
-
+    search.write_topics_from_qrels(qrels_path=dev)
     # pipeline = Pipeline()
     #
     # pipeline.search_BM25_tune_parameter(index_path=index_path, topics_path=topics_path, qrels_path=qrels_path,
