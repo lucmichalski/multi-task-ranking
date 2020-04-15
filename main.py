@@ -1,20 +1,23 @@
 
 import os
 
-from learning.experiments import FineTuningReRanking
+from learning.experiments import FineTuningReRankingExperiments
 
 
 if __name__ == '__main__':
 
-    train_data_dir_path = 'nfs/trec_car/data/bert_reranker_datasets/test_chunks_train/'
+    train_data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/test_chunks_train/'
     train_batch_size = 8
-    dev_data_dir_path = 'nfs/trec_car/data/bert_reranker_datasets/test_chunks/'
+    dev_data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/test_chunks/'
     dev_batch_size = 32
-
-    experiment = FineTuningReRanking(train_data_dir_path=train_data_dir_path,
-                                     train_batch_size=train_batch_size,
-                                     dev_data_dir_path=dev_data_dir_path,
-                                     dev_batch_size=dev_batch_size)
+    dev_qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.qrels'
+    dev_run_path = '/nfs/trec_car/data/bert_reranker_datasets/test_10.run'
+    experiment = FineTuningReRankingExperiments(train_data_dir_path=train_data_dir_path,
+                                                train_batch_size=train_batch_size,
+                                                dev_data_dir_path=dev_data_dir_path,
+                                                dev_batch_size=dev_batch_size,
+                                                dev_qrels_path=dev_qrels_path,
+                                                dev_run_path=dev_run_path)
 
     epochs = 3
     lr = 2e-5

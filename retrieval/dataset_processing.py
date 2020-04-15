@@ -246,7 +246,7 @@ if __name__ == '__main__':
     index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
     run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.run')
     qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.qrels')
-    data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
+    data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'small_dev')
 
     # index_path = '/nfs/trec_car/index/anserini_paragraphs/lucene-index.car17v2.0.paragraphsv2'
     # run_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.run'
@@ -262,4 +262,4 @@ if __name__ == '__main__':
                                    tokenizer=tokenizer,
                                    max_length=max_length)
 
-    processing.build_dataset(sequential=True, chuck_topic_size=2)
+    processing.build_dataset(sequential=True, chuck_topic_size=10)

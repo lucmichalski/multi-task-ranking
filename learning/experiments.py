@@ -1,6 +1,7 @@
 
 from learning.models import BertMultiTaskRanker
 from learning.utils import BertDataset
+from retrieval.tools import EvalTools
 
 from transformers.optimization import AdamW
 from transformers import get_linear_schedule_with_warmup
@@ -16,14 +17,47 @@ import itertools
 import time
 import os
 
-class FineTuningReRanking:
+
+class FineTuningReRankingExperiments:
 
     pretrained_weights = 'bert-base-uncased'
 
-    def __init__(self, train_data_dir_path, train_batch_size, dev_data_dir_path, dev_batch_size):
-        self.model = nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
+    def __init__(self, train_data_dir_path, train_batch_size, dev_data_dir_path, dev_batch_size, dev_qrels_path,
+                 dev_run_path):
+        self.model = self.__init_model()
+        self.eval_tools = EvalTools()
         self.train_dataloader = self.__build_dataloader(data_dir_path=train_data_dir_path, batch_size=train_batch_size)
         self.dev_dataloader = self.__build_dataloader(data_dir_path=dev_data_dir_path, batch_size=dev_batch_size)
+        self.dev_qrels = self.__get_qrels(qrels_path=dev_qrels_path)
+        self.dev_run_data = self.__get_run_data(run_path=dev_run_path)
+        self.dev_labels = None
+        self.dev_logits = None
+
+
+    def __get_qrels(self, qrels_path):
+        """ """
+        return self.eval_tools.get_qrels_dict(qrels_path=qrels_path)
+
+
+    def __get_run_data(self, run_path):
+        """ """
+        run = []
+        with open(run_path, 'r') as f_run:
+            for line in f_run:
+                # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
+                query, _, doc_id, _, _, _ = line.split()
+
+                if doc_id in self.dev_qrels[query]:
+                    R = 1.0
+                else:
+                    R = 0.0
+
+                run.append((query, doc_id, R))
+        return run
+
+    def __init_model(self):
+        """ Initialise model with pre-trained weights."""
+        return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
 
 
     def __build_dataloader(self, data_dir_path, batch_size):
@@ -76,6 +110,139 @@ class FineTuningReRanking:
         b_attention_mask = batch[2].to(device)
         b_labels = batch[3].to(device, dtype=torch.float)
         return b_input_ids, b_token_type_ids, b_attention_mask, b_labels
+
+
+    def __update_dev_lables_and_logits(self, device, lables, logits):
+        """ . """
+        if device == torch.device("cpu"):
+            self.dev_labels += lables.cpu().numpy().tolist()
+            self.dev_logits += self.__flatten_list(logits.cpu().detach().numpy().tolist())
+        elif device == torch.device("cuda"):
+            self.dev_labels += self.__flatten_list(lables.cpu().numpy().tolist())
+            self.dev_logits += self.__flatten_list(logits.cpu().detach().numpy().tolist())
+        else:
+            print("NOT VALID DEVICE")
+            raise
+
+
+    def __get_bert_topic(self, original_topic, scores):
+        """ """
+        bert_topic = []
+        ordered_scores = sorted(list(set(scores)), reverse=True)
+        for os in ordered_scores:
+            ixs = [i for i, x in enumerate(scores) if x == os]
+            for i in ixs:
+                bert_topic.append(original_topic[i])
+        return bert_topic
+
+
+    def __get_topics_metrics(self, original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum,
+                             topic_query, original_topic, BERT_scores, eval_config):
+        """ """
+        bert_topic = self.__get_bert_topic(original_topic=original_topic, scores=BERT_scores)
+        oracle_topic = sorted(original_topic, reverse=True)
+
+        R = len(self.dev_qrels[topic_query])
+
+        _, original_metrics = self.eval_tools.get_query_metrics(run=original_topic, R=R, eval_config=eval_config)
+        _, bert_metrics = self.eval_tools.get_query_metrics(run=bert_topic, R=R, eval_config=eval_config)
+        _, oracle_metrics = self.eval_tools.get_query_metrics(run=oracle_topic, R=R, eval_config=eval_config)
+
+        for k in original_metrics.keys():
+
+            if k in original_metrics_dict_sum:
+                original_metrics_dict_sum[k] += original_metrics[k]
+            else:
+                original_metrics_dict_sum[k] = original_metrics[k]
+
+            if k in bert_metrics_dict_sum:
+                bert_metrics_dict_sum[k] += bert_metrics[k]
+            else:
+                bert_metrics_dict_sum[k] = bert_metrics[k]
+
+            if k in oracle_metrics_dict_sum:
+                oracle_metrics_dict_sum[k] += oracle_metrics[k]
+            else:
+                oracle_metrics_dict_sum[k] = oracle_metrics[k]
+
+        return original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum
+
+
+    def __get_eval_metrics(self):
+        """ """
+        assert len(self.dev_labels) == len(self.dev_logits) == len(self.dev_run_data), \
+            "dev_labels len: {}, dev_logits len: {}, dev_run_data: {}".format(
+                len(self.dev_labels), len(self.dev_logits),len(self.dev_run_data))
+
+        eval_config = {
+            'map': {'k': None},
+            'Rprec': {'k': None},
+            'recip_rank': {'k': None},
+            'P': {'k': 20},
+            'recall': {'k': 40},
+            'ndcg': {'k': 20},
+        }
+
+        original_metrics_dict_sum = {}
+        bert_metrics_dict_sum = {}
+        oracle_metrics_dict_sum = {}
+
+        original_topic = []
+        BERT_scores = []
+
+        topic_query = None
+        topic_counter = 0
+
+        for label, score, dev_run_data in zip(self.dev_labels, self.dev_logits, self.dev_run_data):
+            query, doc_id, label_ground_truth = dev_run_data
+            assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label[0])
+
+            if (topic_query != None) and (topic_query != query):
+                # get topics of metrics
+                topic_counter += 1
+
+                original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum = self.__get_topics_metrics(
+                    original_metrics_dict_sum=original_metrics_dict_sum,
+                    bert_metrics_dict_sum=bert_metrics_dict_sum,
+                    oracle_metrics_dict_sum=oracle_metrics_dict_sum,
+                    topic_query=topic_query,
+                    original_topic=original_topic,
+                    BERT_scores=BERT_scores,
+                    eval_config=eval_config)
+
+                original_topic = []
+                BERT_scores = []
+
+            topic_query = query
+            original_topic.append(label_ground_truth)
+            BERT_scores.append(score)
+
+            print(label[0], score, query, doc_id, label_ground_truth)
+
+        if len(original_topic) > 0:
+
+            topic_counter += 1
+
+            original_metrics_dict_sum, bert_metrics_dict_sum, oracle_metrics_dict_sum = self.__get_topics_metrics(
+                original_metrics_dict_sum=original_metrics_dict_sum,
+                bert_metrics_dict_sum=bert_metrics_dict_sum,
+                oracle_metrics_dict_sum=oracle_metrics_dict_sum,
+                topic_query=topic_query,
+                original_topic=original_topic,
+                BERT_scores=BERT_scores,
+                eval_config=eval_config)
+
+        original_metrics_dict = {}
+        bert_metrics_dict = {}
+        oracle_metrics_dict = {}
+        for k in original_metrics_dict_sum:
+            original_metrics_dict[k] = original_metrics_dict_sum[k] / topic_counter
+            bert_metrics_dict[k] = bert_metrics_dict_sum[k] / topic_counter
+            oracle_metrics_dict[k] = oracle_metrics_dict_sum[k] / topic_counter
+
+        logging.info('Original: \t{}'.format(original_metrics_dict))
+        logging.info('BERT:     \t{}'.format(bert_metrics_dict))
+        logging.info('Oracle:   \t{}'.format(oracle_metrics_dict))
 
 
     def run_experiment(self, epochs=1, lr=2e-5, eps=1e-8, weight_decay=0.01, num_warmup_steps=0, experiments_dir=None,
@@ -169,6 +336,10 @@ class FineTuningReRanking:
                     # Set model to evaluation mode i.e. not weight updates.
                     self.model.eval()
 
+                    # Store prediction logits and labels in lists.
+                    self.dev_labels = []
+                    self.dev_logits = []
+
                     for dev_step, dev_batch in enumerate(self.dev_dataloader):
 
                         # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
@@ -184,6 +355,12 @@ class FineTuningReRanking:
                         # Update dev loss counter.
                         dev_loss += loss.mean().item()
 
+                        # Update list of dev lables and logits
+                        self.__update_dev_lables_and_logits(device=device, lables=b_labels, logits=logits)
+
+
+                    self.__get_eval_metrics()
+
                     # Report the final accuracy for this validation run.
                     av_dev_loss = dev_loss / num_dev_steps
                     logging.info("Validation loss: {0:.5f}".format(av_dev_loss))
@@ -191,32 +368,35 @@ class FineTuningReRanking:
 
 
 if __name__ == '__main__':
-    train_data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
-    train_batch_size = 1
-    dev_data_dir_path = train_data_dir_path
-    dev_batch_size = 1
+    train_data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'small_train')
+    train_batch_size = 2
+    dev_data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'small_dev')
+    dev_batch_size = 2
+    dev_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.qrels')
+    dev_run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.run')
 
-    experiment = FineTuningReRanking(train_data_dir_path=train_data_dir_path,
-                                     train_batch_size=train_batch_size,
-                                     dev_data_dir_path=dev_data_dir_path,
-                                     dev_batch_size=dev_batch_size)
+    experiment = FineTuningReRankingExperiments(train_data_dir_path=train_data_dir_path,
+                                                train_batch_size=train_batch_size,
+                                                dev_data_dir_path=dev_data_dir_path,
+                                                dev_batch_size=dev_batch_size,
+                                                dev_qrels_path=dev_qrels_path,
+                                                dev_run_path=dev_run_path)
 
     epochs = 1
-    lr = 2e-5
+    lr = 5e-5
     eps = 1e-8
     weight_decay = 0.01
     num_warmup_steps = 0
     seed_val = 42
-    experiments_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data')
-    experiment_name = 'test_exp_1'
-    logging_steps = 100
+    experiments_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'exp')
+    experiment_name = 'test_exp_2'
+    logging_steps = 10
 
     experiment.run_experiment(epochs=epochs,
                               lr=lr,
                               eps=eps,
                               weight_decay=weight_decay,
                               num_warmup_steps=num_warmup_steps,
-                              seed_val=seed_val,
                               experiments_dir=experiments_dir,
                               experiment_name=experiment_name,
                               logging_steps=logging_steps)

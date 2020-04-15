@@ -291,6 +291,7 @@ class EvalTools:
 
         # Loop over implemented_metrics/eval_config.
         query_metrics = ''
+        query_metrics_dict = {}
         for m in self.implemented_metrics:
             if m in eval_config:
                 # Build label of metric.
@@ -302,8 +303,9 @@ class EvalTools:
                 metric = self.implemented_metrics[m](run=run, k=eval_config[m]['k'], R=R)
                 # Append metric label and metric to string.
                 query_metrics += metric_label + ' ' + "{:.6f}".format(metric) + ' '
+                query_metrics_dict[metric_label] = metric
 
-        return query_metrics
+        return query_metrics, query_metrics_dict
 
 
     def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_config):
@@ -339,7 +341,7 @@ class EvalTools:
                         # Calculate number of relevant docs in qrels (R).
                         R = len(qrels_dict[topic_query])
                         # Build query metric string.
-                        query_metrics = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
+                        query_metrics, _ = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
                         # Write query metric string to file.
                         f_eval_by_query.write(topic_query + ' ' + query_metrics + '\n')
                         # Start next query.
