@@ -431,9 +431,10 @@ class FineTuningReRankingExperiments:
 
         self.write_rerank_run(rerank_run_path)
 
-        self.eval_tools.write_eval_from_qrels_and_run(qrels_path=self.dev_qrels_path,
-                                                      run_path=rerank_run_path,
-                                                      eval_config=self.eval_config)
+        if do_eval:
+            self.eval_tools.write_eval_from_qrels_and_run(qrels_path=self.dev_qrels_path,
+                                                          run_path=rerank_run_path,
+                                                          eval_config=self.eval_config)
 
 
 
