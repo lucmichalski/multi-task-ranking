@@ -447,35 +447,35 @@ class Pipeline:
 
 if __name__ == '__main__':
 
-    index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    query = 'Love cats and dogs'
-    topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.topics')
-    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.run.decode')
+    # index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
+    # query = 'Love cats and dogs'
+    # topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.topics')
+    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.run')
     qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.qrels')
-    results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
-    hits = 10
-
+    # results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
+    # hits = 10
+    #
     # searcher_config = {
     #     'BM25': {'k1': 0.9, 'b': 0.4}
     # }
     # search = Search(index_path=index_path, searcher_config=searcher_config)
     # search.write_run_from_topics(topics_path, run_path, hits)
-    # eval_config = {
-    #     'map': {'k': None},
-    #     'Rprec': {'k': None},
-    #     'recip_rank': {'k': None},
-    #     'P': {'k': 20},
-    #     'recall': {'k': 40},
-    #     'ndcg': {'k': 20},
-    # }
+    eval_config = {
+        'map': {'k': None},
+        'Rprec': {'k': None},
+        'recip_rank': {'k': None},
+        'P': {'k': 20},
+        'recall': {'k': 40},
+        'ndcg': {'k': 20},
+    }
+
+    eval = EvalTools()
+    eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
+
+    # pipeline = Pipeline()
     #
-    # eval = Eval()
-    # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
-
-    pipeline = Pipeline()
-
-    pipeline.search_BM25_tune_parameter(index_path=index_path, topics_path=topics_path, qrels_path=qrels_path,
-                                        results_dir=results_dir, hits=2, b_list=np.arange(0.0, 1.1, 0.5),
-                                        k1_list=np.arange(0.0, 3.2, 1.6))
+    # pipeline.search_BM25_tune_parameter(index_path=index_path, topics_path=topics_path, qrels_path=qrels_path,
+    #                                     results_dir=results_dir, hits=2, b_list=np.arange(0.0, 1.1, 0.5),
+    #                                     k1_list=np.arange(0.0, 3.2, 1.6))
 
 
