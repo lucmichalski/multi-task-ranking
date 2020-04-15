@@ -27,7 +27,7 @@ if __name__ == '__main__':
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
     experiment_name = 'testing_training_and_validation'
     write = True
-    logging_steps = 50
+    logging_steps = 100
 
     experiment.run_experiment_single_head(
                                     head_flag='entity',
