@@ -6,8 +6,8 @@ from retrieval.dataset_processing import TrecCarProcessing
 from retrieval.tools import EvalTools
 
 if __name__ == '__main__':
-    run_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.qrels'
-    qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25_pyserini.run'
+    run_path =  '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25_pyserini.run'
+    qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.qrels'
     eval_config = {
         'map': {'k': None},
         'Rprec': {'k': None},
