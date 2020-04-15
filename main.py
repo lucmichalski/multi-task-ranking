@@ -7,17 +7,18 @@ from retrieval.dataset_processing import TrecCarProcessing
 if __name__ == '__main__':
 
     index_path = '/nfs/trec_car/index/anserini_paragraphs/lucene-index.car17v2.0.paragraphsv2'
-    run_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.run'
-    qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.qrels'
-    data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25_chucks/'
-
+    run_path = '/nfs/trec_car/data/bert_reranker_datasets/train_benchmarkY1.run'
+    # qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.qrels'
+    # data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25_chucks/'
+    qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/train_benchmarkY1.qrels'
+    data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/train_benchmarkY1_chunks/'
 
     processing = TrecCarProcessing(qrels_path=qrels_path,
                                    run_path=run_path,
                                    index_path=index_path,
                                    data_dir_path=data_dir_path)
 
-    processing.build_dataset(sequential=True, chuck_topic_size=250)
+    processing.build_dataset(sequential=False, chuck_topic_size=250)
 
 
 
