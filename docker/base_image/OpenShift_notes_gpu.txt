@@ -20,16 +20,21 @@ spec:
         app: pythonMLNotebook
         deploymentconfig: pythonMLNotebookGPU
     spec:
+      nodeSelector:
+        node-role.ida/gputitan: "true"
+        #node-role.ida/gpu2080ti: "true"
       containers:
       - name: deepo-ml-plus-imackie
-        image: iainmackie/multi-task-ranking-base-image:v1
+        image: iainmackie/multi-task-ranking-base-image-gpu:v1
         resources:
           requests:
             cpu: "2000m"
             memory: "16Gi"
+            nvidia.com/gpu: 2
           limits:
             cpu: "16000m"
             memory: "128Gi"
+            nvidia.com/gpu: 2
         command:
           - 'jupyter-lab'
         args:

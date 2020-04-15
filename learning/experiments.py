@@ -8,6 +8,7 @@ from transformers import get_linear_schedule_with_warmup
 from torch.utils.data import DataLoader, SequentialSampler
 from torch import nn
 
+import collections
 import numpy as np
 import torch
 import random
@@ -22,9 +23,9 @@ class FineTuningReRankingExperiments:
 
     pretrained_weights = 'bert-base-uncased'
 
-    def __init__(self, train_data_dir_path, train_batch_size, dev_data_dir_path, dev_batch_size, dev_qrels_path,
-                 dev_run_path):
-        self.model = self.__init_model()
+    def __init__(self, model_path=None, train_data_dir_path=None, train_batch_size=None, dev_data_dir_path=None, dev_batch_size=None,
+                 dev_qrels_path=None, dev_run_path=None):
+        self.model = self.__init_model(model_path=model_path)
         self.eval_tools = EvalTools()
         self.train_dataloader = self.__build_dataloader(data_dir_path=train_data_dir_path, batch_size=train_batch_size)
         self.dev_dataloader = self.__build_dataloader(data_dir_path=dev_data_dir_path, batch_size=dev_batch_size)
@@ -32,6 +33,7 @@ class FineTuningReRankingExperiments:
         self.dev_run_data = self.__get_run_data(run_path=dev_run_path)
         self.dev_labels = None
         self.dev_logits = None
+        self.device = self.__get_torch_device()
 
 
     def __get_qrels(self, qrels_path):
@@ -46,26 +48,29 @@ class FineTuningReRankingExperiments:
             for line in f_run:
                 # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
                 query, _, doc_id, _, _, _ = line.split()
-
                 if doc_id in self.dev_qrels[query]:
                     R = 1.0
                 else:
                     R = 0.0
-
                 run.append((query, doc_id, R))
         return run
 
-    def __init_model(self):
+    def __init_model(self, model_path):
         """ Initialise model with pre-trained weights."""
-        return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
+        if model_path == None:
+            return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
+        else:
+            return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
 
 
     def __build_dataloader(self, data_dir_path, batch_size):
         """ Build PyTorch dataloader. """
-        dataset = BertDataset(data_dir_path=data_dir_path)
-        sampler = SequentialSampler(dataset)
-        return DataLoader(dataset, sampler=sampler, batch_size=batch_size)
-
+        if (data_dir_path != None) and (batch_size != None):
+            dataset = BertDataset(data_dir_path=data_dir_path)
+            sampler = SequentialSampler(dataset)
+            return DataLoader(dataset, sampler=sampler, batch_size=batch_size)
+        else:
+            return None
 
     def __log_parameters(self):
         logging.info('--- EXPERIMENT PARAMETERS ---')
@@ -93,31 +98,31 @@ class FineTuningReRankingExperiments:
         # Use GPUs if available.
         if torch.cuda.is_available():
             # Tell PyTorch to use the GPU.
-            logging.info('There are %d GPU(s) available.' % torch.cuda.device_count())
-            logging.info('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
+            print('There are %d GPU(s) available.' % torch.cuda.device_count())
+            print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
             self.model.cuda()
             return torch.device("cuda")
         # Otherwise use CPU.
         else:
-            logging.info('No GPU available, using the CPU instead.')
+            print('No GPU available, using the CPU instead.')
             return torch.device("cpu")
 
 
-    def __unpack_batch(self, batch, device):
+    def __unpack_batch(self, batch):
         """ Unpack batch tensors (input_ids, token_type_ids, attention_mask, labels). """
-        b_input_ids = batch[0].to(device)
-        b_token_type_ids = batch[1].to(device)
-        b_attention_mask = batch[2].to(device)
-        b_labels = batch[3].to(device, dtype=torch.float)
+        b_input_ids = batch[0].to(self.device)
+        b_token_type_ids = batch[1].to(self.device)
+        b_attention_mask = batch[2].to(self.device)
+        b_labels = batch[3].to(self.device, dtype=torch.float)
         return b_input_ids, b_token_type_ids, b_attention_mask, b_labels
 
 
-    def __update_dev_lables_and_logits(self, device, lables, logits):
+    def __update_dev_lables_and_logits(self, lables, logits):
         """ . """
-        if device == torch.device("cpu"):
+        if self.device == torch.device("cpu"):
             self.dev_labels += lables.cpu().numpy().tolist()
             self.dev_logits += self.__flatten_list(logits.cpu().detach().numpy().tolist())
-        elif device == torch.device("cuda"):
+        elif self.device == torch.device("cuda"):
             self.dev_labels += self.__flatten_list(lables.cpu().numpy().tolist())
             self.dev_logits += self.__flatten_list(logits.cpu().detach().numpy().tolist())
         else:
@@ -245,8 +250,44 @@ class FineTuningReRankingExperiments:
         logging.info('Oracle:   \t{}'.format(oracle_metrics_dict))
 
 
-    def run_experiment(self, epochs=1, lr=2e-5, eps=1e-8, weight_decay=0.01, num_warmup_steps=0, experiments_dir=None,
-                       experiment_name=None, logging_steps=100):
+    def __validation_run(self, head_flag):
+        """ """
+        # Dev loss counter.
+        dev_loss = 0
+        # Total number of dev batches.
+        num_dev_steps = len(self.dev_dataloader)
+
+        # Set model to evaluation mode i.e. not weight updates.
+        self.model.eval()
+
+        # Store prediction logits and labels in lists.
+        self.dev_labels = []
+        self.dev_logits = []
+
+        for dev_step, dev_batch in enumerate(self.dev_dataloader):
+            # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
+            b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(
+                batch=dev_batch)
+
+            # With no gradients
+            with torch.no_grad():
+                loss, logits = self.model.module.forward_head(head_flag=head_flag,
+                                                              input_ids=b_input_ids,
+                                                              token_type_ids=b_token_type_ids,
+                                                              attention_mask=b_attention_mask,
+                                                              labels=b_labels)
+            # Update dev loss counter.
+            dev_loss += loss.mean().item()
+
+            # Update list of dev lables and logits
+            self.__update_dev_lables_and_logits(lables=b_labels, logits=logits)
+
+        # Report the final accuracy for this validation run.
+        return dev_loss / num_dev_steps
+
+
+    def run_experiment_single_head(self, head_flag='passage', epochs=1, lr=2e-5, eps=1e-8, weight_decay=0.01,
+                                   num_warmup_steps=0, experiments_dir=None, experiment_name=None, logging_steps=100):
         """ """
         # Define experiment_path directory to contain all logging, models and results.
         experiment_path = os.path.join(experiments_dir, experiment_name)
@@ -259,9 +300,6 @@ class FineTuningReRankingExperiments:
         logging_path = os.path.join(experiment_path, 'output.log')
         print('Starting logging: {}'.format(logging_path))
         logging.basicConfig(filename=logging_path, level=logging.DEBUG)
-
-        # get torch device to use (GPU and CPU). If GPU possible set model to use GPU i.e. model.cuda().
-        device = self.__get_torch_device()
 
         # Log experiment parameters
         self.__log_parameters()
@@ -292,16 +330,16 @@ class FineTuningReRankingExperiments:
 
             for train_step, train_batch in enumerate(self.train_dataloader):
                 # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
-                b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch,
-                                                                                                device=device)
+                b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch)
 
                 # Set gradient to zero.
                 self.model.zero_grad()
                 # Forward pass to retrieve
-                loss, logits = self.model.module.forward_passage(input_ids=b_input_ids,
-                                                           attention_mask=b_attention_mask,
-                                                           token_type_ids=b_token_type_ids,
-                                                           labels=b_labels)
+                loss, logits = self.model.module.forward_head(head_flag=head_flag,
+                                                              input_ids=b_input_ids,
+                                                              attention_mask=b_attention_mask,
+                                                              token_type_ids=b_token_type_ids,
+                                                              labels=b_labels)
                 # Add loss to train loss counter
                 train_loss += loss.mean().item()
                 # Backpropogate loss.
@@ -328,43 +366,87 @@ class FineTuningReRankingExperiments:
 
                     # Dev beginning training.
                     dev_start_time = time.time()
-                    # Dev loss counter.
-                    dev_loss = 0
-                    # Total number of dev batches.
-                    num_dev_steps = len(self.dev_dataloader)
 
-                    # Set model to evaluation mode i.e. not weight updates.
-                    self.model.eval()
+                    av_dev_loss = self.__validation_run(head_flag=head_flag)
 
-                    # Store prediction logits and labels in lists.
-                    self.dev_labels = []
-                    self.dev_logits = []
-
-                    for dev_step, dev_batch in enumerate(self.dev_dataloader):
-
-                        # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
-                        b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(
-                            batch=dev_batch, device=device)
-
-                        # With no gradients
-                        with torch.no_grad():
-                            loss, logits = self.model.module.forward_passage(input_ids=b_input_ids,
-                                                                             token_type_ids=b_token_type_ids,
-                                                                             attention_mask=b_attention_mask,
-                                                                             labels=b_labels)
-                        # Update dev loss counter.
-                        dev_loss += loss.mean().item()
-
-                        # Update list of dev lables and logits
-                        self.__update_dev_lables_and_logits(device=device, lables=b_labels, logits=logits)
-
+                    logging.info("Validation loss: {0:.5f}".format(av_dev_loss))
+                    logging.info("Validation time: {:}".format(self.__format_time(time.time() - dev_start_time)))
 
                     self.__get_eval_metrics()
 
-                    # Report the final accuracy for this validation run.
-                    av_dev_loss = dev_loss / num_dev_steps
-                    logging.info("Validation loss: {0:.5f}".format(av_dev_loss))
-                    logging.info("Validation time: {:}".format(self.__format_time(time.time() - dev_start_time)))
+                    # Save model and weights to directory.
+                    model_dir = os.path.join(experiment_path, 'epoch{}_batch{}/'.format(epoch_i, train_step + 1))
+                    if os.path.isdir(model_dir) == False:
+                        os.mkdir(model_dir)
+                    try:
+                        self.model.module.save_pretrained(model_dir)
+                    except AttributeError:
+                        self.save_pretrained(model_dir)
+
+
+    def run_grid_search(self):
+        """ """
+        pass
+
+
+    def __write_to_file(self, rerank_run_path, doc_ids, query, scores):
+
+        with open(rerank_run_path, "a+") as f_run:
+            d = {i[0]: i[1] for i in zip(doc_ids, scores)}
+            od = collections.OrderedDict(sorted(d.items(), key=lambda item: item[1], reverse=True))
+            rank = 1
+            for doc_id in od.keys():
+                output_line = " ".join((query, "Q0", str(doc_id), str(rank), str(od[doc_id]), "BERT")) + '\n'
+                f_run.write(output_line)
+                rank += 1
+                
+
+    def write_rerank_run(self, rerank_run_path):
+        """ """
+        assert len(self.dev_labels) == len(self.dev_logits) == len(self.dev_run_data), \
+            "dev_labels len: {}, dev_logits len: {}, dev_run_data: {}".format(
+                len(self.dev_labels), len(self.dev_logits), len(self.dev_run_data))
+
+        original_topic = []
+        BERT_scores = []
+        doc_ids = []
+
+        topic_query = None
+
+        for label, score, dev_run_data in zip(self.dev_labels, self.dev_logits, self.dev_run_data):
+            query, doc_id, label_ground_truth = dev_run_data
+            assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth,
+                                                                                                 label[0])
+
+            if (topic_query != None) and (topic_query != query):
+                # get topics of metrics
+
+                self.__write_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids, scores=BERT_scores)
+
+                original_topic = []
+                BERT_scores = []
+
+            topic_query = query
+            original_topic.append(label_ground_truth)
+            BERT_scores.append(score)
+            doc_ids.append(doc_id)
+
+            print(label[0], score, query, doc_id, label_ground_truth)
+
+        if len(original_topic) > 0:
+            self.__write_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids, scores=BERT_scores)
+
+    def inference(self, head_flag, rerank_run_path):
+        """ """
+
+        self.__validation_run(head_flag=head_flag)
+
+        self.write_rerank_run(rerank_run_path)
+
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -382,21 +464,24 @@ if __name__ == '__main__':
                                                 dev_qrels_path=dev_qrels_path,
                                                 dev_run_path=dev_run_path)
 
-    epochs = 1
-    lr = 5e-5
-    eps = 1e-8
-    weight_decay = 0.01
-    num_warmup_steps = 0
-    seed_val = 42
-    experiments_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'exp')
-    experiment_name = 'test_exp_2'
-    logging_steps = 10
+    # epochs = 1
+    # lr = 5e-5
+    # eps = 1e-8
+    # weight_decay = 0.01
+    # num_warmup_steps = 0
+    # seed_val = 42
+    # experiments_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'exp')
+    # experiment_name = 'test_exp_2'
+    # logging_steps = 10
+    #
+    # experiment.run_experiment_single_head(epochs=epochs,
+    #                                       lr=lr,
+    #                                       eps=eps,
+    #                                       weight_decay=weight_decay,
+    #                                       num_warmup_steps=num_warmup_steps,
+    #                                       experiments_dir=experiments_dir,
+    #                                       experiment_name=experiment_name,
+    #                                       logging_steps=logging_steps)
 
-    experiment.run_experiment(epochs=epochs,
-                              lr=lr,
-                              eps=eps,
-                              weight_decay=weight_decay,
-                              num_warmup_steps=num_warmup_steps,
-                              experiments_dir=experiments_dir,
-                              experiment_name=experiment_name,
-                              logging_steps=logging_steps)
+    rerank_run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'rerank.run')
+    experiment.inference(head_flag='passage', rerank_run_path=rerank_run_path)

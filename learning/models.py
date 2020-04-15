@@ -7,6 +7,8 @@ from torch.nn import MSELoss
 class BertMultiTaskRanker(BertPreTrainedModel):
     """ Bert Multi-Task ranking model for passage and entity ranking. """
 
+    valid_head_flags = ['entity', 'passage']
+
     def __init__(self, config):
         super().__init__(config)
 
@@ -46,31 +48,27 @@ class BertMultiTaskRanker(BertPreTrainedModel):
         return loss_fct(logits.view(-1), labels.view(-1))
 
 
-    def forward_passage(self, input_ids=None, attention_mask=None, token_type_ids=None, position_ids=None,
+    def forward_head(self, head_flag='passage', input_ids=None, attention_mask=None, token_type_ids=None, position_ids=None,
                         head_mask=None, inputs_embeds=None, labels=None):
         """ Forward pass over BERT + passage head. Returns loss and logits. """
         # Get BERT CLS vector.
         cls_vector = self.__get_BERT_cls_vector(input_ids=input_ids, attention_mask=attention_mask,
                                                 token_type_ids=token_type_ids, position_ids=position_ids,
                                                 head_mask=head_mask, inputs_embeds=inputs_embeds)
+
+        assert head_flag in self.valid_head_flags, "head_flag: {}, valid_head_flags: {}".format(head_flag,
+                                                                                                self.valid_head_flags)
         # Calculate logits.
-        logits = sigmoid(self.passage_head(cls_vector))
+        if head_flag == 'passage':
+            logits = sigmoid(self.passage_head(cls_vector))
+        elif head_flag == 'entity':
+            logits = sigmoid(self.entity_head(cls_vector))
+        else:
+            "NOT VALID HEAD SELECTION"
+            raise
+
         # Calculate loss.
         loss = self.__get_MSE(logits=logits, labels=labels)
 
         return loss, logits
 
-
-    def forward_entity(self, input_ids=None, attention_mask=None, token_type_ids=None, position_ids=None,
-                        head_mask=None, inputs_embeds=None, labels=None):
-        """ Forward pass over BERT + entity head. Returns loss and logits. """
-        # Get BERT CLS vector.
-        cls_vector = self.__get_BERT_cls_vector(input_ids=input_ids, attention_mask=attention_mask,
-                                                token_type_ids=token_type_ids, position_ids=position_ids,
-                                                head_mask=head_mask, inputs_embeds=inputs_embeds)
-        # Calculate logits.
-        logits = sigmoid(self.entity_head(cls_vector))
-        # Calculate loss.
-        loss = self.__get_MSE(logits=logits, labels=labels)
-
-        return loss, logits
