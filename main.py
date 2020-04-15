@@ -35,16 +35,16 @@ if __name__ == '__main__':
                                                 dev_qrels_path=dev_qrels_path,
                                                 dev_run_path=dev_run_path)
 
-    # epochs = 5
-    # lr = 2e-5
-    # eps = 1e-8
-    # weight_decay = 0.01
-    # num_warmup_steps = 0
-    # experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    # experiment_name = 'testing_training_and_validation_less_printing_v2'
-    # write = True
-    # logging_steps = 600
-    #
+    epochs = 5
+    lr = 2e-5
+    eps = 1e-8
+    weight_decay = 0.01
+    num_warmup_steps = 0
+    experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
+    experiment_name = 'testing_training_and_validation_less_printing_v2'
+    write = True
+    logging_steps = 600
+
     # experiment.run_experiment_single_head(
     #                                 head_flag='entity',
     #                                 epochs=epochs,
