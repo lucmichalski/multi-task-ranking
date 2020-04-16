@@ -128,7 +128,7 @@ class SearchTools:
 
 
     def combine_multiple_qrels(self, qrels_path_list, combined_qrels_path, combined_topics_path=None):
-        """ """
+        """ Combines multiple qrels files into a single qrels file. """
         with open(combined_qrels_path, 'w') as f_combined_qrels:
             for qrels_path in qrels_path_list:
                 with open(qrels_path, 'r') as f_qrels:
