@@ -119,7 +119,7 @@ class SearchTools:
                 for line in qrels_f:
                     # Extract query from QRELS file.
                     query, _, _, _ = line.split(' ')
-                    assert "enwiki:" in query
+                    assert "enwiki:" in query, "{Note valid -> query: {}, line: {}".format(query, line)
                     if query not in written_queries:
                         # Write query to TOPICS file.
                         topics_f.write(query + '\n')
@@ -136,6 +136,9 @@ class SearchTools:
                         if "enwiki:" in query:
                             query, Q0, doc_id, rank = line.split(' ')
                             f_combined_qrels.write(" ".join((query, Q0, doc_id, rank)) + '\n')
+                        else:
+                            print("Not valid query: {}")
+
 
         self.write_topics_from_qrels(qrels_path=combined_qrels_path, topics_path=combined_topics_path)
 
