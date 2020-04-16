@@ -52,19 +52,6 @@ class TrecCarProcessing:
         self.chuck_topic_size = None
 
 
-    def __convert_to_unicode(self, text):
-        """Converts `text` to Unicode (if it's not already), assuming utf-8 input."""
-        if six.PY3:
-            if isinstance(text, str):
-                return text
-            elif isinstance(text, bytes):
-                return text.decode("utf-8", "ignore")
-            else:
-                raise ValueError("Unsupported string type: %s" % (type(text)))
-        else:
-            raise ValueError("Not running on Python 3?")
-
-
     def get_qrels(self):
         """Loads qrels into a dict of key: topic, value: list of relevant doc ids."""
         qrels = collections.defaultdict(list)
@@ -180,6 +167,10 @@ class TrecCarProcessing:
     def build_dataset(self, training_dataset=False, chuck_topic_size=1e8):
         """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
         False (training dataset). """
+        if training_dataset:
+            print("** Building training dataset **")
+        else:
+            print("** Building test/validation dataset **")
         # Counter of current chuck being processed.
         self.chuck_counter = 0
         # Count number of topics being processed.
@@ -194,6 +185,8 @@ class TrecCarProcessing:
             for line in f_run:
                 # Unpack line in run file.
                 query, _, doc_id, rank, _, _ = line.split(' ')
+                # Assert correct query format..
+                assert 'enwiki:' in query, "NOte valid line: {}".format(line)
 
                 # If final doc_id in topic -> process batch.
                 if (topic_query != None) and (topic_query != query):
