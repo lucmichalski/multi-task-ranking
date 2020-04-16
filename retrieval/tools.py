@@ -291,10 +291,11 @@ class EvalTools:
             for line in qrels_file:
                 query, _, doc_id, _ = line.strip().split(" ")
                 # key: query, value: list of doc_ids
-                if query in qrels_dict:
-                    qrels_dict[query].append(doc_id)
-                else:
-                    qrels_dict[query] = [doc_id]
+                if 'enwiki:' in query:
+                    if query in qrels_dict:
+                        qrels_dict[query].append(doc_id)
+                    else:
+                        qrels_dict[query] = [doc_id]
         return qrels_dict
 
 

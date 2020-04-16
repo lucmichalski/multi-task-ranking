@@ -70,13 +70,14 @@ class FineTuningReRankingExperiments:
             for line in f_run:
                 # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
                 query, _, doc_id, _, _, _ = line.split()
-                # Relevant
-                if doc_id in self.dev_qrels[query]:
-                    R = 1.0
-                # Not relevant.
-                else:
-                    R = 0.0
-                run.append((query, doc_id, R))
+                if 'enwiki:' in query:
+                    # Relevant
+                    if doc_id in self.dev_qrels[query]:
+                        R = 1.0
+                    # Not relevant.
+                    else:
+                        R = 0.0
+                    run.append((query, doc_id, R))
         return run
 
 
@@ -215,6 +216,8 @@ class FineTuningReRankingExperiments:
         for label, score, dev_run_data in zip(self.dev_labels, self.dev_logits, self.dev_run_data):
             # Unpack dev_run_data.
             query, doc_id, label_ground_truth = dev_run_data
+            logging.info('query: {}, doc_id: {}, label_ground_truth: {}, label {}, score: {}'.format(
+                query, doc_id, label_ground_truth, label, score))
             # Assert ordering looks correct.
             self.__assert_label_is_correct(label_ground_truth=label_ground_truth, label=label)
 

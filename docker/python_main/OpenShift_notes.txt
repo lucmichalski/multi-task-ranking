@@ -25,13 +25,13 @@ spec:
     imagePullPolicy: IfNotPresent
     resources:
       requests:
-        cpu: "10000m"
+        cpu: "2000m"
         memory: "16Gi"
-        nvidia.com/gpu: 1
+        nvidia.com/gpu: 2
       limits:
         cpu: "16000m"
-        memory: "16Gi"
-        nvidia.com/gpu: 1
+        memory: "64Gi"
+        nvidia.com/gpu: 2
     volumeMounts:
     - mountPath: /nfs/
       name: nfs-access
