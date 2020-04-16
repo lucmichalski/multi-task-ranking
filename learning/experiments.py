@@ -5,7 +5,7 @@ from retrieval.tools import EvalTools
 
 from transformers.optimization import AdamW
 from transformers import get_linear_schedule_with_warmup
-from torch.utils.data import DataLoader, SequentialSampler
+from torch.utils.data import DataLoader, SequentialSampler, RandomSampler
 from torch import nn
 
 import collections
@@ -28,9 +28,11 @@ class FineTuningReRankingExperiments:
         # Initialise EvalTools.
         self.eval_tools = EvalTools()
         # Build PyTorch Dataloader for training data.
-        self.train_dataloader = self.__build_dataloader(data_dir_path=train_data_dir_path, batch_size=train_batch_size)
+        self.train_dataloader = self.__build_dataloader(data_dir_path=train_data_dir_path, batch_size=train_batch_size,
+                                                        random_sample=True)
         # Build PyTorch Dataloader for validation data.
-        self.dev_dataloader = self.__build_dataloader(data_dir_path=dev_data_dir_path, batch_size=dev_batch_size)
+        self.dev_dataloader = self.__build_dataloader(data_dir_path=dev_data_dir_path, batch_size=dev_batch_size,
+                                                      random_sample=False)
         # Store path of original dev/test run.
         self.dev_run_path = dev_run_path
         # Store path of original dev/test qrels.
@@ -86,11 +88,14 @@ class FineTuningReRankingExperiments:
             return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
 
 
-    def __build_dataloader(self, data_dir_path, batch_size):
+    def __build_dataloader(self, data_dir_path, batch_size, random_sample=True):
         """ Build PyTorch dataloader. """
         if (data_dir_path != None) and (batch_size != None):
             dataset = BertDataset(data_dir_path=data_dir_path)
-            sampler = SequentialSampler(dataset)
+            if random_sample:
+                sampler = SequentialSampler(dataset)
+            else:
+                sampler = RandomSampler(dataset)
             return DataLoader(dataset, sampler=sampler, batch_size=batch_size)
         else:
             return None
