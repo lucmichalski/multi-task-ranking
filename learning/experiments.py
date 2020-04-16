@@ -94,9 +94,9 @@ class FineTuningReRankingExperiments:
         if (data_dir_path != None) and (batch_size != None):
             dataset = BertDataset(data_dir_path=data_dir_path)
             if random_sample:
-                sampler = SequentialSampler(dataset)
-            else:
                 sampler = RandomSampler(dataset)
+            else:
+                sampler = SequentialSampler(dataset)
             return DataLoader(dataset, sampler=sampler, batch_size=batch_size)
         else:
             return None
