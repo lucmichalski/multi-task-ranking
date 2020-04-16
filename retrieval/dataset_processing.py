@@ -97,7 +97,7 @@ class TrecCarProcessing:
         self.topic_N_BERT_encodings = []
 
 
-    def __process_non_sequential_topic(self):
+    def __process_non_sequential_topic_even_classes(self):
         """ Process sequentially and even classes through sampling. Used for building training dataset. """
         # Calculate number of relevant (R_count) and non relevant (N_count) documents in topic run.
         R_count = len(self.topic_R_BERT_encodings)
@@ -125,6 +125,8 @@ class TrecCarProcessing:
             diff = abs(R_count - N_count)
             add_extra_sample(BERT_encodings=self.topic_N_BERT_encodings, diff=diff)
 
+        # Assert length of encodings are equal.
+        assert len(self.topic_N_BERT_encodings) == len(self.topic_R_BERT_encodings)
         # Add topics and shuffle data.
         self.topic_BERT_encodings = self.topic_R_BERT_encodings + self.topic_N_BERT_encodings
         random.shuffle(self.topic_BERT_encodings)
@@ -133,14 +135,14 @@ class TrecCarProcessing:
         self.__process_sequential_topic()
 
 
-    def __process_topic(self, sequential):
+    def __process_topic(self, training_dataset):
         """ Process topic - whether sequential (validation) or not sequential (training). """
-        if sequential:
+        if training_dataset == False:
             # Sequential (validation dataset).
             self.__process_sequential_topic()
         else:
             # Not sequential (training dataset).
-            self.__process_non_sequential_topic()
+            self.__process_non_sequential_topic_even_classes()
 
         # Update topic counter.
         self.topic_counter += 1
@@ -175,7 +177,7 @@ class TrecCarProcessing:
         self.labels_list = []
 
 
-    def build_dataset(self, sequential=False, chuck_topic_size=1e8):
+    def build_dataset(self, training_dataset=False, chuck_topic_size=1e8):
         """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
         False (training dataset). """
         # Counter of current chuck being processed.
@@ -197,7 +199,7 @@ class TrecCarProcessing:
                 if (topic_query != None) and (topic_query != query):
 
                     # Process topic
-                    self.__process_topic(sequential=sequential)
+                    self.__process_topic(training_dataset=training_dataset)
 
                     # If specified data chuck size -> write chuck to file.
                     if self.topic_counter % self.chuck_topic_size == 0:
@@ -216,7 +218,7 @@ class TrecCarProcessing:
                                                             pad_to_max_length=True)
                 data = (query, doc_id, BERT_encodings)
                 # Append doc_id data topic
-                if sequential == True:
+                if training_dataset == False:
                     self.topic_BERT_encodings.append(data)
                 else:
                     if doc_id in self.qrels[topic_query]:
@@ -228,7 +230,7 @@ class TrecCarProcessing:
                 topic_query = query
 
         # Process any queries remaining.
-        self.__process_topic(sequential=sequential)
+        self.__process_topic(training_dataset=training_dataset)
 
         # write final chuck to file.
         self.__write_chuck_to_directory()
