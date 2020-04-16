@@ -20,12 +20,16 @@ if __name__ == '__main__':
     # eval = EvalTools()
     # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
 
-    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_train_entity_100_chucks'
+    train_data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/train_benchmarkY1_chunks/'
+    #train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_train_entity_100_chucks/'
     train_batch_size = 8
-    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity_100_chucks'
+    dev_data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25_chucks/'
+    #dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity_100_chucks/'
     dev_batch_size = 64
-    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity.qrels'
-    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity_100.run'
+    # dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity.qrels'
+    # dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity_100.run'
+    dev_qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.qrels'
+    dev_run_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.run'
     model_path = None
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
@@ -41,9 +45,9 @@ if __name__ == '__main__':
     weight_decay = 0.01
     num_warmup_steps = 0
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_benchmarkY1_100_entity'
+    experiment_name = 'test_benchmark_Y1_25_passage'
     write = True
-    logging_steps = 500
+    logging_steps = 100
     head_flag = 'entity'
 
     experiment.run_experiment_single_head(
