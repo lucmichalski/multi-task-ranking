@@ -25,32 +25,25 @@ class TrecCarProcessing:
         self.index_path = index_path
         # Path to data directory to write output PyTorch file(s).
         self.data_dir_path = data_dir_path
-
         # Initialise searching capabilities over Anserini/Lucene index.
         self.search_tools = SearchTools(index_path=self.index_path)
-
         # Tokenizer function (text -> BERT tokens)
         self.tokenizer = tokenizer
-
         # Max length of BERT tokens.
         self.max_length = max_length
-
         # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
         self.qrels = self.get_qrels()
-
         # Lists of BERT inputs.
         self.input_ids_list = []
         self.token_type_ids_list = []
         self.attention_mask_list = []
         self.labels_list = []
-
         # Lists used to build BERT inputs.
         # Stores data for sequential dataset
         self.topic_BERT_encodings = []
         # Having data in relevant (R) and not relevant (N) allows to added extra R samples.
         self.topic_R_BERT_encodings = []
         self.topic_N_BERT_encodings = []
-
         # Counter of current chuck being processed.
         self.chuck_counter = None
         # Count number of topics being processed.

@@ -20,41 +20,42 @@ if __name__ == '__main__':
     # eval = EvalTools()
     # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
 
-    train_data_dir_path = None #'/nfs/trec_car/data/bert_reranker_datasets/train_benchmarkY1_chunks/'
-    train_batch_size = None #8
-    dev_data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25_chucks/'
+    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_train_entity_100_chucks'
+    train_batch_size = 8
+    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity_100_chucks'
     dev_batch_size = 64
-    dev_qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.qrels'
-    dev_run_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.run'
-    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/testing_training_and_validation_less_printing_v2/epoch1_batch1026/'
+    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity.qrels'
+    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity_100.run'
+    model_path = None
     experiment = FineTuningReRankingExperiments(model_path=model_path,
-                                                train_data_dir_path=None,
-                                                train_batch_size=None,
+                                                train_data_dir_path=train_data_dir_path,
+                                                train_batch_size=train_batch_size,
                                                 dev_data_dir_path=dev_data_dir_path,
                                                 dev_batch_size=dev_batch_size,
                                                 dev_qrels_path=dev_qrels_path,
                                                 dev_run_path=dev_run_path)
 
-    epochs = 5
+    epochs = 3
     lr = 2e-5
     eps = 1e-8
     weight_decay = 0.01
     num_warmup_steps = 0
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'testing_training_and_validation_less_printing_v2'
+    experiment_name = 'test_benchmarkY1_100_entity'
     write = True
-    logging_steps = 600
+    logging_steps = 1000
+    head_flag = 'entity'
 
-    # experiment.run_experiment_single_head(
-    #                                 head_flag='entity',
-    #                                 epochs=epochs,
-    #                                 lr=lr,
-    #                                 eps=eps,
-    #                                 weight_decay=weight_decay,
-    #                                 num_warmup_steps=num_warmup_steps,
-    #                                 experiments_dir=experiments_dir,
-    #                                 experiment_name=experiment_name,
-    #                                 logging_steps=logging_steps)
-    head_flag = 'passage'
-    rerank_run_path = '/nfs/trec_car/data/bert_reranker_datasets/test_runs/initial_new_pipeline_passage.run'
-    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
+    experiment.run_experiment_single_head(
+                                    head_flag=head_flag,
+                                    epochs=epochs,
+                                    lr=lr,
+                                    eps=eps,
+                                    weight_decay=weight_decay,
+                                    num_warmup_steps=num_warmup_steps,
+                                    experiments_dir=experiments_dir,
+                                    experiment_name=experiment_name,
+                                    logging_steps=logging_steps)
+    # head_flag = 'passage'
+    # rerank_run_path = '/nfs/trec_car/data/bert_reranker_datasets/test_runs/initial_new_pipeline_passage.run'
+    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
