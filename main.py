@@ -43,7 +43,7 @@ if __name__ == '__main__':
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
     experiment_name = 'test_benchmarkY1_100_entity'
     write = True
-    logging_steps = 1000
+    logging_steps = 250
     head_flag = 'entity'
 
     experiment.run_experiment_single_head(
