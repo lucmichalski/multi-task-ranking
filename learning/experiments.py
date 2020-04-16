@@ -216,8 +216,6 @@ class FineTuningReRankingExperiments:
         for label, score, dev_run_data in zip(self.dev_labels, self.dev_logits, self.dev_run_data):
             # Unpack dev_run_data.
             query, doc_id, label_ground_truth = dev_run_data
-            logging.info('query: {}, doc_id: {}, label_ground_truth: {}, label {}, score: {}'.format(
-                query, doc_id, label_ground_truth, label, score))
             # Assert ordering looks correct.
             self.__assert_label_is_correct(label_ground_truth=label_ground_truth, label=label)
 
