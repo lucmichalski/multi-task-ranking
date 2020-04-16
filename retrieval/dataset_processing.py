@@ -257,4 +257,4 @@ if __name__ == '__main__':
                                    tokenizer=tokenizer,
                                    max_length=max_length)
 
-    processing.build_dataset(sequential=True, chuck_topic_size=10)
+    processing.build_dataset(training_dataset=True, chuck_topic_size=10)
