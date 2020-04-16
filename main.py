@@ -36,14 +36,14 @@ if __name__ == '__main__':
                                                 dev_run_path=dev_run_path)
 
     epochs = 3
-    lr = 2e-5
+    lr = 1e-5
     eps = 1e-8
     weight_decay = 0.01
     num_warmup_steps = 0
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
     experiment_name = 'test_benchmarkY1_100_entity'
     write = True
-    logging_steps = 250
+    logging_steps = 500
     head_flag = 'entity'
 
     experiment.run_experiment_single_head(

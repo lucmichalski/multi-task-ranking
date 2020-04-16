@@ -21,7 +21,7 @@ spec:
   containers:
   - env:
     name: multi-task-ranking-python-main-container
-    image: iainmackie/multi-task-ranking-python-main:v2
+    image: iainmackie/multi-task-ranking-python-main:v3
     imagePullPolicy: IfNotPresent
     resources:
       requests:
