@@ -117,28 +117,30 @@ class SearchTools:
         with open(topics_path, 'w') as topics_f:
             with open(qrels_path, 'r') as qrels_f:
                 for line in qrels_f:
-                    # Extract query from QRELS file.
-                    query, _, _, _ = line.split(' ')
-                    assert "enwiki:" in query, "Note valid -> query: {}, line: {}".format(query, line)
-                    if query not in written_queries:
-                        # Write query to TOPICS file.
-                        topics_f.write(query + '\n')
-                        # Add query to 'written_queries' list.
-                        written_queries.append(query)
+                    if "enwiki:" in line:
+                        # Extract query from QRELS file.
+                        print(line)
+                        query, _, _, _ = line.split(' ')
+                        if query not in written_queries:
+                            # Write query to TOPICS file.
+                            topics_f.write(query + '\n')
+                            # Add query to 'written_queries' list.
+                            written_queries.append(query)
 
 
     def combine_multiple_qrels(self, qrels_path_list, combined_qrels_path, combined_topics_path=None):
         """ Combines multiple qrels files into a single qrels file. """
         with open(combined_qrels_path, 'w') as f_combined_qrels:
             for qrels_path in qrels_path_list:
+                print(qrels_path)
                 with open(qrels_path, 'r') as f_qrels:
                     for line in f_qrels:
-                        if "enwiki:" in query:
+                        if "enwiki:" in line:
                             query, Q0, doc_id, rank = line.split(' ')
-                            f_combined_qrels.write(" ".join((query, Q0, doc_id, rank)) + '\n')
+                            f_combined_qrels.write(" ".join((query, Q0, doc_id, rank)))
                         else:
                             print("Not valid query: {}")
-
+                f_combined_qrels.write('\n')
 
         self.write_topics_from_qrels(qrels_path=combined_qrels_path, topics_path=combined_topics_path)
 
@@ -460,22 +462,25 @@ class Pipeline:
 
 
 if __name__ == '__main__':
-
-    pass
+    print("hi")
 
     index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    query = 'Love cats and dogs'
-    topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test_entity_1000.topics')
+    topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'benchmarkY1_train_passage.topics')
     run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test_entity_1000.run')
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test_entity.qrels')
-    results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
+    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'benchmarkY1_train_passage.qrels')
+    results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data')
     hits = 1000
-
+    qrels_path_list = []
+    files = ['fold-1-train.pages.cbor-hierarchical.qrels', 'fold-2-train.pages.cbor-hierarchical.qrels', 'fold-3-train.pages.cbor-hierarchical.qrels', 'fold-4-train.pages.cbor-hierarchical.qrels']
+    for f in files:
+        qrels_path_list.append(os.path.join(results_dir, f))
+    print(qrels_path_list)
     searcher_config = {
         'BM25': {'k1': 5.5, 'b': 0.1}
     }
     search = SearchTools(index_path=index_path, searcher_config=searcher_config)
-    search.write_topics_from_qrels(qrels_path=qrels_path)
+    search.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=qrels_path, combined_topics_path=topics_path)
+    # search.write_topics_from_qrels(qrels_path=qrels_path)
 
     #search.write_run_from_topics(topics_path, run_path, hits)
     #search.write_topics_from_qrels(qrels_path=qrels_path)
