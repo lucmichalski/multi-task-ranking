@@ -13,8 +13,8 @@ PassagePaths = StaticPaths(
 EntityPaths = StaticPaths(
     corpus='/nfs/trec_car/data/pages/unprocessedAllButBenchmark.Y2.cbor',
     index='/nfs/trec_car/index/anserini_pages/lucene-index.car17v2.0.pages.anserini.full_index.v1',
-    test_topics='/nfs/trec_car/data/entity_ranking/test_hierarchical.topics',
-    test_qrels='/nfs/trec_car/data/entity_ranking/test_hierarchical.qrels',
+    test_topics='/nfs/trec_car/data/entity_ranking/test_hierarchical_entity.topics',
+    test_qrels='/nfs/trec_car/data/entity_ranking/test_hierarchical_entity.qrels',
 )
 
 if __name__ == '__main__':
