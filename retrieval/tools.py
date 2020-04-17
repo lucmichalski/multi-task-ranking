@@ -463,20 +463,22 @@ if __name__ == '__main__':
 
     pass
 
-    # index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    # query = 'Love cats and dogs'
-    # topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.topics')
-    # run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.run')
-    # qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.qrels')
-    # results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
-    # hits = 10
-    #
-    # searcher_config = {
-    #     'BM25': {'k1': 0.9, 'b': 0.4}
-    # }
-    # search = SearchTools(index_path=index_path, searcher_config=searcher_config)
+    index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
+    query = 'Love cats and dogs'
+    topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test_entity_1000.topics')
+    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test_entity_1000.run')
+    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test_entity.qrels')
+    results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
+    hits = 1000
 
-    # search.write_run_from_topics(topics_path, run_path, hits)
+    searcher_config = {
+        'BM25': {'k1': 5.5, 'b': 0.1}
+    }
+    search = SearchTools(index_path=index_path, searcher_config=searcher_config)
+    search.write_topics_from_qrels(qrels_path=qrels_path)
+
+    #search.write_run_from_topics(topics_path, run_path, hits)
+    #search.write_topics_from_qrels(qrels_path=qrels_path)
     # eval_config = {
     #     'map': {'k': None},
     #     'Rprec': {'k': None},
