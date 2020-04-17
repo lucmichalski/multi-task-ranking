@@ -316,11 +316,6 @@ class FineTuningReRankingExperiments:
         print('Starting logging: {}'.format(logging_path))
         logging.basicConfig(filename=logging_path, level=logging.DEBUG)
 
-        # Initialise optimizer and scheduler for training.
-        optimizer = AdamW(self.model.parameters(), lr=lr, eps=eps, weight_decay=weight_decay)
-        num_train_steps = len(self.train_dataloader)
-        scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps,
-                                                    num_training_steps=num_train_steps)
 
         # Loop over epochs (1 -> epochs).
         for epoch_i in range(1, epochs + 1):
@@ -332,6 +327,12 @@ class FineTuningReRankingExperiments:
             # ========================================
             #               Training
             # ========================================
+
+            # Initialise optimizer and scheduler for training.
+            optimizer = AdamW(self.model.parameters(), lr=lr, eps=eps, weight_decay=weight_decay)
+            num_train_steps = len(self.train_dataloader)
+            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps,
+                                                        num_training_steps=num_train_steps)
 
             # Time beginning training.
             train_start_time = time.time()
