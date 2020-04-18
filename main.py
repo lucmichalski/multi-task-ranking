@@ -7,15 +7,15 @@ from retrieval.dataset_processing import TrecCarProcessing
 from retrieval.tools import EvalTools, SearchTools
 
 if __name__ == '__main__':
-    index_path = PassagePaths.index
-    run_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_train_passage_100.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_passage_100.run']
-    qrels_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_train_passage.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_passage.qrels']
-    topics_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_train_passage.topics', '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_passage.topics']
-    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_train_passage_100_chunks/', '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_passage_100_chunks/']
-    training_datasets = [True, False]
-    hits = 100
-    printing_step = 100
 
+    index_path = PassagePaths.index
+    run_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical_passage_1000.run'
+    qrels_path = PassagePaths.test_qrels
+    topics_path = PassagePaths.test_topics
+    data_dir_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical_passage_1000_chunks/'
+    training_dataset = False
+    hits = 1000
+    printing_step = 100
 
     searcher_config = {
         'BM25': {'k1': 0.9, 'b': 0.4}
@@ -28,20 +28,20 @@ if __name__ == '__main__':
         'recall': {'k': 40},
         'ndcg': {'k': 20},
     }
-    for run_path, qrels_path, topics_path, data_dir_path, training_dataset in zip(run_paths, qrels_paths, topics_paths, data_dir_paths, training_datasets):
 
-        search = SearchTools(index_path=index_path, searcher_config=searcher_config)
-        search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
+    print('searching')
+    search = SearchTools(index_path=index_path, searcher_config=searcher_config)
+    search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
+    print('eval')
+    eval = EvalTools()
+    eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
+    print('dataset')
+    processing = TrecCarProcessing(qrels_path=qrels_path,
+                                   run_path=run_path,
+                                   index_path=index_path,
+                                    data_dir_path=data_dir_path)
 
-        eval = EvalTools()
-        eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
-
-        processing = TrecCarProcessing(qrels_path=qrels_path,
-                                       run_path=run_path,
-                                       index_path=index_path,
-                                       data_dir_path=data_dir_path)
-
-        processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100)
+    processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50)
 
 
     # # train_data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/train_benchmarkY1_chunks/'
