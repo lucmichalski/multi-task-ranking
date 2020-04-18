@@ -43,12 +43,12 @@ if __name__ == '__main__':
     #
     # processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50)
 
-    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_train_entity_100_chunks/'
+    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_train_passage_100_chunks/'
     train_batch_size = 8
-    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity_100_chunks/'
+    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_passage_100_chunks/'
     dev_batch_size = 64
-    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity.qrels'
-    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_entity_100.run'
+    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_passage.qrels'
+    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_dev_passage_100.run'
     model_path = None
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
@@ -62,12 +62,12 @@ if __name__ == '__main__':
     lr = 8e-6
     eps = 1e-8
     weight_decay = 0.01
-    num_warmup_steps = 2000
+    num_warmup_steps = 1000
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'benchmarkY1_entity_100_lr_8e6_num_warmup_steps_2000_v2'
+    experiment_name = 'benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000_v2'
     write = True
     logging_steps = 1000
-    head_flag = 'entity'
+    head_flag = 'passage'
 
     experiment.run_experiment_single_head(
                                     head_flag=head_flag,
