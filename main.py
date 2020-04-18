@@ -64,7 +64,7 @@ if __name__ == '__main__':
     weight_decay = 0.01
     num_warmup_steps = 1000
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000_v2'
+    experiment_name = 'benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000'
     write = True
     logging_steps = 1000
     head_flag = 'passage'
