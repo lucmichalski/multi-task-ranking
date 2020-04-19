@@ -29,7 +29,7 @@ if __name__ == '__main__':
         'ndcg': {'k': 20},
     }
 
-    for run_path, qrels_path, topics_path, data_dir_path, training_dataset in [run_paths, qrels_paths, topics_paths, data_dir_paths, training_datasets]:
+    for run_path, qrels_path, topics_path, data_dir_path, training_dataset in zip(run_paths, qrels_paths, topics_paths, data_dir_paths, training_datasets):
         # print('searching')
         # search = SearchTools(index_path=index_path, searcher_config=searcher_config)
         # search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
