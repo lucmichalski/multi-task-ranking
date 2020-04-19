@@ -164,7 +164,7 @@ class TrecCarProcessing:
         self.labels_list = []
 
 
-    def build_dataset(self, training_dataset=False, chuck_topic_size=1e8):
+    def build_dataset(self, training_dataset=False, chuck_topic_size=1e8, first_para=False):
         """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
         False (training dataset). """
         if training_dataset:
@@ -203,6 +203,8 @@ class TrecCarProcessing:
                 decoded_query = self.search_tools.decode_query(q=query)
                 # Extract text from index using doc_id.
                 text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
+                if first_para:
+                    text = text.split('\n')[0]
                 # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                 BERT_encodings = self.tokenizer.encode_plus(text=decoded_query,
                                                             text_pair=text,

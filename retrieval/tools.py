@@ -478,8 +478,24 @@ if __name__ == '__main__':
     searcher_config = {
         'BM25': {'k1': 5.5, 'b': 0.1}
     }
-    search = SearchTools(index_path=index_path, searcher_config=searcher_config)
-    search.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=qrels_path, combined_topics_path=topics_path)
+    search_tools = SearchTools(index_path=index_path, searcher_config=searcher_config)
+    query = 'test query please'
+    hits = 10
+    q_d = search_tools.searcher.search(q=query, k=hits)
+    from transformers import BertTokenizer
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    for i in q_d:
+        print('==========================')
+        print(i.docid)
+        first_para = search_tools.get_contents_from_docid(doc_id=i.docid).split('\n')[0]
+        first_para_token = tokenizer.encode(first_para, max_length=512)
+        print(len(first_para), len(first_para_token))
+
+        full_doc = search_tools.get_contents_from_docid(doc_id=i.docid)
+        full_doc_token = tokenizer.encode(full_doc, max_length=512)
+        print(len(full_doc), len(full_doc_token))
+
+    #search.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=qrels_path, combined_topics_path=topics_path)
     # search.write_topics_from_qrels(qrels_path=qrels_path)
 
     #search.write_run_from_topics(topics_path, run_path, hits)
