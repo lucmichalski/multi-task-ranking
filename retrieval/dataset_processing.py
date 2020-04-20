@@ -202,13 +202,13 @@ class TrecCarProcessing:
                                                             pad_to_max_length=True)
                 data = (query, doc_id, BERT_encodings)
                 # Append doc_id data topic
-                if training_dataset == False:
-                    self.topic_BERT_encodings.append(data)
-                else:
+                if training_dataset:
                     if doc_id in self.qrels[query]:
                         self.topic_R_BERT_encodings.append(data)
                     else:
                         self.topic_N_BERT_encodings.append(data)
+                else:
+                    self.topic_BERT_encodings.append(data)
 
                 # Store query as topic query.
                 topic_query = query

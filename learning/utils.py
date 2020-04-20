@@ -12,9 +12,12 @@ class BertDataset(Dataset):
         self.samples = []
 
         # Unpack dataset in sorted order based on file name.
-        for file_name in sorted(os.listdir(data_dir_path)):
+        path_list = sorted(os.listdir(data_dir_path))
+        print('ordered files: {}'.format(path_list))
+        for file_name in path_list:
             if file_name[len(file_name)-3:] == '.pt':
                 path = os.path.join(data_dir_path, file_name)
+                print('loadings data from: {}'.format(path))
                 dataset = torch.load(path)
                 for td in dataset:
                     self.samples.append(td)
