@@ -217,7 +217,7 @@ class FineTuningReRankingExperiments:
             # Unpack dev_run_data.
             query, doc_id, label_ground_truth = dev_run_data
             # Assert ordering looks correct.
-            self.__assert_label_is_correct(label_ground_truth=label_ground_truth, label=label)
+            self.__assert_label_is_correct(label_ground_truth=label_ground_truth, label=label, query=query, doc_id=doc_id)
 
             if (topic_query != None) and (topic_query != query):
                 # Add metrics of topic.
