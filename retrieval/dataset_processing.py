@@ -1,5 +1,5 @@
 
-from retrieval.tools import SearchTools
+from retrieval.tools import SearchTools, EvalTools
 from transformers import BertTokenizer
 from torch.utils.data import TensorDataset
 
@@ -17,6 +17,8 @@ class TrecCarProcessing:
     def __init__(self, qrels_path, run_path, index_path, data_dir_path,
                  tokenizer=BertTokenizer.from_pretrained('bert-base-uncased'), max_length=512):
 
+        # Initialise EvalTools.
+        self.eval_tools = EvalTools()
         # Path to qrels file.
         self.qrels_path = qrels_path
         # Path to run file.
@@ -32,7 +34,7 @@ class TrecCarProcessing:
         # Max length of BERT tokens.
         self.max_length = max_length
         # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
-        self.qrels = self.get_qrels()
+        self.qrels = self.eval_tools.get_qrels_dict(qrels_path=self.qrels_path)
         # Lists of BERT inputs.
         self.input_ids_list = []
         self.token_type_ids_list = []
@@ -50,19 +52,6 @@ class TrecCarProcessing:
         self.topic_counter = None
         # Number of topics processed in each chuck before being processed.
         self.chuck_topic_size = None
-
-
-    def get_qrels(self):
-        """Loads qrels into a dict of key: topic, value: list of relevant doc ids."""
-        qrels = collections.defaultdict(list)
-        with open(self.qrels_path) as f_qrels:
-            for i, line in enumerate(f_qrels):
-                query, _, doc_id, _ = line.rstrip().split(' ')
-                qrels[query].append(doc_id)
-                if i % 1000 == 0:
-                    print('Loaded #{} lines in qrels file'.format(i))
-        print("Loaded qrels files (#{} lines)".format(i))
-        return qrels
 
 
     def __process_sequential_topic(self):
@@ -125,7 +114,7 @@ class TrecCarProcessing:
     def __process_topic(self, training_dataset):
         """ Process topic - whether sequential (validation) or not sequential (training). """
         if training_dataset == False:
-            # Sequential (validation dataset).
+            # Sequential (test/validation dataset).
             self.__process_sequential_topic()
         else:
             # Not sequential (training dataset).

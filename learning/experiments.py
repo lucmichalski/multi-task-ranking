@@ -89,7 +89,7 @@ class FineTuningReRankingExperiments:
             return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
 
 
-    def __build_dataloader(self, data_dir_path, batch_size, random_sample=True):
+    def __build_dataloader(self, data_dir_path, batch_size, random_sample=False):
         """ Build PyTorch dataloader. """
         if (data_dir_path != None) and (batch_size != None):
             dataset = BertDataset(data_dir_path=data_dir_path)
