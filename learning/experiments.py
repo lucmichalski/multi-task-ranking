@@ -21,8 +21,8 @@ class FineTuningReRankingExperiments:
 
     pretrained_weights = 'bert-base-uncased'
 
-    def __init__(self, model_path=None, train_data_dir_path=None, train_batch_size=None, dev_data_dir_path=None, dev_batch_size=None,
-                 dev_qrels_path=None, dev_run_path=None):
+    def __init__(self, model_path=None, train_data_dir_path=None, train_batch_size=None, dev_data_dir_path=None,
+                 dev_batch_size=None, dev_qrels_path=None, dev_run_path=None):
         # Load model from path or use pretrained_weights.
         self.model = self.__init_model(model_path=model_path)
         # Initialise EvalTools.
@@ -397,6 +397,11 @@ class FineTuningReRankingExperiments:
                         self.save_pretrained(model_dir)
 
 
+    def run_experiment_multiple_heads(self):
+        """ """
+        pass
+
+
     def __write_topic_to_file(self, rerank_run_path, doc_ids, query, scores):
         """ Write topic to run file. """
         with open(rerank_run_path, "a+") as f_run:
@@ -418,13 +423,12 @@ class FineTuningReRankingExperiments:
                 len(self.dev_labels), len(self.dev_logits), len(self.dev_run_data))
 
 
-    def __assert_label_is_correct(self, label_ground_truth, label):
+    def __assert_label_is_correct(self, label_ground_truth, label, query, doc_id):
         """ Assert label from dataset (0,1) is the same as the original label.  Tests data ordering is consistent. """
         if self.device == torch.device("cpu"):
-            assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {}".format(label_ground_truth,
-                                                                                                 label[0])
+            assert label_ground_truth == label[0], "label_ground_truth: {} vs. label: {} -> query: {}, doc_id: {}".format(label_ground_truth, label[0], query, doc_id)
         elif self.device == torch.device("cuda"):
-            assert label_ground_truth == label, "label_ground_truth: {} vs. label: {}".format(label_ground_truth, label)
+            assert label_ground_truth == label, "label_ground_truth: {} vs. label: {} -> query: {}, doc_id: {}".format(label_ground_truth, label, query, doc_id)
         else:
             print("NOT VALID DEVICE")
             raise
@@ -447,7 +451,7 @@ class FineTuningReRankingExperiments:
             # Unpack dev_run_data.
             query, doc_id, label_ground_truth = dev_run_data
             # Assert ordering looks correct.
-            self.__assert_label_is_correct(label_ground_truth=label_ground_truth, label=label)
+            self.__assert_label_is_correct(label_ground_truth=label_ground_truth, label=label, query=query, doc_id=doc_id)
 
             if (topic_query != None) and (topic_query != query):
                 # End of topic run -> write to file.
