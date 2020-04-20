@@ -175,7 +175,7 @@ class TrecCarProcessing:
                 # Unpack line in run file.
                 query, _, doc_id, rank, _, _ = line.split(' ')
                 # Assert correct query format..
-                assert 'enwiki:' in query, "NOte valid line: {}".format(line)
+                assert 'enwiki:' in query, "Not valid query: {}".format(line)
 
                 # If final doc_id in topic -> process batch.
                 if (topic_query != None) and (topic_query != query):
@@ -205,7 +205,7 @@ class TrecCarProcessing:
                 if training_dataset == False:
                     self.topic_BERT_encodings.append(data)
                 else:
-                    if doc_id in self.qrels[topic_query]:
+                    if doc_id in self.qrels[query]:
                         self.topic_R_BERT_encodings.append(data)
                     else:
                         self.topic_N_BERT_encodings.append(data)
