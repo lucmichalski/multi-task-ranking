@@ -46,7 +46,7 @@ if __name__ == '__main__':
     train_data_dir_path = None #'/nfs/trec_car/data/entity_ranking/benchmarkY1_train_entity_para_100_chunks/'
     train_batch_size = None #8
     dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical_entity_para_1000_chunks/'
-    dev_batch_size = 64 * 12
+    dev_batch_size = 64 * 8
     dev_qrels_path = EntityPaths.test_qrels
     dev_run_path = '/nfs/trec_car/data/entity_ranking/test_hierarchical_entity_1000.run'
     model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_entity_100_lr_8e6_num_warmup_steps_2000_just_para/epoch1_batch14000/'
