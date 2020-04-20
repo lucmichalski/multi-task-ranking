@@ -1,6 +1,7 @@
 
 from torch.utils.data import Dataset, DataLoader
 
+import re
 import torch
 import os
 
@@ -12,7 +13,8 @@ class BertDataset(Dataset):
         self.samples = []
 
         # Unpack dataset in sorted order based on file name.
-        path_list = sorted(os.listdir(data_dir_path))
+        path_list = os.listdir(data_dir_path)
+        path_list.sort(key=lambda f: int(re.sub('\D', '', f)))
         print('ordered files: {}'.format(path_list))
         for file_name in path_list:
             if file_name[len(file_name)-3:] == '.pt':
