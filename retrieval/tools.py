@@ -123,10 +123,11 @@ class SearchTools:
                     if "enwiki:" in line:
                         # Extract query from QRELS file.
                         query, _, _, _ = line.split(' ')
-                        # Write query to TOPICS file.
-                        topics_f.write(query + '\n')
-                        # Add query to 'written_queries' list.
-                        written_queries.append(query)
+                        if query not in written_queries:
+                            # Write query to TOPICS file.
+                            topics_f.write(query + '\n')
+                            # Add query to 'written_queries' list.
+                            written_queries.append(query)
 
 
     def combine_multiple_qrels(self, qrels_path_list, combined_qrels_path, combined_topics_path=None):
