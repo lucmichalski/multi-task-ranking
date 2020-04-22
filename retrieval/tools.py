@@ -14,6 +14,9 @@ import os
 ############################## Search Class ###################################
 ###############################################################################
 
+default_searcher_config = {
+        'BM25': {'k1': 0.9, 'b': 0.4}
+    }
 
 class SearchTools:
 
@@ -23,7 +26,7 @@ class SearchTools:
     implemented_searchers = ['BM25', 'BM25+RM3']
 
 
-    def __init__(self, index_path, searcher_config=None):
+    def __init__(self, index_path, searcher_config=default_searcher_config):
         # Initialise absolute path to Anserini (Lucene) index.
         print("Index path: {}".format(index_path))
         self.index_path = index_path
@@ -119,13 +122,11 @@ class SearchTools:
                 for line in qrels_f:
                     if "enwiki:" in line:
                         # Extract query from QRELS file.
-                        print(line)
                         query, _, _, _ = line.split(' ')
-                        if query not in written_queries:
-                            # Write query to TOPICS file.
-                            topics_f.write(query + '\n')
-                            # Add query to 'written_queries' list.
-                            written_queries.append(query)
+                        # Write query to TOPICS file.
+                        topics_f.write(query + '\n')
+                        # Add query to 'written_queries' list.
+                        written_queries.append(query)
 
 
     def combine_multiple_qrels(self, qrels_path_list, combined_qrels_path, combined_topics_path=None):
@@ -143,6 +144,15 @@ class SearchTools:
                 f_combined_qrels.write('\n')
 
         self.write_topics_from_qrels(qrels_path=combined_qrels_path, topics_path=combined_topics_path)
+
+
+    def write_tree_no_root_qrels_from_tree_qrels(self, tree_qrels_path, tree_no_root_qrels_path):
+        """ Write tree-no-root qrels from tree qrels file (remove queries that do not contain '/') """
+        with open(tree_no_root_qrels_path, 'w') as f_tree_no_root_qrels:
+            with open(tree_qrels_path, 'r') as f_tree_qrels:
+                for line in f_tree_qrels:
+                    if '/' in line:
+                        f_tree_no_root_qrels.write(line)
 
 
     def write_run_from_topics(self, topics_path, run_path, hits=10, printing_step=1000):
@@ -186,6 +196,15 @@ class SearchTools:
 ################################ Eval Class ###################################
 ###############################################################################
 
+
+default_eval_config = {
+    'map': {'k': None},
+    'Rprec': {'k': None},
+    'recip_rank': {'k': None},
+    'P': {'k': 20},
+    'recall': {'k': 40},
+    'ndcg': {'k': 20}
+}
 
 class EvalTools:
 
@@ -328,7 +347,7 @@ class EvalTools:
         return query_metrics, query_metrics_dict
 
 
-    def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_config):
+    def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_config=default_eval_config):
         """ Given qrels and run paths calculate evaluation metrics by query and aggreated and write to file. """
         # Eval path assumed to be run path with eval identifier added.
         eval_by_query_path = run_path + '.eval.by_query'
@@ -462,62 +481,16 @@ class Pipeline:
 
 
 if __name__ == '__main__':
-    print("hi")
-
     index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'benchmarkY1_train_passage.topics')
-    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test_entity_1000.run')
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'benchmarkY1_train_passage.qrels')
-    results_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data')
-    hits = 1000
-    qrels_path_list = []
-    files = ['fold-1-train.pages.cbor-hierarchical.qrels', 'fold-2-train.pages.cbor-hierarchical.qrels', 'fold-3-train.pages.cbor-hierarchical.qrels', 'fold-4-train.pages.cbor-hierarchical.qrels']
-    for f in files:
-        qrels_path_list.append(os.path.join(results_dir, f))
-    print(qrels_path_list)
-    searcher_config = {
-        'BM25': {'k1': 5.5, 'b': 0.1}
-    }
-    search_tools = SearchTools(index_path=index_path, searcher_config=searcher_config)
-    query = 'test query please'
-    hits = 10
-    q_d = search_tools.searcher.search(q=query, k=hits)
-    from transformers import BertTokenizer
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    for i in q_d:
-        print('==========================')
-        print(i.docid)
-        first_para = search_tools.get_contents_from_docid(doc_id=i.docid).split('\n')[0]
-        first_para_token = tokenizer.encode(first_para, max_length=512)
-        print(len(first_para), len(first_para_token))
+    search_tools = SearchTools(index_path)
 
-        full_doc = search_tools.get_contents_from_docid(doc_id=i.docid)
-        full_doc_token = tokenizer.encode(full_doc, max_length=512)
-        print(len(full_doc), len(full_doc_token))
+    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY1_tree_passage.qrels')
+    tree_no_root_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY1_tree_no_root_passage.qrels')
 
-    #search.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=qrels_path, combined_topics_path=topics_path)
-    # search.write_topics_from_qrels(qrels_path=qrels_path)
+    search_tools.write_topics_from_qrels(qrels_path=tree_no_root_qrels_path)
 
-    #search.write_run_from_topics(topics_path, run_path, hits)
-    #search.write_topics_from_qrels(qrels_path=qrels_path)
-    # eval_config = {
-    #     'map': {'k': None},
-    #     'Rprec': {'k': None},
-    #     'recip_rank': {'k': None},
-    #     'P': {'k': 20},
-    #     'recall': {'k': 40},
-    #     'ndcg': {'k': 20},
-    # }
-    #
-    # eval = EvalTools()
-    # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
-    # dev = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'benchmarkY1_dev_entity.qrels')
-    #
-    # search.write_topics_from_qrels(qrels_path=dev)
-    # pipeline = Pipeline()
-    #
-    # pipeline.search_BM25_tune_parameter(index_path=index_path, topics_path=topics_path, qrels_path=qrels_path,
-    #                                     results_dir=results_dir, hits=2, b_list=np.arange(0.0, 1.1, 0.5),
-    #                                     k1_list=np.arange(0.0, 3.2, 1.6))
+
+
+
 
 

@@ -17,5 +17,8 @@ EntityPaths = StaticPaths(
     test_qrels='/nfs/trec_car/data/entity_ranking/test_hierarchical_entity.qrels',
 )
 
+
+
+
 if __name__ == '__main__':
     print(PassagePaths)
