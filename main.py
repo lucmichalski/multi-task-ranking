@@ -8,14 +8,14 @@ from retrieval.tools import EvalTools, SearchTools
 
 if __name__ == '__main__':
 
-    run_paths = ['/nfs/trec_car/data/entity_ranking/testY1_article_entity_data/testY1_article_entity_1000.run', '/nfs/trec_car/data/entity_ranking/testY1_toplevel_entity_data/testY1_toplevel_entity_1000.run']
-    qrels_paths = ['/nfs/trec_car/data/entity_ranking/testY1_article_entity_data/testY1_article_entity.qrels', '/nfs/trec_car/data/entity_ranking/testY1_toplevel_entity_data/testY1_toplevel_entity.qrels']
-    topics_paths = ['/nfs/trec_car/data/entity_ranking/testY1_article_entity_data/testY1_article_entity.topics', '/nfs/trec_car/data/entity_ranking/testY1_toplevel_entity_data/testY1_toplevel_entity.topics']
-    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/testY1_article_entity_data/testY1_article_entity_para_1000_chunks/','/nfs/trec_car/data/entity_ranking/testY1_toplevel_entity_data/testY1_toplevel_entity_para_1000_chunks/']
-    training_datasets = [False, False]
+    run_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train_250.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev_250.run']
+    qrels_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev.qrels']
+    topics_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train.topics', '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev.topics']
+    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train_para_250_chunks/','/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev_para_250_chunks/']
+    training_datasets = [True, False]
 
     index_path = EntityPaths.index
-    hits = 1000
+    hits = 250
     printing_step = 100
     searcher_config = {
         'BM25': {'k1': 5.5, 'b': 0.1}

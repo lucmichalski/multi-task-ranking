@@ -484,11 +484,19 @@ class Pipeline:
 if __name__ == '__main__':
     index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
     search_tools = SearchTools(index_path)
-
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY1_toplevel_entity.qrels')
+    #TODO - handle tqa queries and doc ids
+    #TODO - manual judgements
+    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_dev.qrels')
 
     search_tools.write_topics_from_qrels(qrels_path=qrels_path)
-
+    # qrels_path_list = []
+    #
+    # for i in [1,2,3,4]:
+    #     qrels_path_list.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'fold-{}-train.pages.cbor-article.entity.qrels'.format(i)))
+    #
+    # combined_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_train.qrels')
+    # combined_topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_train.topics')
+    # search_tools.combine_multiple_qrels(qrels_path_list, combined_qrels_path, combined_topics_path)
 
 
 
