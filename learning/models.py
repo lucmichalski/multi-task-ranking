@@ -3,6 +3,7 @@ from transformers import BertModel, BertPreTrainedModel
 from torch import nn, sigmoid
 from torch.nn import MSELoss
 
+# TODO - try ROBERTa
 
 class BertMultiTaskRanker(BertPreTrainedModel):
     """ Bert Multi-Task ranking model for passage and entity ranking. """
