@@ -8,14 +8,20 @@ from retrieval.tools import EvalTools, SearchTools
 
 if __name__ == '__main__':
 
-    run_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train_250.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev_250.run']
-    qrels_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev.qrels']
-    topics_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train.topics', '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev.topics']
-    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train_para_250_chunks/','/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev_para_250_chunks/']
+    # run_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train_250.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev_250.run']
+    # qrels_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev.qrels']
+    # topics_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train.topics', '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev.topics']
+    # data_dir_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train_para_250_chunks/','/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev_para_250_chunks/']
+    # training_datasets = [True, False]
+
+    run_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_article_entity_train_data/benchmarkY1_article_entity_train_500.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_article_entity_dev_data/benchmarkY1_article_entity_dev_500.run']
+    qrels_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_article_entity_train_data/benchmarkY1_article_entity_train.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_article_entity_dev_data/benchmarkY1_article_entity_dev.qrels']
+    topics_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_article_entity_train_data/benchmarkY1_article_entity_train.topics', '/nfs/trec_car/data/entity_ranking/benchmarkY1_article_entity_dev_data/benchmarkY1_article_entity_dev.topics']
+    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_article_entity_train_data/benchmarkY1_article_entity_train_para_500_chunks/','/nfs/trec_car/data/entity_ranking/benchmarkY1_article_entity_dev_data/benchmarkY1_article_entity_dev_para_500_chunks/']
     training_datasets = [True, False]
 
     index_path = EntityPaths.index
-    hits = 250
+    hits = 500
     printing_step = 100
     searcher_config = {
         'BM25': {'k1': 5.5, 'b': 0.1}
