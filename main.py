@@ -8,10 +8,10 @@ from retrieval.tools import EvalTools, SearchTools
 
 if __name__ == '__main__':
 
-    run_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_passage_runs/testY1_tree_passage_1000.run', '/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_runs/testY1_tree_no_root_passage_1000.run']
-    qrels_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_passage_runs/testY1_tree_passage.qrels', '/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_runs/testY1_tree_no_root_passage.qrels']
-    topics_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_passage_runs/testY1_tree_passage.topics', '/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_runs/testY1_tree_no_root_passage.topics']
-    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_passage_runs/testY1_tree_passage_1000_chunks/', '/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_runs/testY1_tree_no_root_passage_1000_chunks/']
+    run_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_passage_data/testY1_tree_passage_1000.run', '/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_data/testY1_tree_no_root_passage_1000.run']
+    qrels_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_passage_data/testY1_tree_passage.qrels', '/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_data/testY1_tree_no_root_passage.qrels']
+    topics_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_passage_data/testY1_tree_passage.topics', '/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_data/testY1_tree_no_root_passage.topics']
+    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_passage_data/testY1_tree_passage_1000_chunks/', '/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_data/testY1_tree_no_root_passage_1000_chunks/']
     training_datasets = [False, False]
 
     index_path = EntityPaths.index
