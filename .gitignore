@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 .idea*
-#data/temp/*
-#!data/temp/file.txt
+data/temp/*
+!data/temp/file.txt
