@@ -42,7 +42,7 @@ if __name__ == '__main__':
                                        index_path=index_path,
                                        data_dir_path=data_dir_path)
 
-        processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50, first_para=True)
+        processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50, first_para=False)
     #
     # train_data_dir_path = None #'/nfs/trec_car/data/entity_ranking/benchmarkY1_train_entity_para_100_chunks/'
     # train_batch_size = None #8
