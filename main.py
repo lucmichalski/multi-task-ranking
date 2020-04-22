@@ -14,7 +14,7 @@ if __name__ == '__main__':
     data_dir_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_passage_data/testY1_tree_passage_1000_chunks/', '/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_data/testY1_tree_no_root_passage_1000_chunks/']
     training_datasets = [False, False]
 
-    index_path = EntityPaths.index
+    index_path = PassagePaths.index
     hits = 1000
     printing_step = 100
     searcher_config = {
