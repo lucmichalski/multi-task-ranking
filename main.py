@@ -8,17 +8,17 @@ from retrieval.tools import EvalTools, SearchTools
 
 if __name__ == '__main__':
 
-    run_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_data/testY1_tree_no_root_passage_1000.run']
-    qrels_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_data/testY1_tree_no_root_passage.qrels']
-    topics_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_data/testY1_tree_no_root_passage.topics']
-    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/testY1_tree_no_root_passage_data/testY1_tree_no_root_passage_1000_chunks/']
-    training_datasets = [ False]
+    run_paths = ['/nfs/trec_car/data/entity_ranking/testY1_article_entity_data/testY1_article_entity_1000.run', '/nfs/trec_car/data/entity_ranking/testY1_toplevel_entity_data/testY1_toplevel_entity_1000.run']
+    qrels_paths = ['/nfs/trec_car/data/entity_ranking/testY1_article_entity_data/testY1_article_entity.qrels', '/nfs/trec_car/data/entity_ranking/testY1_toplevel_entity_data/testY1_toplevel_entity.qrels']
+    topics_paths = ['/nfs/trec_car/data/entity_ranking/testY1_article_entity_data/testY1_article_entity.topics', '/nfs/trec_car/data/entity_ranking/testY1_toplevel_entity_data/testY1_toplevel_entity.topics']
+    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/testY1_article_entity_data/testY1_article_entity_para_1000_chunks/','/nfs/trec_car/data/entity_ranking/testY1_toplevel_entity_data/testY1_toplevel_entity_para_1000_chunks/']
+    training_datasets = [False, False]
 
-    index_path = PassagePaths.index
+    index_path = EntityPaths.index
     hits = 1000
     printing_step = 100
     searcher_config = {
-        'BM25': {'k1': 0.9, 'b': 0.4}
+        'BM25': {'k1': 5.5, 'b': 0.1}
     }
     eval_config = {
         'map': {'k': None},
@@ -42,7 +42,7 @@ if __name__ == '__main__':
                                        index_path=index_path,
                                        data_dir_path=data_dir_path)
 
-        processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50, first_para=False)
+        processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50, first_para=True)
     #
     # train_data_dir_path = None #'/nfs/trec_car/data/entity_ranking/benchmarkY1_train_entity_para_100_chunks/'
     # train_batch_size = None #8

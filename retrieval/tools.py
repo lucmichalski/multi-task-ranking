@@ -485,10 +485,9 @@ if __name__ == '__main__':
     index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
     search_tools = SearchTools(index_path)
 
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY1_tree_passage.qrels')
-    tree_no_root_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY1_tree_no_root_passage.qrels')
+    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY1_toplevel_entity.qrels')
 
-    search_tools.write_topics_from_qrels(qrels_path=tree_no_root_qrels_path)
+    search_tools.write_topics_from_qrels(qrels_path=qrels_path)
 
 
 
