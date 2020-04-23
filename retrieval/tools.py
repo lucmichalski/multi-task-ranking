@@ -377,7 +377,7 @@ class EvalTools:
         _, query_metrics_oracle = self.get_query_metrics(run=run_oracle, R=R, eval_config=eval_config)
         self.query_metrics_oracle_sum = dict(Counter(self.query_metrics_oracle_sum) + Counter(query_metrics_oracle))
 
-        self.query_counter += 0
+        self.query_counter += 1
 
 
     def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_config=default_eval_config):
