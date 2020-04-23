@@ -402,7 +402,6 @@ class EvalTools:
                     self.__process_topic(query=topic_query, run_doc_ids=run_doc_ids, eval_config=eval_config)
 
                     # Start next query.
-                    run = []
                     run_doc_ids = []
 
                 # Add doc_id to run and map topic_query->query.
