@@ -399,7 +399,7 @@ class EvalTools:
                 # If run batch complete.
                 if (topic_query != None) and (topic_query != query):
 
-                    self.__process_topic(query=topic_query, run_doc_ids=run, eval_config=eval_config)
+                    self.__process_topic(query=topic_query, run_doc_ids=run_doc_ids, eval_config=eval_config)
 
                     # Start next query.
                     run = []
@@ -409,9 +409,9 @@ class EvalTools:
                 topic_query = query
                 run_doc_ids.append(doc_id)
 
-        if len(run) > 0:
+        if len(run_doc_ids) > 0:
 
-            self.__process_topic(query=topic_query, run_doc_ids=run, eval_config=eval_config)
+            self.__process_topic(query=topic_query, run_doc_ids=run_doc_ids, eval_config=eval_config)
 
         # Find mean of metrics.
         eval_metric = {k: v / self.query_counter for k, v in self.query_metrics_run_sum.items()}
