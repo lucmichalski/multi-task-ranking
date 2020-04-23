@@ -391,7 +391,6 @@ class EvalTools:
                         run_oracle = sorted(run, reverse=True)
                         _, query_metrics_oracle = self.get_query_metrics(run=run_oracle, R=R, eval_config=eval_config)
                         query_metrics_oracle_sum = dict(Counter(query_metrics_oracle_sum)+Counter(query_metrics_oracle))
-                        print(query_metrics_oracle_sum)
                         # Start next query.
                         run_doc_ids = []
                         run = []
@@ -432,7 +431,7 @@ class EvalTools:
             for k, v in eval_metric.items():
                 f_eval.write(k + '\t' + "{:.4f}".format(v) + '\n')
 
-            f_eval.write("Re-ranking Oracle:\n")
+            f_eval.write("\nRe-ranking Oracle:\n")
             for k, v in eval_metric_oracle.items():
                 f_eval.write(k + '\t' + "{:.4f}".format(v) + '\n')
 
