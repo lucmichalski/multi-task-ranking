@@ -223,7 +223,6 @@ class EvalTools:
             'recall':       self.get_recall,
             'ndcg':         self.get_ndcg
         }
-        self.query_counter = None
         self.query_metrics_run_sum = None
         self.query_metrics_oracle_sum = None
         self.qrels_dict = None
@@ -377,12 +376,9 @@ class EvalTools:
         _, query_metrics_oracle = self.get_query_metrics(run=run_oracle, R=R, eval_config=eval_config)
         self.query_metrics_oracle_sum = dict(Counter(self.query_metrics_oracle_sum) + Counter(query_metrics_oracle))
 
-        self.query_counter += 1
-
 
     def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_config=default_eval_config):
         """ Given qrels and run paths calculate evaluation metrics by query and aggreated and write to file. """
-        self.query_counter = 0
         self.query_metrics_run_sum = {}
         self.query_metrics_oracle_sum = {}
         self.qrels_dict = self.get_qrels_dict(qrels_path=qrels_path)
@@ -413,8 +409,9 @@ class EvalTools:
             self.__process_topic(query=topic_query, run_doc_ids=run_doc_ids, eval_config=eval_config)
 
         # Find mean of metrics.
-        eval_metric = {k: v / len(self.qrels_dict) for k, v in self.query_metrics_run_sum.items()}
-        eval_metric_oracle = {k: v / len(self.qrels_dict) for k, v in self.query_metrics_oracle_sum.items()}
+        topic_count = len(self.qrels_dict)
+        eval_metric = {k: v / topic_count for k, v in self.query_metrics_run_sum.items()}
+        eval_metric_oracle = {k: v / topic_count for k, v in self.query_metrics_oracle_sum.items()}
 
         # Write overall eval to file.
         eval_path = run_path + '.eval'
