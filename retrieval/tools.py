@@ -351,76 +351,80 @@ class EvalTools:
 
     def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_config=default_eval_config):
         """ Given qrels and run paths calculate evaluation metrics by query and aggreated and write to file. """
-        # Eval path assumed to be run path with eval identifier added.
-        eval_by_query_path = run_path + '.eval.by_query'
         # build qrels dict {query: [rel#1, rel#2, etc.]}.
         qrels_dict = self.get_qrels_dict(qrels_path=qrels_path)
 
+        query_metrics_run_sum = {}
         query_metrics_oracle_sum = {}
-        with open(eval_by_query_path, 'w') as f_eval_by_query:
-            with open(run_path, 'r') as f_run:
-                # Store query of run (i.e. previous query).
-                topic_query = None
-                # Store 'doc_id' for each hit in ascending order i.e. rank=1, rank=2, etc.
-                run_doc_ids = []
-                # Store binary relevance {0, 1} of each 'doc_id'.
-                run = []
-                for hit in f_run:
-                    # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
-                    query, _, doc_id, _, _, _ = hit.split()
-
-                    # If run batch complete.
-                    if (topic_query != None) and (topic_query != query):
-                        # Assert query of run in qrels
-                        assert topic_query in qrels_dict
-                        # For each doc_id find whether relevant (1) or not relevant (0), appending binary relevance to run.
-                        for d in run_doc_ids:
-                            if d in qrels_dict[topic_query]:
-                                run.append(1)
-                            else:
-                                run.append(0)
-
-                        # Calculate number of relevant docs in qrels (R).
-                        R = len(qrels_dict[topic_query])
-                        # Build query metric string.
-                        query_metrics, _ = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
-                        # Write query metric string to file.
-                        f_eval_by_query.write(topic_query + ' ' + query_metrics + '\n')
-
-                        # get oracle metrics
-                        run_oracle = sorted(run, reverse=True)
-                        _, query_metrics_oracle = self.get_query_metrics(run=run_oracle, R=R, eval_config=eval_config)
-                        query_metrics_oracle_sum = dict(Counter(query_metrics_oracle_sum)+Counter(query_metrics_oracle))
-                        # Start next query.
-                        run_doc_ids = []
-                        run = []
-
-                    # Add doc_id to run and map topic_query->query.
-                    run_doc_ids.append(doc_id)
-                    topic_query = query
-
-        # Store sum of metrics across all queries.
-        eval_metric_sum = {}
-        # Store number of queries - used to divide sum to find mean metric.
         query_counter = 0
-        with open(eval_by_query_path, 'r') as f_eval_by_query:
-            for query_metrics in f_eval_by_query:
-                data = query_metrics.split()[1:]
-                # For index and data item in query metric.
-                for i, d in enumerate(data):
-                    # If string of implemented_metrics is substring of data item --> update eval dict.
-                    for m in self.implemented_metrics.keys():
-                        if m in d:
-                            if d not in eval_metric_sum:
-                                eval_metric_sum[d] = 0
-                            # Update
-                            eval_metric_sum[d] += float(data[i+1])
-                            break
-                # Update counter.
+        with open(run_path, 'r') as f_run:
+            # Store query of run (i.e. previous query).
+            topic_query = None
+            # Store 'doc_id' for each hit in ascending order i.e. rank=1, rank=2, etc.
+            run_doc_ids = []
+            # Store binary relevance {0, 1} of each 'doc_id'.
+            run = []
+            for hit in f_run:
+                # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
+                query, _, doc_id, _, _, _ = hit.split()
+
+                # If run batch complete.
+                if (topic_query != None) and (topic_query != query):
+                    query_counter += 1
+                    # Assert query of run in qrels
+                    assert topic_query in qrels_dict
+                    # For each doc_id find whether relevant (1) or not relevant (0), appending binary relevance to run.
+                    for d in run_doc_ids:
+                        if d in qrels_dict[topic_query]:
+                            run.append(1)
+                        else:
+                            run.append(0)
+
+                    # Calculate number of relevant docs in qrels (R).
+                    R = len(qrels_dict[topic_query])
+                    # Build query metric string.
+                    _, query_metrics_run = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
+                    query_metrics_run_sum = dict(Counter(query_metrics_run_sum)+Counter(query_metrics_run))
+
+                    # get oracle metrics
+                    run_oracle = sorted(run, reverse=True)
+                    _, query_metrics_oracle = self.get_query_metrics(run=run_oracle, R=R, eval_config=eval_config)
+                    query_metrics_oracle_sum = dict(Counter(query_metrics_oracle_sum)+Counter(query_metrics_oracle))
+
+                    # Start next query.
+                    run_doc_ids = []
+                    run = []
+
+                # Add doc_id to run and map topic_query->query.
+                run_doc_ids.append(doc_id)
+                topic_query = query
+
                 query_counter += 1
 
+            if len(run) > 0:
+                query_counter += 1
+                # Assert query of run in qrels
+                assert topic_query in qrels_dict
+                # For each doc_id find whether relevant (1) or not relevant (0), appending binary relevance to run.
+                for d in run_doc_ids:
+                    if d in qrels_dict[topic_query]:
+                        run.append(1)
+                    else:
+                        run.append(0)
+
+                # Calculate number of relevant docs in qrels (R).
+                R = len(qrels_dict[topic_query])
+                # Build query metric string.
+                _, query_metrics_run = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
+                query_metrics_run_sum = dict(Counter(query_metrics_run_sum) + Counter(query_metrics_run))
+
+                # get oracle metrics
+                run_oracle = sorted(run, reverse=True)
+                _, query_metrics_oracle = self.get_query_metrics(run=run_oracle, R=R, eval_config=eval_config)
+                query_metrics_oracle_sum = dict(Counter(query_metrics_oracle_sum) + Counter(query_metrics_oracle))
+
         # Find mean of metrics.
-        eval_metric = {k: v / query_counter for k, v in eval_metric_sum.items()}
+        eval_metric = {k: v / query_counter for k, v in query_metrics_run_sum.items()}
         eval_metric_oracle = {k: v / query_counter for k, v in query_metrics_oracle_sum.items()}
 
         # Write overall eval to file.
