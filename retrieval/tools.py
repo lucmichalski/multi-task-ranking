@@ -354,7 +354,7 @@ class EvalTools:
         return query_metrics, query_metrics_dict
 
 
-    def __process_topic(self, query, run, run_doc_ids, eval_config):
+    def __process_topic(self, query, run_doc_ids, eval_config):
 
         # Assert query of run in qrels
         assert query in self.qrels_dict
@@ -399,7 +399,7 @@ class EvalTools:
                 # If run batch complete.
                 if (topic_query != None) and (topic_query != query):
 
-                    self.__process_topic(query=topic_query, run=run, run_doc_ids=run, eval_config=eval_config)
+                    self.__process_topic(query=topic_query, run_doc_ids=run, eval_config=eval_config)
 
                     # Start next query.
                     run = []
@@ -411,7 +411,7 @@ class EvalTools:
 
         if len(run) > 0:
 
-            self.__process_topic(query=topic_query, run=run, run_doc_ids=run, eval_config=eval_config)
+            self.__process_topic(query=topic_query, run_doc_ids=run, eval_config=eval_config)
 
         # Find mean of metrics.
         eval_metric = {k: v / self.query_counter for k, v in self.query_metrics_run_sum.items()}
