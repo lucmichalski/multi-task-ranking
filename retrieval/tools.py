@@ -3,6 +3,7 @@ from pyserini.search import pysearch
 from pyserini.index import pyutils
 from pyserini.analysis.pyanalysis import get_lucene_analyzer, Analyzer
 
+from collections import Counter
 import pandas as pd
 import numpy as np
 import urllib
@@ -355,6 +356,7 @@ class EvalTools:
         # build qrels dict {query: [rel#1, rel#2, etc.]}.
         qrels_dict = self.get_qrels_dict(qrels_path=qrels_path)
 
+        query_metrics_oracle_sum = {}
         with open(eval_by_query_path, 'w') as f_eval_by_query:
             with open(run_path, 'r') as f_run:
                 # Store query of run (i.e. previous query).
@@ -384,6 +386,11 @@ class EvalTools:
                         query_metrics, _ = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
                         # Write query metric string to file.
                         f_eval_by_query.write(topic_query + ' ' + query_metrics + '\n')
+
+                        # get oracle metrics
+                        run_oracle = sorted(run, reverse=True)
+                        query_metrics_oracle, _ = self.get_query_metrics(run=run_oracle, R=R, eval_config=eval_config)
+                        query_metrics_oracle_sum = dict(Counter(query_metrics_oracle_sum)+Counter(query_metrics_oracle))
                         # Start next query.
                         run_doc_ids = []
                         run = []
@@ -414,14 +421,21 @@ class EvalTools:
 
         # Find mean of metrics.
         eval_metric = {k: v / query_counter for k, v in eval_metric_sum.items()}
+        eval_metric_oracle = {k: v / query_counter for k, v in query_metrics_oracle_sum.items()}
 
         # Write overall eval to file.
         eval_path = run_path + '.eval'
         with open(eval_path, 'w') as f_eval:
-            for k, v in eval_metric.items():
-                f_eval.write(k + ' ' + "{:.4f}".format(v) + '\n')
 
-        return eval_metric
+            f_eval.write("Run:\n")
+            for k, v in eval_metric.items():
+                f_eval.write(k + '\t' + "{:.4f}".format(v) + '\n')
+
+            f_eval.write("Re-ranking Oracle:\n")
+            for k, v in eval_metric_oracle.items():
+                f_eval.write(k + '\t' + "{:.4f}".format(v) + '\n')
+
+        return eval_metric, eval_metric_oracle
 
 
 ###############################################################################
@@ -486,19 +500,19 @@ if __name__ == '__main__':
     search_tools = SearchTools(index_path)
     #TODO - handle tqa queries and doc ids
     #TODO - manual judgements
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_dev.qrels')
+    #TODO - change warmup to proportion
 
-    search_tools.write_topics_from_qrels(qrels_path=qrels_path)
+    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_tree_passage_train.qrels')
+    tree_no_root_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_tree_no_root_passage_train.qrels')
+    search_tools.write_tree_no_root_qrels_from_tree_qrels(tree_qrels_path=qrels_path, tree_no_root_qrels_path=tree_no_root_qrels_path)
+    search_tools.write_topics_from_qrels(qrels_path=tree_no_root_qrels_path)
+
     # qrels_path_list = []
-    #
     # for i in [1,2,3,4]:
-    #     qrels_path_list.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'fold-{}-train.pages.cbor-article.entity.qrels'.format(i)))
+    #     qrels_path_list.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'fold-{}-train.pages.cbor.tree.qrels'.format(i)))
     #
-    # combined_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_train.qrels')
-    # combined_topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_train.topics')
+    # combined_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_no_root_tree_passage_train.qrels')
+    # combined_topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_no_root_tree_passage_train.topics')
     # search_tools.combine_multiple_qrels(qrels_path_list, combined_qrels_path, combined_topics_path)
-
-
-
 
 
