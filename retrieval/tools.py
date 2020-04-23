@@ -392,9 +392,9 @@ class EvalTools:
             topic_query = None
            # Store doc_ids of query got relevance mapping.
             run_doc_ids = []
-            for hit in f_run:
+            for line in f_run:
                 # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
-                query, _, doc_id, _, _, _ = hit.split()
+                query, _, doc_id, _, _, _ = line.split()
 
                 # If run batch complete.
                 if (topic_query != None) and (topic_query != query):
