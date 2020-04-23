@@ -413,8 +413,8 @@ class EvalTools:
             self.__process_topic(query=topic_query, run_doc_ids=run_doc_ids, eval_config=eval_config)
 
         # Find mean of metrics.
-        eval_metric = {k: v / self.query_counter for k, v in self.query_metrics_run_sum.items()}
-        eval_metric_oracle = {k: v / self.query_counter for k, v in self.query_metrics_oracle_sum.items()}
+        eval_metric = {k: v / len(self.qrels_dict) for k, v in self.query_metrics_run_sum.items()}
+        eval_metric_oracle = {k: v / len(self.qrels_dict) for k, v in self.query_metrics_oracle_sum.items()}
 
         # Write overall eval to file.
         eval_path = run_path + '.eval'
