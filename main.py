@@ -50,12 +50,12 @@ if __name__ == '__main__':
     #
     #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=True)
     #
-    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_passage_train_data/benchmarkY1_tree_passage_train_100_chunks/'
+    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_no_root_passage_train_data/benchmarkY1_tree_no_root_passage_train_100_chunks/'
     train_batch_size = 8
-    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_passage_dev_data/benchmarkY1_tree_passage_dev_100_chunks/'
+    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_no_root_passage_dev_data/benchmarkY1_tree_no_root_passage_dev_100_chunks/'
     dev_batch_size = 200
-    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_passage_dev_data/benchmarkY1_tree_passage_dev.qrels'
-    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_passage_dev_data/benchmarkY1_tree_passage_dev_100.run'
+    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_no_root_passage_dev_data/benchmarkY1_tree_no_root_passage_dev.qrels'
+    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_no_root_passage_dev_data/benchmarkY1_tree_no_root_passage_dev_100.run'
     model_path = None
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'benchmarkY1_tree_passage_100_lr_8e6_num_warmup_steps_0.1'
+    experiment_name = 'benchmarkY1_tree_no_root_passage_100_lr_8e6_num_warmup_steps_0.1'
     write = True
     logging_steps = 1000
     head_flag = 'passage'
