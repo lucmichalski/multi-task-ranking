@@ -301,7 +301,7 @@ class FineTuningReRankingExperiments:
 
 
     def run_experiment_single_head(self, head_flag, epochs=1, lr=2e-5, eps=1e-8, weight_decay=0.01,
-                                   num_warmup_steps=0, experiments_dir=None, experiment_name=None, logging_steps=100):
+                                   warmup_percentage=0.1, experiments_dir=None, experiment_name=None, logging_steps=100):
         """ Run training and validation for a single head. """
 
         # Define experiment_path directory to contain all logging, models and results.
@@ -331,6 +331,7 @@ class FineTuningReRankingExperiments:
             # Initialise optimizer and scheduler for training.
             optimizer = AdamW(self.model.parameters(), lr=lr, eps=eps, weight_decay=weight_decay)
             num_train_steps = len(self.train_dataloader)
+            num_warmup_steps = int(num_train_steps * warmup_percentage)
             scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps,
                                                         num_training_steps=num_train_steps)
 
