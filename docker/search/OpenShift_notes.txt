@@ -34,7 +34,7 @@ spec:
     imagePullPolicy: IfNotPresent
     resources:
       requests:
-        cpu: "10000m"
+        cpu: "2000m"
         memory: "12Gi"
       limits:
         cpu: "16000m"
@@ -43,5 +43,6 @@ spec:
     - mountPath: /nfs/
       name: nfs-access
   restartPolicy: Never
+  serviceAccount: containerroot
 
 ################################################
