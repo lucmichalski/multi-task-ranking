@@ -33,7 +33,7 @@ class SearchTools:
         print("Index path: {}".format(index_path))
         self.index_path = index_path
         # Initialise index_utils for accessing index information.
-        self.index_utils = pyutils.IndexReaderUtils(self.index_path)
+        self.index_utils = self.__build_index_utils(index_path=index_path)
         # Initialise searcher configuration with searcher_config dict. If no settings -> use SimpleSearcher.
         self.searcher = self.__build_searcher(searcher_config=searcher_config)
 
