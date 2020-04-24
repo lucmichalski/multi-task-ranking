@@ -175,7 +175,7 @@ class TrecCarProcessing:
                 # Unpack line in run file.
                 query, _, doc_id, rank, _, _ = line.split(' ')
                 # Assert correct query format..
-                assert 'enwiki:' in query, "Not valid query: {}".format(line)
+                assert self.eval_tools.search_tools.test_valid_line(line=line), "Not valid query: {}".format(line)
 
                 # If final doc_id in topic -> process batch.
                 if (topic_query != None) and (topic_query != query):

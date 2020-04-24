@@ -176,6 +176,18 @@ class SearchTools:
                     if '/' in line:
                         f_tree_no_root_qrels.write(line)
 
+    def write_new_qrels_with_mapped_scores(self, old_qrels_path, new_qrels_path, mapped_scores):
+        """ Augment qrels file mapping qrels scores to different scores. """
+        with open(new_qrels_path, 'w') as f_new:
+            with open(old_qrels_path, 'r') as f_old:
+                for line in f_old:
+                    if self.test_valid_line(line):
+                        query, q, doc_id, old_score = line.split(' ')
+                        assert int(old_score) in mapped_scores, "score: {} not in mapped_scores: {}".format(old_score, mapped_scores)
+                        new_score = mapped_scores[int(old_score)]
+                        if new_score != None:
+                            f_new.write(" ".join((query, q, doc_id, str(new_score))) + '\n')
+
 
     def write_run_from_topics(self, topics_path, run_path, hits=10, printing_step=1000):
         """ Write TREC RUN file using BM25 from topics file. """
@@ -513,9 +525,18 @@ if __name__ == '__main__':
     #TODO - manual judgements
     #TODO - change warmup to proportion
 
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_automatic_entity.qrels')
-    search_tools.write_topics_from_qrels(qrels_path=qrels_path)
-
+    old_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_manual_entity_old.qrels')
+    new_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_manual_passage.qrels')
+    mapped_scores = {
+        3: 1,
+        2: 1,
+        1: 1,
+        0: None,
+        -1: None,
+        -2: None
+    }
+    # search_tools.write_new_qrels_with_mapped_scores(new_qrels_path=new_qrels_path, old_qrels_path=old_qrels_path, mapped_scores=mapped_scores)
+    search_tools.write_topics_from_qrels(qrels_path=new_qrels_path)
     # qrels_path_list = []
     # for i in [1,2,3,4]:
     #     qrels_path_list.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'fold-{}-train.pages.cbor.tree.qrels'.format(i)))
