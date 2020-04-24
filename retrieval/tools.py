@@ -25,6 +25,7 @@ class SearchTools:
 
     # Pyserini implemented searcher configs.
     implemented_searchers = ['BM25', 'BM25+RM3']
+    query_start_stings = ['enwiki:', 'tqa:']
 
 
     def __init__(self, index_path, searcher_config=default_searcher_config):
@@ -37,8 +38,17 @@ class SearchTools:
         self.searcher = self.__build_searcher(searcher_config=searcher_config)
 
 
+    def __build_index_utils(self, index_path):
+        """ Initialise index_utils for accessing index information. """
+        if index_path == None:
+            return None
+        else:
+            return pyutils.IndexReaderUtils(self.index_path)
+
     def __build_searcher(self, searcher_config):
         """ Build Pyserini SimpleSearcher based on config."""
+        if searcher_config == None:
+            return None
         searcher = pysearch.SimpleSearcher(index_dir=self.index_path)
         if isinstance(searcher_config, dict):
             # Check valid searcher config
@@ -88,12 +98,18 @@ class SearchTools:
         return self.__get_ranking_from_searcher(query=query, hits=hits)
 
 
+    def __remove_query_start(self, q):
+        """ Removes beginning of query. """
+        for start_str in self.query_start_stings:
+            i = len(start_str)
+            if start_str == q[:i]:
+                return q[i:]
+
+
     def process_query(self, q):
         """ Simple processing of query from TREC CAR format i.e. leave in utf-8 except space characters. """
-        # Remove "enwiki:" from begging of string.
-        i = 7
-        assert q[:i] == "enwiki:"
-        q = q[i:]
+        # Remove begging of string.
+        q = self.__remove_query_start(q=q)
         # Add space for utf-8 space character.
         q = q.replace('%20', ' ')
         return q
@@ -102,9 +118,13 @@ class SearchTools:
     def decode_query(self, q, encoding='utf-8'):
         """ Process query using ut-8 decoding from TREC CAR format. """
         # Remove "enwiki:" from begging of string.
-        i = 7
-        assert q[:i] == "enwiki:"
-        return urllib.parse.unquote(string=q[i:], encoding=encoding)
+        q = self.__remove_query_start(q=q)
+        return urllib.parse.unquote(string=q, encoding=encoding)
+
+
+    def test_valid_line(self, line):
+        """ Return bool whether valid starting substring is in line"""
+        return any(substring in line for substring in self.query_start_stings)
 
 
     def write_topics_from_qrels(self, qrels_path, topics_path=None):
@@ -121,7 +141,7 @@ class SearchTools:
         with open(topics_path, 'w') as topics_f:
             with open(qrels_path, 'r') as qrels_f:
                 for line in qrels_f:
-                    if "enwiki:" in line:
+                    if self.test_valid_line(line=line):
                         # Extract query from QRELS file.
                         query, _, _, _ = line.split(' ')
                         if query not in written_queries:
@@ -138,7 +158,7 @@ class SearchTools:
                 print(qrels_path)
                 with open(qrels_path, 'r') as f_qrels:
                     for line in f_qrels:
-                        if "enwiki:" in line:
+                        if self.test_valid_line(line=line):
                             query, Q0, doc_id, rank = line.split(' ')
                             f_combined_qrels.write(" ".join((query, Q0, doc_id, rank)))
                         else:
@@ -226,6 +246,7 @@ class EvalTools:
         self.query_metrics_run_sum = None
         self.query_metrics_oracle_sum = None
         self.qrels_dict = None
+        self.search_tools = SearchTools(index_path=None, searcher_config=None)
 
 
     def get_map(self, run, R, k=None):
@@ -318,7 +339,7 @@ class EvalTools:
             for line in qrels_file:
                 query, _, doc_id, _ = line.strip().split(" ")
                 # key: query, value: list of doc_ids
-                if 'enwiki:' in query:
+                if self.search_tools.test_valid_line(line=line):
                     if query in qrels_dict:
                         qrels_dict[query].append(doc_id)
                     else:
@@ -492,10 +513,8 @@ if __name__ == '__main__':
     #TODO - manual judgements
     #TODO - change warmup to proportion
 
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_tree_passage_train.qrels')
-    tree_no_root_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_tree_no_root_passage_train.qrels')
-    search_tools.write_tree_no_root_qrels_from_tree_qrels(tree_qrels_path=qrels_path, tree_no_root_qrels_path=tree_no_root_qrels_path)
-    search_tools.write_topics_from_qrels(qrels_path=tree_no_root_qrels_path)
+    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_automatic_entity.qrels')
+    search_tools.write_topics_from_qrels(qrels_path=qrels_path)
 
     # qrels_path_list = []
     # for i in [1,2,3,4]:
