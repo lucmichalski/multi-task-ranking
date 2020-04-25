@@ -52,11 +52,11 @@ if __name__ == '__main__':
     #
     train_data_dir_path = None #'/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_no_root_passage_train_data/benchmarkY1_tree_no_root_passage_train_100_chunks/'
     train_batch_size = None #8
-    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_passage_data/testY2_manual_passage_1000_chunks/'
+    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000_chunks/'
     dev_batch_size = 64 * 8
-    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_passage_data/testY2_manual_passage.qrels'
-    dev_run_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_passage_data/testY2_manual_passage_1000.run'
-    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/epoch1_batch14000/'
+    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity.qrels'
+    dev_run_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run'
+    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_toplevel_entity_para_250_lr_1e5_num_warmup_steps_100/epoch1_batch2600/'
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
                                                 train_batch_size=train_batch_size,
@@ -87,6 +87,6 @@ if __name__ == '__main__':
     #                                 experiment_name=experiment_name,
     #                                 logging_steps=logging_steps)
 
-    head_flag = 'passage'
-    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/benchmarkY1_hierarchical_passage_100_model_test_Y2_manual_passage.run'
+    head_flag = 'entity'
+    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/benchmarkY1_toplevel_entity_250_model_test_Y2_manual_entity.run'
     experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
