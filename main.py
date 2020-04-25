@@ -56,7 +56,7 @@ if __name__ == '__main__':
     dev_batch_size = 64 * 8
     dev_qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_passage_data/testY2_manual_passage.qrels'
     dev_run_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_passage_data/testY2_manual_passage_100.run'
-    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/'
+    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/epoch1_batch14000/'
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
                                                 train_batch_size=train_batch_size,
