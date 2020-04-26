@@ -70,7 +70,7 @@ class FineTuningReRankingExperiments:
             for line in f_run:
                 # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
                 query, _, doc_id, _, _, _ = line.split()
-                if 'enwiki:' in query:
+                if self.eval_tools.search_tools.test_valid_line(line):
                     # Relevant
                     if doc_id in self.dev_qrels[query]:
                         R = 1.0
