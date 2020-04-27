@@ -1,5 +1,5 @@
 
-from retrieval.tools import SearchTools, EvalTools
+from retrieval.tools import SearchTools, EvalTools, RetrievalUtils
 from transformers import BertTokenizer
 from torch.utils.data import TensorDataset
 
@@ -14,11 +14,11 @@ import os
 class TrecCarProcessing:
     """ Process TREC CAR qrels and run files to Pytorch datasets. """
 
+    retrieval_utils = RetrievalUtils()
+
     def __init__(self, qrels_path, run_path, index_path, data_dir_path,
                  tokenizer=BertTokenizer.from_pretrained('bert-base-uncased'), max_length=512):
 
-        # Initialise EvalTools.
-        self.eval_tools = EvalTools()
         # Path to qrels file.
         self.qrels_path = qrels_path
         # Path to run file.
@@ -34,7 +34,7 @@ class TrecCarProcessing:
         # Max length of BERT tokens.
         self.max_length = max_length
         # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
-        self.qrels = self.eval_tools.get_qrels_dict(qrels_path=self.qrels_path)
+        self.qrels = self.retrieval_utils.get_qrels_dict(qrels_path=self.qrels_path)
         # Lists of BERT inputs.
         self.input_ids_list = []
         self.token_type_ids_list = []
@@ -175,7 +175,7 @@ class TrecCarProcessing:
                 # Unpack line in run file.
                 query, _, doc_id, rank, _, _ = line.split(' ')
                 # Assert correct query format..
-                assert self.eval_tools.search_tools.test_valid_line(line=line), "Not valid query: {}".format(line)
+                assert self.retrieval_utils.test_valid_line(line=line), "Not valid query: {}".format(line)
 
                 # If final doc_id in topic -> process batch.
                 if (topic_query != None) and (topic_query != query):

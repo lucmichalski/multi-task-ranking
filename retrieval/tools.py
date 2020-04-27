@@ -10,6 +10,33 @@ import urllib
 import math
 import os
 
+###############################################################################
+######################### Retrieval Utils Class ###############################
+###############################################################################
+
+class RetrievalUtils:
+
+    query_start_stings = ['enwiki:', 'tqa:']
+
+    def get_qrels_dict(self, qrels_path):
+        """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}. """
+        qrels_dict = {}
+        with open(qrels_path) as qrels_file:
+            # Read each line of qrels file.
+            for line in qrels_file:
+                query, _, doc_id, _ = line.strip().split(" ")
+                # key: query, value: list of doc_ids
+                if self.test_valid_line(line=line):
+                    if query in qrels_dict:
+                        qrels_dict[query].append(doc_id)
+                    else:
+                        qrels_dict[query] = [doc_id]
+        return qrels_dict
+
+    def test_valid_line(self, line):
+        """ Return bool whether valid starting substring is in line"""
+        return any(substring in line for substring in self.query_start_stings)
+
 
 ###############################################################################
 ############################## Search Class ###################################
@@ -25,8 +52,7 @@ class SearchTools:
 
     # Pyserini implemented searcher configs.
     implemented_searchers = ['BM25', 'BM25+RM3']
-    query_start_stings = ['enwiki:', 'tqa:']
-
+    retrieval_utils = RetrievalUtils()
 
     def __init__(self, index_path, searcher_config=default_searcher_config):
         # Initialise absolute path to Anserini (Lucene) index.
@@ -100,7 +126,7 @@ class SearchTools:
 
     def __remove_query_start(self, q):
         """ Removes beginning of query. """
-        for start_str in self.query_start_stings:
+        for start_str in self.retrieval_utils.query_start_stings:
             i = len(start_str)
             if start_str == q[:i]:
                 return q[i:]
@@ -122,11 +148,6 @@ class SearchTools:
         return urllib.parse.unquote(string=q, encoding=encoding)
 
 
-    def test_valid_line(self, line):
-        """ Return bool whether valid starting substring is in line"""
-        return any(substring in line for substring in self.query_start_stings)
-
-
     def write_topics_from_qrels(self, qrels_path, topics_path=None):
         """ Given a TREC standard QRELS file in 'qrels_path', write TREC standard TOPICS file in 'file_path'. """
         # Build topics file path if None specified.
@@ -141,7 +162,7 @@ class SearchTools:
         with open(topics_path, 'w') as topics_f:
             with open(qrels_path, 'r') as qrels_f:
                 for line in qrels_f:
-                    if self.test_valid_line(line=line):
+                    if self.retrieval_utils.test_valid_line(line=line):
                         # Extract query from QRELS file.
                         query, _, _, _ = line.split(' ')
                         if query not in written_queries:
@@ -158,7 +179,7 @@ class SearchTools:
                 print(qrels_path)
                 with open(qrels_path, 'r') as f_qrels:
                     for line in f_qrels:
-                        if self.test_valid_line(line=line):
+                        if self.retrieval_utils.test_valid_line(line=line):
                             query, Q0, doc_id, rank = line.split(' ')
                             f_combined_qrels.write(" ".join((query, Q0, doc_id, rank)))
                         else:
@@ -176,12 +197,13 @@ class SearchTools:
                     if '/' in line:
                         f_tree_no_root_qrels.write(line)
 
+
     def write_new_qrels_with_mapped_scores(self, old_qrels_path, new_qrels_path, mapped_scores):
         """ Augment qrels file mapping qrels scores to different scores. """
         with open(new_qrels_path, 'w') as f_new:
             with open(old_qrels_path, 'r') as f_old:
                 for line in f_old:
-                    if self.test_valid_line(line):
+                    if self.retrieval_utils.test_valid_line(line):
                         query, q, doc_id, old_score = line.split(' ')
                         assert int(old_score) in mapped_scores, "score: {} not in mapped_scores: {}".format(old_score, mapped_scores)
                         new_score = mapped_scores[int(old_score)]
@@ -244,6 +266,8 @@ class EvalTools:
 
     """ Information retrieval eval class. """
 
+    retrieval_utils = RetrievalUtils()
+
     # Implemented eval metrics.
     def __init__(self):
         """ Map of metrics labels : calaulated functions """
@@ -258,7 +282,6 @@ class EvalTools:
         self.query_metrics_run_sum = None
         self.query_metrics_oracle_sum = None
         self.qrels_dict = None
-        self.search_tools = SearchTools(index_path=None, searcher_config=None)
 
 
     def get_map(self, run, R, k=None):
@@ -343,22 +366,6 @@ class EvalTools:
             return 0.0
 
 
-    def get_qrels_dict(self, qrels_path):
-        """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}. """
-        qrels_dict = {}
-        with open(qrels_path) as qrels_file:
-            # Read each line of qrels file.
-            for line in qrels_file:
-                query, _, doc_id, _ = line.strip().split(" ")
-                # key: query, value: list of doc_ids
-                if self.search_tools.test_valid_line(line=line):
-                    if query in qrels_dict:
-                        qrels_dict[query].append(doc_id)
-                    else:
-                        qrels_dict[query] = [doc_id]
-        return qrels_dict
-
-
     def get_query_metrics(self, run, R, eval_config):
         """ Build metrics (string and dict representation) from eval_config. """
 
@@ -387,9 +394,9 @@ class EvalTools:
 
 
     def __process_topic(self, query, run_doc_ids, eval_config):
-
+        """ Process eval of topic. """
         # Assert query of run in qrels
-        assert query in self.qrels_dict
+        assert query in self.qrels_dict, 'query: {}\n qrels_dict: {}'.format(query, self.qrels_dict.keys())
         # For each doc_id find whether relevant (1) or not relevant (0), appending binary relevance to run.
         run = []
         for d in run_doc_ids:
@@ -414,7 +421,7 @@ class EvalTools:
         """ Given qrels and run paths calculate evaluation metrics by query and aggreated and write to file. """
         self.query_metrics_run_sum = {}
         self.query_metrics_oracle_sum = {}
-        self.qrels_dict = self.get_qrels_dict(qrels_path=qrels_path)
+        self.qrels_dict = self.retrieval_utils.get_qrels_dict(qrels_path=qrels_path)
 
         with open(run_path, 'r') as f_run:
             # Store query of run (i.e. previous query).
@@ -520,30 +527,8 @@ class Pipeline:
 
 
 if __name__ == '__main__':
-    index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    search_tools = SearchTools(index_path)
-    #TODO - handle tqa queries and doc ids
-    #TODO - manual judgements
-    #TODO - change warmup to proportion
-
-    old_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_manual_entity_old.qrels')
-    new_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_manual_passage.qrels')
-    mapped_scores = {
-        3: 1,
-        2: 1,
-        1: 1,
-        0: None,
-        -1: None,
-        -2: None
-    }
-    # search_tools.write_new_qrels_with_mapped_scores(new_qrels_path=new_qrels_path, old_qrels_path=old_qrels_path, mapped_scores=mapped_scores)
-    search_tools.write_topics_from_qrels(qrels_path=new_qrels_path)
-    # qrels_path_list = []
-    # for i in [1,2,3,4]:
-    #     qrels_path_list.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'fold-{}-train.pages.cbor.tree.qrels'.format(i)))
-    #
-    # combined_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_no_root_tree_passage_train.qrels')
-    # combined_topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_no_root_tree_passage_train.topics')
-    # search_tools.combine_multiple_qrels(qrels_path_list, combined_qrels_path, combined_topics_path)
-
+    eval_tools = EvalTools()
+    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_500_model_test_Y2_manual_entity.run')
+    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_manual_entity.qrels')
+    eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path)
 
