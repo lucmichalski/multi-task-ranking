@@ -276,6 +276,7 @@ class EvalTools:
         self.query_metrics_run_sum = None
         self.query_metrics_oracle_sum = None
         self.qrels_dict = None
+        self.metric_labels = None
 
 
     def get_map(self, run, R, k=None):
@@ -371,12 +372,14 @@ class EvalTools:
         # Loop over implemented_metrics/eval_config.
         query_metrics = ''
         query_metrics_dict = {}
+        self.metric_labels = []
         for eval_func, k in eval_config:
             # Build label of metric.
             if k == None:
                 metric_label = eval_func
             else:
                 metric_label = eval_func + '_' + str(k)
+            self.metric_labels.append(metric_label)
             # Calculate metric.
             metric = self.implemented_metrics[eval_func](run=run, k=k, R=R)
             # Append metric label and metric to string.
@@ -452,12 +455,12 @@ class EvalTools:
         with open(eval_path, 'w') as f_eval:
 
             f_eval.write("Run:\n")
-            for k, v in eval_metric.items():
-                f_eval.write(k + '\t' + "{:.4f}".format(v) + '\n')
+            for metric_label in self.metric_labels:
+                f_eval.write(metric_label + '\t' + "{:.4f}".format(eval_metric[metric_label]) + '\n')
 
             f_eval.write("\nRe-ranking Oracle:\n")
-            for k, v in eval_metric_oracle.items():
-                f_eval.write(k + '\t' + "{:.4f}".format(v) + '\n')
+            for metric_label in self.metric_labels:
+                f_eval.write(metric_label + '\t' + "{:.4f}".format(eval_metric_oracle[metric_label]) + '\n')
 
         return eval_metric, eval_metric_oracle
 
