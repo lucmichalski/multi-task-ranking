@@ -24,7 +24,8 @@ class RetrievalUtils:
         with open(qrels_path) as qrels_file:
             # Read each line of qrels file.
             for line in qrels_file:
-                query, _, doc_id, _ = line.strip().split(" ")
+                query = line.strip().split(" ")[0]
+                doc_id = line.strip().split(" ")[2]
                 # key: query, value: list of doc_ids
                 if self.test_valid_line(line=line):
                     if query in qrels_dict:
@@ -33,9 +34,31 @@ class RetrievalUtils:
                         qrels_dict[query] = [doc_id]
         return qrels_dict
 
+
     def test_valid_line(self, line):
         """ Return bool whether valid starting substring is in line"""
         return any(substring in line for substring in self.query_start_stings)
+
+
+    def unpack_run_line(self, line):
+        """ """
+        split_line = line.split(' ')
+        query = split_line[0]
+        q = split_line[1]
+        doc_id = split_line[2]
+        rank = split_line[3]
+        score = split_line[4]
+        name = split_line[5]
+        return query, q, doc_id, rank, score, name
+
+    def unpack_qrels_line(self, line):
+        """ """
+        split_line = line.split(' ')
+        query = split_line[0]
+        q = split_line[1]
+        doc_id = split_line[2]
+        score = split_line[3]
+        return query, q, doc_id, score
 
 
 ###############################################################################
@@ -164,7 +187,7 @@ class SearchTools:
                 for line in qrels_f:
                     if self.retrieval_utils.test_valid_line(line=line):
                         # Extract query from QRELS file.
-                        query, _, _, _ = line.split(' ')
+                        query, _, _, _ = self.retrieval_utils.unpack_qrels_line(line=line)
                         if query not in written_queries:
                             # Write query to TOPICS file.
                             topics_f.write(query + '\n')
@@ -180,8 +203,7 @@ class SearchTools:
                 with open(qrels_path, 'r') as f_qrels:
                     for line in f_qrels:
                         if self.retrieval_utils.test_valid_line(line=line):
-                            query, Q0, doc_id, rank = line.split(' ')
-                            f_combined_qrels.write(" ".join((query, Q0, doc_id, rank)))
+                            f_combined_qrels.write(line)
                         else:
                             print("Not valid query: {}")
                 f_combined_qrels.write('\n')
@@ -204,7 +226,7 @@ class SearchTools:
             with open(old_qrels_path, 'r') as f_old:
                 for line in f_old:
                     if self.retrieval_utils.test_valid_line(line):
-                        query, q, doc_id, old_score = line.split(' ')
+                        query, q, doc_id, old_score = self.retrieval_utils.unpack_qrels_line(line=line)
                         assert int(old_score) in mapped_scores, "score: {} not in mapped_scores: {}".format(old_score, mapped_scores)
                         new_score = mapped_scores[int(old_score)]
                         if new_score != None:
@@ -223,7 +245,7 @@ class SearchTools:
                 for line in f_topics:
                     rank = 1
                     # Process query.
-                    query = line.split()[0]
+                    query, _, _, _ = self.retrieval_utils.unpack_qrels_line(line=line)
 
                     # Try to decode query correctly using URL utf-8 decoding. If this string causes an error within
                     # Pyserini's SimpleSearcher.search() use basic string processing only dealing with space characters.
@@ -426,7 +448,8 @@ class EvalTools:
             run_doc_ids = []
             for line in f_run:
                 # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
-                query, _, doc_id, _, _, _ = line.split()
+
+                query, _, doc_id, _, _, _ = self.retrieval_utils.unpack_run_line(line=line)
 
                 # If run batch complete.
                 if (topic_query != None) and (topic_query != query):
