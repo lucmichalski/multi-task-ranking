@@ -1,7 +1,7 @@
 
 from learning.models import BertMultiTaskRanker
 from learning.utils import BertDataset
-from retrieval.tools import EvalTools
+from retrieval.tools import EvalTools, RetrievalUtils
 
 from transformers.optimization import AdamW
 from transformers import get_linear_schedule_with_warmup
@@ -19,14 +19,17 @@ import os
 
 class FineTuningReRankingExperiments:
 
+    eval_tools = EvalTools()
+    # Evaluation config used in EvalTools.
+    eval_config = [('map', None), ('Rprec', None), ('recip_rank', None), ('ndcg', 20), ('P', 20), ('recall', 40),
+                   ('recall', 100), ('recall', 1000)]
+    retrieval_utils = RetrievalUtils()
     pretrained_weights = 'bert-base-uncased'
 
     def __init__(self, model_path=None, train_data_dir_path=None, train_batch_size=None, dev_data_dir_path=None,
                  dev_batch_size=None, dev_qrels_path=None, dev_run_path=None):
         # Load model from path or use pretrained_weights.
         self.model = self.__init_model(model_path=model_path)
-        # Initialise EvalTools.
-        self.eval_tools = EvalTools()
         # Build PyTorch Dataloader for training data.
         self.train_dataloader = self.__build_dataloader(data_dir_path=train_data_dir_path, batch_size=train_batch_size,
                                                         random_sample=True)
@@ -38,7 +41,7 @@ class FineTuningReRankingExperiments:
         # Store path of original dev/test qrels.
         self.dev_qrels_path = dev_qrels_path
         # Dictionary from a qrels file. Key: query, value: list of relevant doc_ids.
-        self.dev_qrels = self.__get_qrels(qrels_path=dev_qrels_path)
+        self.dev_qrels = self.retrieval_utils.get_qrels_dict(qrels_path=dev_qrels_path)
         # List of tuples from run file (query, doc_id, R).
         self.dev_run_data = self.__get_run_data(run_path=dev_run_path)
         # Store dev original labels. 1 = relevant, 0 = not relevant.
@@ -47,20 +50,6 @@ class FineTuningReRankingExperiments:
         self.dev_logits = None
         # Store torch device
         self.device = self.__get_torch_device()
-        # Evaluation config used in EvalTools.
-        self.eval_config = {
-            'map': {'k': None},
-            'Rprec': {'k': None},
-            'recip_rank': {'k': None},
-            'P': {'k': 20},
-            'recall': {'k': 40},
-            'ndcg': {'k': 20},
-        }
-
-
-    def __get_qrels(self, qrels_path):
-        """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}."""
-        return self.eval_tools.get_qrels_dict(qrels_path=qrels_path)
 
 
     def __get_run_data(self, run_path):
@@ -70,7 +59,7 @@ class FineTuningReRankingExperiments:
             for line in f_run:
                 # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
                 query, _, doc_id, _, _, _ = line.split()
-                if self.eval_tools.search_tools.test_valid_line(line):
+                if self.retrieval_utils.test_valid_line(line):
                     # Relevant
                     if doc_id in self.dev_qrels[query]:
                         R = 1.0
@@ -395,7 +384,7 @@ class FineTuningReRankingExperiments:
                     try:
                         self.model.module.save_pretrained(model_dir)
                     except AttributeError:
-                        self.save_pretrained(model_dir)
+                        self.model.save_pretrained(model_dir)
 
 
     def run_experiment_multiple_heads(self):
@@ -508,7 +497,7 @@ if __name__ == '__main__':
     lr = 5e-3
     eps = 1e-8
     weight_decay = 0.01
-    num_warmup_steps = 0
+    warmup_percentage = 0.1
     seed_val = 42
     experiments_dir = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'exp')
     experiment_name = 'test_exp_2'
@@ -520,7 +509,7 @@ if __name__ == '__main__':
                                           lr=lr,
                                           eps=eps,
                                           weight_decay=weight_decay,
-                                          num_warmup_steps=num_warmup_steps,
+                                          warmup_percentage=warmup_percentage,
                                           experiments_dir=experiments_dir,
                                           experiment_name=experiment_name,
                                           logging_steps=logging_steps)

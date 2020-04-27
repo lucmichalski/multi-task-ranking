@@ -253,14 +253,8 @@ class SearchTools:
 ###############################################################################
 
 
-default_eval_config = {
-    'map': {'k': None},
-    'Rprec': {'k': None},
-    'recip_rank': {'k': None},
-    'P': {'k': 20},
-    'recall': {'k': 40},
-    'ndcg': {'k': 20}
-}
+default_eval_config = [('map',None), ('Rprec',None), ('recip_rank', None), ('ndcg',20), ('P',20), ('recall',40),
+                       ('recall',100), ('recall',1000)]
 
 class EvalTools:
 
@@ -370,25 +364,24 @@ class EvalTools:
         """ Build metrics (string and dict representation) from eval_config. """
 
         # Assert a valid eval metric config.
-        assert isinstance(eval_config, dict)
-        for k in eval_config.keys():
-            assert k in self.implemented_metrics
-
+        assert isinstance(eval_config, list)
+        for eval_func, k in eval_config:
+            assert eval_func in self.implemented_metrics, "eval_func: {}, k: {}".format(eval_func, k)
+            assert isinstance(k, int) or k == None, "eval_func: {}, k: {}".format(eval_func, k)
         # Loop over implemented_metrics/eval_config.
         query_metrics = ''
         query_metrics_dict = {}
-        for m in self.implemented_metrics:
-            if m in eval_config:
-                # Build label of metric.
-                if eval_config[m]['k'] == None:
-                    metric_label = m
-                else:
-                    metric_label = m + '_' + str(eval_config[m]['k'])
-                # Calculate metric.
-                metric = self.implemented_metrics[m](run=run, k=eval_config[m]['k'], R=R)
-                # Append metric label and metric to string.
-                query_metrics += metric_label + ' ' + "{:.6f}".format(metric) + ' '
-                query_metrics_dict[metric_label] = metric
+        for eval_func, k in eval_config:
+            # Build label of metric.
+            if k == None:
+                metric_label = eval_func
+            else:
+                metric_label = eval_func + '_' + str(k)
+            # Calculate metric.
+            metric = self.implemented_metrics[eval_func](run=run, k=k, R=R)
+            # Append metric label and metric to string.
+            query_metrics += metric_label + ' ' + "{:.6f}".format(metric) + ' '
+            query_metrics_dict[metric_label] = metric
 
         return query_metrics, query_metrics_dict
 
@@ -530,5 +523,6 @@ if __name__ == '__main__':
     eval_tools = EvalTools()
     run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_500_model_test_Y2_manual_entity.run')
     qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_manual_entity.qrels')
-    eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path)
+    eval_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'test_eval_path')
+    eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path)
 
