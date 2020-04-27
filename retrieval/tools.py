@@ -410,7 +410,7 @@ class EvalTools:
         self.query_metrics_oracle_sum = dict(Counter(self.query_metrics_oracle_sum) + Counter(query_metrics_oracle))
 
 
-    def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_config=default_eval_config, eval_path=None):
+    def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_path=None, eval_config=default_eval_config):
         """ Given qrels and run paths calculate evaluation metrics by query and aggreated and write to file. """
         self.query_metrics_run_sum = {}
         self.query_metrics_oracle_sum = {}
