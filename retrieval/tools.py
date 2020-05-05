@@ -415,7 +415,6 @@ class EvalTools:
         """ Process eval of topic. """
         # Assert query of run in qrels
         if query in self.qrels_dict:
-            assert query in self.qrels_dict, 'query: {}\n qrels_dict: {}'.format(query, self.qrels_dict.keys())
             # For each doc_id find whether relevant (1) or not relevant (0), appending binary relevance to run.
             run = []
             for d in run_doc_ids:
@@ -434,6 +433,8 @@ class EvalTools:
             run_oracle = sorted(run, reverse=True)
             _, query_metrics_oracle = self.get_query_metrics(run=run_oracle, R=R, eval_config=eval_config)
             self.query_metrics_oracle_sum = dict(Counter(self.query_metrics_oracle_sum) + Counter(query_metrics_oracle))
+        else:
+            print("query: {} not in qrels_dict".format(query))
 
 
     def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_path=None, eval_config=default_eval_config):
@@ -547,9 +548,19 @@ class Pipeline:
 
 
 if __name__ == '__main__':
-    eval_tools = EvalTools()
-    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_500_model_test_Y2_manual_entity.run')
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_manual_entity.qrels')
-    eval_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'test_eval_path')
-    eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path)
+    # eval_tools = EvalTools()
+    # run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_500_model_test_Y2_manual_entity.run')
+    # qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_manual_entity.qrels')
+    # eval_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'test_eval_path')
+    # eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path)
 
+    search_tools = SearchTools(index_path=None, searcher_config=None)
+
+    qrels_path_list = []
+    for i in [1,2,3,4]:
+        qrels_path_list.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'fold-{}-train.pages.qrels'.format(i)))
+    combined_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.qrels')
+    search_tools.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=combined_qrels_path)
+
+    # qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_dev_entity_synthetic.qrels')
+    # search_tools.write_topics_from_qrels(qrels_path=qrels_path)
