@@ -34,13 +34,13 @@ if __name__ == '__main__':
     #
     #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50, first_para=True)
 
-    train_data_dir_path = None #'/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_100_chunks/'
-    train_batch_size = None #8
-    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000_chunks/'
+    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_100_chunks/'
+    train_batch_size = 8
+    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/testY2_manual_entity_1000_chunks/'
     dev_batch_size = 64 * 8
-    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity.qrels'
-    dev_run_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run'
-    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_entity_100_lr_8e6_num_warmup_steps_2000_just_para/epoch3_batch9000/'
+    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
+    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run'
+    model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_entity_100_lr_8e6_num_warmup_steps_2000_just_para/epoch3_batch9000/'
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
                                                 train_batch_size=train_batch_size,
@@ -49,28 +49,28 @@ if __name__ == '__main__':
                                                 dev_qrels_path=dev_qrels_path,
                                                 dev_run_path=dev_run_path)
 
-    # epochs = 3
-    # lr = 8e-6
-    # eps = 1e-8
-    # weight_decay = 0.01
-    # warmup_percentage = 0.1
-    # experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    # experiment_name = 'benchmarkY1_hierarchical_synthetic_entity_100_lr_8e6_num_warmup_steps_0.1'
-    # write = True
-    # logging_steps = 1000
-    # head_flag = 'entity'
-    #
-    # experiment.run_experiment_single_head(
-    #                                 head_flag=head_flag,
-    #                                 epochs=epochs,
-    #                                 lr=lr,
-    #                                 eps=eps,
-    #                                 weight_decay=weight_decay,
-    #                                 warmup_percentage=warmup_percentage,
-    #                                 experiments_dir=experiments_dir,
-    #                                 experiment_name=experiment_name,
-    #                                 logging_steps=logging_steps)
-
+    epochs = 3
+    lr = 8e-6
+    eps = 1e-8
+    weight_decay = 0.01
+    warmup_percentage = 0.1
+    experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
+    experiment_name = 'benchmarkY1_hierarchical_synthetic_entity_100_lr_8e6_num_warmup_steps_0.1_sum_loss'
+    write = True
+    logging_steps = 1000
     head_flag = 'entity'
-    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/benchmarkY1_hierarchical_entity_old_100_test_Y2_manual_entity.run'
-    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
+
+    experiment.run_experiment_single_head(
+                                    head_flag=head_flag,
+                                    epochs=epochs,
+                                    lr=lr,
+                                    eps=eps,
+                                    weight_decay=weight_decay,
+                                    warmup_percentage=warmup_percentage,
+                                    experiments_dir=experiments_dir,
+                                    experiment_name=experiment_name,
+                                    logging_steps=logging_steps)
+
+    # head_flag = 'entity'
+    # rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/benchmarkY1_hierarchical_entity_old_100_test_Y2_manual_entity.run'
+    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)

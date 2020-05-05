@@ -280,7 +280,7 @@ class FineTuningReRankingExperiments:
                                                               attention_mask=b_attention_mask,
                                                               labels=b_labels)
             # Update dev loss counter.
-            dev_loss += loss.mean().item()
+            dev_loss += loss.sum().item()
 
             # Update list of dev lables and logits
             self.__update_dev_lables_and_logits(lables=b_labels, logits=logits)
@@ -344,9 +344,9 @@ class FineTuningReRankingExperiments:
                                                               token_type_ids=b_token_type_ids,
                                                               labels=b_labels)
                 # Add loss to train loss counter
-                train_loss += loss.mean().item()
+                train_loss += loss.sum().item()
                 # Backpropogate loss.
-                loss.mean().backward()
+                loss.sum().backward()
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
                 # Next step of optimizer and scheduler.
