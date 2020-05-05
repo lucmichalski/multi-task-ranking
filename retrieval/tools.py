@@ -243,6 +243,7 @@ class SearchTools:
                 # Loop over topics.
                 steps = 0
                 for query in f_topics:
+                    query = query.rstrip()
                     rank = 1
                     # Try to decode query correctly using URL utf-8 decoding. If this string causes an error within
                     # Pyserini's SimpleSearcher.search() use basic string processing only dealing with space characters.
