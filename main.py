@@ -4,7 +4,7 @@ import os
 from metadata import EntityPaths, PassagePaths
 from learning.experiments import FineTuningReRankingExperiments
 from retrieval.dataset_processing import TrecCarProcessing
-from retrieval.tools import EvalTools, SearchTools
+from retrieval.tools import EvalTools, SearchTools, default_eval_config
 
 if __name__ == '__main__':
 
@@ -19,22 +19,13 @@ if __name__ == '__main__':
     searcher_config = {
         'BM25': {'k1': 5.5, 'b': 0.1}
     }
-    eval_config = {
-        'map': {'k': None},
-        'Rprec': {'k': None},
-        'recip_rank': {'k': None},
-        'P': {'k': 20},
-        'recall': {'k': 40},
-        'ndcg': {'k': 20},
-    }
-
     for run_path, qrels_path, topics_path, data_dir_path, training_dataset, index_path in zip(run_paths, qrels_paths, topics_paths, data_dir_paths, training_datasets, index_paths):
         print('searching')
         search = SearchTools(index_path=index_path, searcher_config=searcher_config)
         search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
         print('eval')
         eval = EvalTools()
-        eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=eval_config)
+        eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
         print('dataset')
         processing = TrecCarProcessing(qrels_path=qrels_path,
                                        run_path=run_path,
