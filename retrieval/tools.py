@@ -24,14 +24,15 @@ class RetrievalUtils:
         with open(qrels_path) as qrels_file:
             # Read each line of qrels file.
             for line in qrels_file:
-                query = line.strip().split(" ")[0]
-                doc_id = line.strip().split(" ")[2]
-                # key: query, value: list of doc_ids
-                if self.test_valid_line(line=line):
-                    if query in qrels_dict:
-                        qrels_dict[query].append(doc_id)
-                    else:
-                        qrels_dict[query] = [doc_id]
+                if len(line) > 4:
+                    query = line.strip().split(" ")[0]
+                    doc_id = line.strip().split(" ")[2]
+                    # key: query, value: list of doc_ids
+                    if self.test_valid_line(line=line):
+                        if query in qrels_dict:
+                            qrels_dict[query].append(doc_id)
+                        else:
+                            qrels_dict[query] = [doc_id]
         return qrels_dict
 
 
@@ -563,9 +564,10 @@ if __name__ == '__main__':
     # qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_dev_entity_synthetic.qrels')
     # search_tools.write_topics_from_qrels(qrels_path=qrels_path)
 
-    index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    search_tools = SearchTools(index_path=index_path, searcher_config=default_searcher_config)
-    topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.topics')
-    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.test.run')
-    search_tools.write_run_from_topics(topics_path=topics_path, run_path=run_path)
+    # index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
+    # search_tools = SearchTools(index_path=index_path, searcher_config=default_searcher_config)
+    topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.qrels')
+    # run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.test.run')
+    # search_tools.write_run_from_topics(topics_path=topics_path, run_path=run_path)
 
+    qrels = RetrievalUtils().get_qrels_dict(topics_path)
