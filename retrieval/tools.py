@@ -242,11 +242,8 @@ class SearchTools:
             with open(run_path, "w") as f_run:
                 # Loop over topics.
                 steps = 0
-                for line in f_topics:
+                for query in f_topics:
                     rank = 1
-                    # Process query.
-                    query, _, _, _ = self.retrieval_utils.unpack_qrels_line(line=line)
-
                     # Try to decode query correctly using URL utf-8 decoding. If this string causes an error within
                     # Pyserini's SimpleSearcher.search() use basic string processing only dealing with space characters.
                     try:
@@ -554,13 +551,20 @@ if __name__ == '__main__':
     # eval_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'test_eval_path')
     # eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path)
 
-    search_tools = SearchTools(index_path=None, searcher_config=None)
-
-    qrels_path_list = []
-    for i in [1,2,3,4]:
-        qrels_path_list.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'fold-{}-train.pages.qrels'.format(i)))
-    combined_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.qrels')
-    search_tools.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=combined_qrels_path)
+    # search_tools = SearchTools(index_path=None, searcher_config=None)
+    #
+    # qrels_path_list = []
+    # for i in [1,2,3,4]:
+    #     qrels_path_list.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'fold-{}-train.pages.qrels'.format(i)))
+    # combined_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.qrels')
+    # search_tools.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=combined_qrels_path)
 
     # qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_dev_entity_synthetic.qrels')
     # search_tools.write_topics_from_qrels(qrels_path=qrels_path)
+
+    index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
+    search_tools = SearchTools(index_path=index_path, searcher_config=default_searcher_config)
+    topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.topics')
+    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.test.run')
+    search_tools.write_run_from_topics(topics_path=topics_path, run_path=run_path)
+
