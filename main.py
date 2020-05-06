@@ -8,10 +8,10 @@ from retrieval.tools import EvalTools, SearchTools, default_eval_config
 
 if __name__ == '__main__':
 
-    run_paths = ['/nfs/trec_car/data/entity_ranking/]/benchmarkY1_train_entity_tree_synthetic_100.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic_100.run']
-    qrels_paths = ['/nfs/trec_car/data/entity_ranking/]/benchmarkY1_train_entity_tree_synthetic.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic.qrels']
-    topics_paths = ['/nfs/trec_car/data/entity_ranking/]/benchmarkY1_train_entity_tree_synthetic.topics', '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic.topics']
-    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/]/benchmarkY1_train_entity_tree_synthetic_100_chunks', '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic_100_chunks']
+    run_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_train_data/benchmarkY1_train_entity_tree_synthetic_100.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic_100.run']
+    qrels_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_train_data/benchmarkY1_train_entity_tree_synthetic.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic.qrels']
+    topics_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_train_data/benchmarkY1_train_entity_tree_synthetic.topics', '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic.topics']
+    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_train_data/benchmarkY1_train_entity_tree_synthetic_100_chunks/', '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic_100_chunks/']
     training_datasets = [True, False]
     index_paths = [EntityPaths.index, EntityPaths.index]
     hits = 100
