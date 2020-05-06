@@ -34,12 +34,12 @@ if __name__ == '__main__':
     #
     #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50, first_para=True)
 
-    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_train_data/benchmarkY1_train_entity_tree_synthetic_100_chunks/'
+    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_train_data/benchmarkY1_train_entity_tree_100_chunks/'
     train_batch_size = 16
-    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic_100_chunks/'
+    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_100_chunks/'
     dev_batch_size = 64 * 8
-    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic.qrels'
-    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic_100.run'
+    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree.qrels'
+    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_100.run'
     model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_entity_100_lr_8e6_num_warmup_steps_2000_just_para/epoch3_batch9000/'
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'benchmarkY1_tree_synthetic_entity_100_lr_8e6_num_warmup_steps_0.1_new_pipeline'
+    experiment_name = 'benchmarkY1_tree_entity_100_lr_8e6_num_warmup_steps_0.1_new_pipeline'
     write = True
     logging_steps = 500
     head_flag = 'entity'
