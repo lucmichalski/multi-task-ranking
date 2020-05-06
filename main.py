@@ -34,7 +34,7 @@ if __name__ == '__main__':
     #
     #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50, first_para=True)
 
-    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_train_data/benchmarkY1_train_entity_synthetic_100_chunks/'
+    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_train_data/benchmarkY1_train_entity_tree_synthetic_100_chunks/'
     train_batch_size = 16
     dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_tree_entity_dev_data/benchmarkY1_dev_entity_tree_synthetic_100_chunks/'
     dev_batch_size = 64 * 8
