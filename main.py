@@ -55,7 +55,7 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'benchmarkY1_tree_entity_100_lr_8e6_num_warmup_steps_0.1_new_pipeline'
+    experiment_name = 'benchmarkY1_tree_entity_300_lr_5e6_num_warmup_steps_0.1_new_pipeline'
     write = True
     logging_steps = 1000
     head_flag = 'entity'
