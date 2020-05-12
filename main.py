@@ -71,5 +71,5 @@ if __name__ == '__main__':
     #                                 logging_steps=logging_steps)
 
     head_flag = 'entity'
-    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/benchmarkY1_hierarchical_entity_300_test_Y2_manual_entity_v2.run'
+    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/benchmarkY1_hierarchical_entity_300_test_Y2_manual_entity.run'
     experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
