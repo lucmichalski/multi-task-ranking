@@ -25,21 +25,21 @@ if __name__ == '__main__':
         topics_path = '/nfs/trec_car/data/entity_ranking/full_data/test_full_hierarchical_{}.topics'.format(doc_count)
         data_dir_path = '/nfs/trec_car/data/entity_ranking/full_data/test_full_hierarchical_docs_{}_hits_{}_chunks/'.format(doc_count, hits)
 
-        search = SearchTools(index_path=index_path, searcher_config=searcher_config)
-        print('building topics')
-        search.write_topics_from_qrels(qrels_path=qrels_path, topics_path=topics_path)
-        print('searching')
-        search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
-        print('eval')
-        eval = EvalTools()
-        eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
+        # search = SearchTools(index_path=index_path, searcher_config=searcher_config)
+        # print('building topics')
+        # search.write_topics_from_qrels(qrels_path=qrels_path, topics_path=topics_path)
+        # print('searching')
+        # search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
+        # print('eval')
+        # eval = EvalTools()
+        # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
         print('dataset')
         processing = TrecCarProcessing(qrels_path=qrels_path,
                                        run_path=run_path,
                                        index_path=index_path,
                                        data_dir_path=data_dir_path)
 #
-    #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50, first_para=True)
+        processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50, first_para=True)
     # train_data_dir_path = None # '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_1000_chunks/'
     # train_batch_size = None # 12
     # dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000_chunks/'
