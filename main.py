@@ -21,8 +21,8 @@ if __name__ == '__main__':
         }
 
         run_path = '/nfs/trec_car/data/entity_ranking/full_data/test_full_hierarchical_docs_{}_hits_{}.qrels'.format(doc_count, hits)
-        qrels_path = '/nfs/trec_car/data/entity_ranking/full_data/test_full_hierarchical_{}.qrels'.format(hits)
-        topics_path = '/nfs/trec_car/data/entity_ranking/full_data/test_full_hierarchical_{}.topics'.format(hits)
+        qrels_path = '/nfs/trec_car/data/entity_ranking/full_data/test_full_hierarchical_{}.qrels'.format(doc_count)
+        topics_path = '/nfs/trec_car/data/entity_ranking/full_data/test_full_hierarchical_{}.topics'.format(doc_count)
         data_dir_path = '/nfs/trec_car/data/entity_ranking/full_data/test_full_hierarchical_docs_{}_hits_{}_chunks/'.format(doc_count, hits)
 
         search = SearchTools(index_path=index_path, searcher_config=searcher_config)
