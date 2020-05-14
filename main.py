@@ -57,7 +57,7 @@ if __name__ == '__main__':
                                                 dev_run_path=dev_run_path)
 
     epochs = 2
-    lr = 5e-6
+    lr = 1e-5
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
