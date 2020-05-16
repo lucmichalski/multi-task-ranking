@@ -41,7 +41,7 @@ if __name__ == '__main__':
 # #
 #         processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=True)
 
-    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/full_data/full_data_v2_hierarchical_10_hits_300_chunks'
+    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/full_data/full_data_v2_hierarchical_100_hits_300_chunks'
     train_batch_size = 10
     dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_hierarchical_dev_entity_synthetic_v2_300_chuncks/'
     dev_batch_size = 64 * 10
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'full_data_v2_hierarchical_10_hits_300_v2_lr_1e5_num_warmup_steps_0.1_new_pipeline'
+    experiment_name = 'full_data_v2_hierarchical_100_hits_300_v2_lr_1e5_num_warmup_steps_0.1_new_pipeline'
     write = True
     logging_steps = 200
     head_flag = 'entity'
