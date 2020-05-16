@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
 
     epochs = 2
-    lr = 1e-5
+    lr = 8e-6
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
