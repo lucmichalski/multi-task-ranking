@@ -44,7 +44,7 @@ if __name__ == '__main__':
     train_data_dir_path = '/nfs/trec_car/data/entity_ranking/full_data/full_data_v2_hierarchical_10_hits_300_chunks'
     train_batch_size = 10
     dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_hierarchical_dev_entity_synthetic_v2_300_chuncks/'
-    dev_batch_size = 64 * 10
+    dev_batch_size = 64 * 8
     dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_hierarchical_dev_entity_synthetic_v2.qrels'
     dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_hierarchical_dev_entity_synthetic_v2_300.run'
     model_path = None
