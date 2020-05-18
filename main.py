@@ -65,7 +65,7 @@ if __name__ == '__main__':
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
     experiment_name = 'full_data_v2_hierarchical_10000_hits_300_v2_lr_4e7_num_warmup_steps_0.1_new_pipeline'
     write = True
-    logging_steps = 2000
+    logging_steps = 5000
     head_flag = 'entity'
 
     experiment.run_experiment_single_head(
