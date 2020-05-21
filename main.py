@@ -58,12 +58,12 @@ if __name__ == '__main__':
 
 
     epochs = 2
-    lr = 8e-7
+    lr = 2e-6
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'full_data_v2_hierarchical_10000_hits_300_v2_lr_8e7_num_warmup_steps_0.1_new_pipeline'
+    experiment_name = 'full_data_v2_hierarchical_10000_hits_300_v2_lr_2e6_num_warmup_steps_0.1_new_pipeline'
     write = True
     logging_steps = 5000
     head_flag = 'entity'
