@@ -41,16 +41,19 @@ if __name__ == '__main__':
 # #
 #         processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=True)
 
-    train_data_dir_path = None #'/nfs/trec_car/data/entity_ranking/full_data/full_data_v2_hierarchical_10000_hits_300_chunks'
-    train_batch_size = None #10
-    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000_chunks/'
-    #dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000_chunks/'
+    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/full_data/full_data_v2_hierarchical_1000_hits_300_chunks'
+    train_batch_size = 10
     dev_batch_size = 64 * 8
-    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity.qrels'
-    dev_run_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run'
+    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300_chunks'
+    # dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000_chunks/'
+    # dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000_chunks/'
+    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
+    #dev_qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity.qrels'
     #dev_qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity.qrels'
+    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300.run'
+    #dev_run_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run'
     #dev_run_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000.run'
-    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/full_data_v2_hierarchical_10000_hits_300_v2_lr_2e6_num_warmup_steps_0.1_new_pipeline/epoch1_batch225000'
+    model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/full_data_v2_hierarchical_10000_hits_300_v2_lr_2e6_num_warmup_steps_0.1_new_pipeline/epoch1_batch225000'
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
                                                 train_batch_size=train_batch_size,
@@ -60,28 +63,28 @@ if __name__ == '__main__':
                                                 dev_run_path=dev_run_path)
 
 
-    # epochs = 2
-    # lr = 2e-6
-    # eps = 1e-8
-    # weight_decay = 0.01
-    # warmup_percentage = 0.1
-    # experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    # experiment_name = 'full_data_v2_hierarchical_10000_hits_300_v2_lr_2e6_num_warmup_steps_0.1_new_pipeline'
-    # write = True
-    # logging_steps = 5000
-    # head_flag = 'entity'
-
-    # experiment.run_experiment_single_head(
-    #                                 head_flag=head_flag,
-    #                                 epochs=epochs,
-    #                                 lr=lr,
-    #                                 eps=eps,
-    #                                 weight_decay=weight_decay,
-    #                                 warmup_percentage=warmup_percentage,
-    #                                 experiments_dir=experiments_dir,
-    #                                 experiment_name=experiment_name,
-    #                                 logging_steps=logging_steps)
-
+    epochs = 2
+    lr = 6e-6
+    eps = 1e-8
+    weight_decay = 0.01
+    warmup_percentage = 0.1
+    experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
+    experiment_name = 'full_data_v2_hierarchical_1000_hits_300_v2_lr_6e6_num_warmup_steps_0.1_new_pipeline'
+    write = True
+    logging_steps = 5000
     head_flag = 'entity'
-    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/full_docs_10000_hits_300_lr_2e6_hierarchical_entity_300_test_Y2_manual_entity.run'
-    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
+
+    experiment.run_experiment_single_head(
+                                    head_flag=head_flag,
+                                    epochs=epochs,
+                                    lr=lr,
+                                    eps=eps,
+                                    weight_decay=weight_decay,
+                                    warmup_percentage=warmup_percentage,
+                                    experiments_dir=experiments_dir,
+                                    experiment_name=experiment_name,
+                                    logging_steps=logging_steps)
+
+    # head_flag = 'entity'
+    # rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/full_docs_10000_hits_300_lr_2e6_hierarchical_entity_300_test_Y2_manual_entity.run'
+    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
