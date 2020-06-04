@@ -18,7 +18,7 @@ if __name__ == '__main__':
     run_path = '/nfs/trec_car/data/entity_ranking/using_passage/test_entity_Y1_passage.run'
     qrels_path = 'trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity.qrels'
     topics_path = 'trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity.topics'
-    data_dir_path = '/nfs/trec_car/data/entity_ranking/using_passage/test_entity_Y1_passage_1000_hits_50_chunks/'.format(doc_count, hits)
+    data_dir_path = '/nfs/trec_car/data/entity_ranking/using_passage/test_entity_Y1_passage_1000_hits_50_chunks/'
     training_dataset = False
 
     search = SearchTools(index_path=index_path, searcher_config=searcher_config)
