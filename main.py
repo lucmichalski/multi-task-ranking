@@ -24,11 +24,11 @@ if __name__ == '__main__':
     search = SearchTools(index_path=index_path, searcher_config=searcher_config)
     # print('building topics')
     # search.write_topics_from_qrels(qrels_path=qrels_path, topics_path=topics_path)
-    print('searching')
-    search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
-    print('eval')
-    eval = EvalTools()
-    eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
+    # print('searching')
+    # search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
+    # print('eval')
+    # eval = EvalTools()
+    # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
     print('dataset')
     processing = TrecCarProcessing(qrels_path=qrels_path,
                                    run_path=run_path,
