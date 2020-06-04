@@ -70,26 +70,20 @@ if __name__ == '__main__':
 # #
 #         processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=True)
 
-    # train_data_dir_path = '/nfs/trec_car/data/entity_ranking/full_data/full_data_v2_hierarchical_1000_hits_300_chunks'
-    # train_batch_size = 10
-    # dev_batch_size = 64 * 8
-    # dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300_chunks'
-    # dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000_chunks/'
-    # dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000_chunks/'
-    # dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
-    #dev_qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity.qrels'
-    #dev_qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity.qrels'
-    # dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300.run'
-    #dev_run_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run'
-    #dev_run_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000.run'
-    # model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/full_data_v2_hierarchical_10000_hits_300_v2_lr_2e6_num_warmup_steps_0.1_new_pipeline/epoch1_batch225000'
-    # experiment = FineTuningReRankingExperiments(model_path=model_path,
-    #                                             train_data_dir_path=train_data_dir_path,
-    #                                             train_batch_size=train_batch_size,
-    #                                             dev_data_dir_path=dev_data_dir_path,
-    #                                             dev_batch_size=dev_batch_size,
-    #                                             dev_qrels_path=dev_qrels_path,
-    #                                             dev_run_path=dev_run_path)
+    train_data_dir_path = None
+    train_batch_size = None
+    dev_batch_size = 64 * 8
+    dev_data_dir_path = data_dir_path
+    dev_qrels_path = qrels_path
+    dev_run_path = run_path
+    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/epoch1_batch14000'
+    experiment = FineTuningReRankingExperiments(model_path=model_path,
+                                                train_data_dir_path=train_data_dir_path,
+                                                train_batch_size=train_batch_size,
+                                                dev_data_dir_path=dev_data_dir_path,
+                                                dev_batch_size=dev_batch_size,
+                                                dev_qrels_path=dev_qrels_path,
+                                                dev_run_path=dev_run_path)
 
 
     # epochs = 2
@@ -114,6 +108,6 @@ if __name__ == '__main__':
     #                                 experiment_name=experiment_name,
     #                                 logging_steps=logging_steps)
 
-    # head_flag = 'entity'
-    # rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/full_docs_10000_hits_300_lr_2e6_hierarchical_entity_300_test_Y2_manual_entity.run'
-    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
+    head_flag = 'passage'
+    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/testY2_manual_entity_passages_to_entity.run'
+    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
