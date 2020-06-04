@@ -110,4 +110,4 @@ if __name__ == '__main__':
 
     head_flag = 'passage'
     rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/testY2_manual_entity_passages_to_entity.run'
-    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path)
+    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False)
