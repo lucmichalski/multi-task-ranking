@@ -15,17 +15,17 @@ if __name__ == '__main__':
         'BM25': {'k1': 0.9, 'b': 0.4}
     }
 
-    run_path = '/nfs/trec_car/data/entity_ranking/using_passage/test_entity_Y1_passage.run'
-    qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity.qrels'
-    topics_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity.topics'
-    data_dir_path = '/nfs/trec_car/data/entity_ranking/using_passage/test_entity_Y1_passage_1000_hits_50_chunks/'
+    run_path = '/nfs/trec_car/data/entity_ranking/using_passage/test_entity_Y1_passage_automatic.run'
+    qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity.qrels'
+    topics_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity.topics'
+    data_dir_path = '/nfs/trec_car/data/entity_ranking/using_passage/test_entity_Y1_passage_automatic_1000_hits_50_chunks/'
     training_dataset = False
 
     search = SearchTools(index_path=index_path, searcher_config=searcher_config)
     # print('building topics')
     # search.write_topics_from_qrels(qrels_path=qrels_path, topics_path=topics_path)
-    # print('searching')
-    # search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
+    print('searching')
+    search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
     # print('eval')
     # eval = EvalTools()
     # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
