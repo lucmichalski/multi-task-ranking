@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: deepo-ml-plus-imackie
-        image: iainmackie/multi-task-ranking-base-image:v2
+        image: iainmackie/multi-task-ranking-base-image:v3
         resources:
           requests:
             cpu: "12000m"
