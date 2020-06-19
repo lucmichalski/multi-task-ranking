@@ -43,6 +43,7 @@ def check_manual_vs_synthetic_links():
                         for i in manual_entity_id_data[entity_id]['anchor_text']:
                             print(i[0], i[1], document_content.text[i[1].start:i[1].end])
 
+
 def get_query(doc_id, section_heading_names):
     """ Build query with doc_id and section_heading_names. """
     if len(section_heading_names) > 0:
@@ -81,40 +82,43 @@ def build_synthetic_qrels(document_list, path, qrels_type='tree'):
                 if manual_link.entity_id not in hierarchical_qrels[query]:
                     hierarchical_qrels[query].append(manual_link.entity_id)
 
-    # Build list of tree queries for each doc_id.
-    doc_id_tree_queries = {}
-    for doc_id, section_heading_names in doc_id_section_heading_names_list.items():
-        # Build query.
-        query = get_query(doc_id=doc_id, section_heading_names=[])
-        doc_id_tree_queries[doc_id] = [query]
-        unique_section_heading_names = sorted([list(headers) for headers in set(tuple(headers) for headers in section_heading_names)])
-        for headers in unique_section_heading_names:
-            partial_h = []
-            for h in headers:
-                partial_h.append(h)
-                query = get_query(doc_id=doc_id, section_heading_names=partial_h)
-                if query not in doc_id_tree_queries[doc_id]:
-                    doc_id_tree_queries[doc_id].append(query)
-
-    # Build tree qrels.
-    tree_qrels = {}
-    for doc_id, tree_queries in doc_id_tree_queries.items():
-        for tree_query in tree_queries:
-            for hierarchical_query in hierarchical_qrels.keys():
-                if (tree_query == hierarchical_query[:len(tree_query)]):
-                    if tree_query in tree_qrels:
-                        doc_ids = list(set(tree_qrels[tree_query] + hierarchical_qrels[hierarchical_query]))
-                        tree_qrels[tree_query] = doc_ids
-                    else:
-                        tree_qrels[tree_query] = hierarchical_qrels[hierarchical_query]
-
     if qrels_type == 'tree':
+        # Build list of tree queries for each doc_id.
+        doc_id_tree_queries = {}
+        for doc_id, section_heading_names in doc_id_section_heading_names_list.items():
+            # Build query.
+            query = get_query(doc_id=doc_id, section_heading_names=[])
+            doc_id_tree_queries[doc_id] = [query]
+            unique_section_heading_names = sorted([list(headers) for headers in set(tuple(headers) for headers in section_heading_names)])
+            for headers in unique_section_heading_names:
+                partial_h = []
+                for h in headers:
+                    partial_h.append(h)
+                    query = get_query(doc_id=doc_id, section_heading_names=partial_h)
+                    if query not in doc_id_tree_queries[doc_id]:
+                        doc_id_tree_queries[doc_id].append(query)
+
+        # Build tree qrels.
+        tree_qrels = {}
+        for doc_id, tree_queries in doc_id_tree_queries.items():
+            for tree_query in tree_queries:
+                for hierarchical_query in hierarchical_qrels.keys():
+                    if (tree_query == hierarchical_query[:len(tree_query)]):
+                        if tree_query in tree_qrels:
+                            doc_ids = list(set(tree_qrels[tree_query] + hierarchical_qrels[hierarchical_query]))
+                            tree_qrels[tree_query] = doc_ids
+                        else:
+                            tree_qrels[tree_query] = hierarchical_qrels[hierarchical_query]
+
         qrels = tree_qrels
+
     elif qrels_type == 'hierarchical':
         qrels = hierarchical_qrels
+
     else:
         "Not valid qrels_type: {}".qrels_type
         raise
+
     # Write to file
     with open(path, 'w') as f:
         for query in sorted(qrels.keys()):
@@ -122,6 +126,7 @@ def build_synthetic_qrels(document_list, path, qrels_type='tree'):
                 f.write('{} 0 {} 1\n'.format(query, doc))
 
 def build_passage_qrels(document_list, path):
+    """ Build hierarchical passage qrels. """
     # Build hierarchical qrels.
     qrels = {}
     # Store list of section_heading_names for each doc_id
@@ -143,6 +148,7 @@ def build_passage_qrels(document_list, path):
             if len(document_content.content_id) > 0:
                 qrels[query].append(document_content.content_id)
 
+    # Write to file
     with open(path, 'w') as f:
         for query in sorted(qrels.keys()):
             for passage in sorted(qrels[query]):

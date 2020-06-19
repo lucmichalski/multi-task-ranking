@@ -22,13 +22,13 @@ spec:
     spec:
       containers:
       - name: deepo-ml-plus-imackie
-        image: iainmackie/multi-task-ranking-base-image:v1n
+        image: iainmackie/multi-task-ranking-base-image:v2
         resources:
           requests:
-            cpu: "2000m"
-            memory: "16Gi"
+            cpu: "12000m"
+            memory: "32Gi"
           limits:
-            cpu: "16000m"
+            cpu: "32000m"
             memory: "128Gi"
         command:
           - 'jupyter-lab'

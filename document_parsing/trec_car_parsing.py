@@ -10,7 +10,6 @@ import copy
 import time
 
 
-
 class TrecCarParser:
     """ Class to parse TREC CAR cbor files to protocol buffer Document message (protocol_buffers/document_pb2/Document)
     """
