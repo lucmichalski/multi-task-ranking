@@ -1,0 +1,117 @@
+ 142 lines (130 sloc) 3.17 KB
+Commands to run to make files read/write
+
+- end of scripts groupwrite permissons (run chmod -R 775 *)
+- copy scp (chmod -R 775 * && chmod -R +w * && chgrp -R nfsnobody *)
+
+################################################
+
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: pythonmlnotebookgpu2-imackie
+  namespace: imackieproject
+spec:
+  replicas: 1
+  strategy:
+    resources: {}
+  template:
+    metadata:
+      labels:
+        app: pythonMLNotebook
+        deploymentconfig: pythonMLNotebookGPU
+    spec:
+      containers:
+      - name: deepo-ml-plus-imackie
+        image: iainmackie/trec-car-entity-processing:v13
+        resources:
+          requests:
+            cpu: "12000m"
+            memory: "32Gi"
+          limits:
+            cpu: "32000m"
+            memory: "128Gi"
+        command:
+          - 'jupyter-lab'
+        args:
+          - '--no-browser'
+          - '--ip=0.0.0.0'
+          - '--allow-root'
+          - '--NotebookApp.token='
+          - '--notebook-dir="/nfs/"'
+        ports:
+          - containerPort: 8888
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - mountPath: /nfs/
+            name: nfs-access
+      securityContext: {}
+      serviceAccount: containerroot
+      volumes:
+      - name: nfs-access
+        persistentVolumeClaim:
+          claimName: imackievol1claim
+
+
+################################################
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyterservice
+  namespace: imackieproject
+spec:
+  selector:
+    app: pythonMLNotebook
+  ports:
+  - name: jupyter
+    port: 8888
+    protocol: TCP
+    targetPort: 8888
+
+
+################################################
+
+apiVersion:route.openshift.io/v1
+kind: Route
+metadata:
+  name: jupyterroute
+  namespace: imackieproject
+spec:
+  path: /
+  to:
+    kind: Service
+    name: jupyterservice
+  port:
+    targetPort: 8888
+
+
+################################################
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: trec-car-entity-processing-profile
+  namespace: imackieproject
+spec:
+  volumes:
+  - name: nfs-access
+    persistentVolumeClaim:
+      claimName: imackievol1claim
+  containers:
+  - env:
+    name: mtrec-car-entity-processing-profile-container
+    image: iainmackie/trec-car-entity-processing-profile:v2
+    imagePullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: "24000m"
+        memory: "100Gi"
+      limits:
+        cpu: "32000m"
+        memory: "250Gi"
+    volumeMounts:
+    - mountPath: /nfs/
+      name: nfs-access
+  serviceAccount: containerroot
+  restartPolicy: Never

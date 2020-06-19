@@ -1,0 +1,5 @@
+
+FROM iainmackie/trec-car-entity-processing:v13
+
+CMD python3 /nfs/trec_car/entity_processing/entity-linking-with-pyspark/pyspark_job.py
+
