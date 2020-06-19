@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: deepo-ml-plus-imackie
-        image: iainmackie/multi-task-ranking-base-image:v1
+        image: iainmackie/multi-task-ranking-base-image:v1n
         resources:
           requests:
             cpu: "2000m"
@@ -50,3 +50,5 @@ spec:
       - name: nfs-access
         persistentVolumeClaim:
           claimName: imackievol1claim
+
+

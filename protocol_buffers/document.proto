@@ -1,0 +1,99 @@
+
+syntax = "proto3";
+
+message Document {
+    // Unique id of document.
+    string doc_id = 1;
+    // Title of document.
+    string doc_name = 2;
+    // List of DocumentContents that contain contents of document.
+    repeated DocumentContent document_contents = 3;
+    // List of manual entity linking information containing anchor text, span location and entity doc_id/doc_name.
+    repeated EntityLinkTotal manual_entity_link_totals = 4;
+    // List of synthetic entity linking information containing anchor text, span location and entity doc_id/doc_name.
+    repeated EntityLinkTotal synthetic_entity_link_totals = 5;
+    // Page type: { “ArticlePage”,  “CategoryPage”, “RedirectPage “ + “ParaLink”, “DisambiguationPage” }
+    string page_type = 6;
+    // List of other documents that redirect to this document.
+    repeated string redirect_names = 7;
+    // List of Wikipedia document ids within DisambiguationPage for this document.
+    repeated string disambiguation_ids = 8;
+    // List of Wikipedia document names within DisambiguationPage for this document.
+    repeated string disambiguation_names = 9;
+    // List of Wikipedia CategoryPages ids this document belongs.
+    repeated string category_ids = 10;
+    // List of Wikipedia CategoryPages names this document belongs.
+    repeated string category_names = 11;
+    // List of document ids that manually link to this document.
+    repeated string manual_inlink_ids = 12;
+    // List of ManualInlinkAnchors (Anchor text, frequency) that manually link to this document.
+    message ManualInlinkAnchors {
+        string anchor_text = 1;
+        int32 frequency = 2;
+    }
+    repeated ManualInlinkAnchors manual_inlink_anchors = 13;
+}
+
+
+message DocumentContent {
+    // Unique id of DocumentContentMessage.
+    string content_id = 1;
+    // List of parent section heading ids DocumentContentMessage.
+    repeated string section_heading_ids = 2;
+    // List of parent section heading names DocumentContentMessage.
+    repeated string section_heading_names = 3;
+    // Enum of DocumentContentMessage type.
+    enum ContentType {
+        UNKNOWN = 0;
+        PARAGRAPH = 1;
+        IMAGE = 2;
+        LIST = 3;
+        VIDEO = 4;
+        AUDIO = 5;
+    }
+    ContentType content_type = 4;
+    // Text contained in DocumentContentMessage.
+    string text = 5;
+    // Manual entity links within text.
+    repeated EntityLink manual_entity_links = 6;
+    // Synthetic entity links within text.
+    repeated EntityLink synthetic_entity_links = 7;
+    // Links to attached content i.e. video, audio, etc.
+    repeated string content_urls = 8;
+    // Contains nesting level of list.
+    int32 list_level = 9;
+}
+
+
+message EntityLink {
+    // Text span within DocumentContentMessage.text that maps to the entity.
+    string anchor_text = 1;
+    // Character level location of text_span (start character & index of end character).
+    message AnchorTextLocation {
+        int32 start = 1;
+        int32 end = 2;
+    }
+    AnchorTextLocation anchor_text_location = 2;
+    // Linked document id.
+    string entity_id = 3;
+    // Linked document name.
+    string entity_name = 4;
+}
+
+
+message EntityLinkTotal {
+    /// Linked document id.
+    string entity_id = 1;
+    // Linked document name.
+    string entity_name = 2;
+    // Unique anchor text spans and frequency of linking.
+    message AnchorTextFrequency {
+        string anchor_text = 1;
+        int32 frequency = 2;
+    }
+    repeated AnchorTextFrequency anchor_text_frequencies  = 3;
+}
+
+
+
+
