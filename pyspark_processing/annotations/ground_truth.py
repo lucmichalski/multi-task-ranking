@@ -91,7 +91,7 @@ if __name__ == '__main__':
     read_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark/data/testY2_refactor.bin'
     write_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark/data/data_proto_ground_truth_Blue-ringed%20octopus.bin'
     doc_id = 'enwiki:Blue-ringed%20octopus'
-    from entity_linking.annotations.annotation_data import annotation_dict
+    from pyspark_processing.annotations.annotation_data import annotation_dict
 
     new_document = add_extra_annotations_to_document(read_path=read_path,
                                                      write_path=write_path,

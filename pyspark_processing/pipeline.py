@@ -6,7 +6,7 @@ from document_parsing.trec_car_parsing import TrecCarParser
 from pyspark.sql.types import BinaryType
 from pyspark.sql.functions import udf, row_number, monotonically_increasing_id
 from pyspark.sql import SparkSession, Window
-from entity_linking.building_qrels import build_synthetic_qrels
+from pyspark_processing.building_qrels import build_synthetic_qrels
 
 import pandas as pd
 import pickle
