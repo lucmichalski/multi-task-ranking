@@ -12,13 +12,10 @@ RUN apt-get update && apt-get install -y \
     gcc  \
     git
 
-# Install java 11
-RUN wget https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz \
-    && tar -xzvf *.tar.gz
-ENV JAVA_VERSION="jdk-11.0.2"
-RUN mv $JAVA_VERSION /usr/local/share/ \
-    && rm *.tar.gz
-ENV JAVA_HOME=/usr/local/share/$JAVA_VERSION
+# Install Java 8
+RUN apt-get update && apt-get install openjdk-8-jdk -y
+ENV JAVA_VERSION="java-8-openjdk-amd64"
+ENV JAVA_HOME=/usr/lib/jvm/$JAVA_VERSION
 ENV PATH="$JAVA_HOME/bin:$PATH"
 
 # Install maven 3.3.9
@@ -31,7 +28,7 @@ ENV MAVEN_HOME /opt/maven
 
 # Install & build anserini
 WORKDIR /home/
-COPY ./anserini /home/anserini/
+COPY ./anserini-anserini-0.5.1 /home/anserini/
 WORKDIR /home/anserini/
 RUN mvn clean package appassembler:assemble -DskipTests -Dmaven.javadoc.skip=true
 WORKDIR /home/anserini/eval/

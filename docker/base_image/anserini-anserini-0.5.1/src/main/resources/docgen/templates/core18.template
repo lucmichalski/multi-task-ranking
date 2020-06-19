@@ -1,0 +1,43 @@
+# Anserini: Regressions for the [Washington Post](https://trec.nist.gov/data/wapost/) ([Core18](https://trec-core.github.io/2018/))
+
+## Indexing
+
+Typical indexing command:
+
+```
+${index_cmds}
+```
+
+The directory `/path/to/core18/` should be the root directory of TREC Core2018 collection, i.e., `ls /path/to/core18/`
+should bring up a single JSON file.
+
+For additional details, see explanation of [common indexing options](common-indexing-options.md).
+
+## Retrieval
+
+Topics and qrels are stored in `src/main/resources/topics-and-qrels/`, downloaded from NIST:
+
++ `topics.core18.txt`: [50 test topics](https://trec.nist.gov/data/core/topics2018.txt)
++ `qrels.core18.txt`: [Judgments produced by NIST assessors](https://trec.nist.gov/data/core/qrels2018.txt)
+
+After indexing has completed, you should be able to perform retrieval as follows:
+
+```
+${ranking_cmds}
+```
+
+Evaluation can be performed using `trec_eval`:
+
+```
+${eval_cmds}
+```
+
+## Effectiveness
+
+With the above commands, you should be able to replicate the following results:
+
+${effectiveness}
+
+## Replication Log
+
+* Results replicated by [@andrewyates](https://github.com/andrewyates) on 2018-11-30 (commit [`c1aac5`](https://github.com/castorini/Anserini/commit/c1aac5e353e2ab77db3e7106cb4c017a09ce0fe9))
