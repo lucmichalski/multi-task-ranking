@@ -90,7 +90,7 @@ def run_pyspark_pipeline(dir_path, spark, cores, out_path):
     end_preprocess = time.time()
     print("*** preprocess time: {:.2f}s ***".format(end_preprocess - start_preprocess))
 
-    print('start pyspark job')
+    print('start pyspark_processing job')
     start_pyspark_job = time.time()
 
     if num_partitions < cores * 4:
@@ -115,9 +115,9 @@ def run_pyspark_pipeline(dir_path, spark, cores, out_path):
     )
     df_parse.write.parquet(out_path)
 
-    print('end pyspark job')
+    print('end pyspark_processing job')
     end_pyspark_job = time.time()
-    print("*** pyspark job time: {:.2f}s ***".format(end_pyspark_job - start_pyspark_job))
+    print("*** pyspark_processing job time: {:.2f}s ***".format(end_pyspark_job - start_pyspark_job))
 
 
 def build_qrels(spark, parquet_path, qrels_path, doc_count=1000, qrels_type='tree'):
@@ -195,10 +195,10 @@ if __name__ == '__main__':
     # print_intervals = 10000
     #
     # read_paths = [
-    #     '/nfs/trec_car/entity_processing/entity-linking-with-pyspark/data/benchmark_data/test200.cbor',
-    #     '/nfs/trec_car/entity_processing/entity-linking-with-pyspark/data/benchmark_data/benchmarkY2-test.cbor',
-    #     '/nfs/trec_car/entity_processing/entity-linking-with-pyspark/data/benchmark_data/benchmarkY1-train.cbor',
-    #     '/nfs/trec_car/entity_processing/entity-linking-with-pyspark/data/benchmark_data/benchmarkY1-test.cbor',
+    #     '/nfs/trec_car/entity_processing/entity-linking-with-pyspark_processing/data/benchmark_data/test200.cbor',
+    #     '/nfs/trec_car/entity_processing/entity-linking-with-pyspark_processing/data/benchmark_data/benchmarkY2-test.cbor',
+    #     '/nfs/trec_car/entity_processing/entity-linking-with-pyspark_processing/data/benchmark_data/benchmarkY1-train.cbor',
+    #     '/nfs/trec_car/entity_processing/entity-linking-with-pyspark_processing/data/benchmark_data/benchmarkY1-test.cbor',
     #     '/nfs/trec_car/data/pages/unprocessedAllButBenchmark.Y2.cbor'
     # ]
     # datasets = [

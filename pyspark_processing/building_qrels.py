@@ -180,15 +180,15 @@ if __name__ == '__main__':
     import pandas as pd
 
     df = pd.DataFrame(data, columns=['id', 'doc_id', 'text', 'section_heading_ids','id_in_Y2_goldpassages_qrels'])
-    df.to_csv('/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark/data/testY2.v4.csv')
+    df.to_csv('/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/testY2.v4.csv')
 
     #print(document_list[0])
     # doc = tcp.get_protobuf_message(path=proto_path, doc_id=doc_id)
     # print(doc)
     #build_synthetic_qrels(document_list=document_list, path=path, qrels_type=qrels_type)
     # for i in [0,1,2,3,4]:
-    #     proto_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark/data/benchmarkY1/fold-{}-train.pages.bin'.format(i)
-    #     path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark/data/benchmarkY1/fold-{}-train.pages.qrels'.format(i)
+    #     proto_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/benchmarkY1/fold-{}-train.pages.bin'.format(i)
+    #     path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/benchmarkY1/fold-{}-train.pages.qrels'.format(i)
     #     qrels_type = 'hierarchical'
     #     # doc_id = 'enwiki:Aerobic%20fermentation'
     #     tcp = TrecCarParser()
