@@ -1,6 +1,6 @@
 
 from retrieval.tools import SearchTools, EvalTools, RetrievalUtils
-from transformers import BertTokenizer
+from transformers import BertTokenizer, RobertaTokenizer
 from torch.utils.data import TensorDataset
 
 import collections
@@ -16,7 +16,7 @@ class TrecCarProcessing:
 
     retrieval_utils = RetrievalUtils()
 
-    def __init__(self, qrels_path, run_path, index_path, data_dir_path,
+    def __init__(self, qrels_path, run_path, index_path, data_dir_path, use_token_type_ids=True,
                  tokenizer=BertTokenizer.from_pretrained('bert-base-uncased'), max_length=512):
 
         # Path to qrels file.
@@ -27,6 +27,8 @@ class TrecCarProcessing:
         self.index_path = index_path
         # Path to data directory to write output PyTorch file(s).
         self.data_dir_path = data_dir_path
+        # HuggingFace's BERT using 'token_type_ids' and RoBERTa does not.
+        self.use_token_type_ids = use_token_type_ids
         # Initialise searching capabilities over Anserini/Lucene index.
         self.search_tools = SearchTools(index_path=self.index_path)
         # Tokenizer function (text -> BERT tokens)
@@ -37,7 +39,8 @@ class TrecCarProcessing:
         self.qrels = self.retrieval_utils.get_qrels_dict(qrels_path=self.qrels_path)
         # Lists of BERT inputs.
         self.input_ids_list = []
-        self.token_type_ids_list = []
+        if self.use_token_type_ids:
+            self.token_type_ids_list = []
         self.attention_mask_list = []
         self.labels_list = []
         # Lists used to build BERT inputs.
@@ -59,7 +62,8 @@ class TrecCarProcessing:
         for query, doc_id, BERT_encodings in self.topic_BERT_encodings:
             # Append BERT model inputs.
             self.input_ids_list.append(BERT_encodings['input_ids'])
-            self.token_type_ids_list.append(BERT_encodings['token_type_ids'])
+            if self.use_token_type_ids:
+                self.token_type_ids_list.append(BERT_encodings['token_type_ids'])
             self.attention_mask_list.append(BERT_encodings['attention_mask'])
             # Qrels, query and doc_id used to determine whether entry in relevant or not relevant.
             if doc_id in self.qrels[query]:
@@ -134,10 +138,15 @@ class TrecCarProcessing:
         print('Building chuck #{}'.format(self.chuck_counter))
 
         # Make tensor dataset from 4x tensors (input_ids, token_type_ids, attention_mask and labels).
-        dataset = TensorDataset(torch.tensor(self.input_ids_list),
-                                torch.tensor(self.token_type_ids_list),
-                                torch.tensor(self.attention_mask_list),
-                                torch.tensor(self.labels_list))
+        if self.use_token_type_ids:
+            dataset = TensorDataset(torch.tensor(self.input_ids_list),
+                                    torch.tensor(self.token_type_ids_list),
+                                    torch.tensor(self.attention_mask_list),
+                                    torch.tensor(self.labels_list))
+        else:
+            dataset = TensorDataset(torch.tensor(self.input_ids_list),
+                                    torch.tensor(self.attention_mask_list),
+                                    torch.tensor(self.labels_list))
 
         # Save tensor dataset to data_dir_path.
         path = os.path.join(self.data_dir_path, 'tensor_dataset_chuck_{}.pt'.format(self.chuck_counter))
@@ -148,7 +157,8 @@ class TrecCarProcessing:
         self.chuck_counter += 1
         # New lists of BERT inputs.
         self.input_ids_list = []
-        self.token_type_ids_list = []
+        if self.use_token_type_ids:
+            self.token_type_ids_list = []
         self.attention_mask_list = []
         self.labels_list = []
 
@@ -232,12 +242,15 @@ if __name__ == '__main__':
     # qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.qrels'
     # data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/'
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    #tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
     max_length = 512
+    use_token_type_ids = False
     processing = TrecCarProcessing(qrels_path=qrels_path,
                                    run_path=run_path,
                                    index_path=index_path,
                                    data_dir_path=data_dir_path,
+                                   use_token_type_ids=use_token_type_ids,
                                    tokenizer=tokenizer,
                                    max_length=max_length)
 
