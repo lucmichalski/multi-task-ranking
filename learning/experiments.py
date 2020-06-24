@@ -24,12 +24,13 @@ class FineTuningReRankingExperiments:
     eval_config = [('map', None), ('Rprec', None), ('recip_rank', None), ('ndcg', 20), ('P', 20), ('recall', 40),
                    ('recall', 100), ('recall', 1000)]
     retrieval_utils = RetrievalUtils()
-    pretrained_weights = 'bert-base-uncased'
 
-    def __init__(self, model_path=None, train_data_dir_path=None, train_batch_size=None, dev_data_dir_path=None,
+    def __init__(self, model, use_token_type_ids=True, train_data_dir_path=None, train_batch_size=None, dev_data_dir_path=None,
                  dev_batch_size=None, dev_qrels_path=None, dev_run_path=None):
         # Load model from path or use pretrained_weights.
-        self.model = self.__init_model(model_path=model_path)
+        self.model = model
+        # HuggingFace's BERT using 'token_type_ids' and RoBERTa does not.
+        self.use_token_type_ids = use_token_type_ids
         # Build PyTorch Dataloader for training data.
         self.train_dataloader = self.__build_dataloader(data_dir_path=train_data_dir_path, batch_size=train_batch_size,
                                                         random_sample=True)
@@ -70,12 +71,12 @@ class FineTuningReRankingExperiments:
         return run
 
 
-    def __init_model(self, model_path):
-        """ Initialise model with pre-trained weights or load from directory."""
-        if model_path == None:
-            return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
-        else:
-            return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
+    # def __init_model(self, model_path):
+    #     """ Initialise model with pre-trained weights or load from directory."""
+    #     if model_path == None:
+    #         return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
+    #     else:
+    #         return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
 
 
     def __build_dataloader(self, data_dir_path, batch_size, random_sample=False):
@@ -118,11 +119,18 @@ class FineTuningReRankingExperiments:
 
     def __unpack_batch(self, batch):
         """ Unpack batch tensors (input_ids, token_type_ids, attention_mask, labels). """
-        b_input_ids = batch[0].to(self.device)
-        b_token_type_ids = batch[1].to(self.device)
-        b_attention_mask = batch[2].to(self.device)
-        b_labels = batch[3].to(self.device, dtype=torch.float)
-        return b_input_ids, b_token_type_ids, b_attention_mask, b_labels
+        if self.use_token_type_ids:
+            b_input_ids = batch[0].to(self.device)
+            b_token_type_ids = batch[1].to(self.device)
+            b_attention_mask = batch[2].to(self.device)
+            b_labels = batch[3].to(self.device, dtype=torch.float)
+            return b_input_ids, b_token_type_ids, b_attention_mask, b_labels
+        else:
+            b_input_ids = batch[0].to(self.device)
+            b_token_type_ids = batch[1].to(self.device)
+            b_labels = batch[2].to(self.device, dtype=torch.float)
+            return b_input_ids, b_token_type_ids, b_labels
+
 
 
     def __update_dev_lables_and_logits(self, lables, logits):
@@ -269,16 +277,25 @@ class FineTuningReRankingExperiments:
 
         for dev_step, dev_batch in enumerate(self.dev_dataloader):
             # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
-            b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(
-                batch=dev_batch)
+            if self.use_token_type_ids:
+                b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=dev_batch)
+                # With no gradients
+                with torch.no_grad():
+                    loss, logits = self.model.module.forward_head(head_flag=head_flag,
+                                                                  input_ids=b_input_ids,
+                                                                  token_type_ids=b_token_type_ids,
+                                                                  attention_mask=b_attention_mask,
+                                                                  labels=b_labels)
 
-            # With no gradients
-            with torch.no_grad():
-                loss, logits = self.model.module.forward_head(head_flag=head_flag,
-                                                              input_ids=b_input_ids,
-                                                              token_type_ids=b_token_type_ids,
-                                                              attention_mask=b_attention_mask,
-                                                              labels=b_labels)
+            else:
+                b_input_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=dev_batch)
+                # With no gradients
+                with torch.no_grad():
+                    loss, logits = self.model.module.forward_head(head_flag=head_flag,
+                                                                  input_ids=b_input_ids,
+                                                                  attention_mask=b_attention_mask,
+                                                                  labels=b_labels)
+
             # Update dev loss counter.
             dev_loss += loss.sum().item()
 
@@ -333,16 +350,25 @@ class FineTuningReRankingExperiments:
 
             for train_step, train_batch in enumerate(self.train_dataloader):
                 # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
-                b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch)
-
-                # Set gradient to zero.
-                self.model.zero_grad()
-                # Forward pass to retrieve
-                loss, logits = self.model.module.forward_head(head_flag=head_flag,
-                                                              input_ids=b_input_ids,
-                                                              attention_mask=b_attention_mask,
-                                                              token_type_ids=b_token_type_ids,
-                                                              labels=b_labels)
+                if self.use_token_type_ids:
+                    b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch)
+                    # Set gradient to zero.
+                    self.model.zero_grad()
+                    # Forward pass to retrieve
+                    loss, logits = self.model.module.forward_head(head_flag=head_flag,
+                                                                  input_ids=b_input_ids,
+                                                                  attention_mask=b_attention_mask,
+                                                                  token_type_ids=b_token_type_ids,
+                                                                  labels=b_labels)
+                else:
+                    b_input_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch)
+                    # Set gradient to zero.
+                    self.model.zero_grad()
+                    # Forward pass to retrieve
+                    loss, logits = self.model.module.forward_head(head_flag=head_flag,
+                                                                  input_ids=b_input_ids,
+                                                                  attention_mask=b_attention_mask,
+                                                                  labels=b_labels)
                 # Add loss to train loss counter
                 train_loss += loss.sum().item()
                 # Backpropogate loss.
