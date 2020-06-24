@@ -19,7 +19,7 @@ if __name__ == '__main__':
     use_token_type_ids = False
     tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
 
-    run_path = '/trec_car/data/passage_ranking/testY1_hierarchical_passage_1000.run'
+    run_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage_1000.run'
     qrels_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage.qrels'
     topics_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage.topics'
     data_dir_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage_1000_roberta_chunks/'
