@@ -66,14 +66,14 @@ if __name__ == '__main__':
                                                 dev_run_path=dev_run_path)
 
     epochs = 2
-    lr = 2e-5
+    lr = 8e-6
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'roberta_benchmarkY1_lr_2e5_v1'
+    experiment_name = 'roberta_benchmarkY1_lr_8e6_v1'
     write = True
-    logging_steps = 500
+    logging_steps = 1000
 
     head_flag = 'passage'
 
