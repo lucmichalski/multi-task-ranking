@@ -54,7 +54,9 @@ if __name__ == '__main__':
     dev_qrels_path = qrels_paths[1]
     dev_run_path = run_paths[1]
     model = RoBERTaMultiTaskRanker()
+    use_token_type_ids = False
     experiment = FineTuningReRankingExperiments(model=model,
+                                                use_token_type_ids=use_token_type_ids,
                                                 train_data_dir_path=train_data_dir_path,
                                                 train_batch_size=train_batch_size,
                                                 dev_data_dir_path=dev_data_dir_path,
