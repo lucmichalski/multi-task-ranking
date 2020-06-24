@@ -81,10 +81,13 @@ class RoBERTaMultiTaskRanker(RobertaModel):
     valid_head_flags = ['entity', 'passage']
     config = RobertaConfig()
 
-    def __init__(self):
+    def __init__(self, path=None):
         super().__init__(self.config)
         # Initialise BERT setup.
-        self.bert = RobertaModel(self.config).from_pretrained('roberta-base')
+        if path == None:
+            self.bert = RobertaModel(self.config).from_pretrained('roberta-base')
+        else:
+            self.bert = RobertaModel(self.config).from_pretrained(path)
         # Dropout standard of 0.1.
         self.dropout = nn.Dropout(self.config.hidden_dropout_prob)
         # Head for passage ranking between 0 (not relevant) & 1 (relevant)
