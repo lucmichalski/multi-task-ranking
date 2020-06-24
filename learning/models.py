@@ -27,19 +27,15 @@ class BertMultiTaskRanker(BertPreTrainedModel):
         self.init_weights()
 
 
-    def __get_BERT_outputs(self, input_ids, attention_mask, token_type_ids, position_ids, head_mask, inputs_embeds):
+    def __get_BERT_outputs(self, input_ids, attention_mask, token_type_ids):
         """ Returns BERT outputs (last_hidden_state, pooler_output, hidden_states, attentions) """
-        return self.bert(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids,
-                         position_ids=position_ids, head_mask=head_mask, inputs_embeds=inputs_embeds)
+        return self.bert(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
 
 
-    def __get_BERT_cls_vector(self, input_ids, attention_mask, token_type_ids, position_ids, head_mask,
-                              inputs_embeds):
+    def __get_BERT_cls_vector(self, input_ids, attention_mask, token_type_ids):
         """ Returns BERT pooled_output (i.e. CLS vector) applying dropout. """
         # Get BERT outputs.
-        outputs = self.__get_BERT_outputs(input_ids=input_ids, attention_mask=attention_mask,
-                                          token_type_ids=token_type_ids, position_ids=position_ids, head_mask=head_mask,
-                                          inputs_embeds=inputs_embeds)
+        outputs = self.__get_BERT_outputs(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
         # Apply dropout to pooled_output (i.e. CLS vector) and apply dropout.
         pooled_output = outputs[1]
         return self.dropout(pooled_output)
@@ -51,13 +47,11 @@ class BertMultiTaskRanker(BertPreTrainedModel):
         return loss_fct(logits.view(-1), labels.view(-1))
 
 
-    def forward_head(self, head_flag='passage', input_ids=None, attention_mask=None, token_type_ids=None, position_ids=None,
-                        head_mask=None, inputs_embeds=None, labels=None):
+    def forward_head(self, head_flag='passage', input_ids=None, attention_mask=None, token_type_ids=None, labels=None):
         """ Forward pass over BERT + passage head. Returns loss and logits. """
         # Get BERT CLS vector.
         cls_vector = self.__get_BERT_cls_vector(input_ids=input_ids, attention_mask=attention_mask,
-                                                token_type_ids=token_type_ids, position_ids=position_ids,
-                                                head_mask=head_mask, inputs_embeds=inputs_embeds)
+                                                token_type_ids=token_type_ids)
 
         assert head_flag in self.valid_head_flags, "head_flag: {}, valid_head_flags: {}".format(head_flag, self.valid_head_flags)
         # Calculate logits.
