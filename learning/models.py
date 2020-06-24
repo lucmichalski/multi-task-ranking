@@ -75,22 +75,22 @@ class BertMultiTaskRanker(BertPreTrainedModel):
         return loss, logits
 
 
-class RoBERTaMultiTaskRanker():
+class RoBERTaMultiTaskRanker(RobertaModel):
     """ Bert Multi-Task ranking model for passage and entity ranking. """
 
     valid_head_flags = ['entity', 'passage']
+    config = RobertaConfig()
 
     def __init__(self):
-
+        super().__init__(self.config)
         # Initialise BERT setup.
-        config = RobertaConfig()
-        self.bert = RobertaModel(config).from_pretrained('roberta-base')
+        self.bert = RobertaModel(self.config).from_pretrained('roberta-base')
         # Dropout standard of 0.1.
-        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.dropout = nn.Dropout(self.config.hidden_dropout_prob)
         # Head for passage ranking between 0 (not relevant) & 1 (relevant)
-        self.passage_head = nn.Linear(config.hidden_size, 1)
+        self.passage_head = nn.Linear(self.config.hidden_size, 1)
         # Head for entity ranking between 0 (not relevant) & 1 (relevant)
-        self.entity_head = nn.Linear(config.hidden_size, 1)
+        self.entity_head = nn.Linear(self.config.hidden_size, 1)
 
 
     def __get_BERT_outputs(self, input_ids, attention_mask, token_type_ids, position_ids, head_mask, inputs_embeds):
