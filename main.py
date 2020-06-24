@@ -53,7 +53,7 @@ if __name__ == '__main__':
     dev_data_dir_path = data_dir_path
     dev_qrels_path = qrels_path
     dev_run_path = run_path
-    model = nn.DataParallel(RoBERTaMultiTaskRanker(path='nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_8e6_v1/epoch1_batch9000/'))
+    model = nn.DataParallel(RoBERTaMultiTaskRanker(path='/nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_8e6_v1/epoch1_batch9000/'))
     use_token_type_ids = False
     experiment = FineTuningReRankingExperiments(model=model,
                                                 use_token_type_ids=use_token_type_ids,
