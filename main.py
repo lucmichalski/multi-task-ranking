@@ -6,6 +6,7 @@ from learning.experiments import FineTuningReRankingExperiments
 from learning.models import RoBERTaMultiTaskRanker
 from retrieval.dataset_processing import TrecCarProcessing, RobertaTokenizer
 from retrieval.tools import EvalTools, SearchTools, default_eval_config
+from torch import nn
 
 if __name__ == '__main__':
 
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     dev_data_dir_path = data_dir_paths[1]
     dev_qrels_path = qrels_paths[1]
     dev_run_path = run_paths[1]
-    model = RoBERTaMultiTaskRanker()
+    model = nn.DataParallel(RoBERTaMultiTaskRanker())
     use_token_type_ids = False
     experiment = FineTuningReRankingExperiments(model=model,
                                                 use_token_type_ids=use_token_type_ids,
@@ -73,6 +74,7 @@ if __name__ == '__main__':
     experiment_name = 'roberta_benchmarkY1_lr_2e5_v1'
     write = True
     logging_steps = 500
+
     head_flag = 'passage'
 
     experiment.run_experiment_single_head(
