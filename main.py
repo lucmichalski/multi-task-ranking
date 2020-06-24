@@ -22,7 +22,7 @@ if __name__ == '__main__':
     run_path = 'nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage_1000.run'
     qrels_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage.qrels'
     topics_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage.topics'
-    data_dir_path = '/nfs/trec_car/data/passage_ranking/train_benchmarkY1_250_roberta_chunks/'
+    data_dir_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage_1000_roberta_chunks/'
     training_dataset = False
     hits = 1000
 
