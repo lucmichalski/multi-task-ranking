@@ -73,7 +73,7 @@ class RoBERTaMultiTaskRanker(BertPreTrainedModel):
     """ Bert Multi-Task ranking model for passage and entity ranking. """
 
     valid_head_flags = ['entity', 'passage']
-    #config = RobertaConfig()
+    config = RobertaConfig()
 
     def __init__(self, config):
         super().__init__(config)
@@ -152,3 +152,4 @@ if __name__ == '__main__':
     head_flag = 'passage'
     rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/roberta_passage_testY1_1000.run'
     experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False)
+

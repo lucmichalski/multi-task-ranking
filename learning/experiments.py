@@ -1,5 +1,5 @@
 
-from learning.models import BertMultiTaskRanker, RoBERTaMultiTaskRanker
+from learning.models import BertMultiTaskRanker, RoBERTaMultiTaskRanker, RobertaConfig
 from learning.utils import BertDataset
 from retrieval.tools import EvalTools, RetrievalUtils
 
@@ -79,12 +79,12 @@ class FineTuningReRankingExperiments:
             if use_token_type_ids:
                 return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.bert_pretrained_weights))
             else:
-                return nn.DataParallel(RoBERTaMultiTaskRanker.from_pretrained(self.roberta_pretrained_weights))
+                return nn.DataParallel(RoBERTaMultiTaskRanker(RobertaConfig()).from_pretrained(self.roberta_pretrained_weights))
         else:
             if use_token_type_ids:
                 return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
             else:
-                return nn.DataParallel(RoBERTaMultiTaskRanker.from_pretrained(model_path))
+                return nn.DataParallel(RoBERTaMultiTaskRanker(RobertaConfig()).from_pretrained(model_path))
 
 
     def __build_dataloader(self, data_dir_path, batch_size, random_sample=False):
