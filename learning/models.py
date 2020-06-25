@@ -131,9 +131,9 @@ class RoBERTaMultiTaskRanker(BertPreTrainedModel):
 if __name__ == '__main__':
     from learning.experiments import FineTuningReRankingExperiments
 
-    train_data_dir_path = None#data_dir_path
-    train_batch_size = None #12
-    dev_batch_size = 64
+    train_data_dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/roberta_data/'
+    train_batch_size = 2
+    dev_batch_size = 128
     dev_data_dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/roberta_data/'
     dev_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.qrels'
     dev_run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.run'
@@ -147,6 +147,29 @@ if __name__ == '__main__':
                                                 dev_batch_size=dev_batch_size,
                                                 dev_qrels_path=dev_qrels_path,
                                                 dev_run_path=dev_run_path)
+
+    # epochs = 1
+    # lr = 5e-5
+    # eps = 1e-8
+    # weight_decay = 0.01
+    # warmup_percentage = 0.1
+    # experiments_dir = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/exp/'
+    # experiment_name = 'roberta_benchmarkY1_lr_5e5_v3'
+    # write = True
+    # logging_steps = 100
+    # head_flag = 'passage'
+    #
+    # experiment.run_experiment_single_head(
+    #     head_flag=head_flag,
+    #     epochs=epochs,
+    #     lr=lr,
+    #     eps=eps,
+    #     weight_decay=weight_decay,
+    #     warmup_percentage=warmup_percentage,
+    #     experiments_dir=experiments_dir,
+    #     experiment_name=experiment_name,
+    #     logging_steps=logging_steps
+    # )
 
     head_flag = 'passage'
     rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/roberta_passage_testY1_1000.run'
