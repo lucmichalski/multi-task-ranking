@@ -73,7 +73,7 @@ class RoBERTaMultiTaskRanker(BertPreTrainedModel):
     """ Bert Multi-Task ranking model for passage and entity ranking. """
 
     valid_head_flags = ['entity', 'passage']
-    config = RobertaConfig()
+    #config = RobertaConfig()
 
     def __init__(self, config):
         super().__init__(config)
@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
     train_data_dir_path = None#data_dir_path
     train_batch_size = None #12
-    dev_batch_size = 16
+    dev_batch_size = 64
     dev_data_dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/roberta_data/'
     dev_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.qrels'
     dev_run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.run'
