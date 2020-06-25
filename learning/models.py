@@ -14,7 +14,6 @@ class BertMultiTaskRanker(BertPreTrainedModel):
 
     def __init__(self, config):
         super().__init__(config)
-
         # Initialise BERT setup.
         self.bert = BertModel(config)
         # Dropout standard of 0.1.
@@ -138,7 +137,7 @@ if __name__ == '__main__':
     dev_data_dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/roberta_data/'
     dev_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.qrels'
     dev_run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.run'
-    model_path = None #'/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/model/'
+    model_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/model/'
     use_token_type_ids = False
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 use_token_type_ids=use_token_type_ids,
