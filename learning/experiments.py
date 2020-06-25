@@ -409,7 +409,7 @@ class FineTuningReRankingExperiments:
                     logging.info("Validation loss: {0:.5f}".format(av_dev_loss))
                     logging.info("Validation time: {:}".format(self.__format_time(time.time() - dev_start_time)))
 
-                    #self.__log_eval_metrics()
+                    self.__log_eval_metrics()
 
                     # Save model and weights to directory.
                     model_dir = os.path.join(experiment_path, 'epoch{}_batch{}/'.format(epoch_i, train_step + 1))
