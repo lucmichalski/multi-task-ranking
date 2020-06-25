@@ -78,13 +78,13 @@ class RoBERTaMultiTaskRanker(BertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
         # Initialise BERT setup.
-        self.bert = RobertaModel(self.config)
+        self.bert = RobertaModel(config)
         # Dropout standard of 0.1.
-        self.dropout = nn.Dropout(self.config.hidden_dropout_prob)
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
         # Head for passage ranking between 0 (not relevant) & 1 (relevant)
-        self.passage_head = nn.Linear(self.config.hidden_size, 1)
+        self.passage_head = nn.Linear(config.hidden_size, 1)
         # Head for entity ranking between 0 (not relevant) & 1 (relevant)
-        self.entity_head = nn.Linear(self.config.hidden_size, 1)
+        self.entity_head = nn.Linear(config.hidden_size, 1)
         # Initialise BERT weights.
         #TODO - try without?
         #self.init_weights()
