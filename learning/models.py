@@ -69,25 +69,24 @@ class BertMultiTaskRanker(BertPreTrainedModel):
         return loss, logits
 
 
-class RoBERTaMultiTaskRanker(RobertaModel):
+class RoBERTaMultiTaskRanker(BertPreTrainedModel):
     """ Bert Multi-Task ranking model for passage and entity ranking. """
 
     valid_head_flags = ['entity', 'passage']
     config = RobertaConfig()
 
-    def __init__(self, path=None):
-        super().__init__(self.config)
+    def __init__(self, config):
+        super().__init__(config)
         # Initialise BERT setup.
-        if path == None:
-            self.bert = RobertaModel(self.config).from_pretrained('roberta-base')
-        else:
-            self.bert = RobertaModel(self.config).from_pretrained(path)
+        self.bert = RobertaModel(self.config)
         # Dropout standard of 0.1.
         self.dropout = nn.Dropout(self.config.hidden_dropout_prob)
         # Head for passage ranking between 0 (not relevant) & 1 (relevant)
         self.passage_head = nn.Linear(self.config.hidden_size, 1)
         # Head for entity ranking between 0 (not relevant) & 1 (relevant)
         self.entity_head = nn.Linear(self.config.hidden_size, 1)
+        # Initialise BERT weights.
+        self.init_weights()
 
 
     def __get_BERT_outputs(self, input_ids, attention_mask):
@@ -131,4 +130,25 @@ class RoBERTaMultiTaskRanker(RobertaModel):
         return loss, logits
 
 if __name__ == '__main__':
-    model = RoBERTaMultiTaskRanker()
+    from learning.experiments import FineTuningReRankingExperiments
+
+    train_data_dir_path = None#data_dir_path
+    train_batch_size = None #12
+    dev_batch_size = 16
+    dev_data_dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/roberta_data/'
+    dev_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.qrels'
+    dev_run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.run'
+    model_path = None #'/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/model/'
+    use_token_type_ids = False
+    experiment = FineTuningReRankingExperiments(model_path=model_path,
+                                                use_token_type_ids=use_token_type_ids,
+                                                train_data_dir_path=train_data_dir_path,
+                                                train_batch_size=train_batch_size,
+                                                dev_data_dir_path=dev_data_dir_path,
+                                                dev_batch_size=dev_batch_size,
+                                                dev_qrels_path=dev_qrels_path,
+                                                dev_run_path=dev_run_path)
+
+    head_flag = 'passage'
+    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/roberta_passage_testY1_1000.run'
+    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False)

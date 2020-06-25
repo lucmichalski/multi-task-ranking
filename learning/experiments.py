@@ -1,5 +1,5 @@
 
-from learning.models import BertMultiTaskRanker
+from learning.models import BertMultiTaskRanker, RoBERTaMultiTaskRanker
 from learning.utils import BertDataset
 from retrieval.tools import EvalTools, RetrievalUtils
 
@@ -24,11 +24,13 @@ class FineTuningReRankingExperiments:
     eval_config = [('map', None), ('Rprec', None), ('recip_rank', None), ('ndcg', 20), ('P', 20), ('recall', 40),
                    ('recall', 100), ('recall', 1000)]
     retrieval_utils = RetrievalUtils()
+    bert_pretrained_weights = 'bert-base-uncased'
+    roberta_pretrained_weights = 'roberta-base'
 
-    def __init__(self, model, use_token_type_ids=True, train_data_dir_path=None, train_batch_size=None, dev_data_dir_path=None,
+    def __init__(self, model_path, use_token_type_ids=True, train_data_dir_path=None, train_batch_size=None, dev_data_dir_path=None,
                  dev_batch_size=None, dev_qrels_path=None, dev_run_path=None):
         # Load model from path or use pretrained_weights.
-        self.model = model
+        self.model = self.__init_model(model_path=model_path, use_token_type_ids=use_token_type_ids)
         # HuggingFace's BERT using 'token_type_ids' and RoBERTa does not.
         self.use_token_type_ids = use_token_type_ids
         # Build PyTorch Dataloader for training data.
@@ -71,12 +73,18 @@ class FineTuningReRankingExperiments:
         return run
 
 
-    # def __init_model(self, model_path):
-    #     """ Initialise model with pre-trained weights or load from directory."""
-    #     if model_path == None:
-    #         return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
-    #     else:
-    #         return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
+    def __init_model(self, model_path, use_token_type_ids):
+        """ Initialise model with pre-trained weights or load from directory."""
+        if model_path == None:
+            if use_token_type_ids:
+                return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.bert_pretrained_weights))
+            else:
+                return nn.DataParallel(RoBERTaMultiTaskRanker.from_pretrained(self.roberta_pretrained_weights))
+        else:
+            if use_token_type_ids:
+                return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
+            else:
+                return nn.DataParallel(RoBERTaMultiTaskRanker.from_pretrained(model_path))
 
 
     def __build_dataloader(self, data_dir_path, batch_size, random_sample=False):

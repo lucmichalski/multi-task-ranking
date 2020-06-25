@@ -10,21 +10,21 @@ from torch import nn
 
 if __name__ == '__main__':
 
-    index_path = PassagePaths.index
-    printing_step = 100
-    searcher_config = {
-        'BM25': {'k1': 0.9, 'b': 0.4}
-    }
-    max_length = 512
-    use_token_type_ids = False
-    tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
-
-    run_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage_1000.run'
-    qrels_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage.qrels'
-    topics_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage.topics'
-    data_dir_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage_1000_roberta_chunks/'
-    training_dataset = False
-    hits = 1000
+    # index_path = PassagePaths.index
+    # printing_step = 100
+    # searcher_config = {
+    #     'BM25': {'k1': 0.9, 'b': 0.4}
+    # }
+    # max_length = 512
+    # use_token_type_ids = False
+    # tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+    #
+    # run_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage_1000.run'
+    # qrels_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage.qrels'
+    # topics_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage.topics'
+    # data_dir_path = '/nfs/trec_car/data/passage_ranking/testY1_hierarchical_passage_1000_roberta_chunks/'
+    # training_dataset = False
+    # hits = 1000
 
     #
     # search = SearchTools(index_path=index_path, searcher_config=searcher_config)
@@ -47,15 +47,15 @@ if __name__ == '__main__':
     # processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=50, first_para=False)
 
 
-    train_data_dir_path = None#data_dir_path
-    train_batch_size = None#12
+    train_data_dir_path ='/nfs/trec_car/data/passage_ranking/dtrain_benchmarkY1_250_roberta_chunks/'
+    train_batch_size = 12
     dev_batch_size = 64 * 8
-    dev_data_dir_path = data_dir_path
-    dev_qrels_path = qrels_path
-    dev_run_path = run_path
-    model = nn.DataParallel(RoBERTaMultiTaskRanker(path='/nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_8e6_v1/epoch1_batch9000/'))
+    dev_data_dir_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25_roberta_chunks/'
+    dev_qrels_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25.qrels'
+    dev_run_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25.run'
+    model_path = None
     use_token_type_ids = False
-    experiment = FineTuningReRankingExperiments(model=model,
+    experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 use_token_type_ids=use_token_type_ids,
                                                 train_data_dir_path=train_data_dir_path,
                                                 train_batch_size=train_batch_size,
@@ -64,29 +64,29 @@ if __name__ == '__main__':
                                                 dev_qrels_path=dev_qrels_path,
                                                 dev_run_path=dev_run_path)
 
-    # epochs = 2
-    # lr = 8e-6
-    # eps = 1e-8
-    # weight_decay = 0.01
-    # warmup_percentage = 0.1
-    # experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    # experiment_name = 'roberta_benchmarkY1_lr_8e6_v1'
-    # write = True
-    # logging_steps = 1000
-    #
-    # head_flag = 'passage'
-    #
-    # experiment.run_experiment_single_head(
-    #                                 head_flag=head_flag,
-    #                                 epochs=epochs,
-    #                                 lr=lr,
-    #                                 eps=eps,
-    #                                 weight_decay=weight_decay,
-    #                                 warmup_percentage=warmup_percentage,
-    #                                 experiments_dir=experiments_dir,
-    #                                 experiment_name=experiment_name,
-    #                                 logging_steps=logging_steps)
-
+    epochs = 2
+    lr = 6e-6
+    eps = 1e-8
+    weight_decay = 0.01
+    warmup_percentage = 0.1
+    experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
+    experiment_name = 'roberta_benchmarkY1_lr_6e6_v2'
+    write = True
+    logging_steps = 1000
     head_flag = 'passage'
-    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/roberta_passage_testY1_1000.run'
-    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False)
+
+    experiment.run_experiment_single_head(
+        head_flag=head_flag,
+        epochs=epochs,
+        lr=lr,
+        eps=eps,
+        weight_decay=weight_decay,
+        warmup_percentage=warmup_percentage,
+        experiments_dir=experiments_dir,
+        experiment_name=experiment_name,
+        logging_steps=logging_steps
+    )
+
+    # head_flag = 'passage'
+    # rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/roberta_passage_testY1_1000.run'
+    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False)
