@@ -77,14 +77,14 @@ class FineTuningReRankingExperiments:
         """ Initialise model with pre-trained weights or load from directory."""
         if model_path == None:
             if use_token_type_ids:
-                return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.bert_pretrained_weights))
+                return BertMultiTaskRanker.from_pretrained(self.bert_pretrained_weights)
             else:
-                return nn.DataParallel(RoBERTaMultiTaskRanker.from_pretrained(self.roberta_pretrained_weights))
+                return RoBERTaMultiTaskRanker.from_pretrained(self.roberta_pretrained_weights)
         else:
             if use_token_type_ids:
-                return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
+                return BertMultiTaskRanker.from_pretrained(model_path)
             else:
-                return nn.DataParallel(RoBERTaMultiTaskRanker.from_pretrained(model_path))
+                return RoBERTaMultiTaskRanker.from_pretrained(model_path)
 
 
     def __build_dataloader(self, data_dir_path, batch_size, random_sample=False):
@@ -363,20 +363,20 @@ class FineTuningReRankingExperiments:
                     # Set gradient to zero.
                     self.model.zero_grad()
                     # Forward pass to retrieve
-                    loss, logits = self.model.module.forward_head(head_flag=head_flag,
-                                                                  input_ids=b_input_ids,
-                                                                  attention_mask=b_attention_mask,
-                                                                  token_type_ids=b_token_type_ids,
-                                                                  labels=b_labels)
+                    loss, logits = self.model.forward_head(head_flag=head_flag,
+                                                           input_ids=b_input_ids,
+                                                           attention_mask=b_attention_mask,
+                                                           token_type_ids=b_token_type_ids,
+                                                           labels=b_labels)
                 else:
                     b_input_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch)
                     # Set gradient to zero.
                     self.model.zero_grad()
                     # Forward pass to retrieve
-                    loss, logits = self.model.module.forward_head(head_flag=head_flag,
-                                                                  input_ids=b_input_ids,
-                                                                  attention_mask=b_attention_mask,
-                                                                  labels=b_labels)
+                    loss, logits = self.model.forward_head(head_flag=head_flag,
+                                                           input_ids=b_input_ids,
+                                                           attention_mask=b_attention_mask,
+                                                           labels=b_labels)
                 # Add loss to train loss counter
                 train_loss += loss.sum().item()
                 # Backpropogate loss.
@@ -415,10 +415,7 @@ class FineTuningReRankingExperiments:
                     model_dir = os.path.join(experiment_path, 'epoch{}_batch{}/'.format(epoch_i, train_step + 1))
                     if os.path.isdir(model_dir) == False:
                         os.mkdir(model_dir)
-                    try:
-                        self.model.module.save_pretrained(model_dir)
-                    except AttributeError:
-                        self.model.save_pretrained(model_dir)
+                    self.model.save_pretrained(model_dir)
 
 
     def run_experiment_multiple_heads(self):
