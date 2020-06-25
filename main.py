@@ -53,7 +53,7 @@ if __name__ == '__main__':
     dev_data_dir_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25_roberta_chunks/'
     dev_qrels_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25.qrels'
     dev_run_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25.run'
-    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_6e6_v2/epoch1_batch3000' #None
+    model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_6e6_v2/epoch1_batch3000' #None
     use_token_type_ids = False
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 use_token_type_ids=use_token_type_ids,
