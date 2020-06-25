@@ -87,7 +87,7 @@ class RoBERTaMultiTaskRanker(BertPreTrainedModel):
         self.entity_head = nn.Linear(self.config.hidden_size, 1)
         # Initialise BERT weights.
         #TODO - try without?
-        #self.init_weights()
+        self.init_weights()
 
 
     def __get_BERT_outputs(self, input_ids, attention_mask):
