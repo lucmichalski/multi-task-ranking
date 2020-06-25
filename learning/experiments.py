@@ -79,12 +79,12 @@ class FineTuningReRankingExperiments:
             if use_token_type_ids:
                 return BertMultiTaskRanker.from_pretrained(self.bert_pretrained_weights)
             else:
-                return RoBERTaMultiTaskRanker.from_pretrained(self.roberta_pretrained_weights)
+                return RoBERTaMultiTaskRanker(path=self.roberta_pretrained_weights)
         else:
             if use_token_type_ids:
                 return BertMultiTaskRanker.from_pretrained(model_path)
             else:
-                return RoBERTaMultiTaskRanker.from_pretrained(model_path)
+                return RoBERTaMultiTaskRanker(path=model_path)
 
 
     def __build_dataloader(self, data_dir_path, batch_size, random_sample=False):
@@ -135,9 +135,9 @@ class FineTuningReRankingExperiments:
             return b_input_ids, b_token_type_ids, b_attention_mask, b_labels
         else:
             b_input_ids = batch[0].to(self.device)
-            b_token_type_ids = batch[1].to(self.device)
+            b_attention_mask = batch[1].to(self.device)
             b_labels = batch[2].to(self.device, dtype=torch.float)
-            return b_input_ids, b_token_type_ids, b_labels
+            return b_input_ids, b_attention_mask, b_labels
 
 
 
@@ -294,12 +294,6 @@ class FineTuningReRankingExperiments:
                                                            token_type_ids=b_token_type_ids,
                                                            attention_mask=b_attention_mask,
                                                            labels=b_labels)
-                    # Update dev loss counter.
-                    dev_loss += loss.sum().item()
-
-                    # Update list of dev lables and logits
-                    self.__update_dev_lables_and_logits(lables=b_labels, logits=logits)
-
             else:
                 b_input_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=dev_batch)
                 # With no gradients
@@ -309,11 +303,11 @@ class FineTuningReRankingExperiments:
                                                            attention_mask=b_attention_mask,
                                                            labels=b_labels)
 
-                    # Update dev loss counter.
-                    dev_loss += loss.sum().item()
+            # Update dev loss counter.
+            dev_loss += loss.sum().item()
 
-                    # Update list of dev lables and logits
-                    self.__update_dev_lables_and_logits(lables=b_labels, logits=logits)
+            # Update list of dev lables and logits
+            self.__update_dev_lables_and_logits(lables=b_labels, logits=logits)
 
         # Report the final accuracy for this validation run.
         return dev_loss / num_dev_steps
@@ -362,11 +356,11 @@ class FineTuningReRankingExperiments:
             train_loss = 0
 
             for train_step, train_batch in enumerate(self.train_dataloader):
+                # Set gradient to zero.
+                self.model.zero_grad()
                 # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
                 if self.use_token_type_ids:
                     b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch)
-                    # Set gradient to zero.
-                    self.model.zero_grad()
                     # Forward pass to retrieve
                     loss, logits = self.model.forward_head(head_flag=head_flag,
                                                            input_ids=b_input_ids,
@@ -375,8 +369,6 @@ class FineTuningReRankingExperiments:
                                                            labels=b_labels)
                 else:
                     b_input_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch)
-                    # Set gradient to zero.
-                    self.model.zero_grad()
                     # Forward pass to retrieve
                     loss, logits = self.model.forward_head(head_flag=head_flag,
                                                            input_ids=b_input_ids,

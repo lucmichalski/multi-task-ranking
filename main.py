@@ -70,7 +70,7 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'roberta_benchmarkY1_lr_2e5_v3_removed_parallel_data_align_valid_init_weights_no_config_v2'
+    experiment_name = 'roberta_benchmarkY1_lr_2e5_v4_back_to_old_try_learn'
     write = True
     logging_steps = 500
     head_flag = 'passage'

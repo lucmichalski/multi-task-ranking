@@ -72,18 +72,18 @@ class RoBERTaMultiTaskRanker(BertPreTrainedModel):
     """ Bert Multi-Task ranking model for passage and entity ranking. """
 
     valid_head_flags = ['entity', 'passage']
-    #config = RobertaConfig()
+    config = RobertaConfig()
 
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, path='roberta-base'):
+        super().__init__(self.config)
         # Initialise BERT setup.
-        self.bert = RobertaModel(config)
+        self.bert = RobertaModel(self.config).from_pretrained(path)
         # Dropout standard of 0.1.
-        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.dropout = nn.Dropout(self.config.hidden_dropout_prob)
         # Head for passage ranking between 0 (not relevant) & 1 (relevant)
-        self.passage_head = nn.Linear(config.hidden_size, 1)
+        self.passage_head = nn.Linear(self.config.hidden_size, 1)
         # Head for entity ranking between 0 (not relevant) & 1 (relevant)
-        self.entity_head = nn.Linear(config.hidden_size, 1)
+        self.entity_head = nn.Linear(self.config.hidden_size, 1)
         # Initialise BERT weights.
         #TODO - try without?
         self.init_weights()
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     dev_data_dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/roberta_data/'
     dev_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.qrels'
     dev_run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.run'
-    model_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/model/'
+    model_path = None #'/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/model/'
     use_token_type_ids = False
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 use_token_type_ids=use_token_type_ids,
@@ -149,30 +149,30 @@ if __name__ == '__main__':
                                                 dev_qrels_path=dev_qrels_path,
                                                 dev_run_path=dev_run_path)
 
-    # epochs = 1
-    # lr = 5e-5
-    # eps = 1e-8
-    # weight_decay = 0.01
-    # warmup_percentage = 0.1
-    # experiments_dir = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/exp/'
-    # experiment_name = 'roberta_benchmarkY1_lr_5e5_v3'
-    # write = True
-    # logging_steps = 100
-    # head_flag = 'passage'
-    #
-    # experiment.run_experiment_single_head(
-    #     head_flag=head_flag,
-    #     epochs=epochs,
-    #     lr=lr,
-    #     eps=eps,
-    #     weight_decay=weight_decay,
-    #     warmup_percentage=warmup_percentage,
-    #     experiments_dir=experiments_dir,
-    #     experiment_name=experiment_name,
-    #     logging_steps=logging_steps
-    # )
-
+    epochs = 1
+    lr = 1e-5
+    eps = 1e-8
+    weight_decay = 0.01
+    warmup_percentage = 0.1
+    experiments_dir = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/exp/'
+    experiment_name = 'roberta_benchmarkY1_lr_5e5_v3'
+    write = True
+    logging_steps = 100
     head_flag = 'passage'
-    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/roberta_passage_testY1_1000.run'
-    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False)
+
+    experiment.run_experiment_single_head(
+        head_flag=head_flag,
+        epochs=epochs,
+        lr=lr,
+        eps=eps,
+        weight_decay=weight_decay,
+        warmup_percentage=warmup_percentage,
+        experiments_dir=experiments_dir,
+        experiment_name=experiment_name,
+        logging_steps=logging_steps
+    )
+
+    # head_flag = 'passage'
+    # rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/roberta_passage_testY1_1000.run'
+    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False)
 
