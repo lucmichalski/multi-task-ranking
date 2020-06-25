@@ -289,20 +289,20 @@ class FineTuningReRankingExperiments:
                 b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=dev_batch)
                 # With no gradients
                 with torch.no_grad():
-                    loss, logits = self.model.module.forward_head(head_flag=head_flag,
-                                                                  input_ids=b_input_ids,
-                                                                  token_type_ids=b_token_type_ids,
-                                                                  attention_mask=b_attention_mask,
-                                                                  labels=b_labels)
+                    loss, logits = self.model.forward_head(head_flag=head_flag,
+                                                           input_ids=b_input_ids,
+                                                           token_type_ids=b_token_type_ids,
+                                                           attention_mask=b_attention_mask,
+                                                           labels=b_labels)
 
             else:
                 b_input_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=dev_batch)
                 # With no gradients
                 with torch.no_grad():
-                    loss, logits = self.model.module.forward_head(head_flag=head_flag,
-                                                                  input_ids=b_input_ids,
-                                                                  attention_mask=b_attention_mask,
-                                                                  labels=b_labels)
+                    loss, logits = self.model.forward_head(head_flag=head_flag,
+                                                           input_ids=b_input_ids,
+                                                           attention_mask=b_attention_mask,
+                                                           labels=b_labels)
 
             # Update dev loss counter.
             dev_loss += loss.sum().item()

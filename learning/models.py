@@ -72,6 +72,7 @@ class RoBERTaMultiTaskRanker(BertPreTrainedModel):
     """ Bert Multi-Task ranking model for passage and entity ranking. """
 
     valid_head_flags = ['entity', 'passage']
+    #Just config
     config = RobertaConfig()
 
     def __init__(self, config):
@@ -85,7 +86,8 @@ class RoBERTaMultiTaskRanker(BertPreTrainedModel):
         # Head for entity ranking between 0 (not relevant) & 1 (relevant)
         self.entity_head = nn.Linear(self.config.hidden_size, 1)
         # Initialise BERT weights.
-        self.init_weights()
+        #TODO - try without?
+        #self.init_weights()
 
 
     def __get_BERT_outputs(self, input_ids, attention_mask):
