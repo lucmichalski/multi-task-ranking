@@ -294,6 +294,11 @@ class FineTuningReRankingExperiments:
                                                            token_type_ids=b_token_type_ids,
                                                            attention_mask=b_attention_mask,
                                                            labels=b_labels)
+                    # Update dev loss counter.
+                    dev_loss += loss.sum().item()
+
+                    # Update list of dev lables and logits
+                    self.__update_dev_lables_and_logits(lables=b_labels, logits=logits)
 
             else:
                 b_input_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=dev_batch)
@@ -304,11 +309,11 @@ class FineTuningReRankingExperiments:
                                                            attention_mask=b_attention_mask,
                                                            labels=b_labels)
 
-            # Update dev loss counter.
-            dev_loss += loss.sum().item()
+                    # Update dev loss counter.
+                    dev_loss += loss.sum().item()
 
-            # Update list of dev lables and logits
-            self.__update_dev_lables_and_logits(lables=b_labels, logits=logits)
+                    # Update list of dev lables and logits
+                    self.__update_dev_lables_and_logits(lables=b_labels, logits=logits)
 
         # Report the final accuracy for this validation run.
         return dev_loss / num_dev_steps
