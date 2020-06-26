@@ -79,12 +79,12 @@ class FineTuningReRankingExperiments:
             if use_token_type_ids:
                 return BertMultiTaskRanker.from_pretrained(self.bert_pretrained_weights)
             else:
-                return RoBERTaMultiTaskRanker(path=self.roberta_pretrained_weights)
+                return RoBERTaMultiTaskRanker.from_pretrained(self.roberta_pretrained_weights)
         else:
             if use_token_type_ids:
                 return BertMultiTaskRanker.from_pretrained(model_path)
             else:
-                return RoBERTaMultiTaskRanker(path=model_path)
+                return RoBERTaMultiTaskRanker.from_pretrained(model_path)
 
 
     def __build_dataloader(self, data_dir_path, batch_size, random_sample=False):
