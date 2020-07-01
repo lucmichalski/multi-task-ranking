@@ -19,3 +19,4 @@ spacy
 pyarrow
 protobuf
 pystream-protobuf==1.5.1
+

@@ -18,7 +18,6 @@ if __name__ == '__main__':
     max_length = 512
     use_token_type_ids = True
     #tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
-    tokenizer= None
 
     run_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_hierarchical_dev_1000.run'
     qrels_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_hierarchical_dev.qrels'
@@ -42,7 +41,7 @@ if __name__ == '__main__':
                                    index_path=index_path,
                                    data_dir_path=data_dir_path,
                                    use_token_type_ids=use_token_type_ids,
-                                   tokenizer=tokenizer,
+                                   #tokenizer=tokenizer,
                                    max_length=max_length)
 
     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=False)
