@@ -552,8 +552,10 @@ if __name__ == '__main__':
     # qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_manual_entity.qrels')
     # eval_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'test_eval_path')
     # eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path)
-
+    qrels_path_list = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-{}-train.pages.cbor-hierarchical.qrels'.format(i) for i in [1,2,3,4]]
+    combined_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/benchmarkY1_passage_hierarchical_train.qrels'
     search_tools = SearchTools(index_path=None, searcher_config=None)
+    search_tools.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=combined_qrels_path)
 
     # qrels_path_list = []
     # for i in [1,2,3,4]:
@@ -561,8 +563,8 @@ if __name__ == '__main__':
     # combined_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_hierarchical_train_entity_synthetic_v2.qrels')
     # search_tools.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=combined_qrels_path)
 
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_hierarchical_dev_entity_synthetic_v2.qrels')
-    search_tools.write_topics_from_qrels(qrels_path=qrels_path)
+    # qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_hierarchical_dev_entity_synthetic_v2.qrels')
+    # search_tools.write_topics_from_qrels(qrels_path=qrels_path)
 
     # index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
     # search_tools = SearchTools(index_path=index_path, searcher_config=default_searcher_config)
