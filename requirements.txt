@@ -2,7 +2,7 @@ numpy
 pandas
 torch>=1.0.0
 tensorflow>=2.0
-transformers
+transformers==2.11.0
 lmdb
 cbor
 pyserini==0.8.1.0
