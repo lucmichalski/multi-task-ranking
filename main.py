@@ -55,8 +55,8 @@ if __name__ == '__main__':
 
 
     train_data_dir_path = '/nfs/trec_car/data/passage_ranking/dtrain_benchmarkY1_250_roberta_chunks/'
-    train_batch_size = 12
-    dev_batch_size = 64 * 8
+    train_batch_size = 6
+    dev_batch_size = 64 * 6
     dev_data_dir_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25_roberta_chunks/'
     dev_qrels_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25.qrels'
     dev_run_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25.run'
