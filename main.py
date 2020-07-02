@@ -54,8 +54,8 @@ if __name__ == '__main__':
 
 
     train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks/'
-    train_batch_size = 1
-    dev_batch_size = 1
+    train_batch_size = 8
+    dev_batch_size = 64 * 4
     dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_hierarchical_passage_dev_100_chunks/'
     dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
     dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run'
