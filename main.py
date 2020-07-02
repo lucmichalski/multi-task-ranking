@@ -75,7 +75,7 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'bert_test_pipeline_working'
+    experiment_name = 'bert_test_pipeline_working_remove_roberta'
     write = True
     logging_steps = 1000
     head_flag = 'passage'
