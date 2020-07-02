@@ -61,9 +61,7 @@ if __name__ == '__main__':
     dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
     dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run'
     model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_6e6_v2/epoch1_batch3000' #None
-    use_token_type_ids = True
     experiment = FineTuningReRankingExperiments(model_path=model_path,
-                                                use_token_type_ids=use_token_type_ids,
                                                 train_data_dir_path=train_data_dir_path,
                                                 train_batch_size=train_batch_size,
                                                 dev_data_dir_path=dev_data_dir_path,
