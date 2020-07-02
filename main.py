@@ -54,14 +54,14 @@ if __name__ == '__main__':
     #         processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=False)
 
 
-    train_data_dir_path = '/nfs/trec_car/data/passage_ranking/dtrain_benchmarkY1_250_roberta_chunks/'
+    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks/'
     train_batch_size = 8
     dev_batch_size = 64 * 2
-    dev_data_dir_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25_roberta_chunks/'
-    dev_qrels_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25.qrels'
-    dev_run_path = '/nfs/trec_car/data/passage_ranking/dev_benchmark_Y1_25.run'
+    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_hierarchical_passage_dev_100_chunks/'
+    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
+    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run'
     model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_6e6_v2/epoch1_batch3000' #None
-    use_token_type_ids = False
+    use_token_type_ids = True
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 use_token_type_ids=use_token_type_ids,
                                                 train_data_dir_path=train_data_dir_path,
@@ -77,9 +77,9 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'roberta_benchmarkY1_lr_8e6_v5_log_2000'
+    experiment_name = 'bert_test_pipeline_working'
     write = True
-    logging_steps = 2000
+    logging_steps = 1000
     head_flag = 'passage'
 
     experiment.run_experiment_single_head(
