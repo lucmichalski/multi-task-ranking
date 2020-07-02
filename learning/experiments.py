@@ -1,5 +1,5 @@
 
-from learning.models import BertMultiTaskRanker, RoBERTaMultiTaskRanker, RobertaConfig
+from learning.models import BertMultiTaskRanker
 from learning.utils import BertDataset
 from retrieval.tools import EvalTools, RetrievalUtils
 
