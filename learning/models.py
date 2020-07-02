@@ -2,6 +2,20 @@ from transformers import BertModel, BertPreTrainedModel
 from torch import nn, sigmoid
 from torch.nn import MSELoss
 
+
+class MyDataParallel(nn.DataParallel):
+    def __init__(self, my_methods, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._mymethods = my_methods
+
+    def __getattr__(self, name):
+        if name in self._mymethods:
+            return getattr(self.module, name)
+
+        else:
+            return super().__getattr__(name)
+
+
 class BertMultiTaskRanker(BertPreTrainedModel):
     """ Bert Multi-Task ranking model for passage and entity ranking. """
 
@@ -46,16 +60,15 @@ class BertMultiTaskRanker(BertPreTrainedModel):
         return loss_fct(logits.view(-1), labels.view(-1))
 
 
-    def forward_head(self, head_flag='passage', input_ids=None, attention_mask=None, token_type_ids=None, position_ids=None,
-                        head_mask=None, inputs_embeds=None, labels=None):
+    def forward(self, head_flag='passage', input_ids=None, attention_mask=None, token_type_ids=None, position_ids=None,
+                head_mask=None, inputs_embeds=None, labels=None):
         """ Forward pass over BERT + passage head. Returns loss and logits. """
         # Get BERT CLS vector.
         cls_vector = self.__get_BERT_cls_vector(input_ids=input_ids, attention_mask=attention_mask,
                                                 token_type_ids=token_type_ids, position_ids=position_ids,
                                                 head_mask=head_mask, inputs_embeds=inputs_embeds)
 
-        assert head_flag in self.valid_head_flags, "head_flag: {}, valid_head_flags: {}".format(head_flag,
-                                                                                                self.valid_head_flags)
+        assert head_flag in self.valid_head_flags, "head_flag: {}, valid_head_flags: {}".format(head_flag, self.valid_head_flags)
         # Calculate logits.
         if head_flag == 'passage':
             logits = sigmoid(self.passage_head(cls_vector))
@@ -72,46 +85,50 @@ class BertMultiTaskRanker(BertPreTrainedModel):
 
 
 if __name__ == '__main__':
-    from learning.experiments import FineTuningReRankingExperiments
 
-    train_data_dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/roberta_data/'
-    train_batch_size = 2
-    dev_batch_size = 128
-    dev_data_dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/roberta_data/'
-    dev_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.qrels'
-    dev_run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.run'
-    model_path = None #'/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/model/'
-    use_token_type_ids = False
-    experiment = FineTuningReRankingExperiments(model_path=model_path,
-                                                train_data_dir_path=train_data_dir_path,
-                                                train_batch_size=train_batch_size,
-                                                dev_data_dir_path=dev_data_dir_path,
-                                                dev_batch_size=dev_batch_size,
-                                                dev_qrels_path=dev_qrels_path,
-                                                dev_run_path=dev_run_path)
+    test = MyDataParallel(my_methods=['forward_a', 'forward_'])
 
-    epochs = 1
-    lr = 1e-5
-    eps = 1e-8
-    weight_decay = 0.01
-    warmup_percentage = 0.1
-    experiments_dir = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/exp/'
-    experiment_name = 'roberta_benchmarkY1_lr_5e5_v3'
-    write = True
-    logging_steps = 100
-    head_flag = 'passage'
-
-    experiment.run_experiment_single_head(
-        head_flag=head_flag,
-        epochs=epochs,
-        lr=lr,
-        eps=eps,
-        weight_decay=weight_decay,
-        warmup_percentage=warmup_percentage,
-        experiments_dir=experiments_dir,
-        experiment_name=experiment_name,
-        logging_steps=logging_steps
-    )
+    BertMultiTaskRanker.from_pretrained('bert-base-uncased')
+    # from learning.experiments import FineTuningReRankingExperiments
+    #
+    # train_data_dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/roberta_data/'
+    # train_batch_size = 2
+    # dev_batch_size = 128
+    # dev_data_dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/roberta_data/'
+    # dev_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.qrels'
+    # dev_run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/dev_benchmark_Y1_25.run'
+    # model_path = None #'/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/model/'
+    # use_token_type_ids = False
+    # experiment = FineTuningReRankingExperiments(model_path=model_path,
+    #                                             train_data_dir_path=train_data_dir_path,
+    #                                             train_batch_size=train_batch_size,
+    #                                             dev_data_dir_path=dev_data_dir_path,
+    #                                             dev_batch_size=dev_batch_size,
+    #                                             dev_qrels_path=dev_qrels_path,
+    #                                             dev_run_path=dev_run_path)
+    #
+    # epochs = 1
+    # lr = 1e-5
+    # eps = 1e-8
+    # weight_decay = 0.01
+    # warmup_percentage = 0.1
+    # experiments_dir = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/exp/'
+    # experiment_name = 'roberta_benchmarkY1_lr_5e5_v3'
+    # write = True
+    # logging_steps = 100
+    # head_flag = 'passage'
+    #
+    # experiment.run_experiment_single_head(
+    #     head_flag=head_flag,
+    #     epochs=epochs,
+    #     lr=lr,
+    #     eps=eps,
+    #     weight_decay=weight_decay,
+    #     warmup_percentage=warmup_percentage,
+    #     experiments_dir=experiments_dir,
+    #     experiment_name=experiment_name,
+    #     logging_steps=logging_steps
+    # )
 
     # head_flag = 'passage'
     # rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/roberta_passage_testY1_1000.run'
