@@ -25,13 +25,11 @@ spark = SparkSession.\
     .getOrCreate()
 
 if __name__ == '__main__':
-    read_paths = ['/home/iain_mackie1993/nfs/data/pages_corpus/full_unprocessedAllButBenchmark/unprocessedAllButBenchmark.Y2.cbor',
-                  '/home/iain_mackie1993/nfs/data/trec_car/multi-rank-data-gcp/benchmarkY1/benchmarkY1-test/test.pages.cbor ',
+    read_paths = ['/home/iain_mackie1993/nfs/data/trec_car/multi-rank-data-gcp/benchmarkY1/benchmarkY1-test/test.pages.cbor ',
                   '/home/iain_mackie1993/nfs/data/trec_car/multi-rank-data-gcp/benchmarkY1/benchmarkY1-train/train.pages.cbor',
                   '/home/iain_mackie1993/nfs/data/trec_car/multi-rank-data-gcp/test200/test200-train/train.pages.cbor',
                   '/home/iain_mackie1993/nfs/data/trec_car/multi-rank-data-gcp/benchmarkY2test/benchmarkY2test-goldarticles.cbor ']
-    datasets = ['unprocessedAllButBenchmark',
-                'benchmarkY1-test',
+    datasets = ['benchmarkY1-test',
                 'benchmarkY1-train',
                 'test200',
                 'benchmarkY2-test']
