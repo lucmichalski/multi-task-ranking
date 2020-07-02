@@ -3,8 +3,7 @@ import os
 
 from metadata import EntityPaths, PassagePaths
 from learning.experiments import FineTuningReRankingExperiments
-from learning.models import RoBERTaMultiTaskRanker
-from retrieval.dataset_processing import TrecCarProcessing, RobertaTokenizer, BertTokenizer
+from retrieval.dataset_processing import TrecCarProcessing, BertTokenizer
 from retrieval.tools import EvalTools, SearchTools, default_eval_config
 from torch import nn
 
