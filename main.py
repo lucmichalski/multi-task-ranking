@@ -21,33 +21,33 @@ if __name__ == '__main__':
     names = ['test', 'dev', 'train']
     train_flag = [False, False, True]
 
-    for name, flag in zip(names, train_flag):
+    # for name, flag in zip(names, train_flag):
 
-        run_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_hierarchical_{}_1000.run'.format(name)
-        qrels_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_hierarchical_{}.qrels'.format(name)
-        topics_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_hierarchical_{}.topics'.format(name)
-        data_dir_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_hierarchical_{}_1000_roberta_chunks/'.format(name)
-        training_dataset = flag
-        hits = 1000
+        # run_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_hierarchical_{}_1000.run'.format(name)
+        # qrels_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_hierarchical_{}.qrels'.format(name)
+        # topics_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_hierarchical_{}.topics'.format(name)
+        # data_dir_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_hierarchical_{}_1000_roberta_chunks/'.format(name)
+        # training_dataset = flag
+        # hits = 1000
 
         #search = SearchTools(index_path=index_path, searcher_config=searcher_config)
-        print('building topics')
+        # print('building topics')
         #search.write_topics_from_qrels(qrels_path=qrels_path, topics_path=topics_path)
-        print('** searching **')
+        # print('** searching **')
         #search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
-        print('** eval **')
+        # print('** eval **')
         #eval = EvalTools()
         #eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
-        print('** dataset **')
-        processing = TrecCarProcessing(qrels_path=qrels_path,
-                                       run_path=run_path,
-                                       index_path=index_path,
-                                       data_dir_path=data_dir_path,
-                                       use_token_type_ids=use_token_type_ids,
-                                       tokenizer=tokenizer,
-                                       max_length=max_length)
-
-        processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=False)
+        # print('** dataset **')
+        # processing = TrecCarProcessing(qrels_path=qrels_path,
+        #                                run_path=run_path,
+        #                                index_path=index_path,
+        #                                data_dir_path=data_dir_path,
+        #                                use_token_type_ids=use_token_type_ids,
+        #                                tokenizer=tokenizer,
+        #                                max_length=max_length)
+        #
+        # processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=False)
 
 
     # train_data_dir_path = '/nfs/trec_car/data/passage_ranking/dtrain_benchmarkY1_250_roberta_chunks/'

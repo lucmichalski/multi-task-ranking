@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     git
 
 # Install java 8
-RUN apt-get update && apt-get install openjdk-8-jdk -y
+RUN apt-get update && apt-get install -y openjdk-8-jdk
 ENV JAVA_VERSION="java-8-openjdk-amd64"
 ENV JAVA_HOME=/usr/lib/jvm/$JAVA_VERSION
 ENV PATH="$JAVA_HOME/bin:$PATH"
