@@ -24,8 +24,7 @@ class FineTuningReRankingExperiments:
     eval_config = [('map', None), ('Rprec', None), ('recip_rank', None), ('ndcg', 20), ('P', 20), ('recall', 40),
                    ('recall', 100), ('recall', 1000)]
     retrieval_utils = RetrievalUtils()
-    bert_pretrained_weights = 'bert-base-uncased'
-    roberta_pretrained_weights = 'roberta-base'
+    pretrained_weights = 'bert-base-uncased'
 
     def __init__(self, model_path=None, train_data_dir_path=None, train_batch_size=None, dev_data_dir_path=None,
                  dev_batch_size=None, dev_qrels_path=None, dev_run_path=None):
@@ -74,9 +73,9 @@ class FineTuningReRankingExperiments:
     def __init_model(self, model_path):
         """ Initialise model with pre-trained weights or load from directory."""
         if model_path == None:
-            return BertMultiTaskRanker.from_pretrained(self.bert_pretrained_weights)
+            return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
         else:
-            return BertMultiTaskRanker.from_pretrained(model_path)
+            return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
 
 
     def __build_dataloader(self, data_dir_path, batch_size, random_sample=False):
@@ -273,11 +272,11 @@ class FineTuningReRankingExperiments:
             b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=dev_batch)
             # With no gradients
             with torch.no_grad():
-                loss, logits = self.model.forward_head(head_flag=head_flag,
-                                                       input_ids=b_input_ids,
-                                                       token_type_ids=b_token_type_ids,
-                                                       attention_mask=b_attention_mask,
-                                                       labels=b_labels)
+                loss, logits = self.model.module.forward_head(head_flag=head_flag,
+                                                              input_ids=b_input_ids,
+                                                              token_type_ids=b_token_type_ids,
+                                                              attention_mask=b_attention_mask,
+                                                              labels=b_labels)
             # Update dev loss counter.
             dev_loss += loss.sum().item()
 
@@ -336,11 +335,11 @@ class FineTuningReRankingExperiments:
                 # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
                 b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch)
                 # Forward pass to retrieve
-                loss, logits = self.model.forward_head(head_flag=head_flag,
-                                                       input_ids=b_input_ids,
-                                                       attention_mask=b_attention_mask,
-                                                       token_type_ids=b_token_type_ids,
-                                                       labels=b_labels)
+                loss, logits = self.model.module.forward_head(head_flag=head_flag,
+                                                              input_ids=b_input_ids,
+                                                              attention_mask=b_attention_mask,
+                                                              token_type_ids=b_token_type_ids,
+                                                              labels=b_labels)
 
                 # Add loss to train loss counter
                 train_loss += loss.sum().item()
@@ -380,8 +379,10 @@ class FineTuningReRankingExperiments:
                     model_dir = os.path.join(experiment_path, 'epoch{}_batch{}/'.format(epoch_i, train_step + 1))
                     if os.path.isdir(model_dir) == False:
                         os.mkdir(model_dir)
-                    self.model.save_pretrained(model_dir)
-
+                    try:
+                        self.model.module.save_pretrained(model_dir)
+                    except AttributeError:
+                        self.model.save_pretrained(model_dir)
 
     def run_experiment_multiple_heads(self):
         """ """
