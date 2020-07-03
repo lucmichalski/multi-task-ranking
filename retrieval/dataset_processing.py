@@ -214,7 +214,7 @@ class TrecCarProcessing:
                         else:
                             text = self.context_dict[doc_id]['first_para']
                     except:
-                        print('FAILED TO FIND DOC ID {} - will search index'.format(doc_id))
+                        print('CANNOT FIND DOC ID {} (will search index)'.format(doc_id.strip()))
                         text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
                         if first_para:
                             text = text.split('\n')[0]
