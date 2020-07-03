@@ -209,10 +209,6 @@ class TrecCarProcessing:
                         text = text.split('\n')[0]
                 else:
                     if self.use_context:
-                        print('------')
-                        print(doc_id)
-                        print(self.context_dict[doc_id]['first_para'])
-                        print(self.context_dict[doc_id]['top_ents'])
                         text = self.context_dict[doc_id]['first_para'] + self.context_dict[doc_id]['top_ents']
                     else:
                         text = self.context_dict[doc_id]['first_para']
