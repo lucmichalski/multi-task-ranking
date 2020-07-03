@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
     df_group = df_join.groupby("page_id", "first_para").agg(concat_ws(" ", collect_list("doc_desc")).alias("context"))
 
-    df_group.to_parquet(out_path)
+    df_group.write.parquet(out_path)
 
 
 
