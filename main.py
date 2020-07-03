@@ -16,10 +16,10 @@ if __name__ == '__main__':
     }
     max_length = 512
 
-    run_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/fold-0-base.train.cbor-hierarchical_250.run'
+    run_path = '/nfs/trec_car/data/entity_ranking/train_passage_fold0/fold-0-base.train.cbor-hierarchical_250.run'
     qrels_path = '/nfs/trec_car/data/entity_ranking/train_passage_fold0/fold-0-base.train.cbor-hierarchical.qrels'
-    topics_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/fold-0-base.train.cbor-hierarchical.topics'
-    data_dir_path = '/home/iain_mackie1993/nfs/data/trec_car/passage_data/benchmarkY1_passage_bert_250_chunks/'
+    topics_path = '/nfs/trec_car/data/entity_ranking/train_passage_fold0/fold-0-base.train.cbor-hierarchical.topics'
+    data_dir_path = '/nfs/trec_car/data/entity_ranking/train_passage_fold0/fold0_passage_bert_250_chunks/'
     training_dataset = True
     hits = 250
 
