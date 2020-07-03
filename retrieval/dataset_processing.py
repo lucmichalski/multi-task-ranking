@@ -38,6 +38,8 @@ class TrecCarProcessing:
         if self.context_path != None:
             #
             self.context_dict = json.loads(context_path)
+        else:
+            self.context_dict = {}
         # Tokenizer function (text -> BERT tokens)
         self.tokenizer = tokenizer
         # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
@@ -204,7 +206,7 @@ class TrecCarProcessing:
                     if first_para:
                         text = text.split('\n')[0]
                 else:
-                    text = self.context_dict['first_para']
+                    text = self.context_dict[doc_id]['first_para']
                 # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                 BERT_encodings = self.tokenizer.encode_plus(text=decoded_query,
                                                             text_pair=text,
