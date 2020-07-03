@@ -52,7 +52,7 @@ if __name__ == '__main__':
     #
     #         processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=False)
 
-    gpus = 4
+    gpus = 2
     train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks/'
     train_batch_size = 8 * gpus
     dev_batch_size = 64 * 2 * gpus
