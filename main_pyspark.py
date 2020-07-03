@@ -10,9 +10,9 @@ import pickle
 from pyspark_processing.pipeline import write_pages_data_to_dir, run_pyspark_pipeline
 
 
-spark_drive_gbs = 50
-spark_executor_gbs = 2
-cores = 14
+spark_drive_gbs = 80
+spark_executor_gbs = 3
+cores = 18
 
 print('\n//////// RUNNING WITH CORES {} //////////'.format(cores))
 spark = SparkSession.\
