@@ -26,16 +26,16 @@ spark = SparkSession.\
 
 if __name__ == '__main__':
     entity_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_v3/'
-    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_v3_with_top5_ents/'
+    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_v4_with_top5_ents_v2/'
     df = spark.read.parquet(entity_path)
 
-    # @udf(returnType=StringType())
-    # def get_desc(doc_bytearray):
-    #     doc = document_pb2.Document().FromString(pickle.loads(doc_bytearray))
-    #     try:
-    #         return '{}: {}'.format(doc.doc_id, doc.document_contents[0].text.split(".")[0])
-    #     except:
-    #         return '{}: '.format(doc.doc_id)
+    @udf(returnType=StringType())
+    def get_desc(doc_bytearray):
+        doc = document_pb2.Document().FromString(pickle.loads(doc_bytearray))
+        try:
+            return '{}: {}'.format(doc.doc_name, doc.document_contents[0].text.split(".")[0])
+        except:
+            return '{}: '.format(doc.doc_name)
 
     @udf(returnType=ArrayType(StringType()))
     def get_top_5_ents(doc_bytearray):
@@ -50,9 +50,9 @@ if __name__ == '__main__':
         return [i[0] for i in sorted(link_counts, key=lambda x: x[1], reverse=True)][:5]
 
 
-    # df_desc = df.withColumn("doc_desc", get_desc("doc_bytearray"))
-    # df_desc.write.parquet(out_path)
+    df_desc = df.withColumn("doc_desc", get_desc("doc_bytearray"))
 
-    df_5_ent = df.withColumn("top_5_ents", get_top_5_ents("doc_bytearray"))
+    df_5_ent = df_desc.withColumn("top_5_ents", get_top_5_ents("doc_bytearray"))
+
     df_5_ent.write.parquet(out_path)
 
