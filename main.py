@@ -76,7 +76,7 @@ if __name__ == '__main__':
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
     experiment_name = 'bert_test_pipeline_working_remove_roberta'
     write = True
-    logging_steps = 1000
+    logging_steps = 250
     head_flag = 'passage'
 
     experiment.run_experiment_single_head(
