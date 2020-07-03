@@ -26,7 +26,7 @@ spark = SparkSession.\
 
 if __name__ == '__main__':
     entity_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets/'
-    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc/'
+    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_v2/'
     df = spark.read.parquet(entity_path)
 
     @udf(returnType=StringType())
