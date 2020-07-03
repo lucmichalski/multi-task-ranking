@@ -25,25 +25,16 @@ spark = SparkSession.\
     .getOrCreate()
 
 if __name__ == '__main__':
-    read_paths = ['/home/iain_mackie1993/nfs/data/trec_car/multi-rank-data-gcp/benchmarkY1/benchmarkY1-test/test.pages.cbor',
-                  '/home/iain_mackie1993/nfs/data/trec_car/multi-rank-data-gcp/benchmarkY1/benchmarkY1-train/train.pages.cbor',
-                  '/home/iain_mackie1993/nfs/data/trec_car/multi-rank-data-gcp/test200/test200-train/train.pages.cbor',
-                  '/home/iain_mackie1993/nfs/data/trec_car/multi-rank-data-gcp/benchmarkY2test/benchmarkY2test-goldarticles.cbor']
-    datasets = ['benchmarkY1-test',
-                'benchmarkY1-train',
-                'test200',
-                'benchmarkY2-test']
-    chunks = 100000
-    dir_path = '/home/iain_mackie1993/nfs/data/trec_car/entity_links/pages_chunks/'
-    for read_path, dataset in zip(read_paths, datasets):
+    entity_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets'
+    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc'
+    df = spark.read.parquet(entity_path)
 
-        write_pages_data_to_dir(read_path,
-                                dir_path=dir_path,
-                                num_pages=100000000000,
-                                dataset=dataset,
-                                chunks=chunks,
-                                print_intervals=100,
-                                write_output=True)
+    @udf(returnType=StringType())
+    def get_desc(doc_bytearray):
+        doc = document_pb2.Document().FromString(pickle.loads(doc_bytearray))
+        return '{}: {}'.format(doc.doc_id, doc.document_contents[0].text.split(".")[0])
 
-    out_path = '/home/iain_mackie1993/nfs/data/trec_car/entity_links/pyspark_processed_pages_v1/'
-    run_pyspark_pipeline(dir_path, spark, cores, out_path)
+
+    df_desc = df.withColumn("doc_bytearray", get_desc("doc_bytearray"))
+    df_desc.write.parquet(out_path)
+
