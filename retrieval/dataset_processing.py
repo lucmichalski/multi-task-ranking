@@ -208,14 +208,16 @@ class TrecCarProcessing:
                     if first_para:
                         text = text.split('\n')[0]
                 else:
-                    if self.use_context:
-                        try:
+                    try:
+                        if self.use_context:
                             text = self.context_dict[doc_id]['first_para'] + self.context_dict[doc_id]['top_ents']
-                        except:
-                            print(doc_id)
-                            break
-                    else:
-                        text = self.context_dict[doc_id]['first_para']
+                        else:
+                            text = self.context_dict[doc_id]['first_para']
+                    except:
+                        print('FAILED TO FIND DOC ID {} - will search index'.format(doc_id))
+                        text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
+                        if first_para:
+                            text = text.split('\n')[0]
                 # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                 BERT_encodings = self.tokenizer.encode_plus(text=decoded_query,
                                                             text_pair=text,
