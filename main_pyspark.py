@@ -27,7 +27,7 @@ spark = SparkSession.\
 if __name__ == '__main__':
 
     entity_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_v3/'
-    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v4/'
+    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v5/'
 
     df = spark.read.parquet(entity_path)
 
@@ -50,17 +50,15 @@ if __name__ == '__main__':
     @udf(returnType=ArrayType(StringType()))
     def get_top_6_ents(doc_bytearray):
         synthetic_entity_link_totals = document_pb2.Document().FromString(pickle.loads(doc_bytearray)).synthetic_entity_link_totals
-
         link_counts = []
         for synthetic_entity_link_total in synthetic_entity_link_totals:
             entity_id = str(synthetic_entity_link_total.entity_id)
             count = sum([i.frequency for i in synthetic_entity_link_total.anchor_text_frequencies])
             link_counts.append((entity_id, count))
-
         return [i[0] for i in sorted(link_counts, key=lambda x: x[1], reverse=True)][:5]
 
     df_desc = df.withColumn("doc_desc", get_desc("doc_bytearray"))
-    df_desc_first_para = df.withColumn("first_para", get_desc("doc_bytearray"))
+    df_desc_first_para = df_desc.withColumn("first_para", get_desc("doc_bytearray"))
 
     df_desc_first_para_ents = df_desc_first_para.withColumn("top_ents", get_top_6_ents("doc_bytearray"))
 
