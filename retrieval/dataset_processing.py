@@ -36,8 +36,8 @@ class TrecCarProcessing:
         #
         self.context_path = context_path
         if self.context_path != None:
-            #
-            self.context_dict = json.loads(context_path)
+            with open(context_path) as json_file:
+                self.context_dict = json.load(json_file)
         else:
             self.context_dict = {}
         # Tokenizer function (text -> BERT tokens)
