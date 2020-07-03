@@ -16,11 +16,12 @@ if __name__ == '__main__':
     }
     max_length = 512
 
-    run_path = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run']
-    qrels_path = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels']
+    run_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run']
+    qrels_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels']
     #topics_path = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic.topics', ]
-    data_dir_path = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks_context_v1/', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100_chunks_context_v1/']
-    training_dataset = [True, False]
+    data_dir_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks_context_v1/', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100_chunks_context_v1/']
+    training_datasets = [True, False]
+    context_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300.run.context.json', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run.context.json']
     #hits = [300, 25]
 
     #search = SearchTools(index_path=index_path, searcher_config=searcher_config)
@@ -32,13 +33,15 @@ if __name__ == '__main__':
     #eval = EvalTools()
     #eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
     #print('** dataset **')
-    processing = TrecCarProcessing(qrels_path=qrels_path,
-                                   run_path=run_path,
-                                   index_path=index_path,
-                                   data_dir_path=data_dir_path,
-                                   max_length=max_length)
+    for run_path, qrels_path, data_dir_path, training_dataset, context_path in zip(run_paths, qrels_paths, data_dir_paths, training_datasets, context_paths):
+        processing = TrecCarProcessing(qrels_path=qrels_path,
+                                       run_path=run_path,
+                                       index_path=index_path,
+                                       data_dir_path=data_dir_path,
+                                       max_length=max_length,
+                                       context_path=context_path)
 
-    processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=500, first_para=False)
+        processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=500, first_para=False)
 
     # gpus = 2
     # train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks/'
