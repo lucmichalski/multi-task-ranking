@@ -10,12 +10,11 @@ from torch import nn
 if __name__ == '__main__':
 
     index_path = EntityPaths.index #'/home/iain_mackie1993/nfs/data/paragraphs_corpus/index/anserini.paragraph.index.v5'
-    printing_step = 500
-    searcher_config = {
-        'BM25': {'k1': 5.5, 'b': 0.1}
-    }
+    # printing_step = 500
+    # searcher_config = {
+    #     'BM25': {'k1': 5.5, 'b': 0.1}
+    # }
     max_length = 512
-
     run_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run']
     qrels_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels']
     #topics_path = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic.topics', ]
