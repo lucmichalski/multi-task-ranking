@@ -32,7 +32,10 @@ if __name__ == '__main__':
     @udf(returnType=StringType())
     def get_desc(doc_bytearray):
         doc = document_pb2.Document().FromString(pickle.loads(doc_bytearray))
-        return '{}: {}'.format(doc.doc_id, doc.document_contents[0].text.split(".")[0])
+        try:
+            return '{}: {}'.format(doc.doc_id, doc.document_contents[0].text.split(".")[0])
+        except:
+            return '{}: '.format(doc.doc_id)
 
     df_desc = df.withColumn("doc_desc", get_desc("doc_bytearray"))
     df_desc.write.parquet(out_path)
