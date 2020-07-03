@@ -209,7 +209,11 @@ class TrecCarProcessing:
                         text = text.split('\n')[0]
                 else:
                     if self.use_context:
-                        text = self.context_dict[doc_id]['first_para'] + self.context_dict[doc_id]['top_ents']
+                        try:
+                            text = self.context_dict[doc_id]['first_para'] + self.context_dict[doc_id]['top_ents']
+                        except:
+                            print(doc_id)
+                            break
                     else:
                         text = self.context_dict[doc_id]['first_para']
                 # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
