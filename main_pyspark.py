@@ -27,7 +27,7 @@ spark = SparkSession.\
 if __name__ == '__main__':
 
     entity_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_v3/'
-    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v5/'
+    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v6/'
 
     df = spark.read.parquet(entity_path)
 
@@ -35,9 +35,9 @@ if __name__ == '__main__':
     def get_desc(doc_bytearray):
         doc = document_pb2.Document().FromString(pickle.loads(doc_bytearray))
         try:
-            return '{}: {}.'.format(doc.doc_name[7:], doc.document_contents[0].text.split(".")[0])
+            return '{}: {}.'.format(doc.doc_name, doc.document_contents[0].text.split(".")[0])
         except:
-            return '{}: .'.format(doc.doc_name[7:])
+            return '{}: .'.format(doc.doc_name)
 
     @udf(returnType=StringType())
     def get_first_para(doc_bytearray):
