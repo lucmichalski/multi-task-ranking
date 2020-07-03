@@ -7,6 +7,7 @@ import collections
 import random
 import torch
 import time
+import json
 import six
 import os
 
@@ -16,8 +17,8 @@ class TrecCarProcessing:
 
     retrieval_utils = RetrievalUtils()
 
-    def __init__(self, qrels_path, run_path, index_path, data_dir_path,
-                 tokenizer=BertTokenizer.from_pretrained('bert-base-uncased'), max_length=512):
+    def __init__(self, qrels_path, run_path, index_path, data_dir_path, max_length=512, context_path=None,
+                 tokenizer=BertTokenizer.from_pretrained('bert-base-uncased')):
 
         # Path to qrels file.
         self.qrels_path = qrels_path
@@ -29,10 +30,16 @@ class TrecCarProcessing:
         self.data_dir_path = data_dir_path
         # Initialise searching capabilities over Anserini/Lucene index.
         self.search_tools = SearchTools(index_path=self.index_path)
-        # Tokenizer function (text -> BERT tokens)
-        self.tokenizer = tokenizer
         # Max length of BERT tokens.
         self.max_length = max_length
+        #TODO - context path
+        #
+        self.context_path = context_path
+        if self.context_path != None:
+            #
+            self.context_dict = json.loads(context_path)
+        # Tokenizer function (text -> BERT tokens)
+        self.tokenizer = tokenizer
         # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
         self.qrels = self.retrieval_utils.get_qrels_dict(qrels_path=self.qrels_path)
         # Lists of BERT inputs.
@@ -192,9 +199,12 @@ class TrecCarProcessing:
                 # Decode query.
                 decoded_query = self.search_tools.decode_query(q=query)
                 # Extract text from index using doc_id.
-                text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
-                if first_para:
-                    text = text.split('\n')[0]
+                if self.context_path == None:
+                    text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
+                    if first_para:
+                        text = text.split('\n')[0]
+                else:
+                    text = self.context_dict['first_para']
                 # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                 BERT_encodings = self.tokenizer.encode_plus(text=decoded_query,
                                                             text_pair=text,

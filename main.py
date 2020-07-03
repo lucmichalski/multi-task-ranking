@@ -9,29 +9,29 @@ from torch import nn
 
 if __name__ == '__main__':
 
-    index_path = PassagePaths.index #'/home/iain_mackie1993/nfs/data/paragraphs_corpus/index/anserini.paragraph.index.v5'
-    printing_step = 1000
+    index_path = EntityPaths.index #'/home/iain_mackie1993/nfs/data/paragraphs_corpus/index/anserini.paragraph.index.v5'
+    printing_step = 500
     searcher_config = {
-        'BM25': {'k1': 0.9, 'b': 0.4}
+        'BM25': {'k1': 5.5, 'b': 0.1}
     }
     max_length = 512
 
-    run_path = '/nfs/trec_car/data/entity_ranking/train_passage_fold0/fold-0-base.train.cbor-hierarchical_250.run'
-    qrels_path = '/nfs/trec_car/data/entity_ranking/train_passage_fold0/fold-0-base.train.cbor-hierarchical.qrels'
-    topics_path = '/nfs/trec_car/data/entity_ranking/train_passage_fold0/fold-0-base.train.cbor-hierarchical.topics'
-    data_dir_path = '/nfs/trec_car/data/entity_ranking/train_passage_fold0/fold0_passage_bert_250_chunks/'
-    training_dataset = True
-    hits = 250
+    run_path = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300.run', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run']
+    qrels_path = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic.qrels', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels']
+    #topics_path = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic.topics', ]
+    data_dir_path = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks_context_v1/', '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100_chunks_context_v1/']
+    training_dataset = [True, False]
+    #hits = [300, 25]
 
-    search = SearchTools(index_path=index_path, searcher_config=searcher_config)
-    print('building topics')
-    search.write_topics_from_qrels(qrels_path=qrels_path, topics_path=topics_path)
-    print('** searching **')
-    search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
-    print('** eval **')
-    eval = EvalTools()
-    eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
-    print('** dataset **')
+    #search = SearchTools(index_path=index_path, searcher_config=searcher_config)
+    #print('building topics')
+    #search.write_topics_from_qrels(qrels_path=qrels_path, topics_path=topics_path)
+    #print('** searching **')
+    #search.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits, printing_step=printing_step)
+    #print('** eval **')
+    #eval = EvalTools()
+    #eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
+    #print('** dataset **')
     processing = TrecCarProcessing(qrels_path=qrels_path,
                                    run_path=run_path,
                                    index_path=index_path,
