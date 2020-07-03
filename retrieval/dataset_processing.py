@@ -18,7 +18,7 @@ class TrecCarProcessing:
     retrieval_utils = RetrievalUtils()
 
     def __init__(self, qrels_path, run_path, index_path, data_dir_path, max_length=512, context_path=None,
-                 tokenizer=BertTokenizer.from_pretrained('bert-base-uncased')):
+                 use_context=False, tokenizer=BertTokenizer.from_pretrained('bert-base-uncased')):
 
         # Path to qrels file.
         self.qrels_path = qrels_path
@@ -40,6 +40,8 @@ class TrecCarProcessing:
                 self.context_dict = json.load(json_file)
         else:
             self.context_dict = {}
+        #
+        self.use_context = use_context
         # Tokenizer function (text -> BERT tokens)
         self.tokenizer = tokenizer
         # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
@@ -206,7 +208,10 @@ class TrecCarProcessing:
                     if first_para:
                         text = text.split('\n')[0]
                 else:
-                    text = self.context_dict[doc_id]['first_para']
+                    if self.use_context:
+                        text = self.context_dict[doc_id]['first_para'] + self.context_dict[doc_id]['top_ents']
+                    else:
+                        text = self.context_dict[doc_id]['first_para']
                 # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                 BERT_encodings = self.tokenizer.encode_plus(text=decoded_query,
                                                             text_pair=text,
