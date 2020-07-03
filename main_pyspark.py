@@ -1,6 +1,6 @@
 
 from pyspark.sql.types import BinaryType, BooleanType, StringType, ArrayType, FloatType
-from pyspark.sql.functions import udf, row_number, monotonically_increasing_id, explode, desc
+from pyspark.sql.functions import udf, row_number, monotonically_increasing_id, explode, desc, col, collect_list, concat_ws
 from pyspark.sql import SparkSession, Window
 from utils.trec_car_tools import iter_pages, iter_paragraphs
 import time
@@ -25,20 +25,30 @@ spark = SparkSession.\
     .getOrCreate()
 
 if __name__ == '__main__':
+
     entity_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_v3/'
-    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_v4_with_top5_ents_v2/'
+    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v1/'
+
     df = spark.read.parquet(entity_path)
 
     @udf(returnType=StringType())
     def get_desc(doc_bytearray):
         doc = document_pb2.Document().FromString(pickle.loads(doc_bytearray))
         try:
-            return '{}: {}'.format(doc.doc_name, doc.document_contents[0].text.split(".")[0])
+            return '{}: {}.'.format(doc.doc_name, doc.document_contents[0].text.split(".")[0])
         except:
-            return '{}: '.format(doc.doc_name)
+            return '{}: .'.format(doc.doc_name)
+
+    @udf(returnType=StringType())
+    def get_first_para(doc_bytearray):
+        doc = document_pb2.Document().FromString(pickle.loads(doc_bytearray))
+        try:
+            return str(doc.document_contents[0].text.split("\n")[0])
+        except:
+            return ""
 
     @udf(returnType=ArrayType(StringType()))
-    def get_top_5_ents(doc_bytearray):
+    def get_top_6_ents(doc_bytearray):
         synthetic_entity_link_totals = document_pb2.Document().FromString(pickle.loads(doc_bytearray)).synthetic_entity_link_totals
 
         link_counts = []
@@ -49,10 +59,19 @@ if __name__ == '__main__':
 
         return [i[0] for i in sorted(link_counts, key=lambda x: x[1], reverse=True)][:5]
 
-
     df_desc = df.withColumn("doc_desc", get_desc("doc_bytearray"))
+    df_desc_first_para = df.withColumn("first_para", get_desc("doc_bytearray"))
 
-    df_5_ent = df_desc.withColumn("top_5_ents", get_top_5_ents("doc_bytearray"))
+    df_desc_first_para_ents = df_desc_first_para.withColumn("top_ents", get_top_6_ents("doc_bytearray"))
 
-    df_5_ent.write.parquet(out_path)
+    doc_desc_df = df_desc_first_para_ents.select(col("page_id").alias("key_id"), "doc_desc")
+    doc_top_ents = df_desc_first_para_ents.select("page_id", "first_para", explode("top_ents").alias("key_id"))
+
+    df_join = doc_top_ents.join(doc_desc_df, on=['key_id'], how='left')
+
+    df_group = df_join.groupby("page_id", "first_para").agg(concat_ws(" ", collect_list("doc_desc")).alias("context"))
+
+    df_group.to_parquet(out_path)
+
+
 
