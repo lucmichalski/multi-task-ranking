@@ -186,6 +186,14 @@ def write_content_data_to_dir(spark, read_path, dir_path, write_path,  num_conte
     time_delta = time.time() - t_start
     print('PROCESSED DATA: {} --> processing time / page: {}'.format(time_delta, time_delta / (i + 1)))
 
+
+    def add_entity_context():
+        return
+
+
+    def add_paragraph_context():
+        return
+
 if __name__ == '__main__':
 
     # exp_time = str(time.time())
