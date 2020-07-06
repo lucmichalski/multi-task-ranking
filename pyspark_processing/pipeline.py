@@ -238,7 +238,7 @@ def build_entity_context_json(data_path, run_path, out_path=None):
     """ build context json for entities in run. """
     # BUILD CONTEXT
     if out_path == None:
-        out_path + '.context.json'
+        run_path + '.context.json'
 
     print('Reading data from: {}'.format(data_path))
     df = spark.read.parquet(data_path)
