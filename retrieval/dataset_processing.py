@@ -32,16 +32,14 @@ class TrecCarProcessing:
         self.search_tools = SearchTools(index_path=self.index_path)
         # Max length of BERT tokens.
         self.max_length = max_length
-        #TODO - context path
-        #
+        # Path to context file containing text + context for most relevant entities
         self.context_path = context_path
         if self.context_path != None:
             with open(context_path) as json_file:
+                # Load json from 'context_path' to dict
                 self.context_dict = json.load(json_file)
         else:
             self.context_dict = {}
-        #
-        self.use_context = use_context
         # Tokenizer function (text -> BERT tokens)
         self.tokenizer = tokenizer
         # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
@@ -207,23 +205,43 @@ class TrecCarProcessing:
                     text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
                     if first_para:
                         text = text.split('\n')[0]
+
+                    # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
+                    BERT_encodings = self.tokenizer.encode_plus(text=decoded_query,
+                                                                text_pair=text,
+                                                                max_length=self.max_length,
+                                                                add_special_tokens=True,
+                                                                pad_to_max_length=True)
                 else:
-                    try:
-                        if self.use_context:
-                            text = self.context_dict[doc_id]['first_para'] + self.context_dict[doc_id]['top_ents']
-                        else:
-                            text = self.context_dict[doc_id]['first_para']
-                    except:
-                        print('CANNOT FIND DOC ID {} (will search index)'.format(doc_id.strip()))
-                        text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
-                        if first_para:
-                            text = text.split('\n')[0]
-                # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
-                BERT_encodings = self.tokenizer.encode_plus(text=decoded_query,
-                                                            text_pair=text,
-                                                            max_length=self.max_length,
-                                                            add_special_tokens=True,
-                                                            pad_to_max_length=True)
+                    def get_encodings(text, max_length):
+                        """ Get encodings for context"""
+                        return tokenizer.encode_plus(text=text,
+                                                     max_length=max_length,
+                                                     add_special_tokens=False,
+                                                     pad_to_max_length=True)
+                    # Build text encodings
+                    text = self.context_dict[doc_id]['first_para']
+                    text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
+                    text_encodings = get_encodings(text=text_context, max_length=256)
+                    print('-------')
+
+                    # Build entity encodings
+                    if self.context_dict[doc_id]['top_ents'] == None:
+                        entity_context = ' [SEP]'
+                    else:
+                        entity_context = ' [SEP] ' + self.context_dict[doc_id]['top_ents']
+                    entity_encodings = get_encodings(text=entity_context, max_length=256)
+
+                    # Add text and entity encodings
+                    BERT_encodings = {}
+                    for k in ['input_ids', 'token_type_ids', 'attention_mask']:
+                        BERT_encodings[k] = text_encodings[k] + entity_encodings[k]
+
+                    print('-------')
+                    print(text_context)
+                    print(entity_context)
+                    print(BERT_encodings)
+
                 data = (query, doc_id, BERT_encodings)
                 # Append doc_id data topic
                 if training_dataset:
