@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     pages_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_v3/'
     out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v8/'
-    add_entity_context_to_pages(spark=spark, pages_path=pages_path, out_path)
+    add_entity_context_to_pages(spark=spark, pages_path=pages_path, out_path=out_path)
 
     # entity_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_v3/'
     # out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v7/'
