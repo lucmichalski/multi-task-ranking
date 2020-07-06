@@ -78,6 +78,6 @@ if __name__ == '__main__':
 
     for run_path in run_paths:
         print('building: {}'.format(run_path))
-        build_entity_context_json(data_path, run_path)
+        build_entity_context_json(spark, data_path, run_path)
 
 

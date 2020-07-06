@@ -234,7 +234,7 @@ def add_entity_context_to_pages(spark, pages_path, out_path):
     df_group.write.parquet(out_path)
 
 
-def build_entity_context_json(data_path, run_path, out_path=None):
+def build_entity_context_json(spark, data_path, run_path, out_path=None):
     """ build context json for entities in run. """
     # BUILD CONTEXT
     if out_path == None:
