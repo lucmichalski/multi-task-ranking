@@ -65,7 +65,7 @@ if __name__ == '__main__':
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
     experiment_name = 'bert_with_context_no_ent_v1_8e6'
     write = True
-    logging_steps = 1500
+    logging_steps = 500
     head_flag = 'entity'
 
     experiment.run_experiment_single_head(
