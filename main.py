@@ -44,7 +44,7 @@ if __name__ == '__main__':
     gpus = 6
     train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks_context_v2/'
     train_batch_size = 8 * gpus
-    dev_batch_size = 64 * 2 * gpus
+    dev_batch_size = 64 * 3 * gpus
     dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100_chunks_context_v2/'
     dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
     dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run'
@@ -63,9 +63,9 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'bert_with_context_v2_1e5'
+    experiment_name = 'bert_with_context_v2_1e5_100'
     write = True
-    logging_steps = 500
+    logging_steps = 100
     head_flag = 'entity'
 
     experiment.run_experiment_single_head(
