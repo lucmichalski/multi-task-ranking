@@ -4,7 +4,7 @@ from protocol_buffers import document_pb2
 from document_parsing.trec_car_parsing import TrecCarParser
 
 from pyspark.sql.types import BinaryType, StringType, ArrayType
-from pyspark.sql.functions import udf, row_number, monotonically_increasing_id, col, collect_list, concat_ws
+from pyspark.sql.functions import udf, row_number, monotonically_increasing_id, col, collect_list, concat_ws, explode
 from pyspark.sql import SparkSession, Window
 from pyspark_processing.building_qrels import build_synthetic_qrels
 
