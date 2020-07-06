@@ -41,44 +41,44 @@ if __name__ == '__main__':
 
         processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=250, first_para=False)
 
-    # gpus = 3
-    # train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks_context_v1/'
-    # train_batch_size = 8 * gpus
-    # dev_batch_size = 64 * 2 * gpus
-    # dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100_chunks_context_v1/'
-    # dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
-    # dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run'
-    # model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_6e6_v2/epoch1_batch3000' #None
-    # experiment = FineTuningReRankingExperiments(model_path=model_path,
-    #                                             train_data_dir_path=train_data_dir_path,
-    #                                             train_batch_size=train_batch_size,
-    #                                             dev_data_dir_path=dev_data_dir_path,
-    #                                             dev_batch_size=dev_batch_size,
-    #                                             dev_qrels_path=dev_qrels_path,
-    #                                             dev_run_path=dev_run_path)
+    gpus = 5
+    train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks_context_v2/'
+    train_batch_size = 8 * gpus
+    dev_batch_size = 64 * 2 * gpus
+    dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100_chunks_context_v2/'
+    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
+    dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run'
+    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_6e6_v2/epoch1_batch3000' #None
+    experiment = FineTuningReRankingExperiments(model_path=model_path,
+                                                train_data_dir_path=train_data_dir_path,
+                                                train_batch_size=train_batch_size,
+                                                dev_data_dir_path=dev_data_dir_path,
+                                                dev_batch_size=dev_batch_size,
+                                                dev_qrels_path=dev_qrels_path,
+                                                dev_run_path=dev_run_path)
 
-    # epochs = 2
-    # lr = 8e-6
-    # eps = 1e-8
-    # weight_decay = 0.01
-    # warmup_percentage = 0.1
-    # experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    # experiment_name = 'bert_with_context_no_ent_v1_8e6'
-    # write = True
-    # logging_steps = 1500
-    # head_flag = 'entity'
-    #
-    # experiment.run_experiment_single_head(
-    #     head_flag=head_flag,
-    #     epochs=epochs,
-    #     lr=lr,
-    #     eps=eps,
-    #     weight_decay=weight_decay,
-    #     warmup_percentage=warmup_percentage,
-    #     experiments_dir=experiments_dir,
-    #     experiment_name=experiment_name,
-    #     logging_steps=logging_steps
-    # )
+    epochs = 2
+    lr = 1e-5
+    eps = 1e-8
+    weight_decay = 0.01
+    warmup_percentage = 0.1
+    experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
+    experiment_name = 'bert_with_context_no_ent_v1_8e6'
+    write = True
+    logging_steps = 1500
+    head_flag = 'entity'
+
+    experiment.run_experiment_single_head(
+        head_flag=head_flag,
+        epochs=epochs,
+        lr=lr,
+        eps=eps,
+        weight_decay=weight_decay,
+        warmup_percentage=warmup_percentage,
+        experiments_dir=experiments_dir,
+        experiment_name=experiment_name,
+        logging_steps=logging_steps
+    )
 
     # head_flag = 'entity'
     # rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/roberta_dev_test_write.run'

@@ -223,17 +223,12 @@ class TrecCarProcessing:
                 else:
                     try:
                         # Build text encodings
-                        if self.context_dict[doc_id]['first_para'] == None:
-                            print(self.context_dict[doc_id])
                         text = self.context_dict[doc_id]['first_para']
                         text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
                         text_encodings = self.__get_encodings(text=text_context, max_length=256)
 
                         # Build entity encodings
-                        if self.context_dict[doc_id]['top_ents'] == None:
-                            entity_context = ' [SEP]'
-                        else:
-                            entity_context = ' [SEP] ' + self.context_dict[doc_id]['top_ents']
+                        entity_context = ' [SEP] ' + self.context_dict[doc_id]['top_ents']
                         entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
 
                     except:
