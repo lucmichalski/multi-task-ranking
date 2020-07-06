@@ -223,7 +223,6 @@ class TrecCarProcessing:
                     text = self.context_dict[doc_id]['first_para']
                     text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
                     text_encodings = get_encodings(text=text_context, max_length=256)
-                    print('-------')
 
                     # Build entity encodings
                     if self.context_dict[doc_id]['top_ents'] == None:
