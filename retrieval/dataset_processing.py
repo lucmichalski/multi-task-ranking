@@ -235,6 +235,7 @@ class TrecCarProcessing:
                         entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
 
                     except:
+                        print('Failed to add context to: {doc_id}'.doc_id)
                         text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
                         text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
                         text_encodings = self.__get_encodings(text=text_context, max_length=256)
@@ -246,7 +247,7 @@ class TrecCarProcessing:
                     BERT_encodings = {}
                     for k in ['input_ids', 'token_type_ids', 'attention_mask']:
                         BERT_encodings[k] = text_encodings[k] + entity_encodings[k]
-                        
+
                 data = (query, doc_id, BERT_encodings)
                 # Append doc_id data topic
                 if training_dataset:
