@@ -163,6 +163,14 @@ class TrecCarProcessing:
         self.labels_list = []
 
 
+    def __get_encodings(self, text, max_length):
+        """ Get encodings for context"""
+        return self.tokenizer.encode_plus(text=text,
+                                          max_length=max_length,
+                                          add_special_tokens=False,
+                                          pad_to_max_length=True)
+
+
     def build_dataset(self, training_dataset=False, chuck_topic_size=1e8, first_para=False):
         """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
         False (training dataset). """
@@ -213,29 +221,32 @@ class TrecCarProcessing:
                                                                 add_special_tokens=True,
                                                                 pad_to_max_length=True)
                 else:
-                    def get_encodings(text, max_length):
-                        """ Get encodings for context"""
-                        return self.tokenizer.encode_plus(text=text,
-                                                     max_length=max_length,
-                                                     add_special_tokens=False,
-                                                     pad_to_max_length=True)
-                    # Build text encodings
-                    text = self.context_dict[doc_id]['first_para']
-                    text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
-                    text_encodings = get_encodings(text=text_context, max_length=256)
+                    try:
+                        # Build text encodings
+                        text = self.context_dict[doc_id]['first_para']
+                        text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
+                        text_encodings = self.__get_encodings(text=text_context, max_length=256)
 
-                    # Build entity encodings
-                    if self.context_dict[doc_id]['top_ents'] == None:
+                        # Build entity encodings
+                        if self.context_dict[doc_id]['top_ents'] == None:
+                            entity_context = ' [SEP]'
+                        else:
+                            entity_context = ' [SEP] ' + self.context_dict[doc_id]['top_ents']
+                        entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
+
+                    except:
+                        text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
+                        text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
+                        text_encodings = self.__get_encodings(text=text_context, max_length=256)
+
                         entity_context = ' [SEP]'
-                    else:
-                        entity_context = ' [SEP] ' + self.context_dict[doc_id]['top_ents']
-                    entity_encodings = get_encodings(text=entity_context, max_length=256)
+                        entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
 
                     # Add text and entity encodings
                     BERT_encodings = {}
                     for k in ['input_ids', 'token_type_ids', 'attention_mask']:
                         BERT_encodings[k] = text_encodings[k] + entity_encodings[k]
-
+                        
                 data = (query, doc_id, BERT_encodings)
                 # Append doc_id data topic
                 if training_dataset:
