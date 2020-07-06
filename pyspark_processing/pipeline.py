@@ -222,7 +222,7 @@ def add_entity_context_to_pages(spark, pages_path, out_path):
     df_desc = df.withColumn("doc_desc", get_desc("doc_bytearray"))
     df_desc_first_para = df_desc.withColumn("first_para", get_first_para("doc_bytearray"))
 
-    df_desc_first_para_ents = df_desc_first_para.withColumn("top_ents", get_top_6_ents("doc_bytearray"))
+    df_desc_first_para_ents = df_desc_first_para.withColumn("top_ents", get_top_ents("doc_bytearray"))
 
     doc_desc_df = df_desc_first_para_ents.select(col("page_id").alias("key_id"), "doc_desc")
     doc_top_ents = df_desc_first_para_ents.select("page_id", "first_para", explode("top_ents").alias("key_id"))

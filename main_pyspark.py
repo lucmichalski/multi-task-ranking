@@ -77,13 +77,13 @@ if __name__ == '__main__':
     #
     # df_group.write.parquet(out_path)
 
-    from pyspark_processing.pipeline import build_entity_context_json
-    # BUILD CONTEXT
-    run_paths = ['/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000.run', '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run']
-    data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v7/'
-
-    for run_path in run_paths:
-        print('building: {}'.format(run_path))
-        build_entity_context_json(spark, data_path, run_path)
+    # from pyspark_processing.pipeline import build_entity_context_json
+    # # BUILD CONTEXT
+    # run_paths = ['/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000.run', '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run']
+    # data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v7/'
+    #
+    # for run_path in run_paths:
+    #     print('building: {}'.format(run_path))
+    #     build_entity_context_json(spark, data_path, run_path)
 
 
