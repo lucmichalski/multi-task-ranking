@@ -236,11 +236,6 @@ class TrecCarProcessing:
                     for k in ['input_ids', 'token_type_ids', 'attention_mask']:
                         BERT_encodings[k] = text_encodings[k] + entity_encodings[k]
 
-                    print('-------')
-                    print(text_context)
-                    print(entity_context)
-                    print(BERT_encodings)
-
                 data = (query, doc_id, BERT_encodings)
                 # Append doc_id data topic
                 if training_dataset:
