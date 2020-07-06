@@ -48,7 +48,7 @@ if __name__ == '__main__':
     dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100_chunks_context_v2/'
     dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
     dev_run_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run'
-    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_6e6_v2/epoch1_batch3000' #None
+    model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/roberta_benchmarkY1_lr_6e6_v2/epoch1_batch3000' #None
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
                                                 train_batch_size=train_batch_size,
@@ -58,14 +58,14 @@ if __name__ == '__main__':
                                                 dev_run_path=dev_run_path)
 
     epochs = 2
-    lr = 1e-5
+    lr = 8e-6
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'bert_with_context_v2_1e5_100'
+    experiment_name = 'bert_with_context_v2_6e8_500'
     write = True
-    logging_steps = 1000
+    logging_steps = 500
     head_flag = 'entity'
 
     experiment.run_experiment_single_head(
