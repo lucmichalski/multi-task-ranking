@@ -18,7 +18,7 @@ class TrecCarProcessing:
     retrieval_utils = RetrievalUtils()
 
     def __init__(self, qrels_path, run_path, index_path, data_dir_path, max_length=512, context_path=None,
-                 use_context=False, tokenizer=BertTokenizer.from_pretrained('bert-base-uncased')):
+                tokenizer=BertTokenizer.from_pretrained('bert-base-uncased')):
 
         # Path to qrels file.
         self.qrels_path = qrels_path
@@ -222,28 +222,36 @@ class TrecCarProcessing:
                                                                 pad_to_max_length=True)
                 else:
                     try:
+
                         # Build text encodings
-                        text = self.context_dict[doc_id]['first_para']
-                        text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
-                        text_encodings = self.__get_encodings(text=text_context, max_length=256)
+                        # text = self.context_dict[doc_id]['first_para']
+                        # text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
+                        # text_encodings = self.__get_encodings(text=text_context, max_length=256)
 
                         # Build entity encodings
-                        entity_context = ' [SEP] ' + self.context_dict[doc_id]['top_ents']
-                        entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
+                        #entity_context = ' [SEP] ' + self.context_dict[doc_id]['top_ents'] # removed [SEP] begin
+                        #entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
+
+                        text = self.context_dict[doc_id]['first_para'] + self.context_dict[doc_id]['top_ents']
 
                     except:
                         print('Failed to add context to: {}'.format(doc_id))
                         text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
-                        text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
-                        text_encodings = self.__get_encodings(text=text_context, max_length=256)
+                        #text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
+                        #text_encodings = self.__get_encodings(text=text_context, max_length=256)
 
-                        entity_context = ' [SEP]'
-                        entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
+                        #entity_context = ' [SEP]'
+                        #entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
 
                     # Add text and entity encodings
-                    BERT_encodings = {}
-                    for k in ['input_ids', 'token_type_ids', 'attention_mask']:
-                        BERT_encodings[k] = text_encodings[k] + entity_encodings[k]
+                    # BERT_encodings = {}
+                    # for k in ['input_ids', 'token_type_ids', 'attention_mask']:
+                    #     BERT_encodings[k] = text_encodings[k] + entity_encodings[k]
+                    BERT_encodings = self.tokenizer.encode_plus(text=decoded_query,
+                                                                text_pair=text,
+                                                                max_length=self.max_length,
+                                                                add_special_tokens=True,
+                                                                pad_to_max_length=True)
 
                 data = (query, doc_id, BERT_encodings)
                 # Append doc_id data topic
