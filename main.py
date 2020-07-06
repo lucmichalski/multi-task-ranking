@@ -58,12 +58,12 @@ if __name__ == '__main__':
                                                 dev_run_path=dev_run_path)
 
     epochs = 2
-    lr = 8e-6
+    lr = 2e-6
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'bert_with_context_v2_6e8_500'
+    experiment_name = 'bert_with_context_v2_2e6_1000'
     write = True
     logging_steps = 1000
     head_flag = 'entity'
