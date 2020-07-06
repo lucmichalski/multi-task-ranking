@@ -235,7 +235,7 @@ class TrecCarProcessing:
                         entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
 
                     except:
-                        print('Failed to add context to: {doc_id}'.format(doc_id))
+                        print('Failed to add context to: {}'.format(doc_id))
                         text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
                         text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
                         text_encodings = self.__get_encodings(text=text_context, max_length=256)
