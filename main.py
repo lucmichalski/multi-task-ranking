@@ -43,7 +43,7 @@ if __name__ == '__main__':
     #
     #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=500, first_para=False)
 
-    gpus = 2
+    gpus = 3
     train_data_dir_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks_context_v1/'
     train_batch_size = 8 * gpus
     dev_batch_size = 64 * 2 * gpus
