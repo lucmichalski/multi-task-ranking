@@ -215,7 +215,7 @@ class TrecCarProcessing:
                 else:
                     def get_encodings(text, max_length):
                         """ Get encodings for context"""
-                        return tokenizer.encode_plus(text=text,
+                        return self.tokenizer.encode_plus(text=text,
                                                      max_length=max_length,
                                                      add_special_tokens=False,
                                                      pad_to_max_length=True)
