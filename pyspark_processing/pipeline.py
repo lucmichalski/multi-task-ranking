@@ -3,14 +3,15 @@ from utils.trec_car_tools import iter_pages
 from protocol_buffers import document_pb2
 from document_parsing.trec_car_parsing import TrecCarParser
 
-from pyspark.sql.types import BinaryType
-from pyspark.sql.functions import udf, row_number, monotonically_increasing_id
+from pyspark.sql.types import BinaryType, StringType, ArrayType
+from pyspark.sql.functions import udf, row_number, monotonically_increasing_id, col, collect_list, concat_ws
 from pyspark.sql import SparkSession, Window
 from pyspark_processing.building_qrels import build_synthetic_qrels
 
 import pandas as pd
 import pickle
 import time
+import json
 import os
 
 
@@ -137,7 +138,7 @@ def build_qrels(spark, parquet_path, qrels_path, doc_count=1000, qrels_type='tre
     build_synthetic_qrels(document_list=document_list, path=qrels_path, qrels_type=qrels_type)
 
 
-def write_content_data_to_dir(spark, read_path, dir_path, write_path,  num_contents=1, chunks=10000, write_output=True):
+def write_content_data_to_dir(spark, read_path, dir_path, num_contents=1, chunks=10000, write_output=True):
     """ Create document content parquet DF by unpacking preprocessed document data."""
     # Create new dir to store data chunks
     if (os.path.isdir(dir_path) == False) and write_output:
@@ -187,12 +188,80 @@ def write_content_data_to_dir(spark, read_path, dir_path, write_path,  num_conte
     print('PROCESSED DATA: {} --> processing time / page: {}'.format(time_delta, time_delta / (i + 1)))
 
 
-    def add_entity_context():
-        return
+def add_entity_context_to_pages(spark, pages_path, out_path):
+    """ Add entity context to Pages. """
+    df = spark.read.parquet(pages_path)
+
+    @udf(returnType=StringType())
+    def get_desc(doc_bytearray):
+        doc = document_pb2.Document().FromString(pickle.loads(doc_bytearray))
+        try:
+            return '{}: {}.'.format(doc.doc_name, doc.document_contents[0].text.split(".")[0])
+        except:
+            return '{}: .'.format(doc.doc_name)
+
+    @udf(returnType=StringType())
+    def get_first_para(doc_bytearray):
+        doc = document_pb2.Document().FromString(pickle.loads(doc_bytearray))
+        try:
+            return str(doc.document_contents[0].text)
+        except:
+            return ""
+
+    @udf(returnType=ArrayType(StringType()))
+    def get_top_6_ents(doc_bytearray):
+        synthetic_entity_link_totals = document_pb2.Document().FromString(
+            pickle.loads(doc_bytearray)).synthetic_entity_link_totals
+        link_counts = []
+        for synthetic_entity_link_total in synthetic_entity_link_totals:
+            entity_id = str(synthetic_entity_link_total.entity_id)
+            count = sum([i.frequency for i in synthetic_entity_link_total.anchor_text_frequencies])
+            link_counts.append((entity_id, count))
+        return [i[0] for i in sorted(link_counts, key=lambda x: x[1], reverse=True)][:5]
+
+    df_desc = df.withColumn("doc_desc", get_desc("doc_bytearray"))
+    df_desc_first_para = df_desc.withColumn("first_para", get_first_para("doc_bytearray"))
+
+    df_desc_first_para_ents = df_desc_first_para.withColumn("top_ents", get_top_6_ents("doc_bytearray"))
+
+    doc_desc_df = df_desc_first_para_ents.select(col("page_id").alias("key_id"), "doc_desc")
+    doc_top_ents = df_desc_first_para_ents.select("page_id", "first_para", explode("top_ents").alias("key_id"))
+
+    df_join = doc_top_ents.join(doc_desc_df, on=['key_id'], how='left')
+
+    df_group = df_join.groupby("page_id", "first_para").agg(concat_ws(" ", collect_list("doc_desc")).alias("context"))
+
+    df_group.write.parquet(out_path)
 
 
-    def add_paragraph_context():
-        return
+def build_entity_context_json(data_path, run_path, out_path):
+    """ build context json for entities in run. """
+    # BUILD CONTEXT
+
+    df = spark.read.parquet(data_path)
+
+    page_ids = []
+    with open(run_path, 'r') as f:
+        for i, line in enumerate(f):
+            page_ids.append(line.split()[2])
+    page_ids = [[i] for i in list(set(page_ids))]
+
+    df_run = spark.createDataFrame(page_ids, ["page_id"])
+    df_join = df_run.join(df, on=["page_id"], how='left').collect()
+    entities_dict = {}
+
+    for i in df_join:
+        entities_dict[i[0]] = {
+            'first_para': i[1],
+            'top_ents': i[2]
+        }
+
+    with open(out_path, 'w') as fp:
+        json.dump(entities_dict, fp, indent=4)
+
+
+def add_paragraph_context():
+    return
 
 if __name__ == '__main__':
 
