@@ -234,28 +234,37 @@ def add_entity_context_to_pages(spark, pages_path, out_path):
     df_group.write.parquet(out_path)
 
 
-def build_entity_context_json(data_path, run_path, out_path):
+def build_entity_context_json(data_path, run_path, out_path=None):
     """ build context json for entities in run. """
     # BUILD CONTEXT
+    if out_path == None:
+        out_path + '.context.json'
 
+    print('Reading data from: {}'.format(data_path))
     df = spark.read.parquet(data_path)
 
+    print('Building list of page ids in run file.')
     page_ids = []
     with open(run_path, 'r') as f:
         for i, line in enumerate(f):
             page_ids.append(line.split()[2])
+    print('Formatting runs for pyspark.')
     page_ids = [[i] for i in list(set(page_ids))]
 
+    print('Building page ids DF.')
     df_run = spark.createDataFrame(page_ids, ["page_id"])
+    print('Joining and collecting data.')
     df_join = df_run.join(df, on=["page_id"], how='left').collect()
-    entities_dict = {}
 
+    print('Building context dict.')
+    entities_dict = {}
     for i in df_join:
         entities_dict[i[0]] = {
             'first_para': i[1],
             'top_ents': i[2]
         }
 
+    print('Writing context dict to file: {}'.format(out_path))
     with open(out_path, 'w') as fp:
         json.dump(entities_dict, fp, indent=4)
 

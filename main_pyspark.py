@@ -71,34 +71,13 @@ if __name__ == '__main__':
     #
     # df_group.write.parquet(out_path)
 
-
+    from pyspark_processing.pipeline import build_entity_context_json
     # BUILD CONTEXT
     run_paths = ['/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000.run', '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run']
+    data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v7/'
 
     for run_path in run_paths:
-
-        out_path = run_path + '.context.json'
-        data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v7/'
-
-        df = spark.read.parquet(data_path)
-
-        page_ids = []
-        with open(run_path, 'r') as f:
-            for i, line in enumerate(f):
-                page_ids.append(line.split()[2])
-        page_ids = [[i] for i in list(set(page_ids))]
-
-        df_run = spark.createDataFrame(page_ids, ["page_id"])
-        df_join = df_run.join(df, on=["page_id"], how='left').collect()
-        entities_dict = {}
-
-        for i in df_join:
-            entities_dict[i[0]] = {
-                'first_para': i[1],
-                'top_ents': i[2]
-            }
-        import json
-        with open(out_path, 'w') as fp:
-            json.dump(entities_dict, fp, indent=4)
-
+        print('building: {}'.format(run_path))
+        build_entity_context_json(data_path, run_path)
+    
 
