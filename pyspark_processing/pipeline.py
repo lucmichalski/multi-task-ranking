@@ -209,7 +209,7 @@ def add_entity_context_to_pages(spark, pages_path, out_path):
             return ""
 
     @udf(returnType=ArrayType(StringType()))
-    def get_top_6_ents(doc_bytearray):
+    def get_top_ents(doc_bytearray):
         synthetic_entity_link_totals = document_pb2.Document().FromString(
             pickle.loads(doc_bytearray)).synthetic_entity_link_totals
         link_counts = []
@@ -217,7 +217,7 @@ def add_entity_context_to_pages(spark, pages_path, out_path):
             entity_id = str(synthetic_entity_link_total.entity_id)
             count = sum([i.frequency for i in synthetic_entity_link_total.anchor_text_frequencies])
             link_counts.append((entity_id, count))
-        return [i[0] for i in sorted(link_counts, key=lambda x: x[1], reverse=True)][:5]
+        return [i[0] for i in sorted(link_counts, key=lambda x: x[1], reverse=True)][:9]
 
     df_desc = df.withColumn("doc_desc", get_desc("doc_bytearray"))
     df_desc_first_para = df_desc.withColumn("first_para", get_first_para("doc_bytearray"))
@@ -229,7 +229,7 @@ def add_entity_context_to_pages(spark, pages_path, out_path):
 
     df_join = doc_top_ents.join(doc_desc_df, on=['key_id'], how='left')
 
-    df_group = df_join.groupby("page_id", "first_para").agg(concat_ws(" ", collect_list("doc_desc")).alias("context"))
+    df_group = df_join.groupby("page_id", "first_para").agg(concat_ws(" [SEP] ", collect_list("doc_desc")).alias("context"))
 
     df_group.write.parquet(out_path)
 
