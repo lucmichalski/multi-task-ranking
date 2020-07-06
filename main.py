@@ -63,7 +63,7 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'bert_with_context_no_ent_v1_8e6'
+    experiment_name = 'bert_with_context_v2_1e5'
     write = True
     logging_steps = 500
     head_flag = 'entity'
