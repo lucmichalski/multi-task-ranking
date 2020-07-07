@@ -293,22 +293,30 @@ def add_paragraph_context(spark, para_path, pages_path, out_path):
     @udf(returnType=ArrayType(StringType()))
     def get_top_ents(content_bytearray):
         content = document_pb2.DocumentContent.FromString(pickle.loads(content_bytearray))
-        entity_ids = [str(i.entity_id) for i in content.synthetic_entity_links]
-        return list(Counter(entity_ids).keys())
+        try:
+            entity_ids = [str(i.entity_id) for i in content.synthetic_entity_links]
+            return list(Counter(entity_ids).keys())
+        except:
+            return []
 
     # Format paragraph
+    print('Formatting paragraphs')
     df_para_text = df_para.withColumn("first_para", get_text("content_bytearray"))
     df_para_text_ents = df_para_text.withColumn("top_ents", get_top_ents("content_bytearray"))
     df_para_text_ents_format = df_para_text_ents.select(col("content_id").alias('page_id'), "first_para", explode("top_ents").alias("key_id"))
 
     # Format pages
+    print('Formatting pages')
     df_desc = df_page.withColumn("doc_desc", get_desc("doc_bytearray"))
     doc_desc_df = df_desc.select(col("page_id").alias("key_id"), "doc_desc")
 
+    print('Joining paragraphs + pages')
     df_join = df_para_text_ents_format.join(doc_desc_df, on=['key_id'], how='left')
 
+    print('Group by to expose context')
     df_group = df_join.groupby("page_id", "first_para").agg(concat_ws(" ", collect_list("doc_desc")).alias("context"))
 
+    print('Writing to: {}'.format(out_path))
     df_group.write.parquet(out_path)
 
 
