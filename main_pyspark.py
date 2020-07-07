@@ -84,11 +84,11 @@ if __name__ == '__main__':
         #          '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300.run',
         #          '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000.run',
         #          '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run']
-    data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v8/'
+    data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v7/'
     para_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4/'
-    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4_with_desc_context/'
+    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4__with_desc_ents_context_v7_para_v1/'
 
-    add_paragraph_context(spark, para_path=, context_path=data_path, out_path=out_path)
+    add_paragraph_context(spark, para_path=para_path, context_path=data_path, out_path=out_path)
 
     # for run_path in run_paths:
     #     print('building: {}'.format(run_path))

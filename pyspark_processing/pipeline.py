@@ -289,15 +289,15 @@ def add_paragraph_context(spark, para_path, context_path, out_path):
         return list(Counter(entity_ids).keys())
 
     # Format
-    df_para_text = df_para.withColumn("text", get_text("content_bytearray"))
+    df_para_text = df_para.withColumn("first_para", get_text("content_bytearray"))
     df_para_text_ents = df_para_text.withColumn("top_ents", get_top_ents("content_bytearray"))
-    df_para_text_ents_format = df_para_text_ents.selec("content_id", "text", explode("top_ents").alias("key_id"))
+    df_para_text_ents_format = df_para_text_ents.selec(col("content_id").alias('page_id'), "first_para", explode("top_ents").alias("key_id"))
 
     doc_desc_df = df_context.select(col("page_id").alias("key_id"), "doc_desc")
 
     df_join = df_para_text_ents_format.join(doc_desc_df, on=['key_id'], how='left')
 
-    df_group = df_join.groupby("content_id", "text").agg(concat_ws(" ", collect_list("doc_desc")).alias("context"))
+    df_group = df_join.groupby("page_id", "first_para").agg(concat_ws(" ", collect_list("doc_desc")).alias("context"))
 
     df_group.write.parquet(out_path)
 
