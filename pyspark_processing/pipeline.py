@@ -284,9 +284,9 @@ def add_paragraph_context(spark, para_path, pages_path, out_path):
 
     @udf(returnType=StringType())
     def get_text(content_bytearray):
-        doc = document_pb2.Document().FromString(pickle.loads(content_bytearray))
+        document_contents = document_pb2.DocumentContent().FromString(pickle.loads(content_bytearray))
         try:
-            return str(doc.document_contents.text)
+            return str(document_contents.text)
         except:
             return ""
 
