@@ -45,15 +45,15 @@ if __name__ == '__main__':
     # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
     # print('** dataset **')
 
-    for run_path, qrels_path, data_dir_path, training_dataset, context_path in zip(run_paths, qrels_paths, data_dir_paths, training_datasets, context_paths):
-        processing = TrecCarProcessing(qrels_path=qrels_path,
-                                       run_path=run_path,
-                                       index_path=index_path,
-                                       data_dir_path=data_dir_path,
-                                       max_length=max_length,
-                                       context_path=context_path)
-
-        processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=False)
+    # for run_path, qrels_path, data_dir_path, training_dataset, context_path in zip(run_paths, qrels_paths, data_dir_paths, training_datasets, context_paths):
+    #     processing = TrecCarProcessing(qrels_path=qrels_path,
+    #                                    run_path=run_path,
+    #                                    index_path=index_path,
+    #                                    data_dir_path=data_dir_path,
+    #                                    max_length=max_length,
+    #                                    context_path=context_path)
+    #
+    #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=False)
 
     gpus = 6
     train_data_dir_path = data_dir_paths[2]
