@@ -77,21 +77,16 @@ if __name__ == '__main__':
     #
     # df_group.write.parquet(out_path)
 
-    from pyspark_processing.pipeline import add_paragraph_context
+    from pyspark_processing.pipeline import add_paragraph_context, build_entity_context_json
     # BUILD CONTEXT
-    #run_paths = ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300.run']
-        # ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100.run',
-        #          '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300.run',
-        #          '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000.run',
-        #          '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run']
-    para_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4/'
-    pages_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets/'
-    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4_with_desc_ents_para_v5/'
+    run_paths =   ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run',
+                   '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_train_passage_100.run',
+                   '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage_1000.run']
 
-    add_paragraph_context(spark, para_path=para_path, pages_path=pages_path, out_path=out_path)
+    data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4_with_desc_ents_para_v5/'
 
-    # for run_path in run_paths:
-    #     print('building: {}'.format(run_path))
-    #     build_entity_context_json(spark, data_path, run_path)
+    for run_path in run_paths:
+        print('building: {}'.format(run_path))
+        build_entity_context_json(spark, data_path, run_path)
 
 
