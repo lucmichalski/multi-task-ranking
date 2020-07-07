@@ -9,7 +9,7 @@ from torch import nn
 
 if __name__ == '__main__':
 
-    index_path = EntityPaths.index #'/home/iain_mackie1993/nfs/data/paragraphs_corpus/index/anserini.paragraph.index.v5'
+    index_path = PassagePaths.index #'/home/iain_mackie1993/nfs/data/paragraphs_corpus/index/anserini.paragraph.index.v5'
     # printing_step = 500
     # searcher_config = {
     #     'BM25': {'k1': 5.5, 'b': 0.1}
