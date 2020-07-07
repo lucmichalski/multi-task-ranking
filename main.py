@@ -59,7 +59,7 @@ if __name__ == '__main__':
     dev_batch_size = 64 * 3 * gpus
     dev_data_dir_path = data_dir_paths[2]
     dev_qrels_path = qrels_paths[2]
-    dev_run_path = qrels_paths[2]
+    dev_run_path = run_paths[2]
     model_path = None
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
