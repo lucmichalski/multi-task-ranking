@@ -291,7 +291,7 @@ def add_paragraph_context(spark, para_path, context_path, out_path):
     # Format
     df_para_text = df_para.withColumn("first_para", get_text("content_bytearray"))
     df_para_text_ents = df_para_text.withColumn("top_ents", get_top_ents("content_bytearray"))
-    df_para_text_ents_format = df_para_text_ents.selec(col("content_id").alias('page_id'), "first_para", explode("top_ents").alias("key_id"))
+    df_para_text_ents_format = df_para_text_ents.select(col("content_id").alias('page_id'), "first_para", explode("top_ents").alias("key_id"))
 
     doc_desc_df = df_context.select(col("page_id").alias("key_id"), "doc_desc")
 
