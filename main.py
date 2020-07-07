@@ -62,7 +62,7 @@ if __name__ == '__main__':
     dev_data_dir_path = data_dir_paths[0]
     dev_qrels_path = qrels_paths[0]
     dev_run_path = run_paths[0]
-    model_path = None
+    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/bert_passages_with_top5_ents_6e6/epoch2_batch1500/'
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
                                                 train_batch_size=train_batch_size,
