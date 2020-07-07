@@ -72,14 +72,14 @@ if __name__ == '__main__':
                                                 dev_run_path=dev_run_path)
 
     epochs = 2
-    lr = 3e-6
+    lr = 6e-6
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'bert_passages_with_top5_ents_3e6'
+    experiment_name = 'bert_passages_with_top5_ents_6e6'
     write = True
-    logging_steps = 1000
+    logging_steps = 500
     head_flag = 'passage'
 
     experiment.run_experiment_single_head(
