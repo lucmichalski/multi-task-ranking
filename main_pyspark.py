@@ -86,7 +86,7 @@ if __name__ == '__main__':
         #          '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000.run']
     para_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4/'
     pages_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets/'
-    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4_with_desc_ents_para_v1/'
+    out_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4_with_desc_ents_para_v2/'
 
     add_paragraph_context(spark, para_path=para_path, pages_path=pages_path, out_path=out_path)
 
