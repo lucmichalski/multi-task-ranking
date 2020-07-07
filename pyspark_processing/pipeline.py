@@ -269,10 +269,18 @@ def build_entity_context_json(spark, data_path, run_path, out_path=None):
         json.dump(entities_dict, fp, indent=4)
 
 
-def add_paragraph_context(spark, para_path, context_path, out_path):
+def add_paragraph_context(spark, para_path, pages_path, out_path):
     """ """
     df_para = spark.read.parquet(para_path)
-    df_context = spark.read.parquet(context_path)
+    df_page = spark.read.parquet(pages_path)
+
+    @udf(returnType=StringType())
+    def get_desc(doc_bytearray):
+        doc = document_pb2.Document().FromString(pickle.loads(doc_bytearray))
+        try:
+            return '{}: {}.'.format(doc.doc_name, doc.document_contents[0].text.split(".")[0])
+        except:
+            return '{}: .'.format(doc.doc_name)
 
     @udf(returnType=StringType())
     def get_text(content_bytearray):
@@ -288,12 +296,14 @@ def add_paragraph_context(spark, para_path, context_path, out_path):
         entity_ids = [str(i.entity_id) for i in content.synthetic_entity_links]
         return list(Counter(entity_ids).keys())
 
-    # Format
+    # Format paragraph
     df_para_text = df_para.withColumn("first_para", get_text("content_bytearray"))
     df_para_text_ents = df_para_text.withColumn("top_ents", get_top_ents("content_bytearray"))
     df_para_text_ents_format = df_para_text_ents.select(col("content_id").alias('page_id'), "first_para", explode("top_ents").alias("key_id"))
 
-    doc_desc_df = df_context.select(col("page_id").alias("key_id"), "doc_desc")
+    # Format pages
+    df_desc = df_page.withColumn("doc_desc", get_desc("doc_bytearray"))
+    doc_desc_df = df_desc.select(col("page_id").alias("key_id"), "doc_desc")
 
     df_join = df_para_text_ents_format.join(doc_desc_df, on=['key_id'], how='left')
 
