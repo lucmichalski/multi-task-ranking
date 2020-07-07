@@ -56,12 +56,12 @@ if __name__ == '__main__':
     #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=False)
 
     gpus = 6
-    train_data_dir_path = data_dir_paths[2]
-    train_batch_size = 8 * gpus
+    train_data_dir_path = None #data_dir_paths[2]
+    train_batch_size = None #8 * gpus
     dev_batch_size = 64 * 3 * gpus
-    dev_data_dir_path = data_dir_paths[1]
-    dev_qrels_path = qrels_paths[1]
-    dev_run_path = run_paths[1]
+    dev_data_dir_path = data_dir_paths[0]
+    dev_qrels_path = qrels_paths[0]
+    dev_run_path = run_paths[0]
     model_path = None
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
@@ -71,29 +71,29 @@ if __name__ == '__main__':
                                                 dev_qrels_path=dev_qrels_path,
                                                 dev_run_path=dev_run_path)
 
-    epochs = 2
-    lr = 6e-6
-    eps = 1e-8
-    weight_decay = 0.01
-    warmup_percentage = 0.1
-    experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'bert_passages_with_top5_ents_6e6'
-    write = True
-    logging_steps = 500
+    # epochs = 2
+    # lr = 6e-6
+    # eps = 1e-8
+    # weight_decay = 0.01
+    # warmup_percentage = 0.1
+    # experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
+    # experiment_name = 'bert_passages_with_top5_ents_6e6'
+    # write = True
+    # logging_steps = 500
+    # head_flag = 'passage'
+    #
+    # experiment.run_experiment_single_head(
+    #     head_flag=head_flag,
+    #     epochs=epochs,
+    #     lr=lr,
+    #     eps=eps,
+    #     weight_decay=weight_decay,
+    #     warmup_percentage=warmup_percentage,
+    #     experiments_dir=experiments_dir,
+    #     experiment_name=experiment_name,
+    #     logging_steps=logging_steps
+    # )
+
     head_flag = 'passage'
-
-    experiment.run_experiment_single_head(
-        head_flag=head_flag,
-        epochs=epochs,
-        lr=lr,
-        eps=eps,
-        weight_decay=weight_decay,
-        warmup_percentage=warmup_percentage,
-        experiments_dir=experiments_dir,
-        experiment_name=experiment_name,
-        logging_steps=logging_steps
-    )
-
-    # head_flag = 'entity'
-    # rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/roberta_dev_test_write.run'
-    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=True)
+    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/bert_passage_with_5_ents.run'
+    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=True)
