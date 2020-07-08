@@ -346,7 +346,6 @@ class FineTuningReRankingExperiments:
         print('Starting logging: {}'.format(logging_path))
         logging.basicConfig(filename=logging_path, level=logging.DEBUG)
 
-
         # Loop over epochs (1 -> epochs).
         for epoch_i in range(1, epochs + 1):
 
@@ -431,7 +430,110 @@ class FineTuningReRankingExperiments:
     def run_experiment_multi_head(self, epochs=1, lr=2e-5, eps=1e-8, weight_decay=0.01, warmup_percentage=0.1,
                                   experiments_dir=None, experiment_name=None, logging_steps=100):
         """ Run training and validation for a multi head. """
-        pass
+        # Define experiment_path directory to contain all logging, models and results.
+        experiment_path = os.path.join(experiments_dir, experiment_name)
+
+        # Make experiment_path if does not already exist.
+        if os.path.isdir(experiment_path) == False:
+            os.mkdir(experiment_path)
+
+        # Start logging.
+        logging_path = os.path.join(experiment_path, 'output.log')
+        print('Starting logging: {}'.format(logging_path))
+        logging.basicConfig(filename=logging_path, level=logging.DEBUG)
+
+        # Loop over epochs (1 -> epochs).
+        for epoch_i in range(1, epochs + 1):
+
+            logging.info("=================================")
+            logging.info('======== Epoch {:} / {:} ========'.format(epoch_i, epochs))
+            logging.info("=================================")
+
+            # ========================================
+            #               Training
+            # ========================================
+
+            # Initialise optimizer and scheduler for training.
+            optimizer = AdamW(self.model.parameters(), lr=lr, eps=eps, weight_decay=weight_decay)
+            num_train_steps = min(len(self.train_dataloader_passage), len(self.train_dataloader_entity))
+            num_warmup_steps = int(num_train_steps * warmup_percentage)
+            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps,
+                                                        num_training_steps=num_train_steps)
+
+            # Time beginning training.
+            train_start_time = time.time()
+            # Set model in training mode.
+            self.model.train()
+            # Train loss counter.
+            train_loss = 0
+
+            for train_step, train_batch_passage, train_batch_entity  in enumerate(zip(self.train_dataloader_passage, self.train_dataloader_entity)):
+                # Feedforward both heads
+                for head_flag, train_batch in zip(['passage', 'entity'], [train_batch_passage, train_batch_entity]):
+                    # Set gradient to zero.
+                    self.model.zero_grad()
+                    # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
+                    b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch_passage)
+                    # Forward pass to retrieve
+                    loss, logits = self.model.forward(head_flag=head_flag,
+                                                      input_ids=b_input_ids,
+                                                      attention_mask=b_attention_mask,
+                                                      token_type_ids=b_token_type_ids,
+                                                      labels=b_labels)
+
+                    # Add loss to train loss counter
+                    train_loss += loss.sum().item()
+                    # Backpropogate loss.
+                    loss.sum().backward()
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+
+                    # Next step of optimizer and scheduler.
+                    optimizer.step()
+                    scheduler.step()
+
+                # Progress update every X batches or last batch (logging and validation).
+                if ((train_step + 1) % logging_steps == 0) or ((train_step + 1) == num_train_steps):
+
+                    # Calculate average training loss
+                    avg_train_loss = train_loss / (train_step + 1)
+
+                    logging.info('----- Epoch {} / Batch {} -----\n'.format(str(epoch_i), str(train_step + 1)))
+                    logging.info("Training loss: {0:.5f}".format(avg_train_loss))
+                    logging.info("Training time: {:}".format(self.__format_time(time.time() - train_start_time)))
+
+                    # ========================================
+                    #               Validation
+                    # ========================================
+
+                    for head_flag in ['passage', 'entity']:
+                        if head_flag == 'passage':
+                            dev_dataloader = self.dev_dataloader_passage
+                            dev_qrels = self.dev_qrels_passage
+                            dev_run_data = self.dev_run_data_passage
+                        else:
+                            dev_dataloader = self.dev_dataloader_entity
+                            dev_qrels = self.dev_qrels_entity
+                            dev_run_data = self.dev_run_data_entity
+
+                        # Dev beginning training.
+                        dev_start_time = time.time()
+
+                        av_dev_loss = self.__validation_run(head_flag=head_flag, dev_dataloader=dev_dataloader)
+
+                        logging.info("================ Validation {} ================".format(head_flag))
+                        logging.info("Validation loss: {0:.5f}".format(av_dev_loss))
+                        logging.info("Validation time: {:}".format(self.__format_time(time.time() - dev_start_time)))
+
+                        self.__log_eval_metrics(dev_qrels=dev_qrels, dev_run_data=dev_run_data)
+
+                    # Save model and weights to directory.
+                    model_dir = os.path.join(experiment_path, 'epoch{}_batch{}/'.format(epoch_i, train_step + 1))
+                    if os.path.isdir(model_dir) == False:
+                        os.mkdir(model_dir)
+                    try:
+                        self.model.module.save_pretrained(model_dir)
+                    except AttributeError:
+                        self.model.save_pretrained(model_dir)
 
 
     def __write_topic_to_file(self, rerank_run_path, doc_ids, query, scores):

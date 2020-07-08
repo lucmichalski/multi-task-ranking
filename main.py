@@ -75,13 +75,21 @@ if __name__ == '__main__':
     # model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/bert_entity_with_top5_ents_1e6_synthetic_toplevel_500_write_synethic_runs/epoch1_batch2500/'
 
     gpus = 3
-    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/bert_passages_with_top5_ents_6e6/epoch2_batch1500/'
+    model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/bert_passages_with_top5_ents_6e6/epoch2_batch1500/'
     train_batch_size = 8 * gpus
     dev_batch_size = 64 * 3 * gpus
-    train_data_dir_path_passage = None #'/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks_plus_context/'
+
+    train_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks_plus_context/'
+    train_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks_context_no_sep/'
+
     dev_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_hierarchical_passage_dev_100_chunks_plus_context/'
+    dev_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_100_chunks_context_no_sep/'
+
     dev_qrels_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
+    dev_qrels_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity.qrels'
+
     dev_run_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run'
+    dev_run_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity.qrels'
 
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_batch_size=train_batch_size,
