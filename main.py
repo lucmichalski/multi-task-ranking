@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     training_datasets = [False, True]
 
-    context_paths = [run_paths[0] + 'context.json', run_paths[1] + 'context.json']
+    context_paths = [i + '.context.json' for i in run_paths]
 
     hitss = [250, 250]
 
