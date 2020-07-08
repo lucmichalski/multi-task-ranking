@@ -95,33 +95,38 @@ if __name__ == '__main__':
                                                 train_batch_size=train_batch_size,
                                                 dev_batch_size=dev_batch_size,
                                                 train_data_dir_path_passage=train_data_dir_path_passage,
+                                                train_data_dir_path_entity=train_data_dir_path_entity,
+
                                                 dev_data_dir_path_passage=dev_data_dir_path_passage,
+                                                dev_data_dir_path_entity=dev_data_dir_path_entity,
+
                                                 dev_qrels_path_passage=dev_qrels_path_passage,
-                                                dev_run_path_passage=dev_run_path_passage)
+                                                dev_qrels_path_entity=dev_qrels_path_entity,
 
-    # epochs = 2
-    # lr = 1e-5
-    # eps = 1e-8
-    # weight_decay = 0.01
-    # warmup_percentage = 0.1
-    # experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    # experiment_name = 'test_single_head_passage_train'
-    # write = True
-    # logging_steps = 500
+                                                dev_run_path_passage=dev_run_path_passage,
+                                                dev_run_path_entity=dev_run_path_entity)
+
+    epochs = 2
+    lr = 8e-7
+    eps = 1e-8
+    weight_decay = 0.01
+    warmup_percentage = 0.1
+    experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
+    experiment_name = 'test_multi_task_hierarchical'
+    write = True
+    logging_steps = 500
+
+    experiment.run_experiment_multi_head(
+        epochs=epochs,
+        lr=lr,
+        eps=eps,
+        weight_decay=weight_decay,
+        warmup_percentage=warmup_percentage,
+        experiments_dir=experiments_dir,
+        experiment_name=experiment_name,
+        logging_steps=logging_steps
+    )
+
     # head_flag = 'passage'
-
-    # experiment.run_experiment_single_head(
-    #     head_flag=head_flag,
-    #     epochs=epochs,
-    #     lr=lr,
-    #     eps=eps,
-    #     weight_decay=weight_decay,
-    #     warmup_percentage=warmup_percentage,
-    #     experiments_dir=experiments_dir,
-    #     experiment_name=experiment_name,
-    #     logging_steps=logging_steps
-    # )
-
-    head_flag = 'passage'
-    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/test_single_head_passage_dev_v2.run'
-    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=True)
+    # rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/test_single_head_passage_dev_v2.run'
+    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=True)
