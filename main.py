@@ -79,7 +79,7 @@ if __name__ == '__main__':
     train_batch_size = 8 * gpus
     dev_batch_size = 64 * 3 * gpus
     train_data_dir_path_passage = None #'/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks_plus_context/'
-    dev_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_hierarchical_passage_dev_100_chunks_plus_context'
+    dev_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_hierarchical_passage_dev_100_chunks_plus_context/'
     dev_qrels_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
     dev_run_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run'
 
