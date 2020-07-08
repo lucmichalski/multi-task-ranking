@@ -465,7 +465,9 @@ class FineTuningReRankingExperiments:
             # Set model in training mode.
             self.model.train()
             # Train loss counter.
-            train_loss = 0
+            #TODO - 2x training loss
+            train_loss_passage = 0
+            train_loss_entity = 0
 
             train_step = 0
             for train_batch_passage, train_batch_entity in zip(self.train_dataloader_passage, self.train_dataloader_entity):
@@ -483,7 +485,11 @@ class FineTuningReRankingExperiments:
                                                       labels=b_labels)
 
                     # Add loss to train loss counter
-                    train_loss += loss.sum().item()
+                    if head_flag == 'passage':
+                        train_loss_passage += loss.sum().item()
+                    else:
+                        train_loss_entity += loss.sum().item()
+
                     # Backpropogate loss.
                     loss.sum().backward()
                     torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
@@ -496,17 +502,19 @@ class FineTuningReRankingExperiments:
                 if ((train_step + 1) % logging_steps == 0) or ((train_step + 1) == num_train_steps):
 
                     # Calculate average training loss
-                    avg_train_loss = train_loss / (train_step + 1)
+                    avg_train_loss_passage = train_loss_passage / (train_step + 1)
+                    avg_train_loss_entity = train_loss_entity / (train_step + 1)
 
                     logging.info('----- Epoch {} / Batch {} -----\n'.format(str(epoch_i), str(train_step + 1)))
-                    logging.info("Training loss: {0:.5f}".format(avg_train_loss))
+                    logging.info("Training loss passage: {0:.5f}".format(avg_train_loss_passage))
+                    logging.info("Training loss entity: {0:.5f}".format(avg_train_loss_entity))
                     logging.info("Training time: {:}".format(self.__format_time(time.time() - train_start_time)))
 
                     # ========================================
                     #               Validation
                     # ========================================
 
-                    for head_flag in ['passage', 'entity']:
+                    for head_flag in ['entity', 'passage']:
                         if head_flag == 'passage':
                             dev_dataloader = self.dev_dataloader_passage
                             dev_qrels = self.dev_qrels_passage
@@ -521,7 +529,7 @@ class FineTuningReRankingExperiments:
 
                         av_dev_loss = self.__validation_run(head_flag=head_flag, dev_dataloader=dev_dataloader)
 
-                        logging.info("================ Validation {} ================".format(head_flag))
+                        logging.info("=== Validation {} ===".format(head_flag))
                         logging.info("Validation loss: {0:.5f}".format(av_dev_loss))
                         logging.info("Validation time: {:}".format(self.__format_time(time.time() - dev_start_time)))
 
@@ -574,7 +582,7 @@ class FineTuningReRankingExperiments:
     def write_rerank_to_run_file(self, rerank_run_path, dev_run_data):
         """ Process re-ranking from validation run and write to TREC run file. """
         # Assert validation outputs correct length.
-        self.__assert_dev_lists_correct_lengths(dev_run_data)
+        self.__assert_dev_lists_correct_lengths(dev_run_data=dev_run_data)
 
         # Store BERT score and doc_id for each topic run.
         BERT_scores = []

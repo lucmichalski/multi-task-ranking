@@ -94,6 +94,7 @@ if __name__ == '__main__':
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_batch_size=train_batch_size,
                                                 dev_batch_size=dev_batch_size,
+
                                                 train_data_dir_path_passage=train_data_dir_path_passage,
                                                 train_data_dir_path_entity=train_data_dir_path_entity,
 
@@ -114,7 +115,7 @@ if __name__ == '__main__':
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
     experiment_name = 'test_multi_task_hierarchical'
     write = True
-    logging_steps = 500
+    logging_steps = 50
 
     experiment.run_experiment_multi_head(
         epochs=epochs,
