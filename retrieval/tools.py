@@ -20,20 +20,22 @@ class RetrievalUtils:
 
     def get_qrels_dict(self, qrels_path):
         """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}. """
-        qrels_dict = {}
-        with open(qrels_path) as qrels_file:
-            # Read each line of qrels file.
-            for line in qrels_file:
-                if len(line) > 4:
-                    query = line.strip().split(" ")[0]
-                    doc_id = line.strip().split(" ")[2]
-                    # key: query, value: list of doc_ids
-                    if self.test_valid_line(line=line):
-                        if query in qrels_dict:
-                            qrels_dict[query].append(doc_id)
-                        else:
-                            qrels_dict[query] = [doc_id]
-        return qrels_dict
+        if isinstance(qrels_path, str):
+            qrels_dict = {}
+            with open(qrels_path) as qrels_file:
+                # Read each line of qrels file.
+                for line in qrels_file:
+                    if len(line) > 4:
+                        query = line.strip().split(" ")[0]
+                        doc_id = line.strip().split(" ")[2]
+                        # key: query, value: list of doc_ids
+                        if self.test_valid_line(line=line):
+                            if query in qrels_dict:
+                                qrels_dict[query].append(doc_id)
+                            else:
+                                qrels_dict[query] = [doc_id]
+            return qrels_dict
+        return None
 
 
     def test_valid_line(self, line):
