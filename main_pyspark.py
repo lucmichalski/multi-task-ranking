@@ -12,7 +12,7 @@ from pyspark_processing.pipeline import write_pages_data_to_dir, run_pyspark_pip
 
 spark_drive_gbs = 50
 spark_executor_gbs = 2
-cores = 18
+cores = 16
 
 print('\n//////// RUNNING WITH CORES {} //////////'.format(cores))
 spark = SparkSession.\
@@ -79,8 +79,9 @@ if __name__ == '__main__':
 
     from pyspark_processing.pipeline import add_paragraph_context, build_entity_context_json
     # BUILD CONTEXT
-    run_paths =   ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev_250.run',
-                   '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train_250.run']
+    run_paths = [
+        '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1.dev.top-level.synthetic.250.run',
+        '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1.train.top-level.synthetic.250.run']
 
     data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v7/'
 
