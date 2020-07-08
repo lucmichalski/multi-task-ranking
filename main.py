@@ -68,14 +68,14 @@ if __name__ == '__main__':
                                                 dev_run_path=dev_run_path)
 
     epochs = 2
-    lr = 5e-6
+    lr = 3e-6
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'bert_entity_with_top5_ents_5e6_synthetic_toplevel'
+    experiment_name = 'bert_entity_with_top5_ents_3e6_synthetic_toplevel'
     write = True
-    logging_steps = 100
+    logging_steps = 1000
     head_flag = 'entity'
 
     experiment.run_experiment_single_head(
