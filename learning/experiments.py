@@ -467,7 +467,8 @@ class FineTuningReRankingExperiments:
             # Train loss counter.
             train_loss = 0
 
-            for train_step, train_batch_passage, train_batch_entity  in enumerate(zip(self.train_dataloader_passage, self.train_dataloader_entity)):
+            train_step = 0
+            for train_step, train_batch_passage, train_batch_entity in zip(self.train_dataloader_passage, self.train_dataloader_entity):
                 # Feedforward both heads
                 for head_flag, train_batch in zip(['passage', 'entity'], [train_batch_passage, train_batch_entity]):
                     # Set gradient to zero.
@@ -534,6 +535,8 @@ class FineTuningReRankingExperiments:
                         self.model.module.save_pretrained(model_dir)
                     except AttributeError:
                         self.model.save_pretrained(model_dir)
+
+                train_step += 1
 
 
     def __write_topic_to_file(self, rerank_run_path, doc_ids, query, scores):
