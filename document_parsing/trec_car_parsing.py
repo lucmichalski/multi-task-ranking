@@ -471,9 +471,10 @@ if __name__ == '__main__':
     # year = 1
     # read_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/testY{}.pages.cbor'.format(year)
     # write_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/testY{}_{}.bin'.format(year, name)
-    for i in [0, 1, 2, 3, 4]:
-        read_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/benchmarkY1/fold-{}-train.pages.cbor'.format(i)
-        write_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/benchmarkY1/fold-{}-train.pages.bin'.format(i)
+
+    for i in range(0,5):
+        read_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-{}-train.pages.cbor'.format(i)
+        write_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-{}-train.pages.bin'.format(i)
         num_docs = 10000
         write_output = True
         print_intervals = 10

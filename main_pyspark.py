@@ -79,9 +79,8 @@ if __name__ == '__main__':
 
     from pyspark_processing.pipeline import add_paragraph_context, build_entity_context_json
     # BUILD CONTEXT
-    run_paths =   ['/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run',
-                   '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_train_passage_100.run',
-                   '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage_1000.run']
+    run_paths =   ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev_250.run',
+                   '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train_250.run']
 
     data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4_with_desc_ents_para_v5/'
 

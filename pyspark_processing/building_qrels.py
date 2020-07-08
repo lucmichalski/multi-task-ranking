@@ -3,6 +3,7 @@ from document_parsing.trec_car_parsing import TrecCarParser
 
 import numpy as np
 import urllib
+import re
 
 def check_manual_vs_synthetic_links():
     """ Util to check manual vs. synthetic entity linking. """
@@ -54,7 +55,7 @@ def get_query(doc_id, section_heading_names):
         return doc_id
 
 
-def build_synthetic_qrels(document_list, path, qrels_type='tree'):
+def build_synthetic_qrels(document_list, path, qrels_type='tree', write=True):
     """ Build tree or hierarchical qrels. """
     # Build hierarchical qrels.
     hierarchical_qrels = {}
@@ -112,6 +113,22 @@ def build_synthetic_qrels(document_list, path, qrels_type='tree'):
 
         qrels = tree_qrels
 
+    elif qrels_type == 'top-level':
+        qrels = {}
+        for k, v in hierarchical_qrels.items():
+            if k.count('/') >= 2:
+                i = [m.start() for m in re.finditer(r"/", k)][1]
+                new_k = k[:i]
+                if new_k in qrels:
+                    qrels[new_k] = list(set(v + qrels[new_k]))
+                else:
+                    qrels[new_k] = v
+            else:
+                if k in qrels:
+                    qrels[k] = list(set(v + qrels[new_k]))
+                else:
+                    qrels[k] = v
+
     elif qrels_type == 'hierarchical':
         qrels = hierarchical_qrels
 
@@ -120,10 +137,12 @@ def build_synthetic_qrels(document_list, path, qrels_type='tree'):
         raise
 
     # Write to file
-    with open(path, 'w') as f:
-        for query in sorted(qrels.keys()):
-            for doc in sorted(qrels[query]):
-                f.write('{} 0 {} 1\n'.format(query, doc))
+    if write:
+        with open(path, 'w') as f:
+            for query in sorted(qrels.keys()):
+                for doc in sorted(qrels[query]):
+                    f.write('{} 0 {} 1\n'.format(query, doc))
+
 
 def build_passage_qrels(document_list, path):
     """ Build hierarchical passage qrels. """
@@ -154,47 +173,46 @@ def build_passage_qrels(document_list, path):
             for passage in sorted(qrels[query]):
                 f.write('{} 0 {} 1\n'.format(query, passage))
 
+
 if __name__ == '__main__':
     import pandas as pd
 
-    proto_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark/data/testY2_custom.bin'
-    path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark/data/testY2.custom.hierarchical.passage.qrels.v3'
-    #qrels_type = 'hierarchical'
-    df = pd.read_csv('/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark/data/testY2_qrels.csv')
-    print(df.columns)
-    valid_qrels = list(df['id'])
+    proto_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-0-train.pages.bin'
     tcp = TrecCarParser()
     document_list = tcp.get_list_protobuf_messages(path=proto_path)
+    path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/benchmarkY1.dev.top-level.synthetic.qrels'
+    build_synthetic_qrels(document_list, path, qrels_type='top-level', write=True)
+
+    document_list = []
+    for i in range(1,5):
+        proto_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-{}-train.pages.bin'.format(i)
+        tcp = TrecCarParser()
+        document_list += tcp.get_list_protobuf_messages(path=proto_path)
+
+    path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/benchmarkY1.train.top-level.synthetic.qrel'
+    build_synthetic_qrels(document_list=document_list, path=path, qrels_type='top-level', write=True)
+
     #build_passage_qrels(document_list=document_list, path=path)
-    data = []
-    for doc in document_list:
-        doc_id = doc.doc_id
-        for document_content in doc.document_contents:
-            if len(document_content.content_id) > 0:
-                content_id = document_content.content_id
-                section_heading_ids = document_content.section_heading_ids
-                text = document_content.text
-                id_in_Y2_goldpassages_qrels = content_id in valid_qrels
-                data.append([content_id, doc_id, text, section_heading_ids, id_in_Y2_goldpassages_qrels])
-
-    import pandas as pd
-
-    df = pd.DataFrame(data, columns=['id', 'doc_id', 'text', 'section_heading_ids','id_in_Y2_goldpassages_qrels'])
-    df.to_csv('/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/testY2.v4.csv')
+    # data = []
+    # for doc in document_list:
+    #     doc_id = doc.doc_id
+    #     for document_content in doc.document_contents:
+    #         if len(document_content.content_id) > 0:
+    #             content_id = document_content.content_id
+    #             section_heading_ids = document_content.section_heading_ids
+    #             text = document_content.text
+    #             id_in_Y2_goldpassages_qrels = content_id in valid_qrels
+    #             data.append([content_id, doc_id, text, section_heading_ids, id_in_Y2_goldpassages_qrels])
+    #
+    # import pandas as pd
+    #
+    # df = pd.DataFrame(data, columns=['id', 'doc_id', 'text', 'section_heading_ids','id_in_Y2_goldpassages_qrels'])
+    # df.to_csv('/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/testY2.v4.csv')
 
     #print(document_list[0])
     # doc = tcp.get_protobuf_message(path=proto_path, doc_id=doc_id)
     # print(doc)
     #build_synthetic_qrels(document_list=document_list, path=path, qrels_type=qrels_type)
-    # for i in [0,1,2,3,4]:
-    #     proto_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/benchmarkY1/fold-{}-train.pages.bin'.format(i)
-    #     path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/benchmarkY1/fold-{}-train.pages.qrels'.format(i)
-    #     qrels_type = 'hierarchical'
-    #     # doc_id = 'enwiki:Aerobic%20fermentation'
-    #     tcp = TrecCarParser()
-    #     document_list = tcp.get_list_protobuf_messages(path=proto_path)
-    #     # doc = tcp.get_protobuf_message(path=proto_path, doc_id=doc_id)
-    #     # print(doc)
-    #     build_synthetic_qrels(document_list=document_list, path=path, qrels_type=qrels_type)
+
 
 
