@@ -75,7 +75,7 @@ if __name__ == '__main__':
     # model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/bert_entity_with_top5_ents_1e6_synthetic_toplevel_500_write_synethic_runs/epoch1_batch2500/'
 
     gpus = 3
-    model_path = None
+    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/bert_with_context_v2_no_sep_5e6_top5_ents/epoch1_batch2000/'
     train_batch_size = 8 * gpus
     dev_batch_size = 64 * 3 * gpus
     train_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks_plus_context/'
@@ -91,29 +91,29 @@ if __name__ == '__main__':
                                                 dev_qrels_path_passage=dev_qrels_path_passage,
                                                 dev_run_path_passage=dev_run_path_passage)
 
-    epochs = 2
-    lr = 1e-5
-    eps = 1e-8
-    weight_decay = 0.01
-    warmup_percentage = 0.1
-    experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_single_head_passage_train'
-    write = True
-    logging_steps = 500
+    # epochs = 2
+    # lr = 1e-5
+    # eps = 1e-8
+    # weight_decay = 0.01
+    # warmup_percentage = 0.1
+    # experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
+    # experiment_name = 'test_single_head_passage_train'
+    # write = True
+    # logging_steps = 500
+    # head_flag = 'passage'
+
+    # experiment.run_experiment_single_head(
+    #     head_flag=head_flag,
+    #     epochs=epochs,
+    #     lr=lr,
+    #     eps=eps,
+    #     weight_decay=weight_decay,
+    #     warmup_percentage=warmup_percentage,
+    #     experiments_dir=experiments_dir,
+    #     experiment_name=experiment_name,
+    #     logging_steps=logging_steps
+    # )
+
     head_flag = 'passage'
-
-    experiment.run_experiment_single_head(
-        head_flag=head_flag,
-        epochs=epochs,
-        lr=lr,
-        eps=eps,
-        weight_decay=weight_decay,
-        warmup_percentage=warmup_percentage,
-        experiments_dir=experiments_dir,
-        experiment_name=experiment_name,
-        logging_steps=logging_steps
-    )
-
-    # head_flag = 'entity'
-    # rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/bert_entity_toplevel_synthetic_qrels_with_ent_context_{}_y2_test.run'.format(name)
-    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=True)
+    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/test_single_head_passage_dev.run'
+    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=True)
