@@ -468,7 +468,7 @@ class FineTuningReRankingExperiments:
             train_loss = 0
 
             train_step = 0
-            for train_step, train_batch_passage, train_batch_entity in zip(self.train_dataloader_passage, self.train_dataloader_entity):
+            for train_batch_passage, train_batch_entity in zip(self.train_dataloader_passage, self.train_dataloader_entity):
                 # Feedforward both heads
                 for head_flag, train_batch in zip(['passage', 'entity'], [train_batch_passage, train_batch_entity]):
                     # Set gradient to zero.
