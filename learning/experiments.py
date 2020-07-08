@@ -464,8 +464,7 @@ class FineTuningReRankingExperiments:
             train_start_time = time.time()
             # Set model in training mode.
             self.model.train()
-            # Train loss counter.
-            #TODO - 2x training loss
+            # Train loss counters.
             train_loss_passage = 0
             train_loss_entity = 0
 
@@ -563,9 +562,8 @@ class FineTuningReRankingExperiments:
 
     def __assert_dev_lists_correct_lengths(self, dev_run_data):
         """ Assert dev_labels and dev_logits from validation are correct length i.e. length of original run file. """
-        assert len(self.dev_labels) == len(self.dev_logits) == len(dev_run_data), \
-            "dev_labels len: {}, dev_logits len: {}, dev_run_data: {}".format(
-                len(self.dev_labels), len(self.dev_logits), len(dev_run_data))
+        assert len(self.dev_labels) == len(self.dev_logits) == len(dev_run_data),\
+            "dev_labels len: {}, dev_logits len: {}, dev_run_data: {}".format(len(self.dev_labels), len(self.dev_logits), len(dev_run_data))
 
 
     def __assert_label_is_correct(self, label_ground_truth, label, query, doc_id):
