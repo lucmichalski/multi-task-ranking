@@ -513,7 +513,7 @@ class FineTuningReRankingExperiments:
                     #               Validation
                     # ========================================
 
-                    for head_flag in ['entity', 'passage']:
+                    for head_flag in ['passage', 'entity']:
                         if head_flag == 'passage':
                             dev_dataloader = self.dev_dataloader_passage
                             dev_qrels = self.dev_qrels_passage
