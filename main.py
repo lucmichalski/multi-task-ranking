@@ -54,7 +54,7 @@ if __name__ == '__main__':
     #                                    context_path=context_path)
     #
     #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=True)
-    manual = False
+    manual = True
     if manual:
         name = 'manual'
         dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000_chunks_with_context_no_sep/'
@@ -67,11 +67,11 @@ if __name__ == '__main__':
         dev_qrels_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity.qrels'
         dev_run_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_1000.run'
 
-    gpus = 6
+    gpus = 3
     train_data_dir_path = None #data_dir_paths[1]
     train_batch_size = None # 8 * gpus
     dev_batch_size = 64 * 3 * gpus
-    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/bert_entity_with_top5_ents_1e6_synthetic_toplevel_500_write/epoch2_batch1000/'
+    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/bert_entity_with_top5_ents_1e6_synthetic_toplevel_500_write_synethic_runs/epoch1_batch2500/'
 
     experiment = FineTuningReRankingExperiments(model_path=model_path,
                                                 train_data_dir_path=train_data_dir_path,
@@ -105,5 +105,5 @@ if __name__ == '__main__':
     # )
 
     head_flag = 'entity'
-    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/bert_entity_toplevel_manaul_qrels_with_ent_context_{}_y2_test.run'.format(name)
+    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/bert_entity_toplevel_synthetic_qrels_with_ent_context_{}_y2_test.run'.format(name)
     experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=True)
