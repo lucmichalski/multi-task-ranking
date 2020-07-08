@@ -54,7 +54,7 @@ if __name__ == '__main__':
     #                                    context_path=context_path)
     #
     #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=True)
-    manual = True
+    manual = False
     if manual:
         name = 'manual'
         dev_data_dir_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_1000_chunks_with_context_no_sep/'
