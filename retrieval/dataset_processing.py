@@ -237,6 +237,8 @@ class TrecCarProcessing:
                     except:
                         print('Failed to add context to: {}'.format(doc_id))
                         text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
+                        if first_para:
+                            text = text.split('\n')[0]
                         #text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
                         #text_encodings = self.__get_encodings(text=text_context, max_length=256)
 
