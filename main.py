@@ -79,7 +79,7 @@ if __name__ == '__main__':
     train_batch_size = 8 * gpus
     dev_batch_size = 64 * 3 * gpus
     train_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks_plus_context/'
-    dev_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_hierarchical_passage_dev_100_chunks_plus_context/'
+    dev_data_dir_path_passage = '/nfs/trec_car/data/bert_reranker_datasets/exp/bert_passages_with_top5_ents_6e6/epoch2_batch1500'
     dev_qrels_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
     dev_run_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run'
 
@@ -115,5 +115,5 @@ if __name__ == '__main__':
     # )
 
     head_flag = 'passage'
-    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/test_single_head_passage_dev.run'
+    rerank_run_path = '/nfs/trec_car/data/entity_ranking/test_runs/test_single_head_passage_dev_v2.run'
     experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=True)

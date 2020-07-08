@@ -322,7 +322,7 @@ class FineTuningReRankingExperiments:
     def run_experiment_single_head(self, head_flag, epochs=1, lr=2e-5, eps=1e-8, weight_decay=0.01,
                                    warmup_percentage=0.1, experiments_dir=None, experiment_name=None, logging_steps=100):
         """ Run training and validation for a single head. """
-        assert head_flag == 'passage' or 'entity'
+        assert head_flag == 'passage' or head_flag == 'entity'
         if head_flag == 'passage':
             train_dataloader = self.train_dataloader_passage
             dev_dataloader = self.dev_dataloader_passage
@@ -334,7 +334,7 @@ class FineTuningReRankingExperiments:
             dev_qrels = self.dev_qrels_entity
             dev_run_data = self.dev_run_data_entity
 
-            # Define experiment_path directory to contain all logging, models and results.
+        # Define experiment_path directory to contain all logging, models and results.
         experiment_path = os.path.join(experiments_dir, experiment_name)
 
         # Make experiment_path if does not already exist.
@@ -507,7 +507,7 @@ class FineTuningReRankingExperiments:
 
     def inference(self, head_flag, rerank_run_path, do_eval=True):
         """ Run inference and produce BERT re-ranking run and evaluation. """
-        assert head_flag == 'passage' or 'entity'
+        assert head_flag == 'passage' or head_flag == 'entity'
         if head_flag == 'passage':
             dev_dataloader = self.dev_dataloader_passage
             dev_qrels_path = self.dev_qrels_path_passage
