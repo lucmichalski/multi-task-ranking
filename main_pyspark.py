@@ -82,7 +82,7 @@ if __name__ == '__main__':
     run_paths =   ['/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev_250.run',
                    '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_train_data/benchmarkY1_toplevel_entity_train_250.run']
 
-    data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4_with_desc_ents_para_v5/'
+    data_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_with_desc_ents_context_v7/'
 
     for run_path in run_paths:
         print('building: {}'.format(run_path))
