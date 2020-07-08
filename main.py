@@ -107,15 +107,15 @@ if __name__ == '__main__':
                                                 dev_run_path_passage=dev_run_path_passage,
                                                 dev_run_path_entity=dev_run_path_entity)
 
-    epochs = 2
+    epochs = 3
     lr = 8e-7
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_multi_task_hierarchical_v3'
+    experiment_name = 'test_multi_task_hierarchical_v4'
     write = True
-    logging_steps = 50
+    logging_steps = 500
 
     experiment.run_experiment_multi_head(
         epochs=epochs,
