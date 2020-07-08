@@ -113,7 +113,7 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_multi_task_hierarchical_v2'
+    experiment_name = 'test_multi_task_hierarchical_v3'
     write = True
     logging_steps = 50
 
