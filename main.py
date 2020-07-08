@@ -41,15 +41,15 @@ if __name__ == '__main__':
     # eval.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_config=default_eval_config)
     # print('** dataset **')
 
-    for run_path, qrels_path, data_dir_path, training_dataset, context_path in zip(run_paths, qrels_paths, data_dir_paths, training_datasets, context_paths):
-        processing = TrecCarProcessing(qrels_path=qrels_path,
-                                       run_path=run_path,
-                                       index_path=index_path,
-                                       data_dir_path=data_dir_path,
-                                       max_length=max_length,
-                                       context_path=context_path)
-
-        processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=False)
+    # for run_path, qrels_path, data_dir_path, training_dataset, context_path in zip(run_paths, qrels_paths, data_dir_paths, training_datasets, context_paths):
+    #     processing = TrecCarProcessing(qrels_path=qrels_path,
+    #                                    run_path=run_path,
+    #                                    index_path=index_path,
+    #                                    data_dir_path=data_dir_path,
+    #                                    max_length=max_length,
+    #                                    context_path=context_path)
+    #
+    #     processing.build_dataset(training_dataset=training_dataset, chuck_topic_size=100, first_para=False)
 
     gpus = 6
     train_data_dir_path = data_dir_paths[1]
@@ -68,14 +68,14 @@ if __name__ == '__main__':
                                                 dev_run_path=dev_run_path)
 
     epochs = 2
-    lr = 8e-6
+    lr = 1e-5
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'bert_entity_with_top5_ents_8e6_synthetic_toplevel'
+    experiment_name = 'bert_entity_with_top5_ents_1e5_synthetic_toplevel'
     write = True
-    logging_steps = 200
+    logging_steps = 100
     head_flag = 'entity'
 
     experiment.run_experiment_single_head(
