@@ -12,8 +12,8 @@ metadata:
   namespace: imackieproject
 spec:
   nodeSelector:
-    #node-role.ida/gputitan: "true"
-    node-role.ida/gpu2080ti: "true"
+    node-role.ida/gputitan: "true"
+    #node-role.ida/gpu2080ti: "true"
   volumes:
   - name: nfs-access
     persistentVolumeClaim:
@@ -26,7 +26,7 @@ spec:
     resources:
       requests:
         cpu: "2000m"
-        memory: "16Gi"
+        memory: "32Gi"
         nvidia.com/gpu: 2
       limits:
         cpu: "16000m"
