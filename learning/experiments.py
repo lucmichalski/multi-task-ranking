@@ -485,17 +485,20 @@ class FineTuningReRankingExperiments:
 
                     # Add loss to train loss counter
                     if head_flag == 'passage':
+                        train_loss_passage = loss
                         train_loss_passage += loss.sum().item()
                     else:
                         train_loss_entity += loss.sum().item()
+                        train_loss_entity = loss
 
-                    # Backpropogate loss.
-                    loss.sum().backward()
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+                # Backpropogate loss.
+                total_loss = train_loss_passage + train_loss_entity
+                total_loss.sum().backward()
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
-                    # Next step of optimizer and scheduler.
-                    optimizer.step()
-                    scheduler.step()
+                # Next step of optimizer and scheduler.
+                optimizer.step()
+                scheduler.step()
 
                 # Progress update every X batches or last batch (logging and validation).
                 if ((train_step + 1) % logging_steps == 0) or ((train_step + 1) == num_train_steps):

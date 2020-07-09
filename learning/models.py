@@ -21,7 +21,7 @@ class BertMultiTaskRanker(BertPreTrainedModel):
 
     valid_head_flags = ['entity', 'passage']
 
-    def __init__(self, config):
+    def __init__(self, config, extra_layer=False):
         super().__init__(config)
 
         # Initialise BERT setup.
