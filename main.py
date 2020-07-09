@@ -110,12 +110,12 @@ if __name__ == '__main__':
                                                 dev_run_path_entity=dev_run_path_entity)
 
     epochs = 3
-    lr = 5e-7
+    lr = 1e-6
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_multi_task_hierarchical_v5_5e7'
+    experiment_name = 'test_multi_task_hierarchical_v5_1e6_double_schedule'
     write = True
     logging_steps = 500
 
