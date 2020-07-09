@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     gpus = 6
     model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/bert_passages_with_top5_ents_6e6/epoch2_batch1500/'
-    train_batch_size = 8 * gpus
+    train_batch_size = 6 * gpus
     dev_batch_size = 64 * 3 * gpus
 
     train_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks_plus_context/'
