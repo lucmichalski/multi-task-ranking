@@ -115,6 +115,7 @@ class FineTuningReRankingExperiments:
             else:
                 return nn.DataParallel(BertMultiTaskRankerLarge.from_pretrained(model_path))
 
+
     def __build_dataloader(self, data_dir_path, batch_size, random_sample=False):
         """ Build PyTorch dataloader. """
         if (data_dir_path != None) and (batch_size != None):
@@ -462,7 +463,7 @@ class FineTuningReRankingExperiments:
 
             # Initialise optimizer and scheduler for training.
             optimizer = AdamW(self.model.parameters(), lr=lr, eps=eps, weight_decay=weight_decay)
-            num_train_steps = min(len(self.train_dataloader_passage), len(self.train_dataloader_entity))
+            num_train_steps = int(min(len(self.train_dataloader_passage), len(self.train_dataloader_entity)) * 2)
             num_warmup_steps = int(num_train_steps * warmup_percentage)
             scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps,
                                                         num_training_steps=num_train_steps)
@@ -503,9 +504,9 @@ class FineTuningReRankingExperiments:
                     loss.sum().backward()
                     torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
-                # Next step of optimizer and scheduler.
-                optimizer.step()
-                scheduler.step()
+                    # Next step of optimizer and scheduler.
+                    optimizer.step()
+                    scheduler.step()
 
                 # Progress update every X batches or last batch (logging and validation).
                 if ((train_step + 1) % logging_steps == 0) or ((train_step + 1) == num_train_steps):
