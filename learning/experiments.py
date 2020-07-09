@@ -500,12 +500,12 @@ class FineTuningReRankingExperiments:
 
                 # Backpropogate loss.
                 print('== total_loss ==')
-                total_loss = loss_passage + loss_entity
-                print(type(total_loss))
-                print(total_loss)
+                loss_total = loss_passage + loss_entity
+                print(type(loss_total))
+                print(loss_total)
                 print('== total_loss.sum() ==')
-                print(total_loss.sum())
-                total_loss.sum().backward()
+                print(loss_total.sum())
+                loss_total.sum().backward()
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
                 # Next step of optimizer and scheduler.
