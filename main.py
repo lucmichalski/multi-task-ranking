@@ -74,9 +74,9 @@ if __name__ == '__main__':
     # dev_batch_size = 64 * 3 * gpus
     # model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/bert_entity_with_top5_ents_1e6_synthetic_toplevel_500_write_synethic_runs/epoch1_batch2500/'
 
-    gpus = 6
+    gpus = 4
     model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/bert_passages_with_top5_ents_6e6/epoch2_batch1500/'
-    train_batch_size = 6 * gpus
+    train_batch_size = 8 * gpus
     dev_batch_size = 64 * 3 * gpus
 
     train_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks_plus_context/'
