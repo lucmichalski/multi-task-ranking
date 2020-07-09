@@ -489,20 +489,22 @@ class FineTuningReRankingExperiments:
                         print(type(loss))
                         print(loss)
 
-                        train_loss_passage = loss
+                        loss_passage = loss
                         train_loss_passage += loss.sum().item()
                     else:
                         print('== entity ==')
                         print(type(loss))
                         print(loss)
+                        loss_entity = loss
                         train_loss_entity += loss.sum().item()
-                        train_loss_entity = loss
 
                 # Backpropogate loss.
                 print('== total_loss ==')
-                total_loss = train_loss_passage + train_loss_entity
+                total_loss = loss_passage + loss_entity
                 print(type(total_loss))
                 print(total_loss)
+                print('== total_loss.sum() ==')
+                print(total_loss.sum())
                 total_loss.sum().backward()
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
