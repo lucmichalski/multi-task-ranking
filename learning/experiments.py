@@ -471,11 +471,11 @@ class FineTuningReRankingExperiments:
             train_step = 0
             for train_batch_passage, train_batch_entity in zip(self.train_dataloader_passage, self.train_dataloader_entity):
 
-                # Set gradient to zero.
-                self.model.zero_grad()
-
                 # Feedforward both heads
                 for head_flag, train_batch in zip(['passage', 'entity'], [train_batch_passage, train_batch_entity]):
+
+                    # Set gradient to zero.
+                    self.model.zero_grad()
 
                     # Unpack batch (input_ids, token_type_ids, attention_mask, labels).
                     b_input_ids, b_token_type_ids, b_attention_mask, b_labels = self.__unpack_batch(batch=train_batch_passage)
@@ -488,16 +488,13 @@ class FineTuningReRankingExperiments:
 
                     # Add loss to train loss counter
                     if head_flag == 'passage':
-                        loss_passage = loss.sum()
                         train_loss_passage += loss.sum().item()
                     else:
-                        loss_entity = loss.sum()
                         train_loss_entity += loss.sum().item()
 
-                # Backpropogate loss.
-                loss_total = loss_passage + loss_entity
-                loss_total.backward()
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+                    # Backpropogate loss.
+                    loss.sum().backward()
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
                 # Next step of optimizer and scheduler.
                 optimizer.step()
