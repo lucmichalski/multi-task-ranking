@@ -485,14 +485,24 @@ class FineTuningReRankingExperiments:
 
                     # Add loss to train loss counter
                     if head_flag == 'passage':
+                        print('== passage ==')
+                        print(type(loss))
+                        print(loss)
+
                         train_loss_passage = loss
                         train_loss_passage += loss.sum().item()
                     else:
+                        print('== entity ==')
+                        print(type(loss))
+                        print(loss)
                         train_loss_entity += loss.sum().item()
                         train_loss_entity = loss
 
                 # Backpropogate loss.
+                print('== total_loss ==')
                 total_loss = train_loss_passage + train_loss_entity
+                print(type(total_loss))
+                print(total_loss)
                 total_loss.sum().backward()
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
