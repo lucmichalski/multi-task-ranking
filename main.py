@@ -76,6 +76,7 @@ if __name__ == '__main__':
 
     gpus = 6
     model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/bert_passages_with_top5_ents_6e6/epoch2_batch1500/'
+    extra_layers = True
     train_batch_size = 8 * gpus
     dev_batch_size = 64 * 3 * gpus
 
@@ -92,6 +93,7 @@ if __name__ == '__main__':
     dev_run_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_toplevel_entity_dev_data/benchmarkY1_toplevel_entity_dev_250.run'
 
     experiment = FineTuningReRankingExperiments(model_path=model_path,
+                                                extra_layers=extra_layers,
                                                 train_batch_size=train_batch_size,
                                                 dev_batch_size=dev_batch_size,
 

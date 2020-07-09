@@ -1,5 +1,5 @@
 
-from learning.models import BertMultiTaskRanker
+from learning.models import BertMultiTaskRanker, BertMultiTaskRankerLarge
 from learning.utils import BertDataset
 from retrieval.tools import EvalTools, RetrievalUtils
 
@@ -28,6 +28,7 @@ class FineTuningReRankingExperiments:
 
     def __init__(self,
                  model_path=None,
+                 extra_layers=False,
                  dev_batch_size=None,
                  train_batch_size=None,
                  train_data_dir_path_passage=None,
@@ -40,7 +41,7 @@ class FineTuningReRankingExperiments:
                  dev_run_path_entity=None):
 
         # Load model from path or use pretrained_weights.
-        self.model = self.__init_model(model_path=model_path)
+        self.model = self.__init_model(model_path=model_path, extra_layers=extra_layers)
 
         # Build PyTorch Dataloader for training data.
         self.train_dataloader_passage = self.__build_dataloader(data_dir_path=train_data_dir_path_passage,
@@ -100,13 +101,19 @@ class FineTuningReRankingExperiments:
             return None
 
 
-    def __init_model(self, model_path):
+    def __init_model(self, model_path, extra_layers):
         """ Initialise model with pre-trained weights or load from directory."""
         if model_path == None:
-            return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
-        else:
-            return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
+            if not extra_layers:
+                return nn.DataParallel(BertMultiTaskRanker.from_pretrained(self.pretrained_weights))
+            else:
+                return nn.DataParallel(BertMultiTaskRankerLarge.from_pretrained(self.pretrained_weights))
 
+        else:
+            if not extra_layers:
+                return nn.DataParallel(BertMultiTaskRanker.from_pretrained(model_path))
+            else:
+                return nn.DataParallel(BertMultiTaskRankerLarge.from_pretrained(model_path))
 
     def __build_dataloader(self, data_dir_path, batch_size, random_sample=False):
         """ Build PyTorch dataloader. """
