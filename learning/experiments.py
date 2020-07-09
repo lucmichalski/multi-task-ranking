@@ -473,7 +473,7 @@ class FineTuningReRankingExperiments:
 
                 # Set gradient to zero.
                 self.model.zero_grad()
-                
+
                 # Feedforward both heads
                 for head_flag, train_batch in zip(['passage', 'entity'], [train_batch_passage, train_batch_entity]):
 
@@ -489,16 +489,17 @@ class FineTuningReRankingExperiments:
                     # Add loss to train loss counter
                     if head_flag == 'passage':
                         print('== passage ==')
-                        print(type(loss))
-                        print(loss)
+
 
                         loss_passage = loss.sum()
+                        print(type(loss_passage))
+                        print(loss_passage)
                         train_loss_passage += loss.sum().item()
                     else:
                         print('== entity ==')
-                        print(type(loss))
-                        print(loss)
                         loss_entity = loss.sum()
+                        print(type(loss_entity))
+                        print(loss_entity)
                         train_loss_entity += loss.sum().item()
 
                 # Backpropogate loss.
