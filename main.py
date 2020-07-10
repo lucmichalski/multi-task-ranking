@@ -1,7 +1,7 @@
 
 import os
 
-from metadata import EntityPaths, PassagePaths
+from metadata import CarEntityPaths, CarPassagePaths
 from learning.experiments import FineTuningReRankingExperiments
 from retrieval.dataset_processing import TrecCarProcessing, BertTokenizer
 from retrieval.tools import EvalTools, SearchTools, default_eval_config
