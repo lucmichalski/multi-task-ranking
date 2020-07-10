@@ -42,3 +42,14 @@ spec:
   restartPolicy: Never
 
 ################################################
+TREC NEWS - WashingtonPost (v2)
+
+bash anserini/target/appassembler/bin/IndexCollection \
+    -collection WashingtonPostCollection \
+    -generator WashingtonPostGenerator \
+    -input /nfs/trec_news_track/WashingtonPost.v2/data/ \
+    -index /nfs/trec_news_track/index/WashingtonPost.v2.index.anserini.v1 \
+    -threads 12 \
+    -storePositions \
+    -storeDocvectors \
+    -storeRawDocs

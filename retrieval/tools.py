@@ -9,6 +9,7 @@ import numpy as np
 import urllib
 import math
 import os
+import re
 
 ###############################################################################
 ######################### Retrieval Utils Class ###############################
@@ -196,6 +197,18 @@ class SearchTools:
                             topics_f.write(query + '\n')
                             # Add query to 'written_queries' list.
                             written_queries.append(query)
+
+
+    def write_topics_news_track(self, xml_topics_path, topics_path):
+        """ Write TREC News Track topics from """
+        with open(topics_path, 'w') as f_out:
+            with open(xml_topics_path, 'r') as f_in:
+                for line in f_out:
+                    if 'docid' in line:
+                        start_i = [m.span() for m in re.finditer('<docid>', line)][0][1]
+                        end_i = [m.span() for m in re.finditer('</docid>', line)][0][0]
+                        i = str(line[start_i:end_i])
+                        f_in.write(i + '\n')
 
 
     def combine_multiple_qrels(self, qrels_path_list, combined_qrels_path, combined_topics_path=None):
