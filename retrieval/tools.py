@@ -366,7 +366,7 @@ class SearchTools:
                     # Next rank.
                     rank += 1
 
-                missed_hits = list(set(valid_docs) - set(retrieved_hits))
+                missed_hits = list(set(valid_docs) - set([i[0] for i in valid_hits]))
                 min_score = valid_hits[len(valid_hits)-1][1]
                 for doc_id in missed_hits:
                     # Create and write run file.
