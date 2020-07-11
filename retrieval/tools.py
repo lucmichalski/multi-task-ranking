@@ -2,12 +2,14 @@
 from pyserini.search import pysearch
 from pyserini.index import pyutils
 from pyserini.analysis.pyanalysis import get_lucene_analyzer, Analyzer
+from metadata import NewsPassagePaths
 
 from collections import Counter
 import pandas as pd
 import numpy as np
 import urllib
 import math
+import json
 import os
 import re
 
@@ -57,7 +59,7 @@ class RetrievalUtils:
 
     def unpack_qrels_line(self, line):
         """ """
-        split_line = line.split(' ')
+        split_line = line.strip().split(' ')
         query = split_line[0]
         q = split_line[1]
         doc_id = split_line[2]
@@ -81,14 +83,14 @@ class SearchTools:
     implemented_searchers = ['BM25', 'BM25+RM3']
     retrieval_utils = RetrievalUtils()
 
-    def __init__(self, index_path, searcher_config=default_searcher_config):
+    def __init__(self, index_path=None, searcher_config=default_searcher_config):
         # Initialise absolute path to Anserini (Lucene) index.
         print("Index path: {}".format(index_path))
         self.index_path = index_path
         # Initialise index_utils for accessing index information.
         self.index_utils = self.__build_index_utils(index_path=index_path)
         # Initialise searcher configuration with searcher_config dict. If no settings -> use SimpleSearcher.
-        self.searcher = self.__build_searcher(searcher_config=searcher_config)
+        self.searcher = self.__build_searcher(searcher_config=searcher_config, index_path=index_path)
 
 
     def __build_index_utils(self, index_path):
@@ -98,9 +100,9 @@ class SearchTools:
         else:
             return pyutils.IndexReaderUtils(self.index_path)
 
-    def __build_searcher(self, searcher_config):
+    def __build_searcher(self, searcher_config, index_path):
         """ Build Pyserini SimpleSearcher based on config."""
-        if searcher_config == None:
+        if searcher_config == None or index_path == None:
             return None
         searcher = pysearch.SimpleSearcher(index_dir=self.index_path)
         if isinstance(searcher_config, dict):
@@ -200,15 +202,64 @@ class SearchTools:
 
 
     def write_topics_news_track(self, xml_topics_path, topics_path):
-        """ Write TREC News Track topics from """
+        """ Write TREC News Track topics from XLM topics file. """
         with open(topics_path, 'w') as f_out:
             with open(xml_topics_path, 'r') as f_in:
-                for line in f_out:
+                for line in f_in:
                     if 'docid' in line:
                         start_i = [m.span() for m in re.finditer('<docid>', line)][0][1]
                         end_i = [m.span() for m in re.finditer('</docid>', line)][0][0]
                         i = str(line[start_i:end_i])
-                        f_in.write(i + '\n')
+                        f_out.write(i + '\n')
+
+
+    def write_qrels_news_track(self, xml_topics_path, old_qrels_path, qrels_path, ranking_type='passage'):
+        """ Write qrels for News Track augmenting intermediate query ids. """
+        assert ranking_type == 'passage' or ranking_type == 'entity'
+        # Build maps - intermediate_id: id
+        passage_id_map = {}
+        entity_id_map = {}
+        with open(xml_topics_path, 'r') as f:
+            for line in f:
+                # Passage intermediate_id
+                if '<num>' in line:
+                    start_i = [m.span() for m in re.finditer('<num> Number: ', line)][0][1]
+                    end_i = [m.span() for m in re.finditer(' </num>', line)][0][0]
+                    passage_temp_id = line[start_i:end_i]
+                # Passage id
+                if '<docid>' in line:
+                    start_i = [m.span() for m in re.finditer('<docid>', line)][0][1]
+                    end_i = [m.span() for m in re.finditer('</docid>', line)][0][0]
+                    passage_id = line[start_i:end_i]
+                    passage_id_map[passage_temp_id] = passage_id
+
+                if ranking_type == 'entity':
+                    # Entity intermediate_id
+                    if '<id>' in line:
+                        start_i = [m.span() for m in re.finditer('<id> ', line)][0][1]
+                        end_i = [m.span() for m in re.finditer(' </id>', line)][0][0]
+                        entity_temp_id = line[start_i:end_i]
+                    # Entity id
+                    if '<link>' in line:
+                        start_i = [m.span() for m in re.finditer('<link>', line)][0][1]
+                        end_i = [m.span() for m in re.finditer('</link>', line)][0][0]
+                        entity_id = line[start_i:end_i]
+                        entity_id_map[entity_temp_id] = entity_id
+
+        # Augment qrels with true query_ids.
+        with open(qrels_path, 'w') as f_out:
+            with open(old_qrels_path, 'r') as f_in:
+                for line in f_in:
+                    # Passage qrels.
+                    if ranking_type == 'passage':
+                        query_temp, q, doc_id, score = self.retrieval_utils.unpack_qrels_line(line)
+                        query = passage_id_map[query_temp]
+                    # Entity qrels.
+                    else:
+                        query_temp, q, doc_id_temp, score = self.retrieval_utils.unpack_qrels_line(line)
+                        query = passage_id_map[query_temp]
+                        doc_id = entity_id_map[doc_id_temp]
+                    f_out.write(" ".join((query, q, doc_id, str(score))) + '\n')
 
 
     def combine_multiple_qrels(self, qrels_path_list, combined_qrels_path, combined_topics_path=None):
@@ -283,6 +334,37 @@ class SearchTools:
                         print("Processed query #{}: {}".format(steps, query))
         print("Completed run - written to run file: {}".format(run_path))
 
+
+    def __process_news_query(self, query_dict, query_type):
+        """ """
+        assert query_type == 'title'
+        if query_type == 'title':
+            return query_dict['title']
+
+
+    def write_entity_run_news(self, run_path, qrels_path, query_type, hits=250000,
+                              news_index_path=NewsPassagePaths.index):
+        """ """
+        assert query_type == 'title'
+
+        search_tools_news = SearchTools(news_index_path)
+        qrels_dict = self.retrieval_utils.get_qrels_dict(qrels_path)
+
+        with open(run_path, "w") as f_run:
+            for query_id, valid_docs in qrels_dict.items():
+                query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
+                query = self.__process_news_query(query_dict=query_dict, query_type=query_type)
+
+                retrieved_hits = self.search(query=query, hits=hits)
+
+                valid_hits = [i for i in retrieved_hits if i[0] in valid_docs]
+                rank = 1
+                for hit in valid_hits:
+                    # Create and write run file.
+                    run_line = " ".join((query, "Q0", hit[0], str(rank), "{:.6f}".format(hit[1]), "PYSERINI")) + '\n'
+                    f_run.write(run_line)
+                    # Next rank.
+                    rank += 1
 
 ###############################################################################
 ################################ Eval Class ###################################
@@ -562,29 +644,12 @@ class Pipeline:
 
 
 if __name__ == '__main__':
-    # eval_tools = EvalTools()
-    # run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_article_entity_500_model_test_Y2_manual_entity.run')
-    # qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'testY2_manual_entity.qrels')
-    # eval_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'test_eval_path')
-    # eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path)
-    qrels_path_list = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-{}-train.pages.cbor-hierarchical.qrels'.format(i) for i in [1,2,3,4]]
-    combined_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/benchmarkY1_passage_hierarchical_train.qrels'
-    search_tools = SearchTools(index_path=None, searcher_config=None)
-    search_tools.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=combined_qrels_path)
+    search_tools = SearchTools()
+    xml_topics_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/newsir19-entity-ranking-topics.xml'
+    old_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/newsir19-qrels-entity.txt'
+    topics_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/news_track.2019.entity.topics'
+    qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/news_track.2019.entity.qrels'
 
-    # qrels_path_list = []
-    # for i in [1,2,3,4]:
-    #     qrels_path_list.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'fold-{}-train.pages.qrels'.format(i)))
-    # combined_qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_hierarchical_train_entity_synthetic_v2.qrels')
-    # search_tools.combine_multiple_qrels(qrels_path_list=qrels_path_list, combined_qrels_path=combined_qrels_path)
+    search_tools.write_topics_news_track(xml_topics_path, topics_path)
 
-    # qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_hierarchical_dev_entity_synthetic_v2.qrels')
-    # search_tools.write_topics_from_qrels(qrels_path=qrels_path)
-
-    # index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    # search_tools = SearchTools(index_path=index_path, searcher_config=default_searcher_config)
-    # topics_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.qrels')
-    # run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'temp', 'benchmarkY1_train_entity_synthetic.test.run')
-    # search_tools.write_run_from_topics(topics_path=topics_path, run_path=run_path)
-
-    # qrels = RetrievalUtils().get_qrels_dict(topics_path)
+    search_tools.write_qrels_news_track(xml_topics_path, old_qrels_path, qrels_path, ranking_type='entity')
