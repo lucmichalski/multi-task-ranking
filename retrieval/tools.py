@@ -360,15 +360,19 @@ class SearchTools:
                 valid_hits = [i for i in retrieved_hits if i[0] in valid_docs]
                 rank = 1
                 for hit in valid_hits:
+                    print('index')
+                    print(hit,rank)
                     # Create and write run file.
                     run_line = " ".join((query_id, "Q0", hit[0], str(rank), "{:.6f}".format(hit[1]), "PYSERINI")) + '\n'
                     f_run.write(run_line)
                     # Next rank.
                     rank += 1
 
-                missed_hits = list(set(valid_docs) - set([i[0] for i in valid_hits]))
+                missed_hits = list(set(valid_docs) - set([hit[0] for hit in valid_hits]))
                 min_score = valid_hits[len(valid_hits)-1][1]
                 for doc_id in missed_hits:
+                    print('miss')
+                    print(doc_id,rank)
                     # Create and write run file.
                     min_score -= 0.1
                     run_line = " ".join((query_id, "Q0", doc_id, str(rank), "{:.6f}".format(min_score), "PYSERINI")) + '\n'
