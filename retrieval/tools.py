@@ -372,6 +372,7 @@ class SearchTools:
                     missed_hits = list(set(valid_docs) - set([hit[0] for hit in valid_hits]))
                     min_score = valid_hits[len(valid_hits)-1][1]
                 for doc_id in missed_hits:
+                    print('missed: {}'.format(doc_id))
                     # Create and write run file.
                     min_score -= 0.1
                     run_line = " ".join((query_id, "Q0", doc_id, str(rank), "{:.6f}".format(min_score), "PYSERINI")) + '\n'
