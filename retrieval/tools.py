@@ -353,26 +353,25 @@ class SearchTools:
             for query_id, valid_docs in qrels_dict.items():
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
                 query = self.__process_news_query(query_dict=query_dict, query_type=query_type)
-
                 print("{} -> {}".format(query_id, query))
 
                 retrieved_hits = self.search(query=query, hits=hits)
                 valid_hits = [i for i in retrieved_hits if i[0] in valid_docs]
                 rank = 1
                 for hit in valid_hits:
-                    print('index')
-                    print(hit,rank)
                     # Create and write run file.
                     run_line = " ".join((query_id, "Q0", hit[0], str(rank), "{:.6f}".format(hit[1]), "PYSERINI")) + '\n'
                     f_run.write(run_line)
                     # Next rank.
                     rank += 1
 
-                missed_hits = list(set(valid_docs) - set([hit[0] for hit in valid_hits]))
-                min_score = valid_hits[len(valid_hits)-1][1]
+                if len(valid_hits) == 0:
+                    missed_hits = valid_docs
+                    min_score = 0.0
+                else:
+                    missed_hits = list(set(valid_docs) - set([hit[0] for hit in valid_hits]))
+                    min_score = valid_hits[len(valid_hits)-1][1]
                 for doc_id in missed_hits:
-                    print('miss')
-                    print(doc_id,rank)
                     # Create and write run file.
                     min_score -= 0.1
                     run_line = " ".join((query_id, "Q0", doc_id, str(rank), "{:.6f}".format(min_score), "PYSERINI")) + '\n'
