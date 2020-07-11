@@ -353,14 +353,13 @@ class SearchTools:
             for query_id, valid_docs in qrels_dict.items():
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
                 query = self.__process_news_query(query_dict=query_dict, query_type=query_type)
-                print(query_id, query)
-                retrieved_hits = self.search(query=query, hits=hits)
 
+                retrieved_hits = self.search(query=query, hits=hits)
                 valid_hits = [i for i in retrieved_hits if i[0] in valid_docs]
                 rank = 1
                 for hit in valid_hits:
                     # Create and write run file.
-                    run_line = " ".join((query, "Q0", hit[0], str(rank), "{:.6f}".format(hit[1]), "PYSERINI")) + '\n'
+                    run_line = " ".join((query_id, "Q0", hit[0], str(rank), "{:.6f}".format(hit[1]), "PYSERINI")) + '\n'
                     f_run.write(run_line)
                     # Next rank.
                     rank += 1
