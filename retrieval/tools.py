@@ -23,6 +23,7 @@ class RetrievalUtils:
 
     def get_qrels_dict(self, qrels_path):
         """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}. """
+        print(qrels_path)
         if isinstance(qrels_path, str):
             qrels_dict = {}
             with open(qrels_path) as qrels_file:
