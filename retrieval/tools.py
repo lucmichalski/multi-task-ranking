@@ -368,10 +368,10 @@ class SearchTools:
 
                 missed_hits = list(set(valid_docs) - set(retrieved_hits))
                 min_score = valid_hits[len(valid_hits)-1][1]
-                for hit in missed_hits:
+                for doc_id in missed_hits:
                     # Create and write run file.
                     min_score -= 0.1
-                    run_line = " ".join((query_id, "Q0", hit[0], str(rank), "{:.6f}".format(min_score), "PYSERINI")) + '\n'
+                    run_line = " ".join((query_id, "Q0", doc_id, str(rank), "{:.6f}".format(min_score), "PYSERINI")) + '\n'
                     f_run.write(run_line)
                     # Next rank.
                     rank += 1
