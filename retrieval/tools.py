@@ -342,8 +342,7 @@ class SearchTools:
             return query_dict['title']
 
 
-    def write_entity_run_news(self, run_path, qrels_path, query_type, hits=250000, printing_step=5,
-                              news_index_path=NewsPassagePaths.index):
+    def write_entity_run_news(self, run_path, qrels_path, query_type, hits=250000, news_index_path=NewsPassagePaths.index):
         """ """
         assert query_type == 'title'
 
@@ -351,13 +350,11 @@ class SearchTools:
         qrels_dict = self.retrieval_utils.get_qrels_dict(qrels_path)
 
         with open(run_path, "w") as f_run:
-            steps = 0
             for query_id, valid_docs in qrels_dict.items():
-                steps += 1
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
                 query = self.__process_news_query(query_dict=query_dict, query_type=query_type)
-                if steps % printing_step == 0:
-                    print("Step: {}: {} -> {}".format(steps, query_id, query))
+
+                print("{} -> {}".format(query_id, query))
 
                 retrieved_hits = self.search(query=query, hits=hits)
                 valid_hits = [i for i in retrieved_hits if i[0] in valid_docs]
