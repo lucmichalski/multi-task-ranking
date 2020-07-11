@@ -26,7 +26,7 @@ class RetrievalUtils:
         print(qrels_path)
         if isinstance(qrels_path, str):
             qrels_dict = {}
-            with open(qrels_path, 'r+') as qrels_file:
+            with open(qrels_path, 'r') as qrels_file:
                 # Read each line of qrels file.
                 for line in qrels_file:
                     print(line)
