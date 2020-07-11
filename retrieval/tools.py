@@ -349,7 +349,7 @@ class SearchTools:
         search_tools_news = SearchTools(news_index_path)
         qrels_dict = self.retrieval_utils.get_qrels_dict(qrels_path)
 
-        with open(run_path, "w") as f_run:
+        with open(run_path, "w", encoding='utf-8') as f_run:
             for query_id, valid_docs in qrels_dict.items():
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
                 query = self.__process_news_query(query_dict=query_dict, query_type=query_type)
