@@ -31,8 +31,7 @@ class RetrievalUtils:
                 for line in qrels_file:
                     print(line)
                     if len(line) > 4:
-                        query = line.strip().split(" ")[0]
-                        doc_id = line.strip().split(" ")[2]
+                        query, _, doc_id, _ = self.unpack_qrels_line(line)
                         # key: query, value: list of doc_ids
                         if self.test_valid_line(line=line):
                             if query in qrels_dict:
