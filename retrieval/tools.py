@@ -358,15 +358,24 @@ class SearchTools:
 
                 retrieved_hits = self.search(query=query, hits=hits)
                 valid_hits = [i for i in retrieved_hits if i[0] in valid_docs]
-                missed_hits = list(set(valid_docs) - set(retrieved_hits))
-                total_hits = valid_hits + missed_hits
                 rank = 1
-                for hit in total_hits:
+                for hit in valid_hits:
                     # Create and write run file.
                     run_line = " ".join((query_id, "Q0", hit[0], str(rank), "{:.6f}".format(hit[1]), "PYSERINI")) + '\n'
                     f_run.write(run_line)
                     # Next rank.
                     rank += 1
+
+                missed_hits = list(set(valid_docs) - set(retrieved_hits))
+                min_score = valid_hits[len(valid_hits)-1][1]
+                for hit in missed_hits:
+                    # Create and write run file.
+                    min_score -= 0.1
+                    run_line = " ".join((query_id, "Q0", hit[0], str(rank), "{:.6f}".format(min_score), "PYSERINI")) + '\n'
+                    f_run.write(run_line)
+                    # Next rank.
+                    rank += 1
+
 
 ###############################################################################
 ################################ Eval Class ###################################
