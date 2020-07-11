@@ -28,6 +28,7 @@ class RetrievalUtils:
             with open(qrels_path) as qrels_file:
                 # Read each line of qrels file.
                 for line in qrels_file:
+                    print(line)
                     if len(line) > 4:
                         query = line.strip().split(" ")[0]
                         doc_id = line.strip().split(" ")[2]
