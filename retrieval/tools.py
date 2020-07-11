@@ -356,12 +356,15 @@ class SearchTools:
                 steps += 1
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
                 query = self.__process_news_query(query_dict=query_dict, query_type=query_type)
-                print("Step: {}: {} -> {}".format(steps, query_id, query))
+                if steps % printing_step == 0:
+                    print("Step: {}: {} -> {}".format(steps, query_id, query))
 
                 retrieved_hits = self.search(query=query, hits=hits)
                 valid_hits = [i for i in retrieved_hits if i[0] in valid_docs]
+                missed_hits = list(set(valid_docs) - set(retrieved_hits))
+                total_hits = valid_hits + missed_hits
                 rank = 1
-                for hit in valid_hits:
+                for hit in total_hits:
                     # Create and write run file.
                     run_line = " ".join((query_id, "Q0", hit[0], str(rank), "{:.6f}".format(hit[1]), "PYSERINI")) + '\n'
                     f_run.write(run_line)
