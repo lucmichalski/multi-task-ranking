@@ -344,7 +344,7 @@ class SearchTools:
             query = ""
             for content in query_dict['contents']:
                 if 'content' in content:
-                    if not isinstance(content['content'], dict):
+                    if isinstance(content['content'], dict) == False:
                         text = re.sub(r'<a href=.*\</a>', '', str(content['content']))
                         if len(query) == 0:
                             query = text
