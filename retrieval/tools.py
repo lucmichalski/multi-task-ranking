@@ -213,10 +213,8 @@ class SearchTools:
                         f_out.write(i + '\n')
 
 
-    def write_qrels_news_track(self, xml_topics_path, old_qrels_path, qrels_path, ranking_type='passage'):
-        """ Write qrels for News Track augmenting intermediate query ids. """
-        assert ranking_type == 'passage' or ranking_type == 'entity'
-        # Build maps - intermediate_id: id
+    def get_news_ids_maps(self, xml_topics_path, ranking_type='passage'):
+        """ """
         passage_id_map = {}
         entity_id_map = {}
         with open(xml_topics_path, 'r') as f:
@@ -245,6 +243,15 @@ class SearchTools:
                         end_i = [m.span() for m in re.finditer('</link>', line)][0][0]
                         entity_id = line[start_i:end_i]
                         entity_id_map[entity_temp_id] = entity_id
+
+        return passage_id_map, entity_id_map
+
+
+    def write_qrels_news_track(self, xml_topics_path, old_qrels_path, qrels_path, ranking_type='passage'):
+        """ Write qrels for News Track augmenting intermediate query ids. """
+        assert ranking_type == 'passage' or ranking_type == 'entity'
+        # Build maps - intermediate_id: id
+        passage_id_map, entity_id_map = self.get_news_ids_maps(xml_topics_path=xml_topics_path, ranking_type=ranking_type)
 
         # Augment qrels with true query_ids.
         with open(qrels_path, 'w') as f_out:
@@ -335,7 +342,7 @@ class SearchTools:
         print("Completed run - written to run file: {}".format(run_path))
 
 
-    def __process_news_query(self, query_dict, query_type):
+    def process_news_query(self, query_dict, query_type):
         """ """
         assert query_type == 'title' or query_type == 'title+contents'
         if query_type == 'title':
@@ -350,7 +357,7 @@ class SearchTools:
                             query = text
                         else:
                             query += " " + text
-            query = query_dict['title'] + ' ' + query[:500]
+            query = query_dict['title'] + ' ' + query
             return query
 
 
@@ -364,13 +371,14 @@ class SearchTools:
         with open(run_path, "w", encoding='utf-8') as f_run:
             for query_id, valid_docs in qrels_dict.items():
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
-                query = self.__process_news_query(query_dict=query_dict, query_type=query_type)
+                query = self.process_news_query(query_dict=query_dict, query_type=query_type)
                 print("{} -> {}".format(query_id, query))
+
                 try:
                     retrieved_hits = self.search(query=query, hits=hits)
                 except:
-                    print('UTF8 encoded')
                     retrieved_hits = self.search(query=query.encode('utf-8'), hits=hits)
+
                 valid_hits = [i for i in retrieved_hits if i[0] in valid_docs]
                 rank = 1
                 for hit in valid_hits:

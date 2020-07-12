@@ -3,7 +3,7 @@ import os
 
 from metadata import CarEntityPaths, CarPassagePaths
 from learning.experiments import FineTuningReRankingExperiments
-from retrieval.dataset_processing import TrecCarProcessing, BertTokenizer
+from retrieval.dataset_processing import DatasetProcessing, BertTokenizer
 from retrieval.tools import EvalTools, SearchTools, default_eval_config
 from torch import nn
 

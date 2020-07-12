@@ -2,6 +2,7 @@
 from retrieval.tools import SearchTools, EvalTools, RetrievalUtils
 from transformers import BertTokenizer
 from torch.utils.data import TensorDataset
+from metadata import NewsPassagePaths
 
 import collections
 import random
@@ -12,7 +13,7 @@ import six
 import os
 
 
-class TrecCarProcessing:
+class DatasetProcessing:
     """ Process TREC CAR qrels and run files to Pytorch datasets. """
 
     retrieval_utils = RetrievalUtils()
@@ -171,7 +172,7 @@ class TrecCarProcessing:
                                           pad_to_max_length=True)
 
 
-    def build_dataset(self, training_dataset=False, chuck_topic_size=1e8, first_para=False):
+    def build_car_dataset(self, training_dataset=False, chuck_topic_size=1e8, first_para=False):
         """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
         False (training dataset). """
         if training_dataset:
@@ -223,15 +224,6 @@ class TrecCarProcessing:
                 else:
                     try:
 
-                        # Build text encodings
-                        # text = self.context_dict[doc_id]['first_para']
-                        # text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
-                        # text_encodings = self.__get_encodings(text=text_context, max_length=256)
-
-                        # Build entity encodings
-                        #entity_context = ' [SEP] ' + self.context_dict[doc_id]['top_ents'] # removed [SEP] begin
-                        #entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
-
                         text = self.context_dict[doc_id]['first_para'] + self.context_dict[doc_id]['top_ents']
 
                     except:
@@ -239,16 +231,8 @@ class TrecCarProcessing:
                         text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
                         if first_para:
                             text = text.split('\n')[0]
-                        #text_context = '[CLS] ' + decoded_query + ' [SEP] ' + text
-                        #text_encodings = self.__get_encodings(text=text_context, max_length=256)
-
-                        #entity_context = ' [SEP]'
-                        #entity_encodings = self.__get_encodings(text=entity_context, max_length=256)
 
                     # Add text and entity encodings
-                    # BERT_encodings = {}
-                    # for k in ['input_ids', 'token_type_ids', 'attention_mask']:
-                    #     BERT_encodings[k] = text_encodings[k] + entity_encodings[k]
                     BERT_encodings = self.tokenizer.encode_plus(text=decoded_query,
                                                                 text_pair=text,
                                                                 max_length=self.max_length,
@@ -269,6 +253,87 @@ class TrecCarProcessing:
                 topic_query = query
 
         # Process any queries remaining.
+        self.__process_topic(training_dataset=training_dataset)
+
+        # write final chuck to file.
+        self.__write_chuck_to_directory()
+
+
+    def build_news_dataset(self, training_dataset=False, chuck_topic_size=1e8, ranking_type='passage',
+                           query_type='title+contents', xml_topics_path=None):
+        """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
+        False (training dataset). """
+
+        if training_dataset:
+            print("** Building training dataset **")
+        else:
+            print("** Building test/validation dataset **")
+        # Counter of current chuck being processed.
+        self.chuck_counter = 0
+        # Count number of topics being processed.
+        self.topic_counter = 0
+        # Number of topics processed in each chuck before being processed.
+        self.chuck_topic_size = chuck_topic_size
+
+        if ranking_type == 'passage':
+            passage_id_map, entity_id_map = self.search_tools.get_news_ids_maps(xml_topics_path=xml_topics_path,
+                                                                                ranking_type=ranking_type)
+
+        with open(self.run_path) as f_run:
+
+            # Store previous query so we know when a new topic began.
+            topic_query = None
+            for line in f_run:
+                # Unpack line in run file.
+                query_id, _, doc_id, rank, _, _ = self.retrieval_utils.unpack_run_line(line=line)
+
+                # If final doc_id in topic -> process batch.
+                if (topic_query != None) and (topic_query != query):
+
+                    # Process topic
+                    self.__process_topic(training_dataset=training_dataset)
+
+                    # If specified data chuck size -> write chuck to file.
+                    if self.topic_counter % self.chuck_topic_size == 0:
+                        # write final chuck to file.
+                        self.__write_chuck_to_directory()
+
+                if ranking_type == 'passage':
+                    # Decode query.
+                    query_id = passage_id_map[query_id]
+                    query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
+                    query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
+                else:
+                    pass
+
+                # Extract text from index using doc_id.
+                if self.context_path == None:
+                    text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
+
+                    # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
+                    BERT_encodings = self.tokenizer.encode_plus(text=query,
+                                                                text_pair=text,
+                                                                max_length=self.max_length,
+                                                                add_special_tokens=True,
+                                                                pad_to_max_length=True,
+                                                                truncation_strategy='longest_first')
+                else:
+                    pass
+
+                data = (query, doc_id, BERT_encodings)
+                # Append doc_id data topic
+                if training_dataset:
+                    if doc_id in self.qrels[query]:
+                        self.topic_R_BERT_encodings.append(data)
+                    else:
+                        self.topic_N_BERT_encodings.append(data)
+                else:
+                    self.topic_BERT_encodings.append(data)
+
+                # Store query as topic query.
+                topic_query = query
+
+            # Process any queries remaining.
         self.__process_topic(training_dataset=training_dataset)
 
         # write final chuck to file.
