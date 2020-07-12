@@ -350,7 +350,7 @@ class SearchTools:
                             query = text
                         else:
                             query += " " + text
-            return query[:100]
+            return query[:50]
 
 
     def write_entity_run_news(self, run_path, qrels_path, query_type, hits=250000, news_index_path=NewsPassagePaths.index):
