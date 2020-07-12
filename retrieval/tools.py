@@ -351,7 +351,7 @@ class SearchTools:
                         else:
                             query += " " + text
             query = query_dict['title'] + ' ' + query[:500]
-            return query.encode('utf-8')
+            return query
 
 
     def write_entity_run_news(self, run_path, qrels_path, query_type, hits=250000, news_index_path=NewsPassagePaths.index):
@@ -366,8 +366,11 @@ class SearchTools:
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
                 query = self.__process_news_query(query_dict=query_dict, query_type=query_type)
                 print("{} -> {}".format(query_id, query))
-
-                retrieved_hits = self.search(query=query, hits=hits)
+                try:
+                    retrieved_hits = self.search(query=query, hits=hits)
+                except:
+                    print('UTF8 encoded')
+                    retrieved_hits = self.search(query=query.encode('utf-8'), hits=hits)
                 valid_hits = [i for i in retrieved_hits if i[0] in valid_docs]
                 rank = 1
                 for hit in valid_hits:
