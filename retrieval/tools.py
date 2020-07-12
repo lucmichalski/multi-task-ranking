@@ -337,14 +337,25 @@ class SearchTools:
 
     def __process_news_query(self, query_dict, query_type):
         """ """
-        assert query_type == 'title'
+        assert query_type == 'title' or query_type == 'title+contents'
         if query_type == 'title':
             return query_dict['title']
+        elif query_type == 'title+contents':
+            query = ""
+            for content in query_dict['contents']:
+                if 'content' in content:
+                    if not isinstance(content['content'], dict):
+                        text = re.sub(r'<a href=.*\</a>', '', str(content['content']))
+                        if len(query) == 0:
+                            query = text
+                        else:
+                            query += " " + text
+            return query
 
 
     def write_entity_run_news(self, run_path, qrels_path, query_type, hits=250000, news_index_path=NewsPassagePaths.index):
         """ """
-        assert query_type == 'title'
+        assert query_type == 'title' or query_type == 'title+contents'
 
         search_tools_news = SearchTools(news_index_path)
         qrels_dict = self.retrieval_utils.get_qrels_dict(qrels_path)
