@@ -562,7 +562,7 @@ class FineTuningReRankingExperiments:
                 train_step += 1
 
 
-    def __write_topic_to_file(self, rerank_run_path, doc_ids, query, scores):
+    def __write_topic_to_file(self, rerank_run_path, doc_ids, query, scores, cap_rank=None):
         """ Write topic to run file. """
         with open(rerank_run_path, "a+") as f_run:
             # Build dict of {doc_ids: score}
@@ -572,7 +572,12 @@ class FineTuningReRankingExperiments:
             rank = 1
             # Writing to file in ascending rank.
             for doc_id, score in od.items():
-                f_run.write(" ".join((query, "Q0", str(doc_id), str(rank), "{:.6f}".format(score), "BERT")) + '\n')
+                if cap_rank == None:
+                    f_run.write(" ".join((query, "Q0", str(doc_id), str(rank), "{:.6f}".format(score), "BERT")) + '\n')
+                else:
+                    if rank <= cap_rank:
+                        f_run.write(" ".join((query, "Q0", str(doc_id), str(rank), "{:.6f}".format(score), "BERT")) + '\n')
+
                 rank += 1
 
 
@@ -593,7 +598,7 @@ class FineTuningReRankingExperiments:
             raise
 
 
-    def write_rerank_to_run_file(self, rerank_run_path, dev_run_data):
+    def write_rerank_to_run_file(self, rerank_run_path, dev_run_data, cap_rank=None):
         """ Process re-ranking from validation run and write to TREC run file. """
         # Assert validation outputs correct length.
         self.__assert_dev_lists_correct_lengths(dev_run_data=dev_run_data)
@@ -615,7 +620,7 @@ class FineTuningReRankingExperiments:
             if (topic_query != None) and (topic_query != query):
                 # End of topic run -> write to file.
                 self.__write_topic_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids,
-                                           scores=BERT_scores)
+                                           scores=BERT_scores, cap_rank=cap_rank)
 
                 # Start new topic run.
                 BERT_scores = []
@@ -629,10 +634,10 @@ class FineTuningReRankingExperiments:
         # Write final topic run.
         if len(doc_ids) > 0:
             self.__write_topic_to_file(rerank_run_path=rerank_run_path, query=topic_query, doc_ids=doc_ids,
-                                       scores=BERT_scores)
+                                       scores=BERT_scores, cap_rank=cap_rank)
 
 
-    def inference(self, head_flag, rerank_run_path, do_eval=True):
+    def inference(self, head_flag, rerank_run_path, cap_rank=None, do_eval=True):
         """ Run inference and produce BERT re-ranking run and evaluation. """
         assert head_flag == 'passage' or head_flag == 'entity'
 
@@ -649,7 +654,7 @@ class FineTuningReRankingExperiments:
         self.__validation_run(head_flag=head_flag, dev_dataloader=dev_dataloader)
 
         # Write re-ranking run
-        self.write_rerank_to_run_file(rerank_run_path=rerank_run_path, dev_run_data=dev_run_data)
+        self.write_rerank_to_run_file(rerank_run_path=rerank_run_path, dev_run_data=dev_run_data, cap_rank=cap_rank)
 
         # If 'do_eval' write eval files by query and overall.
         if do_eval:
