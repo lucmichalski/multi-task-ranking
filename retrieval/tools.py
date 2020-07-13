@@ -350,6 +350,12 @@ class SearchTools:
         if query_type == 'title':
             return query_dict['title']
         elif query_type == 'title+contents':
+            try:
+                title = query_dict['title']
+            except:
+                title = ""
+                print('FAILED TO PARSE TITLE')
+
             query = ""
             for content in query_dict['contents']:
                 try:
@@ -361,10 +367,10 @@ class SearchTools:
                             else:
                                 query += " " + text
                 except:
-                    print('FAILED')
+                    print('FAILED TO PARSE CONTENTS')
                     print('current query: {}'.format(query))
 
-            query = query_dict['title'] + ' ' + query
+            query = title + ' ' + query
             return query
 
 
