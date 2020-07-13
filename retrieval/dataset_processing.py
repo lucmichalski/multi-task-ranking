@@ -333,6 +333,7 @@ class DatasetProcessing:
                                                             truncation_strategy='longest_first')
 
                 data = (query_id, doc_id, BERT_encodings)
+                print(query_id, doc_id)
                 # Append doc_id data topic
                 if training_dataset:
                     if query_id in self.qrels:
