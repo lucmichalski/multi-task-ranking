@@ -39,7 +39,7 @@ if __name__ == '__main__':
     data_dir_path = '/nfs/trec_news_track/runs/anserini/bert/news_track_train_bm25_100000_50_words_bert_chunks/'
     max_length = 512
     context_path = None
-    training_dataset = False
+    training_dataset = True
     ranking_type = 'entity'
     query_type = 'title+contents'
 
