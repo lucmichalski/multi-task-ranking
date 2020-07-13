@@ -88,9 +88,6 @@ class DatasetProcessing:
         # Calculate number of relevant (R_count) and non relevant (N_count) documents in topic run.
         R_count = len(self.topic_R_BERT_encodings)
         N_count = len(self.topic_N_BERT_encodings)
-        print('N: {}'.format(N_count))
-        print('R: {}'.format(R_count))
-        print(self.qrels[self.topic_R_BERT_encodings[0][0]])
 
         # If cannot balance classes (i.e. 0 relevant or 0 non relevant) do not add to dataset.
         if (R_count == 0) or (N_count == 0):
@@ -333,7 +330,6 @@ class DatasetProcessing:
                                                             truncation_strategy='longest_first')
 
                 data = (query_id, doc_id, BERT_encodings)
-                print(query_id, doc_id)
                 # Append doc_id data topic
                 if training_dataset:
                     if query_id in self.qrels:
