@@ -306,7 +306,6 @@ class DatasetProcessing:
                     query_id_news = passage_id_map[query_id]
                     query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id_news))
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
-
                 else:
                     query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
@@ -318,6 +317,7 @@ class DatasetProcessing:
                         doc = self.search_tools.process_news_query(query_dict=doc_dict, query_type=query_type)
                     else:
                         doc = search_tools_car.get_contents_from_docid(doc_id=doc_id)
+                        print(doc)
 
                     # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                     BERT_encodings = self.tokenizer.encode_plus(text=query,
