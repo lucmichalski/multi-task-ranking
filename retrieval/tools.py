@@ -52,7 +52,7 @@ class RetrievalUtils:
 
     def unpack_run_line(self, line):
         """ """
-        split_line = line.split(' ')
+        split_line = line.split()
         query = split_line[0]
         q = split_line[1]
         doc_id = split_line[2]
@@ -63,7 +63,7 @@ class RetrievalUtils:
 
     def unpack_qrels_line(self, line):
         """ """
-        split_line = line.strip().split(' ')
+        split_line = line.strip().split()
         query = split_line[0]
         q = split_line[1]
         doc_id = split_line[2]
