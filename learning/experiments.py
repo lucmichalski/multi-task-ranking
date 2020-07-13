@@ -90,9 +90,12 @@ class FineTuningReRankingExperiments:
                     query, _, doc_id, _, _, _ = line.split()
                     #if self.retrieval_utils.test_valid_line(line):
                     # Relevant
-                    if doc_id in qrels[query]:
-                        R = 1.0
-                    # Not relevant.
+                    if query in qrels:
+                        if doc_id in qrels[query]:
+                            R = 1.0
+                        # Not relevant.
+                        else:
+                            R = 0.0
                     else:
                         R = 0.0
                     run.append((query, doc_id, R))
@@ -632,6 +635,7 @@ class FineTuningReRankingExperiments:
     def inference(self, head_flag, rerank_run_path, do_eval=True):
         """ Run inference and produce BERT re-ranking run and evaluation. """
         assert head_flag == 'passage' or head_flag == 'entity'
+
         if head_flag == 'passage':
             dev_dataloader = self.dev_dataloader_passage
             dev_qrels_path = self.dev_qrels_path_passage

@@ -263,9 +263,6 @@ class DatasetProcessing:
                            query_type='title+contents', car_index_path=None, xml_topics_path=None):
         """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
         False (training dataset). """
-        for i in ['868', '877', '881']:
-            if i not in self.qrels:
-                self.qrels[i] = []
 
         if training_dataset:
             print("** Building training dataset **")
@@ -338,8 +335,11 @@ class DatasetProcessing:
                 data = (query_id, doc_id, BERT_encodings)
                 # Append doc_id data topic
                 if training_dataset:
-                    if doc_id in self.qrels[query_id]:
-                        self.topic_R_BERT_encodings.append(data)
+                    if query_id in self.qrels:
+                        if doc_id in self.qrels[query_id]:
+                            self.topic_R_BERT_encodings.append(data)
+                        else:
+                            self.topic_N_BERT_encodings.append(data)
                     else:
                         self.topic_N_BERT_encodings.append(data)
                 else:
