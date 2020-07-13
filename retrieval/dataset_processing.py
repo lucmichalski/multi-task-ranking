@@ -263,7 +263,7 @@ class DatasetProcessing:
                            query_type='title+contents', car_index_path=None, xml_topics_path=None):
         """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
         False (training dataset). """
-        for i in ['868', '877']:
+        for i in ['868', '877', '881']:
             if i not in self.qrels:
                 self.qrels[i] = []
 
