@@ -279,7 +279,8 @@ class DatasetProcessing:
             passage_id_map, entity_id_map = self.search_tools.get_news_ids_maps(xml_topics_path=xml_topics_path,
                                                                                 ranking_type=ranking_type)
         else:
-            search_tools_car = SearchTools(index_path=car_index_path)
+            pass
+            #search_tools_car = SearchTools(index_path=car_index_path)
 
         with open(self.run_path) as f_run:
 
@@ -290,7 +291,7 @@ class DatasetProcessing:
                 query_id, _, doc_id, rank, _, _ = self.retrieval_utils.unpack_run_line(line=line)
 
                 # If final doc_id in topic -> process batch.
-                if (topic_query != None) and (topic_query != query):
+                if (topic_query != None) and (topic_query != query_id):
 
                     # Process topic
                     self.__process_topic(training_dataset=training_dataset)
@@ -314,15 +315,15 @@ class DatasetProcessing:
                 # Extract text from index using doc_id.
                 if self.context_path == None:
                     if ranking_type == 'passage':
-                        text_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=doc_id))
-                        text = self.search_tools.process_news_query(query_dict=text_dict, query_type=query_type)
+                        doc_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=doc_id))
+                        doc = self.search_tools.process_news_query(query_dict=doc_dict, query_type=query_type)
                     else:
                         pass
                         #text = search_tools_car.get_contents_from_docid(doc_id=doc_id)
 
                     # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                     BERT_encodings = self.tokenizer.encode_plus(text=query,
-                                                                text_pair=text,
+                                                                text_pair=doc,
                                                                 max_length=self.max_length,
                                                                 add_special_tokens=True,
                                                                 pad_to_max_length=True,
