@@ -302,13 +302,14 @@ class DatasetProcessing:
 
                 if ranking_type == 'passage':
                     # Decode query.
-                    query_id = passage_id_map[query_id]
-                    query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
+                    query_id_news = passage_id_map[query_id]
+                    query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id_news))
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
 
                 else:
-                    query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
-                    query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
+                    pass
+                    #query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
+                    #query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
 
                 # Extract text from index using doc_id.
                 if self.context_path == None:
@@ -316,7 +317,8 @@ class DatasetProcessing:
                         text_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=doc_id))
                         text = self.search_tools.process_news_query(query_dict=text_dict, query_type=query_type)
                     else:
-                        text = search_tools_car.get_contents_from_docid(doc_id=doc_id)
+                        pass
+                        #text = search_tools_car.get_contents_from_docid(doc_id=doc_id)
 
                     # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                     BERT_encodings = self.tokenizer.encode_plus(text=query,
@@ -331,7 +333,7 @@ class DatasetProcessing:
                 data = (query_id, doc_id, BERT_encodings)
                 # Append doc_id data topic
                 if training_dataset:
-                    if doc_id in self.qrels[query]:
+                    if doc_id in self.qrels[query_id]:
                         self.topic_R_BERT_encodings.append(data)
                     else:
                         self.topic_N_BERT_encodings.append(data)
