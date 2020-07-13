@@ -351,7 +351,7 @@ class SearchTools:
             return query_dict['title']
         elif query_type == 'title+contents':
             query = ""
-            for content in query_dict['contents'].keys():
+            for content in query_dict['contents']:
                 if 'content' in content.keys():
                     if isinstance(content['content'], dict) == False:
                         text = re.sub(r'<a href=.*\</a>', '', str(content['content']))
