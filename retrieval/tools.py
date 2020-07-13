@@ -366,8 +366,11 @@ class SearchTools:
                 except:
                     print('FAILED TO PARSE CONTENTS')
                     print('current query: {}'.format(content_text))
-
-            news_query = title + ' ' + content_text
+            try:
+                news_query = title + ' ' + content_text
+            except:
+                print(title, content_text)
+                return ""
             return news_query
 
 
