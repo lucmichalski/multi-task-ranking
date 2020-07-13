@@ -268,14 +268,13 @@ class DatasetProcessing:
             print("** Building training dataset **")
         else:
             print("** Building test/validation dataset **")
+            self.qrels['868'] = []
         # Counter of current chuck being processed.
         self.chuck_counter = 0
         # Count number of topics being processed.
         self.topic_counter = 0
         # Number of topics processed in each chuck before being processed.
         self.chuck_topic_size = chuck_topic_size
-
-        print(self.qrels.keys())
 
         if ranking_type == 'passage':
             passage_id_map, entity_id_map = self.search_tools.get_news_ids_maps(xml_topics_path=xml_topics_path,
