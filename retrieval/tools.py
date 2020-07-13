@@ -30,13 +30,14 @@ class RetrievalUtils:
                 # Read each line of qrels file.
                 for line in qrels_file:
                     if len(line) > 4:
-                        query, _, doc_id, _ = self.unpack_qrels_line(line)
-                        # key: query, value: list of doc_ids
-                        #if car_valid_test:
-                        if query in qrels_dict:
-                            qrels_dict[query].append(doc_id)
-                        else:
-                            qrels_dict[query] = [doc_id]
+                        query, _, doc_id, score = self.unpack_qrels_line(line)
+                        if int(score) > 0:
+                            # key: query, value: list of doc_ids
+                            #if car_valid_test:
+                            if query in qrels_dict:
+                                qrels_dict[query].append(doc_id)
+                            else:
+                                qrels_dict[query] = [doc_id]
             return qrels_dict
         else:
             return None
