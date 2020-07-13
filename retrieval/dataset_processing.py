@@ -290,6 +290,7 @@ class DatasetProcessing:
                 # Unpack line in run file.
                 query_id, _, doc_id, rank, _, _ = self.retrieval_utils.unpack_run_line(line=line)
 
+                print(query_id, _, doc_id, rank, _, _)
                 # If final doc_id in topic -> process batch.
                 if (topic_query != None) and (topic_query != query_id):
 
@@ -317,7 +318,6 @@ class DatasetProcessing:
                         doc = self.search_tools.process_news_query(query_dict=doc_dict, query_type=query_type)
                     else:
                         doc = search_tools_car.get_contents_from_docid(doc_id=doc_id)
-                        print(doc)
 
                     # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                     BERT_encodings = self.tokenizer.encode_plus(text=query,
