@@ -86,17 +86,16 @@ class FineTuningReRankingExperiments:
             run = []
             with open(run_path, 'r') as f_run:
                 for line in f_run:
-                    print(line)
                     # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
                     query, _, doc_id, _, _, _ = line.split()
-                    if self.retrieval_utils.test_valid_line(line):
-                        # Relevant
-                        if doc_id in qrels[query]:
-                            R = 1.0
-                        # Not relevant.
-                        else:
-                            R = 0.0
-                        run.append((query, doc_id, R))
+                    #if self.retrieval_utils.test_valid_line(line):
+                    # Relevant
+                    if doc_id in qrels[query]:
+                        R = 1.0
+                    # Not relevant.
+                    else:
+                        R = 0.0
+                    run.append((query, doc_id, R))
             return run
         else:
             return None
