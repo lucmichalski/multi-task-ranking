@@ -362,10 +362,7 @@ class SearchTools:
                     if 'content' in content.keys():
                         if isinstance(content['content'], dict) == False:
                             text = re.sub(r'<a href=.*\</a>', '', str(content['content']))
-                            if len(query) == 0:
-                                query = text
-                            else:
-                                query += " " + text
+                            query += " " + str(text)
                 except:
                     print('FAILED TO PARSE CONTENTS')
                     print('current query: {}'.format(query))
