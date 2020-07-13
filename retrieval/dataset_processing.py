@@ -45,6 +45,7 @@ class DatasetProcessing:
         self.tokenizer = tokenizer
         # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
         self.qrels = self.retrieval_utils.get_qrels_dict(qrels_path=self.qrels_path)
+        print(self.qrels)
         # Lists of BERT inputs.
         self.input_ids_list = []
         self.token_type_ids_list = []
