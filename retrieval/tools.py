@@ -29,11 +29,11 @@ class RetrievalUtils:
             with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
                 # Read each line of qrels file.
                 for line in qrels_file:
-                    print(line)
                     if len(line) > 4:
                         query, _, doc_id, score = self.unpack_qrels_line(line)
                         if query not in qrels_dict:
                             qrels_dict[query] = []
+                        print(score)
                         if float(score) > 0.0:
                             # key: query, value: list of doc_ids
                             #if car_valid_test:
