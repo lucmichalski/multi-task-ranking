@@ -308,7 +308,7 @@ class DatasetProcessing:
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
 
                 else:
-                    query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
+                    query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
 
                 # Extract text from index using doc_id.
