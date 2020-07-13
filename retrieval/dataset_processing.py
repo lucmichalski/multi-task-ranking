@@ -263,13 +263,15 @@ class DatasetProcessing:
                            query_type='title+contents', car_index_path=None, xml_topics_path=None):
         """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
         False (training dataset). """
+        for i in ['868', '877']:
+            if i not in self.qrels:
+                self.qrels[i] = []
 
         if training_dataset:
             print("** Building training dataset **")
         else:
             print("** Building test/validation dataset **")
-            self.qrels['868'] = []
-            
+
         # Counter of current chuck being processed.
         self.chuck_counter = 0
         # Count number of topics being processed.
