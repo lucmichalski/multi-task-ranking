@@ -565,7 +565,7 @@ class FineTuningReRankingExperiments:
 
     def __write_topic_to_file(self, rerank_run_path, doc_ids, query, scores, cap_rank=None):
         """ Write topic to run file. """
-        with open(rerank_run_path, "a+") as f_run:
+        with open(rerank_run_path, "a+", encoding='utf-8') as f_run:
             # Build dict of {doc_ids: score}
             d = {i[0]: i[1] for i in zip(doc_ids, scores)}
             # Order dict based on score
