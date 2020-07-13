@@ -366,12 +366,11 @@ class SearchTools:
                 except:
                     print('FAILED TO PARSE CONTENTS')
                     print('current query: {}'.format(content_text))
-            try:
+
+            if isinstance(title, str):
                 news_query = title + ' ' + content_text
-            except:
-                news_query = title.encode('utf-8') + content_text.encode('utf-8')
-                print('FAILED TO ADD TITLE + CONTENTS')
-                print(news_query)
+            else:
+                news_query = content_text
 
             return news_query
 
