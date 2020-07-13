@@ -320,7 +320,7 @@ class DatasetProcessing:
                         try:
                             doc = search_tools_car.get_contents_from_docid(doc_id=doc_id)
                         except:
-                            print("COULD NOT FIND DOC ID IN INDEX: {}".format(doc_id))
+                            print("COULD NOT FIND DOC ID IN INDEX")
                             doc = doc_id
 
                     # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
