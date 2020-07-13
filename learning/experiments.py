@@ -84,7 +84,7 @@ class FineTuningReRankingExperiments:
         """ Reads run file returning list of tuples (query, doc_id, R) """
         if isinstance(run_path, str):
             run = []
-            with open(run_path, 'r') as f_run:
+            with open(run_path, 'r', encoding='utf-8') as f_run:
                 for line in f_run:
                     # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
                     query, _, doc_id, _, _, _ = line.split()
