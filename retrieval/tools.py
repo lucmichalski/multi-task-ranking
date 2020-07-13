@@ -369,8 +369,10 @@ class SearchTools:
             try:
                 news_query = title + ' ' + content_text
             except:
-                print(title, content_text)
-                return ""
+                news_query = title.encode('utf-8') + content_text.encode('utf-8')
+                print('FAILED TO ADD TITLE + CONTENTS')
+                print(news_query)
+
             return news_query
 
 
