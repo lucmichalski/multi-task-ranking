@@ -385,7 +385,6 @@ class SearchTools:
             for query_id, valid_docs in qrels_dict.items():
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
                 query = self.process_news_query(query_dict=query_dict, query_type=query_type)
-                print("{} -> {}".format(query_id, query))
 
                 try:
                     retrieved_hits = self.search(query=query, hits=hits)
