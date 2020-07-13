@@ -303,8 +303,7 @@ class DatasetProcessing:
                 if ranking_type == 'passage':
                     # Decode query.
                     query_id = passage_id_map[query_id]
-                    print()
-                    query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
+                    query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
                 else:
                     query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
@@ -313,7 +312,7 @@ class DatasetProcessing:
                 # Extract text from index using doc_id.
                 if self.context_path == None:
                     if ranking_type == 'passage':
-                        text_dict = self.search_tools.get_contents_from_docid(doc_id=doc_id)
+                        text_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=doc_id)
                         text = self.search_tools.process_news_query(query_dict=text_dict, query_type=query_type)
                     else:
                         text = search_tools_car.get_contents_from_docid(doc_id=doc_id)
