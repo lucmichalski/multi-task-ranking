@@ -352,13 +352,17 @@ class SearchTools:
         elif query_type == 'title+contents':
             query = ""
             for content in query_dict['contents']:
-                if 'content' in content.keys():
-                    if isinstance(content['content'], dict) == False:
-                        text = re.sub(r'<a href=.*\</a>', '', str(content['content']))
-                        if len(query) == 0:
-                            query = text
-                        else:
-                            query += " " + text
+                try:
+                    if 'content' in content.keys():
+                        if isinstance(content['content'], dict) == False:
+                            text = re.sub(r'<a href=.*\</a>', '', str(content['content']))
+                            if len(query) == 0:
+                                query = text
+                            else:
+                                query += " " + text
+                    else:
+                        print('FAILED')
+                        print('current query: {}'.format(query))
             query = query_dict['title'] + ' ' + query
             return query
 
