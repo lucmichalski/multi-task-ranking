@@ -82,12 +82,11 @@ class FineTuningReRankingExperiments:
 
     def __get_run_data(self, run_path, qrels):
         """ Reads run file returning list of tuples (query, doc_id, R) """
-        print(run_path)
-        print(qrels)
         if isinstance(run_path, str):
             run = []
             with open(run_path, 'r') as f_run:
                 for line in f_run:
+                    print(line)
                     # Assumes run file is written in ascending order i.e. rank=1, rank=2, etc.
                     query, _, doc_id, _, _, _ = line.split()
                     if self.retrieval_utils.test_valid_line(line):
