@@ -12,11 +12,11 @@ if __name__ == '__main__':
     from retrieval.dataset_processing import DatasetProcessing
     from metadata import NewsPassagePaths
 
-    qrels_path = '/nfs/trec_news_track/data/2018/bqrels.exp-gains.txt'
-    xml_topics_path = '/nfs/trec_news_track/data/2018/newsir18-topics.txt'
-    run_path = '/nfs/trec_news_track/bert/train_passage/news_track.train.passage.250.bm25.rm3.run'
+    qrels_path = '/nfs/trec_news_track/data/2019/newsir19-qrels-background.txt'
+    xml_topics_path = '/nfs/trec_news_track/data/2019/newsir19-background-linking-topics.xml'
+    run_path = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.250.bm25.rm3.run'
     index_path = NewsPassagePaths.index
-    data_dir_path = '/nfs/trec_news_track/bert/train_passage/news_track_train_passage_250_bm25_rm3_bert_chunks/'
+    data_dir_path = '/nfs/trec_news_track/bert/test_passage/news_track_test_passage_250_bm25_rm3_bert_chunks/'
     max_length = 512
     context_path = None
     training_dataset = True
