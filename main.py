@@ -9,6 +9,24 @@ from torch import nn
 
 if __name__ == '__main__':
 
+    from metadata import NewsPassagePaths, CarEntityPaths
+    from retrieval.tools import SearchTools
+
+    run_paths = ['/nfs/trec_news_track/bert/dev_entity/news_track.dev.bm25.500000.title+contents.run',
+                 '/nfs/trec_news_track/bert/train_entity/news_track.train.bm25.500000.title+contents.run',
+                 '/nfs/trec_news_track/bert/test_entity/news_track.test.bm25.500000.title+contents.run']
+    qrels_paths = ['/nfs/trec_news_track/bert/dev_entity/news_track.dev.entity.qrels',
+                   '/nfs/trec_news_track/bert/train_entity/news_track.train.entity.qrels',
+                   '/nfs/trec_news_track/bert/test_entity/news_track.test.entity.qrels']
+
+    query_type = 'title+contents'
+    hits = 500000
+    news_index_path = NewsPassagePaths.index
+
+    for run_path, qrels_path in zip(run_paths, qrels_paths):
+        search_tools = SearchTools(index_path=CarEntityPaths.index)
+        search_tools.write_entity_run_news(run_path, qrels_path, query_type, hits, news_index_path)
+
     # from retrieval.dataset_processing import DatasetProcessing
     # from metadata import NewsPassagePaths
     #
@@ -20,7 +38,7 @@ if __name__ == '__main__':
     # max_length = 512
     # context_path = None
     # training_dataset = False
-    # ranking_type = 'passage'
+    # ranking_type = 'entity'
     # query_type = 'title+contents'
     #
     # processing = DatasetProcessing(qrels_path=qrels_path,
@@ -37,29 +55,29 @@ if __name__ == '__main__':
     #                               car_index_path=None,
     #                               xml_topics_path=xml_topics_path)
 
-    gpus = 1
-    model_path =  '/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_2e5_batch_8/epoch1_batch1000/'
-    extra_layers = False
-    train_batch_size = None #8 * gpus
-    dev_batch_size = 64 * 3 * gpus
-
-    train_data_dir_path_passage = None # '/nfs/trec_news_track/bert/test_passage/news_track_test_passage_250_bm25_rm3_bert_chunks'
-
-    dev_data_dir_path_passage = '/nfs/trec_news_track/bert/test_passage/news_track_test_passage_250_bm25_rm3_bert_chunks/'
-
-    dev_qrels_path_passage = '/nfs/trec_news_track/data/2019/newsir19-qrels-background.txt'
-
-    dev_run_path_passage = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.250.bm25.rm3.run'
-
-    experiment = FineTuningReRankingExperiments(model_path=model_path,
-                                                extra_layers=extra_layers,
-                                                train_batch_size=train_batch_size,
-                                                dev_batch_size=dev_batch_size,
-
-                                                train_data_dir_path_passage=train_data_dir_path_passage,
-                                                dev_data_dir_path_passage=dev_data_dir_path_passage,
-                                                dev_qrels_path_passage=dev_qrels_path_passage,
-                                                dev_run_path_passage=dev_run_path_passage)
+    # gpus = 1
+    # model_path =  '/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_2e5_batch_8/epoch1_batch1000/'
+    # extra_layers = False
+    # train_batch_size = None #8 * gpus
+    # dev_batch_size = 64 * 3 * gpus
+    #
+    # train_data_dir_path_passage = None # '/nfs/trec_news_track/bert/test_passage/news_track_test_passage_250_bm25_rm3_bert_chunks'
+    #
+    # dev_data_dir_path_passage = '/nfs/trec_news_track/bert/test_passage/news_track_test_passage_250_bm25_rm3_bert_chunks/'
+    #
+    # dev_qrels_path_passage = '/nfs/trec_news_track/data/2019/newsir19-qrels-background.txt'
+    #
+    # dev_run_path_passage = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.250.bm25.rm3.run'
+    #
+    # experiment = FineTuningReRankingExperiments(model_path=model_path,
+    #                                             extra_layers=extra_layers,
+    #                                             train_batch_size=train_batch_size,
+    #                                             dev_batch_size=dev_batch_size,
+    #
+    #                                             train_data_dir_path_passage=train_data_dir_path_passage,
+    #                                             dev_data_dir_path_passage=dev_data_dir_path_passage,
+    #                                             dev_qrels_path_passage=dev_qrels_path_passage,
+    #                                             dev_run_path_passage=dev_run_path_passage)
 
     # epochs = 3
     # lr = 8e-6
