@@ -37,7 +37,7 @@ if __name__ == '__main__':
     #                               car_index_path=None,
     #                               xml_topics_path=xml_topics_path)
 
-    gpus = 3
+    gpus = 1
     model_path = None  # '/nfs/trec_car/data/bert_reranker_datasets/exp/bert_passages_with_top5_ents_6e6/epoch2_batch1500/'
     extra_layers = False
     train_batch_size = 8 * gpus
@@ -57,11 +57,8 @@ if __name__ == '__main__':
                                                 dev_batch_size=dev_batch_size,
 
                                                 train_data_dir_path_passage=train_data_dir_path_passage,
-
                                                 dev_data_dir_path_passage=dev_data_dir_path_passage,
-
                                                 dev_qrels_path_passage=dev_qrels_path_passage,
-
                                                 dev_run_path_passage=dev_run_path_passage)
 
     epochs = 3
@@ -70,9 +67,9 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_trec_news_v1'
+    experiment_name = 'test_trec_news_v2_2e5_batch_8'
     write = True
-    logging_steps = 25
+    logging_steps = 100
     head_flag = 'passage'
 
     experiment.run_experiment_single_head(
