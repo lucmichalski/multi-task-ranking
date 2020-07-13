@@ -62,14 +62,14 @@ if __name__ == '__main__':
                                                 dev_run_path_passage=dev_run_path_passage)
 
     epochs = 3
-    lr = 2e-5
+    lr = 8e-6
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_trec_news_v2_2e5_batch_8'
+    experiment_name = 'test_trec_news_v2_8e6_batch_8'
     write = True
-    logging_steps = 100
+    logging_steps = 250
     head_flag = 'passage'
 
     experiment.run_experiment_single_head(
