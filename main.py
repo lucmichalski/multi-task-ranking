@@ -19,7 +19,7 @@ if __name__ == '__main__':
     data_dir_path = '/nfs/trec_news_track/bert/test_passage/news_track_test_passage_250_bm25_rm3_bert_chunks/'
     max_length = 512
     context_path = None
-    training_dataset = True
+    training_dataset = False
     ranking_type = 'passage'
     query_type = 'title+contents'
 
