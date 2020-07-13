@@ -90,6 +90,7 @@ class DatasetProcessing:
         N_count = len(self.topic_N_BERT_encodings)
         print('N: {}'.format(N_count))
         print('R: {}'.format(R_count))
+        print(self.qrels[self.topic_R_BERT_encodings[0][0]])
 
         # If cannot balance classes (i.e. 0 relevant or 0 non relevant) do not add to dataset.
         if (R_count == 0) or (N_count == 0):
