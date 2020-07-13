@@ -341,11 +341,12 @@ class FineTuningReRankingExperiments:
             dev_run_data = self.dev_run_data_passage
         else:
             train_dataloader = self.train_dataloader_entity
+            print(len(train_dataloader))
             dev_dataloader = self.dev_dataloader_entity
+            print(len(dev_dataloader))
+
             dev_qrels = self.dev_qrels_entity
             dev_run_data = self.dev_run_data_entity
-
-        print(dev_run_data)
 
         # Define experiment_path directory to contain all logging, models and results.
         experiment_path = os.path.join(experiments_dir, experiment_name)
