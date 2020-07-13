@@ -12,13 +12,16 @@ if __name__ == '__main__':
     from retrieval.dataset_processing import DatasetProcessing
     from metadata import NewsPassagePaths
 
-    qrels_path = '/nfs/trec_news_track/bert/dev_passage/news_track.dev.passage.qrels'
+    qrels_path = '/nfs/trec_news_track/data/2018/bqrels.exp-gains.txt'
     xml_topics_path = '/nfs/trec_news_track/data/2018/newsir18-topics.txt'
     run_path = '/nfs/trec_news_track/bert/dev_passage/news_track.dev.passage.250.bm25.rm3.run'
     index_path = NewsPassagePaths.index
     data_dir_path = '/nfs/trec_news_track/bert/dev_passage/news_track_dev_passage_250_bm25_rm3_bert_chunks/'
     max_length = 512
     context_path = None
+    training_dataset = False
+    ranking_type = 'passage'
+    query_type = 'title+contents'
 
     processing = DatasetProcessing(qrels_path=qrels_path,
                                    run_path=run_path,
@@ -27,9 +30,9 @@ if __name__ == '__main__':
                                    max_length=max_length,
                                    context_path=context_path)
 
-    processing.build_news_dataset(training_dataset=False,
+    processing.build_news_dataset(training_dataset=training_dataset,
                                   chuck_topic_size=1e8,
-                                  ranking_type='passage',
-                                  query_type='title+contents',
+                                  ranking_type=ranking_type,
+                                  query_type=query_type,
                                   car_index_path=None,
                                   xml_topics_path=xml_topics_path)
