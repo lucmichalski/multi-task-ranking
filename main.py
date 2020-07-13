@@ -85,7 +85,7 @@ if __name__ == '__main__':
     # )
 
     head_flag = 'passage'
-    rerank_run_path = '/nfs/trec_news_track/runs/anserini/background_2018/anserini.bm5.default.run'
+    rerank_run_path = '/nfs/ttrec_news_track/runs/bert/background_2019/re_ranked_anserini.bm5.rm3.run'
     experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False)
 
 
