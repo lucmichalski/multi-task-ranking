@@ -280,8 +280,7 @@ class DatasetProcessing:
             passage_id_map, entity_id_map = self.search_tools.get_news_ids_maps(xml_topics_path=xml_topics_path,
                                                                                 ranking_type=ranking_type)
         else:
-            pass
-            #search_tools_car = SearchTools(index_path=car_index_path)
+            search_tools_car = SearchTools(index_path=car_index_path)
 
         with open(self.run_path) as f_run:
 
@@ -309,9 +308,8 @@ class DatasetProcessing:
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
 
                 else:
-                    pass
-                    #query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
-                    #query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
+                    query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
+                    query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
 
                 # Extract text from index using doc_id.
                 if self.context_path == None:
@@ -319,8 +317,7 @@ class DatasetProcessing:
                         doc_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=doc_id))
                         doc = self.search_tools.process_news_query(query_dict=doc_dict, query_type=query_type)
                     else:
-                        pass
-                        #text = search_tools_car.get_contents_from_docid(doc_id=doc_id)
+                        doc = search_tools_car.get_contents_from_docid(doc_id=doc_id)
 
                     # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                     BERT_encodings = self.tokenizer.encode_plus(text=query,
