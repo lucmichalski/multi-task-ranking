@@ -356,19 +356,19 @@ class SearchTools:
                 title = ""
                 print('FAILED TO PARSE TITLE')
 
-            query = ""
+            content_text = ""
             for content in query_dict['contents']:
                 try:
                     if 'content' in content.keys():
                         if isinstance(content['content'], dict) == False:
                             text = re.sub(r'<a href=.*\</a>', '', str(content['content']))
-                            query += " " + str(text)
+                            content_text += " " + str(text)
                 except:
                     print('FAILED TO PARSE CONTENTS')
-                    print('current query: {}'.format(query))
+                    print('current query: {}'.format(content_text))
 
-            query = title + ' ' + query
-            return query
+            news_query = title + ' ' + content_text
+            return news_query
 
 
     def write_entity_run_news(self, run_path, qrels_path, query_type, hits=250000, news_index_path=NewsPassagePaths.index):
