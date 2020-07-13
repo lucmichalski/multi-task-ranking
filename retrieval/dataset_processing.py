@@ -305,8 +305,7 @@ class DatasetProcessing:
                     query_id = passage_id_map[query_id]
                     query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
-                    print('<------------->')
-                    print("query: {}".format(query))
+
                 else:
                     query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
@@ -316,8 +315,6 @@ class DatasetProcessing:
                     if ranking_type == 'passage':
                         text_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=doc_id))
                         text = self.search_tools.process_news_query(query_dict=text_dict, query_type=query_type)
-                        print("text: {}".format(query))
-
                     else:
                         text = search_tools_car.get_contents_from_docid(doc_id=doc_id)
 
