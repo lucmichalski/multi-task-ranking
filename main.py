@@ -58,15 +58,15 @@ if __name__ == '__main__':
     #                               xml_topics_path=xml_topics_path)
 
     gpus = 1
-    model_path =  None#'/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_2e5_batch_8/epoch1_batch1000/'
+    model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_2e5_batch_8/epoch1_batch1000/'
     extra_layers = False
     train_batch_size = 8 * gpus
     dev_batch_size = 64 * 3 * gpus
 
-    train_data_dir_path_passage = None# '/nfs/trec_news_track/runs/anserini/bert/news_track_train_bm25_100000_50_words_bert_chunks/'
-    dev_data_dir_path_passage = None# '/nfs/trec_news_track/runs/anserini/bert/news_track_dev_bm25_100000_50_words_bert_chunks/'
-    dev_qrels_path_passage = None# '/nfs/trec_news_track/bert/dev_entity/news_track.dev.entity.qrels'
-    dev_run_path_passage = None# '/nfs/trec_news_track/runs/anserini/bert/news_track.dev.bm25.100000.title+contents.50_words.run'
+    # train_data_dir_path_passage =  '/nfs/trec_news_track/runs/anserini/bert/news_track_train_bm25_100000_50_words_bert_chunks/'
+    # dev_data_dir_path_passage =  '/nfs/trec_news_track/runs/anserini/bert/news_track_dev_bm25_100000_50_words_bert_chunks/'
+    # dev_qrels_path_passage = '/nfs/trec_news_track/bert/dev_entity/news_track.dev.entity.qrels'
+    # dev_run_path_passage =  '/nfs/trec_news_track/runs/anserini/bert/news_track.dev.bm25.100000.title+contents.50_words.run'
 
     train_data_dir_path_entity = '/nfs/trec_news_track/runs/anserini/bert/news_track_train_bm25_100000_50_words_bert_chunks/'
     dev_data_dir_path_entity = '/nfs/trec_news_track/runs/anserini/bert/news_track_dev_bm25_100000_50_words_bert_chunks/'
@@ -77,11 +77,6 @@ if __name__ == '__main__':
                                                 extra_layers=extra_layers,
                                                 train_batch_size=train_batch_size,
                                                 dev_batch_size=dev_batch_size,
-
-                                                train_data_dir_path_passage=train_data_dir_path_passage,
-                                                dev_data_dir_path_passage=dev_data_dir_path_passage,
-                                                dev_qrels_path_passage=dev_qrels_path_passage,
-                                                dev_run_path_passage=dev_run_path_passage,
 
                                                 train_data_dir_path_entity=train_data_dir_path_entity,
                                                 dev_data_dir_path_entity=dev_data_dir_path_entity,
