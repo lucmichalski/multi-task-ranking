@@ -282,7 +282,7 @@ class DatasetProcessing:
         else:
             search_tools_car = SearchTools(index_path=car_index_path)
 
-        with open(self.run_path) as f_run:
+        with open(self.run_path, 'r', encoding='utf-8') as f_run:
 
             # Store previous query so we know when a new topic began.
             topic_query = None
