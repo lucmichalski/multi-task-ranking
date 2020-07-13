@@ -360,9 +360,10 @@ class SearchTools:
                                 query = text
                             else:
                                 query += " " + text
-                    else:
-                        print('FAILED')
-                        print('current query: {}'.format(query))
+                except:
+                    print('FAILED')
+                    print('current query: {}'.format(query))
+
             query = query_dict['title'] + ' ' + query
             return query
 
