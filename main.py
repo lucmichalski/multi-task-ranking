@@ -12,17 +12,17 @@ if __name__ == '__main__':
     from metadata import NewsPassagePaths, CarEntityPaths
     from retrieval.tools import SearchTools
 
-    run_paths = ['/nfs/trec_news_track/runs/anserini/bert/news_track.dev.bm25.500000.title+contents.100_words.run',
-                 '/nfs/trec_news_track/runs/anserini/bert/news_track.train.bm25.500000.title+contents.100_words.run',
-                 '/nfs/trec_news_track/runs/anserini/bert/news_track.test.bm25.500000.title+contents.100_words.run']
+    run_paths = ['/nfs/trec_news_track/runs/anserini/bert/news_track.dev.bm25.500000.title+contents.50_words.run',
+                 '/nfs/trec_news_track/runs/anserini/bert/news_track.train.bm25.500000.title+contents.50_words.run',
+                 '/nfs/trec_news_track/runs/anserini/bert/news_track.test.bm25.500000.title+contents.50_words.run']
     qrels_paths = ['/nfs/trec_news_track/bert/dev_entity/news_track.dev.entity.qrels',
                    '/nfs/trec_news_track/bert/train_entity/news_track.train.entity.qrels',
                    '/nfs/trec_news_track/bert/test_entity/news_track.test.entity.qrels']
 
     query_type = 'title+contents'
-    hits = 1000
+    hits = 100000
     news_index_path = NewsPassagePaths.index
-    words = 100
+    words = 50
 
     for run_path, qrels_path in zip(run_paths, qrels_paths):
         search_tools = SearchTools(index_path=CarEntityPaths.index)
