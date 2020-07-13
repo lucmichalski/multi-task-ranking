@@ -269,6 +269,7 @@ class DatasetProcessing:
         else:
             print("** Building test/validation dataset **")
             self.qrels['868'] = []
+            
         # Counter of current chuck being processed.
         self.chuck_counter = 0
         # Count number of topics being processed.
