@@ -379,7 +379,17 @@ class SearchTools:
         assert query_type == 'title' or query_type == 'title+contents'
 
         search_tools_news = SearchTools(news_index_path)
-        qrels_dict = self.retrieval_utils.get_qrels_dict(qrels_path)
+
+        qrels_dict = {}
+        with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
+            # Read each line of qrels file.
+            for line in qrels_file:
+                if len(line) > 4:
+                    query, _, doc_id, score = self.retrieval_utils.unpack_qrels_line(line)
+                    if query not in qrels_dict:
+                        qrels_dict[query] = [doc_id]
+                    else:
+                        qrels_dict[query].append(doc_id)
 
         with open(run_path, "w", encoding='utf-8') as f_run:
             for query_id, valid_docs in qrels_dict.items():
