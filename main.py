@@ -14,12 +14,12 @@ if __name__ == '__main__':
 
     qrels_path = '/nfs/trec_news_track/data/2018/bqrels.exp-gains.txt'
     xml_topics_path = '/nfs/trec_news_track/data/2018/newsir18-topics.txt'
-    run_path = '/nfs/trec_news_track/bert/dev_passage/news_track.dev.passage.250.bm25.rm3.run'
+    run_path = '/nfs/trec_news_track/bert/train_passage/news_track.train.passage.250.bm25.rm3.run'
     index_path = NewsPassagePaths.index
-    data_dir_path = '/nfs/trec_news_track/bert/dev_passage/news_track_dev_passage_250_bm25_rm3_bert_chunks/'
+    data_dir_path = '/nfs/trec_news_track/bert/train_passage/news_track_train_passage_250_bm25_rm3_bert_chunks/'
     max_length = 512
     context_path = None
-    training_dataset = False
+    training_dataset = True
     ranking_type = 'passage'
     query_type = 'title+contents'
 
