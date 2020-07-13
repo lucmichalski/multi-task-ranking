@@ -374,7 +374,7 @@ class SearchTools:
             return news_query
 
 
-    def write_entity_run_news(self, run_path, qrels_path, query_type, hits=250000, news_index_path=NewsPassagePaths.index):
+    def write_entity_run_news(self, run_path, qrels_path, query_type, words=100, hits=250000, news_index_path=NewsPassagePaths.index):
         """ """
         assert query_type == 'title' or query_type == 'title+contents'
 
@@ -385,6 +385,7 @@ class SearchTools:
             for query_id, valid_docs in qrels_dict.items():
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
                 query = self.process_news_query(query_dict=query_dict, query_type=query_type)
+                query = " ".join(query.split(" ")[:words])
 
                 try:
                     retrieved_hits = self.search(query=query, hits=hits)
