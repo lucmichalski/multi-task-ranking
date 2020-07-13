@@ -344,7 +344,6 @@ class SearchTools:
 
     def process_news_query(self, query_dict, query_type):
         """ """
-        print(query_dict)
         assert query_type == 'title' or query_type == 'title+contents'
         if query_type == 'title':
             return query_dict['title']
