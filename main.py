@@ -12,9 +12,9 @@ if __name__ == '__main__':
     from metadata import NewsPassagePaths, CarEntityPaths
     from retrieval.tools import SearchTools
 
-    run_paths = ['/nfs/trec_news_track/bert/dev_entity/news_track.dev.bm25.500000.title+contents.run',
-                 '/nfs/trec_news_track/bert/train_entity/news_track.train.bm25.500000.title+contents.run',
-                 '/nfs/trec_news_track/bert/test_entity/news_track.test.bm25.500000.title+contents.run']
+    run_paths = ['/nfs/trec_news_track/runs/anserini/bert/news_track.dev.bm25.500000.title+contents.run',
+                 '/nfs/trec_news_track/runs/anserini/bert/news_track.train.bm25.500000.title+contents.run',
+                 '/nfs/trec_news_track/runs/anserini/bert/news_track.test.bm25.500000.title+contents.run']
     qrels_paths = ['/nfs/trec_news_track/bert/dev_entity/news_track.dev.entity.qrels',
                    '/nfs/trec_news_track/bert/train_entity/news_track.train.entity.qrels',
                    '/nfs/trec_news_track/bert/test_entity/news_track.test.entity.qrels']
