@@ -23,28 +23,20 @@ class RetrievalUtils:
 
     def get_qrels_dict(self, qrels_path, car_valid_test=True):
         """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}. """
-        print(qrels_path)
         if isinstance(qrels_path, str):
             qrels_dict = {}
             #TODO - does encoding="utf-8" change anything?
             with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
                 # Read each line of qrels file.
                 for line in qrels_file:
-                    print(line)
                     if len(line) > 4:
                         query, _, doc_id, _ = self.unpack_qrels_line(line)
                         # key: query, value: list of doc_ids
-                        if car_valid_test:
-                            if self.test_valid_line(line=line):
-                                if query in qrels_dict:
-                                    qrels_dict[query].append(doc_id)
-                                else:
-                                    qrels_dict[query] = [doc_id]
+                        #if car_valid_test:
+                        if query in qrels_dict:
+                            qrels_dict[query].append(doc_id)
                         else:
-                            if query in qrels_dict:
-                                qrels_dict[query].append(doc_id)
-                            else:
-                                qrels_dict[query] = [doc_id]
+                            qrels_dict[query] = [doc_id]
             return qrels_dict
         else:
             return None
