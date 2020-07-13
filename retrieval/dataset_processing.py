@@ -88,6 +88,8 @@ class DatasetProcessing:
         # Calculate number of relevant (R_count) and non relevant (N_count) documents in topic run.
         R_count = len(self.topic_R_BERT_encodings)
         N_count = len(self.topic_N_BERT_encodings)
+        print('N: {}'.format(N_count))
+        print('R: {}'.format(R_count))
 
         # If cannot balance classes (i.e. 0 relevant or 0 non relevant) do not add to dataset.
         if (R_count == 0) or (N_count == 0):
@@ -307,31 +309,27 @@ class DatasetProcessing:
                     query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id_news))
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
                 else:
-                    print(query_id)
                     query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
 
                 # Extract text from index using doc_id.
-                if self.context_path == None:
-                    if ranking_type == 'passage':
-                        doc_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=doc_id))
-                        doc = self.search_tools.process_news_query(query_dict=doc_dict, query_type=query_type)
-                    else:
-                        try:
-                            doc = search_tools_car.get_contents_from_docid(doc_id=doc_id)
-                        except:
-                            print("COULD NOT FIND DOC ID IN INDEX")
-                            doc = doc_id
-
-                    # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
-                    BERT_encodings = self.tokenizer.encode_plus(text=query,
-                                                                text_pair=doc,
-                                                                max_length=self.max_length,
-                                                                add_special_tokens=True,
-                                                                pad_to_max_length=True,
-                                                                truncation_strategy='longest_first')
+                if ranking_type == 'passage':
+                    doc_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=doc_id))
+                    doc = self.search_tools.process_news_query(query_dict=doc_dict, query_type=query_type)
                 else:
-                    pass
+                    try:
+                        doc = search_tools_car.get_contents_from_docid(doc_id=doc_id)
+                    except:
+                        print("COULD NOT FIND DOC ID IN INDEX")
+                        doc = doc_id
+
+                # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
+                BERT_encodings = self.tokenizer.encode_plus(text=query,
+                                                            text_pair=doc,
+                                                            max_length=self.max_length,
+                                                            add_special_tokens=True,
+                                                            pad_to_max_length=True,
+                                                            truncation_strategy='longest_first')
 
                 data = (query_id, doc_id, BERT_encodings)
                 # Append doc_id data topic
