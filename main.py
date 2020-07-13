@@ -68,7 +68,7 @@ if __name__ == '__main__':
     # dev_qrels_path_passage = '/nfs/trec_news_track/bert/dev_entity/news_track.dev.entity.qrels'
     # dev_run_path_passage =  '/nfs/trec_news_track/runs/anserini/bert/news_track.dev.bm25.100000.title+contents.50_words.run'
 
-    train_data_dir_path_entity = '/nfs/trec_news_track/runs/anserini/bert/news_track_dev_bm25_100000_50_words_bert_chunks/'
+    train_data_dir_path_entity =  '/nfs/trec_news_track/runs/anserini/bert/news_track_test_bm25_100000_50_words_bert_chunks/'
     dev_data_dir_path_entity = '/nfs/trec_news_track/runs/anserini/bert/news_track_dev_bm25_100000_50_words_bert_chunks/'
     dev_qrels_path_entity = '/nfs/trec_news_track/bert/dev_entity/news_track.dev.entity.qrels'
     dev_run_path_entity = '/nfs/trec_news_track/runs/anserini/bert/news_track.dev.bm25.100000.title+contents.50_words.run'
