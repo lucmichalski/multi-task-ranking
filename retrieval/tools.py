@@ -33,11 +33,13 @@ class RetrievalUtils:
                         query, _, doc_id, score = self.unpack_qrels_line(line)
                         if query not in qrels_dict:
                             qrels_dict[query] = []
-                        print(score)
-                        if float(score) > 0.0:
-                            # key: query, value: list of doc_ids
-                            #if car_valid_test:
-                            qrels_dict[query].append(doc_id)
+                        try:
+                            if float(score) > 0.0:
+                                # key: query, value: list of doc_ids
+                                #if car_valid_test:
+                                qrels_dict[query].append(doc_id)
+                        except:
+                            print("COULD NOT VALIDATE QRELS SCORE", query, _, doc_id, score)
             return qrels_dict
         else:
             return None
