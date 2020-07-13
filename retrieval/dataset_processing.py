@@ -260,7 +260,7 @@ class DatasetProcessing:
 
 
     def build_news_dataset(self, training_dataset=False, chuck_topic_size=1e8, ranking_type='passage',
-                           query_type='title+contents', xml_topics_path=None):
+                           query_type='title+contents', car_index_path=None, xml_topics_path=None):
         """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
         False (training dataset). """
 
@@ -278,6 +278,8 @@ class DatasetProcessing:
         if ranking_type == 'passage':
             passage_id_map, entity_id_map = self.search_tools.get_news_ids_maps(xml_topics_path=xml_topics_path,
                                                                                 ranking_type=ranking_type)
+        else:
+            search_tools_car = SearchTools(index_path=car_index_path)
 
         with open(self.run_path) as f_run:
 
@@ -304,11 +306,15 @@ class DatasetProcessing:
                     query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
                     query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
                 else:
-                    pass
+                    query_dict = self.search_tools.get_contents_from_docid(doc_id=query_id)
+                    query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
 
                 # Extract text from index using doc_id.
                 if self.context_path == None:
-                    text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
+                    if ranking_type == 'passage':
+                        text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
+                    else:
+                        text = search_tools_car.get_contents_from_docid(doc_id=doc_id)
 
                     # Get BERT inputs {input_ids, token_type_ids, attention_mask} -> [CLS] Q [SEP] DOC [SEP]
                     BERT_encodings = self.tokenizer.encode_plus(text=query,
@@ -320,7 +326,7 @@ class DatasetProcessing:
                 else:
                     pass
 
-                data = (query, doc_id, BERT_encodings)
+                data = (query_id, doc_id, BERT_encodings)
                 # Append doc_id data topic
                 if training_dataset:
                     if doc_id in self.qrels[query]:
@@ -331,7 +337,7 @@ class DatasetProcessing:
                     self.topic_BERT_encodings.append(data)
 
                 # Store query as topic query.
-                topic_query = query
+                topic_query = query_id
 
             # Process any queries remaining.
         self.__process_topic(training_dataset=training_dataset)
