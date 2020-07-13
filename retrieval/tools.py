@@ -350,6 +350,7 @@ class SearchTools:
         if query_type == 'title':
             return query_dict['title']
         elif query_type == 'title+contents':
+
             try:
                 title = query_dict['title']
             except:
@@ -365,7 +366,6 @@ class SearchTools:
                             content_text += " " + str(text)
                 except:
                     print('FAILED TO PARSE CONTENTS')
-                    print('current query: {}'.format(content_text))
 
             if isinstance(title, str):
                 news_query = title + ' ' + content_text
