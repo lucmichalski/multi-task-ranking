@@ -38,7 +38,7 @@ if __name__ == '__main__':
     news_index_path = NewsPassagePaths.index
     words = 50
 
-    for run_path, qrels_path, query_type in zip(run_paths, qrels_paths):
+    for run_path, qrels_path in zip(run_paths, qrels_paths):
         search_tools = SearchTools(index_path=CarEntityPaths.index)
         search_tools.write_entity_run_news(run_path, qrels_path, query_type, words, hits, news_index_path)
 
