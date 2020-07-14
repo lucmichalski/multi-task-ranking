@@ -45,12 +45,12 @@ if __name__ == '__main__':
     from retrieval.dataset_processing import DatasetProcessing
     from metadata import NewsPassagePaths
 
-    qrels_path = '/nfs/trec_news_track/bert/dev_entity/news_track.dev.entity.qrels'
+    qrels_path = '/nfs/trec_news_track/bert/test_entity/news_track.test.entity.qrels'
     xml_topics_path = None #'/nfs/trec_news_track/data/2019/newsir19-background-linking-topics.xml'
-    run_path = '/nfs/trec_news_track/runs/anserini/bert/news_track.dev.bm25.100000.title+contents.50_words.run'
+    run_path = '/nfs/trec_news_track/runs/anserini/bert/news_track.test.bm25.100000.title+contents.50_words.run'
     index_path = NewsPassagePaths.index
     car_index_path = CarEntityPaths.index
-    data_dir_path = '/nfs/trec_news_track/runs/anserini/bert/news_track_dev_bm25_100000_50_words_bert_chunks/'
+    data_dir_path = '/nfs/trec_news_track/runs/anserini/bert/news_track_test_bm25_100000_50_words_bert_chunks/'
     max_length = 512
     context_path = None
     training_dataset = False
@@ -120,8 +120,8 @@ if __name__ == '__main__':
     #     logging_steps=logging_steps
     # )
 
-    head_flag = 'entity'
-    rerank_run_path = '/nfs/trec_news_track/runs/bert/entity_2019/re_ranked_anserini.bm5.run'
-    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False, cap_rank=100)
+    # head_flag = 'entity'
+    # rerank_run_path = '/nfs/trec_news_track/runs/bert/entity_2019/re_ranked_anserini.bm5.run'
+    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False, cap_rank=100)
 
 
