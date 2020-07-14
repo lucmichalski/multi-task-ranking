@@ -12,27 +12,33 @@ if __name__ == '__main__':
     from metadata import NewsPassagePaths, CarEntityPaths
     from retrieval.tools import SearchTools
 
-    run_bases = ['/nfs/trec_news_track/runs/anserini/entity_2018/entity.custom_anserini.500000_doc.100_words.{}.fixed_qrels.run',
-                 '/nfs/trec_news_track/runs/anserini/entity_2019/entity.custom_anserini.500000_doc.100_words.{}.fixed_qrels.run',
-                 '/nfs/trec_news_track/runs/anserini/entity_2018/entity.custom_anserini.500000_doc.100_words.{}.fixed_qrels.run',
-                 '/nfs/trec_news_track/runs/anserini/entity_2019/entity.custom_anserini.500000_doc.100_words.{}.fixed_qrels.run']
+    # run_bases = ['/nfs/trec_news_track/runs/anserini/entity_2018/entity.custom_anserini.500000_doc.100_words.{}.fixed_qrels.run',
+    #              '/nfs/trec_news_track/runs/anserini/entity_2019/entity.custom_anserini.500000_doc.100_words.{}.fixed_qrels.run',
+    #              '/nfs/trec_news_track/runs/anserini/entity_2018/entity.custom_anserini.500000_doc.100_words.{}.fixed_qrels.run',
+    #              '/nfs/trec_news_track/runs/anserini/entity_2019/entity.custom_anserini.500000_doc.100_words.{}.fixed_qrels.run']
+    #
+    # qrels_paths = ['/nfs/trec_news_track/data/2018/news_track.2018.entity.qrels',
+    #                '/nfs/trec_news_track/data/2019/news_track.2019.entity.qrels',
+    #                '/nfs/trec_news_track/data/2018/news_track.2018.entity.qrels',
+    #                '/nfs/trec_news_track/data/2019/news_track.2019.entity.qrels'
+    #                ]
+    #
+    # query_types = ['title+contents',
+    #                'title+contents',
+    #                'title',
+    #                'title']
 
-    qrels_paths = ['/nfs/trec_news_track/data/2018/news_track.2018.entity.qrels',
-                   '/nfs/trec_news_track/data/2019/news_track.2019.entity.qrels',
-                   '/nfs/trec_news_track/data/2018/news_track.2018.entity.qrels',
-                   '/nfs/trec_news_track/data/2019/news_track.2019.entity.qrels'
-                   ]
+    run_paths = ['/nfs/trec_news_track/runs/anserini/bert/news_track.dev.bm25.100000.title+contents.50_words.run',
+                 '/nfs/trec_news_track/runs/anserini/bert/news_track.test.bm25.100000.title+contents.50_words.run']
+    qrels_paths = ['/nfs/trec_news_track/bert/dev_entity/news_track.dev.entity.qrels',
+                   '/nfs/trec_news_track/bert/test_entity/news_track.test.entity.qrels']
+    query_type = 'title+contents'
 
-    query_types = ['title+contents',
-                   'title+contents',
-                   'title',
-                   'title']
-    hits = 500000
+    hits = 100000
     news_index_path = NewsPassagePaths.index
-    words = 100
+    words = 50
 
-    for run_base, qrels_path, query_type in zip(run_bases, qrels_paths, query_types):
-        run_path = run_base.format(query_type)
+    for run_path, qrels_path, query_type in zip(run_paths, qrels_paths):
         search_tools = SearchTools(index_path=CarEntityPaths.index)
         search_tools.write_entity_run_news(run_path, qrels_path, query_type, words, hits, news_index_path)
 
