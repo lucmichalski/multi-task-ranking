@@ -73,15 +73,15 @@ if __name__ == '__main__':
     #                               xml_topics_path=xml_topics_path)
 
     gpus = 3
-    model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_entity_4e5_batch_8_fixed_qrels_scaled_rel/epoch2_batch25/'
+    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_passage_2e5_batch_24_fixed_qrels_scaled_rel_v2/epoch2_batch400/'
     extra_layers = False
-    train_batch_size = 8 * gpus
+    train_batch_size = None #8 * gpus
     dev_batch_size = 64 * 3 * gpus
 
-    train_data_dir_path_passage = '/nfs/trec_news_track/bert/train_passage/news_track_train_passage_250_bm25_rm3_bert_chunks_scaled_rel/'
-    dev_data_dir_path_passage =  '/nfs/trec_news_track/bert/dev_passage/news_track_dev_passage_250_bm25_rm3_bert_chunks_scaled_rel/'
-    dev_qrels_path_passage = '/nfs/trec_news_track/bert/dev_passage/news_track.dev.passage.qrels'
-    dev_run_path_passage = '/nfs/trec_news_track/bert/dev_passage/news_track.dev.passage.250.bm25.rm3.run'
+    train_data_dir_path_passage = None #'/nfs/trec_news_track/bert/train_passage/news_track_train_passage_250_bm25_rm3_bert_chunks_scaled_rel/'
+    dev_data_dir_path_passage =  '/nfs/trec_news_track/bert/test_passage/news_track_test_passage_250_bm25_rm3_bert_chunks_scaled_rel/'
+    dev_qrels_path_passage = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.qrels'
+    dev_run_path_passage = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.250.bm25.rm3.run'
 
     # train_data_dir_path_entity = None #'/nfs/trec_news_track/runs/anserini/bert/news_track_train_bm25_100000_50_words_bert_chunks_scaled_rel/'
     # dev_data_dir_path_entity = '/nfs/trec_news_track/runs/anserini/bert/news_track_test_bm25_100000_50_words_bert_chunks_scaled_rel/'
@@ -105,32 +105,32 @@ if __name__ == '__main__':
 
                                                 )
 
-    epochs = 3
-    lr = 8e-6
-    eps = 1e-8
-    weight_decay = 0.01
-    warmup_percentage = 0.1
-    experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_trec_news_v2_passage_8e6_batch_24_fixed_qrels_scaled_rel_v2'
-    write = True
-    logging_steps = 100
+    # epochs = 3
+    # lr = 8e-6
+    # eps = 1e-8
+    # weight_decay = 0.01
+    # warmup_percentage = 0.1
+    # experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
+    # experiment_name = 'test_trec_news_v2_passage_8e6_batch_24_fixed_qrels_scaled_rel_v2'
+    # write = True
+    # logging_steps = 100
+    # head_flag = 'passage'
+    #
+    # experiment.run_experiment_single_head(
+    #     head_flag=head_flag,
+    #     epochs=epochs,
+    #     lr=lr,
+    #     eps=eps,
+    #     weight_decay=weight_decay,
+    #     warmup_percentage=warmup_percentage,
+    #     experiments_dir=experiments_dir,
+    #     experiment_name=experiment_name,
+    #     logging_steps=logging_steps
+    # )
+
     head_flag = 'passage'
-
-    experiment.run_experiment_single_head(
-        head_flag=head_flag,
-        epochs=epochs,
-        lr=lr,
-        eps=eps,
-        weight_decay=weight_decay,
-        warmup_percentage=warmup_percentage,
-        experiments_dir=experiments_dir,
-        experiment_name=experiment_name,
-        logging_steps=logging_steps
-    )
-
-    # head_flag = 'entity'
-    # rerank_run_path = '/nfs/trec_news_track/runs/bert/entity_2018/test_entity_news_fixed_qrels_scaled_rel.bm5_re_rank.run'
-    # experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False, cap_rank=100)
+    rerank_run_path = '/nfs/trec_news_track/runs/bert/passage_2018/test_passage_news_fixed_qrels_scaled_rel.bm5_re_rank.run'
+    experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False, cap_rank=100)
     #
     # from REL.mention_detection import MentionDetection
     # from REL.utils import process_results
