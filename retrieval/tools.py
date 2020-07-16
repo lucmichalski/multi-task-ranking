@@ -21,8 +21,9 @@ class RetrievalUtils:
 
     query_start_stings = ['enwiki:', 'tqa:']
 
-    def get_qrels_binary_dict(self, qrels_path, car_valid_test=True):
-        """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}. """
+
+    def get_qrels_binary_dict(self, qrels_path):
+        """ Build a dictionary from a qrels file with binary relevance: {query: [rel#1, rel#2, rel#3, ...]}. """
         if isinstance(qrels_path, str):
             qrels_dict = {}
             with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
@@ -34,16 +35,16 @@ class RetrievalUtils:
                             qrels_dict[query] = []
                         if float(score) > 0.0:
                             # key: query, value: list of doc_ids
-                            #if car_valid_test:
                             qrels_dict[query].append(doc_id)
             return qrels_dict
         else:
             return None
 
-    def get_qrels_norm_dict(self, qrels_path, car_valid_test=True):
-        """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}. """
 
+    def get_qrels_norm_dict(self, qrels_path):
+        """ Build a dictionary from a qrels file with normalised relevance: {query: {rel#1: score},... }. """
         if isinstance(qrels_path, str):
+            # Get max score form qrels file to normalise with.
             with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
                 max_score = 0.0
                 # Read each line of qrels file.
@@ -54,7 +55,6 @@ class RetrievalUtils:
                             max_score = float(score)
 
             qrels_dict = {}
-            #TODO - does encoding="utf-8" change anything?
             with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
                 # Read each line of qrels file.
                 for line in qrels_file:
@@ -64,20 +64,20 @@ class RetrievalUtils:
                             qrels_dict[query] = {}
                         if float(score) > 0.0:
                             # key: query, value: list of doc_ids
-                            #if car_valid_test:
                             qrels_dict[query][doc_id] = float(score) / max_score
 
             return qrels_dict
         else:
             return None
 
-    def test_valid_line(self, line):
+
+    def test_valid_line_car(self, line):
         """ Return bool whether valid starting substring is in line"""
         return any(substring in line for substring in self.query_start_stings)
 
 
     def unpack_run_line(self, line):
-        """ """
+        """ Unpack line from trec run file. """
         split_line = line.strip().split()
         query = split_line[0]
         q = split_line[1]
@@ -89,7 +89,7 @@ class RetrievalUtils:
 
 
     def unpack_qrels_line(self, line):
-        """ """
+        """ Unpack line from trec qrels file. """
         split_line = line.strip().split()
         query = split_line[0]
         q = split_line[1]
@@ -130,6 +130,7 @@ class SearchTools:
             return None
         else:
             return pyutils.IndexReaderUtils(self.index_path)
+
 
     def __build_searcher(self, searcher_config, index_path):
         """ Build Pyserini SimpleSearcher based on config."""
@@ -245,7 +246,7 @@ class SearchTools:
 
 
     def get_news_ids_maps(self, xml_topics_path, ranking_type='passage'):
-        """ """
+        """ Build dict map from intermediate ids to Washington Post ids {intermediate_id: passage_id} """
         passage_id_map = {}
         entity_id_map = {}
         with open(xml_topics_path, 'r') as f:
@@ -372,18 +373,20 @@ class SearchTools:
 
 
     def process_query_news(self, query_dict, query_type):
-        """ """
+        """ Process news query from dict of Washington Post article. """
         assert query_type == 'title' or query_type == 'title+contents'
+        # Simply return title string.
         if query_type == 'title':
             return query_dict['title']
+        # Append contents text to title.
         elif query_type == 'title+contents':
-
+            # Extract title
             try:
                 title = query_dict['title']
             except:
                 title = ""
                 print('FAILED TO PARSE TITLE')
-
+            # Extract conents text
             content_text = ""
             for content in query_dict['contents']:
                 try:
@@ -393,7 +396,7 @@ class SearchTools:
                             content_text += " " + str(text)
                 except:
                     print('FAILED TO PARSE CONTENTS')
-
+            # Title + contents.
             if isinstance(title, str):
                 news_query = title + ' ' + content_text
             else:
@@ -402,12 +405,15 @@ class SearchTools:
             return news_query
 
 
-    def write_entity_run_news(self, run_path, qrels_path, query_type, words=100, hits=250000, news_index_path=NewsPassagePaths.index):
-        """ """
+    def write_entity_run_news(self, run_path, qrels_path, query_type, words=100, hits=250000,
+                              news_index_path=NewsPassagePaths.index):
+        """ Write PySerini BM25 for TREC News Track - query_type {'passage', 'entity}. """
         assert query_type == 'title' or query_type == 'title+contents'
 
+        # Initialise SearchTools for news index (queries)
         search_tools_news = SearchTools(news_index_path)
 
+        # Build qrels of both relevant and non-relevant documents.
         qrels_dict = {}
         with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
             # Read each line of qrels file.
@@ -419,19 +425,24 @@ class SearchTools:
                     else:
                         qrels_dict[query].append(doc_id)
 
+        # Begin writing to run file.
         with open(run_path, "w", encoding='utf-8') as f_run:
             for query_id, valid_docs in qrels_dict.items():
+                # Build query (limit to 'words' number of query terms).
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
                 query = self.process_query_news(query_dict=query_dict, query_type=query_type)
                 query = " ".join(query.split(" ")[:words])
 
+                # Get 'hits' many documents from entity index.
                 try:
                     retrieved_hits = self.search(query=query, hits=hits)
                 except:
                     retrieved_hits = self.search(query=query.encode('utf-8'), hits=hits)
 
+                # Reduce retrieved docs to those within qrels.
                 valid_hits = [i for i in retrieved_hits if i[0] in valid_docs]
                 rank = 1
+                # Write valid retrieved docs to file.
                 for hit in valid_hits:
                     # Create and write run file.
                     run_line = " ".join((query_id, "Q0", hit[0], str(rank), "{:.6f}".format(hit[1]), "PYSERINI")) + '\n'
@@ -439,12 +450,14 @@ class SearchTools:
                     # Next rank.
                     rank += 1
 
+                # Add possible documents (i.e. within qrels) that are not retieved.
                 if len(valid_hits) == 0:
                     missed_hits = valid_docs
                     min_score = 0.0
                 else:
                     missed_hits = list(set(valid_docs) - set([hit[0] for hit in valid_hits]))
                     min_score = valid_hits[len(valid_hits)-1][1]
+                # Write possible documents to file.
                 for doc_id in missed_hits:
                     # Create and write run file.
                     min_score -= 0.1
@@ -608,7 +621,6 @@ class EvalTools:
                     run.append(0.0)
 
             # Calculate number of relevant docs in qrels (R).
-            # TODO - is R length of rel or aggregation of relevance scores?
             R = len(self.qrels_dict[query])
             # Build query metric string.
             _, query_metrics_run = self.get_query_metrics(run=run, R=R, eval_config=eval_config)

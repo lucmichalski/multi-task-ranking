@@ -1078,7 +1078,7 @@ annotation_dict['enwiki:Blue-ringed%20octopus'] = [
                    entity_id='enwiki:Hypotension', entity_name='Hypotension'),
     ],
     # ===========================================================
-    # ========================= INDEX 18 ========================
+    # ========================= INDEX 2018 ========================
     # ===========================================================
     # It is essential that rescue breathing be continued without pause until the paralysis subsides and the victim
     # regains the ability to breathe on their own. This is a daunting physical prospect for a single individual, but
@@ -1092,7 +1092,7 @@ annotation_dict['enwiki:Blue-ringed%20octopus'] = [
 
     ],
     # ===========================================================
-    # ========================= INDEX 19 ========================
+    # ========================= INDEX 2019 ========================
     # ===========================================================
     # Definitive hospital treatment involves placing the patient on a medical ventilator until the toxin is removed by
     # the body.

@@ -19,7 +19,7 @@ class DatasetProcessing:
     retrieval_utils = RetrievalUtils()
 
     def __init__(self, qrels_path, run_path, index_path, data_dir_path, max_length=512, context_path=None,
-                tokenizer=BertTokenizer.from_pretrained('bert-base-uncased')):
+                tokenizer=BertTokenizer.from_pretrained('bert-base-uncased'), binary_qrels=True):
 
         # Path to qrels file.
         self.qrels_path = qrels_path
@@ -43,9 +43,13 @@ class DatasetProcessing:
             self.context_dict = {}
         # Tokenizer function (text -> BERT tokens)
         self.tokenizer = tokenizer
-        # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
-        #TODO - add flag for norm or binary
-        self.qrels = self.retrieval_utils.get_qrels_norm_dict(qrels_path=self.qrels_path)
+        # Flag to indicate whether to process with binary qrels (True) or normalise qrels (False)
+        self.binary_qrels = binary_qrels
+        # load qrels dictionary into memory - wither binary or normalised
+        if self.binary_qrels:
+            self.qrels = self.retrieval_utils.get_qrels_binary_dict(qrels_path=self.qrels_path)
+        else:
+            self.qrels = self.retrieval_utils.get_qrels_norm_dict(qrels_path=self.qrels_path)
         # Lists of BERT inputs.
         self.input_ids_list = []
         self.token_type_ids_list = []
@@ -75,7 +79,10 @@ class DatasetProcessing:
             # Qrels, query and doc_id used to determine whether entry in relevant or not relevant.
             if query in self.qrels:
                 if doc_id in self.qrels[query]:
-                    self.labels_list.append([self.qrels[query][doc_id]])
+                    if self.binary_qrels:
+                        self.labels_list.append(1.0)
+                    else:
+                        self.labels_list.append([self.qrels[query][doc_id]])
                 else:
                     self.labels_list.append([0.0])
             else:
@@ -178,8 +185,8 @@ class DatasetProcessing:
 
 
     def build_car_dataset(self, training_dataset=False, chuck_topic_size=1e8, first_para=False):
-        """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
-        False (training dataset). """
+        """ Build TREC CAR dataset and save data chucks of data_dir_path. If sequential flag is True (validation
+        dataset) and if False (training dataset). """
         if training_dataset:
             print("** Building training dataset **")
         else:
@@ -199,7 +206,7 @@ class DatasetProcessing:
                 # Unpack line in run file.
                 query, _, doc_id, rank, _, _ = line.split(' ')
                 # Assert correct query format..
-                assert self.retrieval_utils.test_valid_line(line=line), "Not valid query: {}".format(line)
+                assert self.retrieval_utils.test_valid_line_car(line=line), "Not valid query: {}".format(line)
 
                 # If final doc_id in topic -> process batch.
                 if (topic_query != None) and (topic_query != query):
@@ -228,9 +235,7 @@ class DatasetProcessing:
                                                                 pad_to_max_length=True)
                 else:
                     try:
-
                         text = self.context_dict[doc_id]['first_para'] + self.context_dict[doc_id]['top_ents']
-
                     except:
                         print('Failed to add context to: {}'.format(doc_id))
                         text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
@@ -266,8 +271,8 @@ class DatasetProcessing:
 
     def build_news_dataset(self, training_dataset=False, chuck_topic_size=1e8, ranking_type='passage',
                            query_type='title+contents', car_index_path=None, xml_topics_path=None):
-        """ Build dataset and save data chucks of data_dir_path. If sequential flag is True (validation dataset) and if
-        False (training dataset). """
+        """ Build TREC News Track dataset and save data chucks of data_dir_path. If sequential flag is True (validation
+        dataset) and if False (training dataset). """
 
         if training_dataset:
             print("** Building training dataset **")

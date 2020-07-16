@@ -41,6 +41,7 @@ class TrecCarParser:
         self.valid_counter = 0
         self.not_valid_counter = 0
 
+
     def get_manual_entity_links_from_para_bodies(self, bodies, text):
         """ Extract list manual entity_links (protocol_buffers/document.proto:EntityLink) from trec-car-tools
         Para.paragraph.bodies. """
@@ -166,6 +167,7 @@ class TrecCarParser:
     def format_string(self, string):
         """ Format string - remove beginning/ending punctuation and stem. """
         return self.stemmer.stem(string.strip(punctuation))
+
 
     def __process_match_words(self, match_string):
         """ Process string of anchor text / entity name to list of word stems i.e. "Iain loves IR" -> ["iain", "lov",
@@ -312,13 +314,14 @@ class TrecCarParser:
                             start_i_lower = end_i_lower
 
     def __rel_id_to_car_id(self, rel_id):
-        """ """
+        """ Build TREC CAR id from REL id (will be close, roughly 90% converage)."""
         return 'enwiki:' + urllib.parse.quote(rel_id.replace('_', ' '), encoding='utf-8')
 
 
     def __add_rel_entity_links(self):
         """ Add REL entity linker links to all document contents. """
 
+        # Build batch REL text input - sharding document contents into sentences.
         processed_document_contents = {}
         for document_content in self.document.document_contents:
             content_id = document_content.content_id
@@ -327,10 +330,12 @@ class TrecCarParser:
                 sentence_id = str(content_id+(str(i)))
                 processed_document_contents[sentence_id] = [str(sentence), []]
 
+        # Run REL model with document contents.
         mentions_dataset, n_mentions = self.mention_detection.find_mentions(processed_document_contents, self.tagger_ner)
         predictions, timing = self.entity_disambiguation.predict(mentions_dataset)
         entity_links_dict = process_results(mentions_dataset, predictions, processed_document_contents)
 
+        # Connet to LMDB of: {pickle(car_id): pickle(car_name).}
         env = lmdb.open(self.car_id_to_name_path, map_size=2e10)
         with env.begin(write=False) as txn:
 
@@ -355,7 +360,6 @@ class TrecCarParser:
 
                                 if entity_name_pickle != None:
                                     self.valid_counter += 1
-                                    #print('VALID: {}'.format(entity_id))
                                     entity_name = pickle.loads(entity_name_pickle)
 
                                     if entity_link[2] == span_text:
@@ -401,8 +405,6 @@ class TrecCarParser:
 
                                 else:
                                     self.not_valid_counter += 1
-
-                                    #print('NOT VALID: {}'.format(entity_id))
 
                     i_sentence_start += len(sentence) + 1
 
@@ -565,16 +567,16 @@ class TrecCarParser:
         documents = []
         t_start = time.time()
 
+        # Use REL (Radbound entity linker): https://github.com/informagi/REL
         if use_rel:
+            # Will require models and data saved paths
             wiki_version = "wiki_" + rel_wiki_year
             self.mention_detection = MentionDetection(rel_base_url, wiki_version)
             self.tagger_ner = load_flair_ner("ner-fast")
-            #self.tagger_ner = Cmns(rel_base_url, wiki_version, n=5)
             config = {
                 "mode": "eval",
                 "model_path": rel_model_path,
             }
-
             self.entity_disambiguation = EntityDisambiguation(rel_base_url, wiki_version, config)
             self.car_id_to_name_path = car_id_to_name_path
 

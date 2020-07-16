@@ -82,6 +82,10 @@ def build_synthetic_qrels(document_list, path, qrels_type='tree', write=True):
             for manual_link in document_content.manual_entity_links:
                 if manual_link.entity_id not in hierarchical_qrels[query]:
                     hierarchical_qrels[query].append(manual_link.entity_id)
+            # Add REL links.
+            for rel_link in document_content.rel_entity_links:
+                if rel_link.entity_id not in hierarchical_qrels[query]:
+                    hierarchical_qrels[query].append(rel_link.entity_id)
 
     if qrels_type == 'tree':
         # Build list of tree queries for each doc_id.
@@ -177,20 +181,20 @@ def build_passage_qrels(document_list, path):
 if __name__ == '__main__':
     import pandas as pd
 
-    proto_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-0-train.pages.bin'
+    proto_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/testY2_custom_with_REL_2019_rel_0.3_el_conf.bin'
     tcp = TrecCarParser()
     document_list = tcp.get_list_protobuf_messages(path=proto_path)
-    path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/benchmarkY1.dev.top-level.synthetic.qrels'
-    build_synthetic_qrels(document_list, path, qrels_type='top-level', write=True)
+    path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/testY2.custom.tree.synthetic+flair&rel_ed.wiki_14.conf=0.3.qrels'
+    build_synthetic_qrels(document_list, path, qrels_type='tree', write=True)
 
-    document_list = []
-    for i in range(1,5):
-        proto_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-{}-train.pages.bin'.format(i)
-        tcp = TrecCarParser()
-        document_list += tcp.get_list_protobuf_messages(path=proto_path)
-
-    path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/benchmarkY1.train.top-level.synthetic.qrel'
-    build_synthetic_qrels(document_list=document_list, path=path, qrels_type='top-level', write=True)
+    # document_list = []
+    # for i in range(1,5):
+    #     proto_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-{}-train.pages.bin'.format(i)
+    #     tcp = TrecCarParser()
+    #     document_list += tcp.get_list_protobuf_messages(path=proto_path)
+    #
+    # path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/benchmarkY1.train.top-level.synthetic.qrel'
+    # build_synthetic_qrels(document_list=document_list, path=path, qrels_type='top-level', write=True)
 
     #build_passage_qrels(document_list=document_list, path=path)
     # data = []
