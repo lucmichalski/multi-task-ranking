@@ -73,8 +73,11 @@ class DatasetProcessing:
             self.token_type_ids_list.append(BERT_encodings['token_type_ids'])
             self.attention_mask_list.append(BERT_encodings['attention_mask'])
             # Qrels, query and doc_id used to determine whether entry in relevant or not relevant.
-            if doc_id in self.qrels[query]:
-                self.labels_list.append([self.qrels[query][doc_id]])
+            if query in self.qrels[query]:
+                if doc_id in self.qrels[query]:
+                    self.labels_list.append([self.qrels[query][doc_id]])
+                else:
+                    self.labels_list.append([0.0])
             else:
                 self.labels_list.append([0.0])
 
