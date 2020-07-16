@@ -92,7 +92,7 @@ class FineTuningReRankingExperiments:
                     # Relevant
                     if query in qrels:
                         if doc_id in qrels[query]:
-                            R = 1.0
+                            R = qrels[query][doc_id]
                         # Not relevant.
                         else:
                             R = 0.0
