@@ -98,12 +98,12 @@ if __name__ == '__main__':
                                                 dev_run_path_entity=dev_run_path_entity)
 
     epochs = 3
-    lr = 2e-5
+    lr = 4e-5
     eps = 1e-8
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_trec_news_v2_entity_2e5_batch_8_fixed_qrels_scaled_rel'
+    experiment_name = 'test_trec_news_v2_entity_4e5_batch_8_fixed_qrels_scaled_rel'
     write = True
     logging_steps = 25
     head_flag = 'entity'
