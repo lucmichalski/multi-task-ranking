@@ -79,7 +79,7 @@ class DatasetProcessing:
                 else:
                     self.labels_list.append([0.0])
             else:
-                print('query not in qrels: {}')
+                print('query not in qrels: {}'.format(query))
                 self.labels_list.append([0.0])
 
         # New topics.
