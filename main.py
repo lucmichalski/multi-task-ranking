@@ -46,7 +46,7 @@ if __name__ == '__main__':
     # from metadata import NewsPassagePaths
     #
     #TEST
-    qrels_path = '/nfs/trec_news_track/bert/train_passage/news_track.rain.passage.qrels'
+    qrels_path = '/nfs/trec_news_track/bert/train_passage/news_track.train.passage.qrels'
     xml_topics_path = '/nfs/trec_news_track/data/2018/newsir18-topics.txt'
     run_path = '/nfs/trec_news_track/bert/train_passage/news_track.train.passage.250.bm25.rm3.run'
     index_path = NewsPassagePaths.index
