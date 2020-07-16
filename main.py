@@ -45,31 +45,31 @@ if __name__ == '__main__':
     # from retrieval.dataset_processing import DatasetProcessing
     # from metadata import NewsPassagePaths
     #
-    qrels_path = '/nfs/trec_news_track/bert/train_entity/news_track.train.entity.qrels'
-    xml_topics_path = None #'/nfs/trec_news_track/data/2019/newsir19-background-linking-topics.xml'
-    run_path = '/nfs/trec_news_track/runs/anserini/bert/news_track.train.bm25.100000.title+contents.50_words.run'
-    index_path = NewsPassagePaths.index
-    car_index_path = CarEntityPaths.index
-    data_dir_path = '/nfs/trec_news_track/runs/anserini/bert/news_track_train_bm25_100000_50_words_bert_chunks_scaled_rel/'
-    max_length = 512
-    context_path = None
-    training_dataset = True
-    ranking_type = 'entity'
-    query_type = 'title+contents'
-
-    processing = DatasetProcessing(qrels_path=qrels_path,
-                                   run_path=run_path,
-                                   index_path=index_path,
-                                   data_dir_path=data_dir_path,
-                                   max_length=max_length,
-                                   context_path=context_path)
-
-    processing.build_news_dataset(training_dataset=training_dataset,
-                                  chuck_topic_size=1e8,
-                                  ranking_type=ranking_type,
-                                  query_type=query_type,
-                                  car_index_path=car_index_path,
-                                  xml_topics_path=xml_topics_path)
+    # qrels_path = '/nfs/trec_news_track/bert/train_entity/news_track.train.entity.qrels'
+    # xml_topics_path = None #'/nfs/trec_news_track/data/2019/newsir19-background-linking-topics.xml'
+    # run_path = '/nfs/trec_news_track/runs/anserini/bert/news_track.train.bm25.100000.title+contents.50_words.run'
+    # index_path = NewsPassagePaths.index
+    # car_index_path = CarEntityPaths.index
+    # data_dir_path = '/nfs/trec_news_track/runs/anserini/bert/news_track_train_bm25_100000_50_words_bert_chunks_scaled_rel/'
+    # max_length = 512
+    # context_path = None
+    # training_dataset = True
+    # ranking_type = 'entity'
+    # query_type = 'title+contents'
+    #
+    # processing = DatasetProcessing(qrels_path=qrels_path,
+    #                                run_path=run_path,
+    #                                index_path=index_path,
+    #                                data_dir_path=data_dir_path,
+    #                                max_length=max_length,
+    #                                context_path=context_path)
+    #
+    # processing.build_news_dataset(training_dataset=training_dataset,
+    #                               chuck_topic_size=1e8,
+    #                               ranking_type=ranking_type,
+    #                               query_type=query_type,
+    #                               car_index_path=car_index_path,
+    #                               xml_topics_path=xml_topics_path)
 
     gpus = 1
     model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_entity_2e5_batch_8_fixed_qrels/epoch3_batch75'
