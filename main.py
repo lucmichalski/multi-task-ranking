@@ -72,7 +72,7 @@ if __name__ == '__main__':
     #                               car_index_path=car_index_path,
     #                               xml_topics_path=xml_topics_path)
 
-    gpus = 2
+    gpus = 3
     model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_entity_4e5_batch_8_fixed_qrels_scaled_rel/epoch2_batch25/'
     extra_layers = False
     train_batch_size = 8 * gpus
@@ -111,9 +111,9 @@ if __name__ == '__main__':
     weight_decay = 0.01
     warmup_percentage = 0.1
     experiments_dir = '/nfs/trec_car/data/bert_reranker_datasets/exp/'
-    experiment_name = 'test_trec_news_v2_passage_2e5_batch_16_fixed_qrels_scaled_rel'
+    experiment_name = 'test_trec_news_v2_passage_2e5_batch_24_fixed_qrels_scaled_rel_v2'
     write = True
-    logging_steps = 100
+    logging_steps = 200
     head_flag = 'passage'
 
     experiment.run_experiment_single_head(
