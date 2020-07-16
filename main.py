@@ -47,7 +47,7 @@ if __name__ == '__main__':
     #
     qrels_path = '/nfs/trec_news_track/bert/train_passage/news_track.rain.passage.qrels'
     xml_topics_path = '/nfs/trec_news_track/data/2018/newsir18-topics.txt'
-    run_path = '/nfs/trec_news_track/bert/rain_passage/news_track.rain.passage.250.bm25.rm3.run'
+    run_path = '/nfs/trec_news_track/bert/train_passage/news_track.train.passage.250.bm25.rm3.run'
     index_path = NewsPassagePaths.index
     car_index_path = None #CarEntityPaths.index
     data_dir_path = '/nfs/trec_news_track/bert/train_passage/news_track_rain_passage_250_bm25_rm3_bert_chunks_scaled_rel/'
