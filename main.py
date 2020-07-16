@@ -46,31 +46,31 @@ if __name__ == '__main__':
     # from metadata import NewsPassagePaths
     #
     #TEST
-    # qrels_path = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.qrels'
-    # xml_topics_path = '/nfs/trec_news_track/data/2019/newsir19-background-linking-topics.xml'
-    # run_path = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.250.bm25.rm3.run'
-    # index_path = NewsPassagePaths.index
-    # car_index_path = None #CarEntityPaths.index
-    # data_dir_path = '/nfs/trec_news_track/bert/test_passage/news_track_test_passage_250_bm25_rm3_bert_chunks_scaled_rel/'
-    # max_length = 512
-    # context_path = None
-    # training_dataset = False
-    # ranking_type = 'passage'
-    # query_type = 'title+contents'
-    #
-    # processing = DatasetProcessing(qrels_path=qrels_path,
-    #                                run_path=run_path,
-    #                                index_path=index_path,
-    #                                data_dir_path=data_dir_path,
-    #                                max_length=max_length,
-    #                                context_path=context_path)
-    #
-    # processing.build_news_dataset(training_dataset=training_dataset,
-    #                               chuck_topic_size=1e8,
-    #                               ranking_type=ranking_type,
-    #                               query_type=query_type,
-    #                               car_index_path=car_index_path,
-    #                               xml_topics_path=xml_topics_path)
+    qrels_path = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.qrels'
+    xml_topics_path = '/nfs/trec_news_track/data/2019/newsir19-background-linking-topics.xml'
+    run_path = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.250.bm25.rm3.run'
+    index_path = NewsPassagePaths.index
+    car_index_path = None #CarEntityPaths.index
+    data_dir_path = '/nfs/trec_news_track/bert/test_passage/news_track_test_passage_250_bm25_rm3_bert_chunks_scaled_rel/'
+    max_length = 512
+    context_path = None
+    training_dataset = False
+    ranking_type = 'passage'
+    query_type = 'title+contents'
+
+    processing = DatasetProcessing(qrels_path=qrels_path,
+                                   run_path=run_path,
+                                   index_path=index_path,
+                                   data_dir_path=data_dir_path,
+                                   max_length=max_length,
+                                   context_path=context_path)
+
+    processing.build_news_dataset(training_dataset=training_dataset,
+                                  chuck_topic_size=1e8,
+                                  ranking_type=ranking_type,
+                                  query_type=query_type,
+                                  car_index_path=car_index_path,
+                                  xml_topics_path=xml_topics_path)
 
     gpus = 3
     model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_passage_2e5_batch_24_fixed_qrels_scaled_rel_v2/epoch2_batch400/'
