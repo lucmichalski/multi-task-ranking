@@ -45,7 +45,7 @@ if __name__ == '__main__':
     # from retrieval.dataset_processing import DatasetProcessing
     # from metadata import NewsPassagePaths
     #
-    qrels_path = '/nfs/trec_news_track/bert/test_entity/news_track.dev.entity.qrels'
+    qrels_path = '/nfs/trec_news_track/bert/test_entity/news_track.test.entity.qrels'
     xml_topics_path = None #'/nfs/trec_news_track/data/2019/newsir19-background-linking-topics.xml'
     run_path = '/nfs/trec_news_track/runs/anserini/bert/news_track.test.bm25.100000.title+contents.50_words.run'
     index_path = NewsPassagePaths.index
