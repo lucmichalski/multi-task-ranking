@@ -72,7 +72,7 @@ if __name__ == '__main__':
     #                               xml_topics_path=xml_topics_path)
 
     gpus = 1
-    model_path = None #'/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_entity_2e5_batch_8_fixed_qrels/epoch3_batch75'
+    model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/test_trec_news_v2_entity_4e5_batch_8_fixed_qrels_scaled_rel/epoch2_batch25/'
     extra_layers = False
     train_batch_size = None #8 * gpus
     dev_batch_size = 64 * 3 * gpus
