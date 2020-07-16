@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # )
 
     head_flag = 'passage'
-    rerank_run_path = '/nfs/trec_news_track/runs/bert/passage_2018/test_passage_news_fixed_qrels_scaled_rel.bm5_re_rank.run'
+    rerank_run_path = '/nfs/trec_news_track/runs/bert/background_2019/test_passage_news_fixed_qrels_scaled_rel.bm5_re_rank.run'
     experiment.inference(head_flag=head_flag, rerank_run_path=rerank_run_path, do_eval=False, cap_rank=100)
     #
     # from REL.mention_detection import MentionDetection
