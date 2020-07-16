@@ -15,8 +15,14 @@ nltk
 cbor
 lmdb
 spacy
-spacy
 pyarrow
 protobuf
 pystream-protobuf==1.5.1
+colorama
+tiny-tokenizer
+flair==0.5
+unidecode
+segtok
+pillow==6.2.2
+sqlitedict
 

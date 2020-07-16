@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x0e\x64ocument.proto\"\xf1\x03\n\x08\x44ocument\x12\x0e\n\x06\x64oc_id\x18\x01 \x01(\t\x12\x10\n\x08\x64oc_name\x18\x02 \x01(\t\x12+\n\x11\x64ocument_contents\x18\x03 \x03(\x0b\x32\x10.DocumentContent\x12\x33\n\x19manual_entity_link_totals\x18\x04 \x03(\x0b\x32\x10.EntityLinkTotal\x12\x36\n\x1csynthetic_entity_link_totals\x18\x05 \x03(\x0b\x32\x10.EntityLinkTotal\x12\x11\n\tpage_type\x18\x06 \x01(\t\x12\x16\n\x0eredirect_names\x18\x07 \x03(\t\x12\x1a\n\x12\x64isambiguation_ids\x18\x08 \x03(\t\x12\x1c\n\x14\x64isambiguation_names\x18\t \x03(\t\x12\x14\n\x0c\x63\x61tegory_ids\x18\n \x03(\t\x12\x16\n\x0e\x63\x61tegory_names\x18\x0b \x03(\t\x12\x19\n\x11manual_inlink_ids\x18\x0c \x03(\t\x12<\n\x15manual_inlink_anchors\x18\r \x03(\x0b\x32\x1d.Document.ManualInlinkAnchors\x1a=\n\x13ManualInlinkAnchors\x12\x13\n\x0b\x61nchor_text\x18\x01 \x01(\t\x12\x11\n\tfrequency\x18\x02 \x01(\x05\"\xfa\x02\n\x0f\x44ocumentContent\x12\x12\n\ncontent_id\x18\x01 \x01(\t\x12\x1b\n\x13section_heading_ids\x18\x02 \x03(\t\x12\x1d\n\x15section_heading_names\x18\x03 \x03(\t\x12\x32\n\x0c\x63ontent_type\x18\x04 \x01(\x0e\x32\x1c.DocumentContent.ContentType\x12\x0c\n\x04text\x18\x05 \x01(\t\x12(\n\x13manual_entity_links\x18\x06 \x03(\x0b\x32\x0b.EntityLink\x12+\n\x16synthetic_entity_links\x18\x07 \x03(\x0b\x32\x0b.EntityLink\x12\x14\n\x0c\x63ontent_urls\x18\x08 \x03(\t\x12\x12\n\nlist_level\x18\t \x01(\x05\"T\n\x0b\x43ontentType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tPARAGRAPH\x10\x01\x12\t\n\x05IMAGE\x10\x02\x12\x08\n\x04LIST\x10\x03\x12\t\n\x05VIDEO\x10\x04\x12\t\n\x05\x41UDIO\x10\x05\"\xb9\x01\n\nEntityLink\x12\x13\n\x0b\x61nchor_text\x18\x01 \x01(\t\x12<\n\x14\x61nchor_text_location\x18\x02 \x01(\x0b\x32\x1e.EntityLink.AnchorTextLocation\x12\x11\n\tentity_id\x18\x03 \x01(\t\x12\x13\n\x0b\x65ntity_name\x18\x04 \x01(\t\x1a\x30\n\x12\x41nchorTextLocation\x12\r\n\x05start\x18\x01 \x01(\x05\x12\x0b\n\x03\x65nd\x18\x02 \x01(\x05\"\xbf\x01\n\x0f\x45ntityLinkTotal\x12\x11\n\tentity_id\x18\x01 \x01(\t\x12\x13\n\x0b\x65ntity_name\x18\x02 \x01(\t\x12\x45\n\x17\x61nchor_text_frequencies\x18\x03 \x03(\x0b\x32$.EntityLinkTotal.AnchorTextFrequency\x1a=\n\x13\x41nchorTextFrequency\x12\x13\n\x0b\x61nchor_text\x18\x01 \x01(\t\x12\x11\n\tfrequency\x18\x02 \x01(\x05\x62\x06proto3'
+  serialized_pb=b'\n\x0e\x64ocument.proto\"\xa3\x04\n\x08\x44ocument\x12\x0e\n\x06\x64oc_id\x18\x01 \x01(\t\x12\x10\n\x08\x64oc_name\x18\x02 \x01(\t\x12+\n\x11\x64ocument_contents\x18\x03 \x03(\x0b\x32\x10.DocumentContent\x12\x33\n\x19manual_entity_link_totals\x18\x04 \x03(\x0b\x32\x10.EntityLinkTotal\x12\x36\n\x1csynthetic_entity_link_totals\x18\x05 \x03(\x0b\x32\x10.EntityLinkTotal\x12\x11\n\tpage_type\x18\x06 \x01(\t\x12\x16\n\x0eredirect_names\x18\x07 \x03(\t\x12\x1a\n\x12\x64isambiguation_ids\x18\x08 \x03(\t\x12\x1c\n\x14\x64isambiguation_names\x18\t \x03(\t\x12\x14\n\x0c\x63\x61tegory_ids\x18\n \x03(\t\x12\x16\n\x0e\x63\x61tegory_names\x18\x0b \x03(\t\x12\x19\n\x11manual_inlink_ids\x18\x0c \x03(\t\x12<\n\x15manual_inlink_anchors\x18\r \x03(\x0b\x32\x1d.Document.ManualInlinkAnchors\x12\x30\n\x16rel_entity_link_totals\x18\x0e \x03(\x0b\x32\x10.EntityLinkTotal\x1a=\n\x13ManualInlinkAnchors\x12\x13\n\x0b\x61nchor_text\x18\x01 \x01(\t\x12\x11\n\tfrequency\x18\x02 \x01(\x05\"\xa1\x03\n\x0f\x44ocumentContent\x12\x12\n\ncontent_id\x18\x01 \x01(\t\x12\x1b\n\x13section_heading_ids\x18\x02 \x03(\t\x12\x1d\n\x15section_heading_names\x18\x03 \x03(\t\x12\x32\n\x0c\x63ontent_type\x18\x04 \x01(\x0e\x32\x1c.DocumentContent.ContentType\x12\x0c\n\x04text\x18\x05 \x01(\t\x12(\n\x13manual_entity_links\x18\x06 \x03(\x0b\x32\x0b.EntityLink\x12+\n\x16synthetic_entity_links\x18\x07 \x03(\x0b\x32\x0b.EntityLink\x12\x14\n\x0c\x63ontent_urls\x18\x08 \x03(\t\x12\x12\n\nlist_level\x18\t \x01(\x05\x12%\n\x10rel_entity_links\x18\n \x03(\x0b\x32\x0b.EntityLink\"T\n\x0b\x43ontentType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tPARAGRAPH\x10\x01\x12\t\n\x05IMAGE\x10\x02\x12\x08\n\x04LIST\x10\x03\x12\t\n\x05VIDEO\x10\x04\x12\t\n\x05\x41UDIO\x10\x05\"\xb9\x01\n\nEntityLink\x12\x13\n\x0b\x61nchor_text\x18\x01 \x01(\t\x12<\n\x14\x61nchor_text_location\x18\x02 \x01(\x0b\x32\x1e.EntityLink.AnchorTextLocation\x12\x11\n\tentity_id\x18\x03 \x01(\t\x12\x13\n\x0b\x65ntity_name\x18\x04 \x01(\t\x1a\x30\n\x12\x41nchorTextLocation\x12\r\n\x05start\x18\x01 \x01(\x05\x12\x0b\n\x03\x65nd\x18\x02 \x01(\x05\"\xbf\x01\n\x0f\x45ntityLinkTotal\x12\x11\n\tentity_id\x18\x01 \x01(\t\x12\x13\n\x0b\x65ntity_name\x18\x02 \x01(\t\x12\x45\n\x17\x61nchor_text_frequencies\x18\x03 \x03(\x0b\x32$.EntityLinkTotal.AnchorTextFrequency\x1a=\n\x13\x41nchorTextFrequency\x12\x13\n\x0b\x61nchor_text\x18\x01 \x01(\t\x12\x11\n\tfrequency\x18\x02 \x01(\x05\x62\x06proto3'
 )
 
 
@@ -56,8 +56,8 @@ _DOCUMENTCONTENT_CONTENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=813,
-  serialized_end=897,
+  serialized_start=902,
+  serialized_end=986,
 )
 _sym_db.RegisterEnumDescriptor(_DOCUMENTCONTENT_CONTENTTYPE)
 
@@ -95,8 +95,8 @@ _DOCUMENT_MANUALINLINKANCHORS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=455,
-  serialized_end=516,
+  serialized_start=505,
+  serialized_end=566,
 )
 
 _DOCUMENT = _descriptor.Descriptor(
@@ -197,6 +197,13 @@ _DOCUMENT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='rel_entity_link_totals', full_name='Document.rel_entity_link_totals', index=13,
+      number=14, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -210,7 +217,7 @@ _DOCUMENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=19,
-  serialized_end=516,
+  serialized_end=566,
 )
 
 
@@ -284,6 +291,13 @@ _DOCUMENTCONTENT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='rel_entity_links', full_name='DocumentContent.rel_entity_links', index=9,
+      number=10, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -297,8 +311,8 @@ _DOCUMENTCONTENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=519,
-  serialized_end=897,
+  serialized_start=569,
+  serialized_end=986,
 )
 
 
@@ -335,8 +349,8 @@ _ENTITYLINK_ANCHORTEXTLOCATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1037,
-  serialized_end=1085,
+  serialized_start=1126,
+  serialized_end=1174,
 )
 
 _ENTITYLINK = _descriptor.Descriptor(
@@ -386,8 +400,8 @@ _ENTITYLINK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=900,
-  serialized_end=1085,
+  serialized_start=989,
+  serialized_end=1174,
 )
 
 
@@ -424,8 +438,8 @@ _ENTITYLINKTOTAL_ANCHORTEXTFREQUENCY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1218,
-  serialized_end=1279,
+  serialized_start=1307,
+  serialized_end=1368,
 )
 
 _ENTITYLINKTOTAL = _descriptor.Descriptor(
@@ -468,8 +482,8 @@ _ENTITYLINKTOTAL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1088,
-  serialized_end=1279,
+  serialized_start=1177,
+  serialized_end=1368,
 )
 
 _DOCUMENT_MANUALINLINKANCHORS.containing_type = _DOCUMENT
@@ -477,9 +491,11 @@ _DOCUMENT.fields_by_name['document_contents'].message_type = _DOCUMENTCONTENT
 _DOCUMENT.fields_by_name['manual_entity_link_totals'].message_type = _ENTITYLINKTOTAL
 _DOCUMENT.fields_by_name['synthetic_entity_link_totals'].message_type = _ENTITYLINKTOTAL
 _DOCUMENT.fields_by_name['manual_inlink_anchors'].message_type = _DOCUMENT_MANUALINLINKANCHORS
+_DOCUMENT.fields_by_name['rel_entity_link_totals'].message_type = _ENTITYLINKTOTAL
 _DOCUMENTCONTENT.fields_by_name['content_type'].enum_type = _DOCUMENTCONTENT_CONTENTTYPE
 _DOCUMENTCONTENT.fields_by_name['manual_entity_links'].message_type = _ENTITYLINK
 _DOCUMENTCONTENT.fields_by_name['synthetic_entity_links'].message_type = _ENTITYLINK
+_DOCUMENTCONTENT.fields_by_name['rel_entity_links'].message_type = _ENTITYLINK
 _DOCUMENTCONTENT_CONTENTTYPE.containing_type = _DOCUMENTCONTENT
 _ENTITYLINK_ANCHORTEXTLOCATION.containing_type = _ENTITYLINK
 _ENTITYLINK.fields_by_name['anchor_text_location'].message_type = _ENTITYLINK_ANCHORTEXTLOCATION

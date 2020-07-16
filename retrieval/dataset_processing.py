@@ -44,7 +44,8 @@ class DatasetProcessing:
         # Tokenizer function (text -> BERT tokens)
         self.tokenizer = tokenizer
         # load qrels dictionary {query: [doc_id, doc_id, etc.]} into memory.
-        self.qrels = self.retrieval_utils.get_qrels_dict(qrels_path=self.qrels_path)
+        #TODO - add flag for norm or binary
+        self.qrels = self.retrieval_utils.get_qrels_norm_dict(qrels_path=self.qrels_path)
         # Lists of BERT inputs.
         self.input_ids_list = []
         self.token_type_ids_list = []
@@ -73,9 +74,9 @@ class DatasetProcessing:
             self.attention_mask_list.append(BERT_encodings['attention_mask'])
             # Qrels, query and doc_id used to determine whether entry in relevant or not relevant.
             if doc_id in self.qrels[query]:
-                self.labels_list.append([1])
+                self.labels_list.append([self.qrels[query][doc_id]])
             else:
-                self.labels_list.append([0])
+                self.labels_list.append([0.0])
 
         # New topics.
         self.topic_BERT_encodings = []
@@ -208,7 +209,7 @@ class DatasetProcessing:
                         self.__write_chuck_to_directory()
 
                 # Decode query.
-                decoded_query = self.search_tools.decode_query(q=query)
+                decoded_query = self.search_tools.decode_query_car(q=query)
                 # Extract text from index using doc_id.
                 if self.context_path == None:
                     text = self.search_tools.get_contents_from_docid(doc_id=doc_id)
@@ -305,15 +306,15 @@ class DatasetProcessing:
                     # Decode query.
                     query_id_news = passage_id_map[query_id]
                     query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id_news))
-                    query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
+                    query = self.search_tools.process_query_news(query_dict=query_dict, query_type=query_type)
                 else:
                     query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
-                    query = self.search_tools.process_news_query(query_dict=query_dict, query_type=query_type)
+                    query = self.search_tools.process_query_news(query_dict=query_dict, query_type=query_type)
 
                 # Extract text from index using doc_id.
                 if ranking_type == 'passage':
                     doc_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=doc_id))
-                    doc = self.search_tools.process_news_query(query_dict=doc_dict, query_type=query_type)
+                    doc = self.search_tools.process_query_news(query_dict=doc_dict, query_type=query_type)
                 else:
                     try:
                         doc = search_tools_car.get_contents_from_docid(doc_id=doc_id)
@@ -353,25 +354,26 @@ class DatasetProcessing:
 
 
 if __name__ == '__main__':
+    pass
 
-    index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
-    run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.run')
-    qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.qrels')
-    data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'small_dev')
-
-    # index_path = '/nfs/trec_car/index/anserini_paragraphs/lucene-index.car17v2.0.paragraphsv2'
-    # run_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.run'
-    # qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.qrels'
-    # data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/'
-
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    max_length = 512
-    use_token_type_ids = False
-    processing = TrecCarProcessing(qrels_path=qrels_path,
-                                   run_path=run_path,
-                                   index_path=index_path,
-                                   data_dir_path=data_dir_path,
-                                   tokenizer=tokenizer,
-                                   max_length=max_length)
-
-    processing.build_dataset(training_dataset=True, chuck_topic_size=10)
+    # index_path = '/Users/iain/LocalStorage/anserini_index/car_entity_v9'
+    # run_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.run')
+    # qrels_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'test.pages.cbor-hierarchical.entity.small.qrels')
+    # data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'small_dev')
+    #
+    # # index_path = '/nfs/trec_car/index/anserini_paragraphs/lucene-index.car17v2.0.paragraphsv2'
+    # # run_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.run'
+    # # qrels_path = '/nfs/trec_car/data/bert_reranker_datasets/dev_benchmark_Y1_25.qrels'
+    # # data_dir_path = '/nfs/trec_car/data/bert_reranker_datasets/'
+    #
+    # tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    # max_length = 512
+    # use_token_type_ids = False
+    # processing = TrecCarProcessing(qrels_path=qrels_path,
+    #                                run_path=run_path,
+    #                                index_path=index_path,
+    #                                data_dir_path=data_dir_path,
+    #                                tokenizer=tokenizer,
+    #                                max_length=max_length)
+    #
+    # processing.build_dataset(training_dataset=True, chuck_topic_size=10)

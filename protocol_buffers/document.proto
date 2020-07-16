@@ -32,6 +32,8 @@ message Document {
         int32 frequency = 2;
     }
     repeated ManualInlinkAnchors manual_inlink_anchors = 13;
+    // List of synthetic entity linking information containing anchor text, span location and entity doc_id/doc_name.
+    repeated EntityLinkTotal rel_entity_link_totals = 14;
 }
 
 
@@ -62,6 +64,8 @@ message DocumentContent {
     repeated string content_urls = 8;
     // Contains nesting level of list.
     int32 list_level = 9;
+    // Synthetic entity links within text.
+    repeated EntityLink rel_entity_links = 10;
 }
 
 

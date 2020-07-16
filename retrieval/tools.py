@@ -21,11 +21,10 @@ class RetrievalUtils:
 
     query_start_stings = ['enwiki:', 'tqa:']
 
-    def get_qrels_dict(self, qrels_path, car_valid_test=True):
+    def get_qrels_binary_dict(self, qrels_path, car_valid_test=True):
         """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}. """
         if isinstance(qrels_path, str):
             qrels_dict = {}
-            #TODO - does encoding="utf-8" change anything?
             with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
                 # Read each line of qrels file.
                 for line in qrels_file:
@@ -41,6 +40,36 @@ class RetrievalUtils:
         else:
             return None
 
+    def get_qrels_norm_dict(self, qrels_path, car_valid_test=True):
+        """ Build a dictionary from a qrels file: {query: [rel#1, rel#2, rel#3, ...]}. """
+
+        if isinstance(qrels_path, str):
+            with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
+                max_score = 0.0
+                # Read each line of qrels file.
+                for line in qrels_file:
+                    if len(line) > 4:
+                        _, _, _, score = self.unpack_qrels_line(line)
+                        if float(score) > max_score:
+                            max_score = float(score)
+
+            qrels_dict = {}
+            #TODO - does encoding="utf-8" change anything?
+            with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
+                # Read each line of qrels file.
+                for line in qrels_file:
+                    if len(line) > 4:
+                        query, _, doc_id, score = self.unpack_qrels_line(line)
+                        if query not in qrels_dict:
+                            qrels_dict[query] = {}
+                        if float(score) > 0.0:
+                            # key: query, value: list of doc_ids
+                            #if car_valid_test:
+                            qrels_dict[query][doc_id] = float(score) / max_score
+
+            return qrels_dict
+        else:
+            return None
 
     def test_valid_line(self, line):
         """ Return bool whether valid starting substring is in line"""
@@ -49,7 +78,7 @@ class RetrievalUtils:
 
     def unpack_run_line(self, line):
         """ """
-        split_line = line.split()
+        split_line = line.strip().split()
         query = split_line[0]
         q = split_line[1]
         doc_id = split_line[2]
@@ -57,6 +86,7 @@ class RetrievalUtils:
         score = split_line[4]
         name = split_line[5]
         return query, q, doc_id, rank, score, name
+
 
     def unpack_qrels_line(self, line):
         """ """
@@ -154,7 +184,7 @@ class SearchTools:
         return self.__get_ranking_from_searcher(query=query, hits=hits)
 
 
-    def __remove_query_start(self, q):
+    def __remove_query_start_car(self, q):
         """ Removes beginning of query. """
         for start_str in self.retrieval_utils.query_start_stings:
             i = len(start_str)
@@ -162,23 +192,23 @@ class SearchTools:
                 return q[i:]
 
 
-    def process_query(self, q):
+    def process_query_car(self, q):
         """ Simple processing of query from TREC CAR format i.e. leave in utf-8 except space characters. """
         # Remove begging of string.
-        q = self.__remove_query_start(q=q)
+        q = self.__remove_query_start_car(q=q)
         # Add space for utf-8 space character.
         q = q.replace('%20', ' ')
         return q
 
 
-    def decode_query(self, q, encoding='utf-8'):
+    def decode_query_car(self, q, encoding='utf-8'):
         """ Process query using ut-8 decoding from TREC CAR format. """
         # Remove "enwiki:" from begging of string.
-        q = self.__remove_query_start(q=q)
+        q = self.__remove_query_start_car(q=q)
         return urllib.parse.unquote(string=q, encoding=encoding)
 
 
-    def write_topics_from_qrels(self, qrels_path, topics_path=None):
+    def write_topics_car(self, qrels_path, topics_path=None):
         """ Given a TREC standard QRELS file in 'qrels_path', write TREC standard TOPICS file in 'file_path'. """
         # Build topics file path if None specified.
         if topics_path == None:
@@ -202,7 +232,7 @@ class SearchTools:
                             written_queries.append(query)
 
 
-    def write_topics_news_track(self, xml_topics_path, topics_path):
+    def write_topics_news(self, xml_topics_path, topics_path):
         """ Write TREC News Track topics from XLM topics file. """
         with open(topics_path, 'w') as f_out:
             with open(xml_topics_path, 'r') as f_in:
@@ -248,7 +278,7 @@ class SearchTools:
         return passage_id_map, entity_id_map
 
 
-    def write_qrels_news_track(self, xml_topics_path, old_qrels_path, qrels_path, ranking_type='passage'):
+    def write_qrels_news(self, xml_topics_path, old_qrels_path, qrels_path, ranking_type='passage'):
         """ Write qrels for News Track augmenting intermediate query ids. """
         assert ranking_type == 'passage' or ranking_type == 'entity'
         # Build maps - intermediate_id: id
@@ -270,7 +300,7 @@ class SearchTools:
                     f_out.write(" ".join((query, q, doc_id, str(score))) + '\n')
 
 
-    def combine_multiple_qrels(self, qrels_path_list, combined_qrels_path, combined_topics_path=None):
+    def combine_multiple_qrels(self, qrels_path_list, combined_qrels_path):
         """ Combines multiple qrels files into a single qrels file. """
         with open(combined_qrels_path, 'w') as f_combined_qrels:
             for qrels_path in qrels_path_list:
@@ -282,8 +312,6 @@ class SearchTools:
                         else:
                             print("Not valid query: {}")
                 f_combined_qrels.write('\n')
-
-        self.write_topics_from_qrels(qrels_path=combined_qrels_path, topics_path=combined_topics_path)
 
 
     def write_tree_no_root_qrels_from_tree_qrels(self, tree_qrels_path, tree_no_root_qrels_path):
@@ -308,7 +336,7 @@ class SearchTools:
                             f_new.write(" ".join((query, q, doc_id, str(new_score))) + '\n')
 
 
-    def write_run_from_topics(self, topics_path, run_path, hits=10, printing_step=1000):
+    def write_run_car(self, topics_path, run_path, hits=10, printing_step=1000):
         """ Write TREC RUN file using BM25 from topics file. """
         print("Beginning run.")
         print("-> Using topics: {}".format(topics_path))
@@ -323,12 +351,12 @@ class SearchTools:
                     # Try to decode query correctly using URL utf-8 decoding. If this string causes an error within
                     # Pyserini's SimpleSearcher.search() use basic string processing only dealing with space characters.
                     try:
-                        decoded_query = self.decode_query(q=query)
+                        decoded_query = self.decode_query_car(q=query)
                         retrieved_hits = self.searcher.search(q=decoded_query, k=hits)
                     except ValueError:
                         print("URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
                         print("-> Using simple processing")
-                        processed_query = self.process_query(q=query)
+                        processed_query = self.process_query_car(q=query)
                         retrieved_hits = self.searcher.search(q=processed_query, k=hits)
 
                     for hit in retrieved_hits:
@@ -343,7 +371,7 @@ class SearchTools:
         print("Completed run - written to run file: {}".format(run_path))
 
 
-    def process_news_query(self, query_dict, query_type):
+    def process_query_news(self, query_dict, query_type):
         """ """
         assert query_type == 'title' or query_type == 'title+contents'
         if query_type == 'title':
@@ -394,7 +422,7 @@ class SearchTools:
         with open(run_path, "w", encoding='utf-8') as f_run:
             for query_id, valid_docs in qrels_dict.items():
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
-                query = self.process_news_query(query_dict=query_dict, query_type=query_type)
+                query = self.process_query_news(query_dict=query_dict, query_type=query_type)
                 query = " ".join(query.split(" ")[:words])
 
                 try:
@@ -575,11 +603,12 @@ class EvalTools:
             run = []
             for d in run_doc_ids:
                 if d in self.qrels_dict[query]:
-                    run.append(1)
+                    run.append(1.0)
                 else:
-                    run.append(0)
+                    run.append(0.0)
 
             # Calculate number of relevant docs in qrels (R).
+            # TODO - is R length of rel or aggregation of relevance scores?
             R = len(self.qrels_dict[query])
             # Build query metric string.
             _, query_metrics_run = self.get_query_metrics(run=run, R=R, eval_config=eval_config)
@@ -593,12 +622,11 @@ class EvalTools:
             print("query: {} not in qrels_dict".format(query))
 
 
-    def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_path=None, eval_config=default_eval_config,
-                                      cap_rank=None):
+    def write_eval_from_qrels_and_run(self, run_path, qrels_path, eval_path=None, eval_config=default_eval_config):
         """ Given qrels and run paths calculate evaluation metrics by query and aggreated and write to file. """
         self.query_metrics_run_sum = {}
         self.query_metrics_oracle_sum = {}
-        self.qrels_dict = self.retrieval_utils.get_qrels_dict(qrels_path=qrels_path)
+        self.qrels_dict = self.retrieval_utils.get_qrels_binary_dict(qrels_path=qrels_path)
 
         with open(run_path, 'r') as f_run:
             # Store query of run (i.e. previous query).
@@ -675,7 +703,7 @@ class Pipeline:
                     'BM25': {'k1': k1, 'b': b}
                 }
                 search_tools = SearchTools(index_path=index_path, searcher_config=searcher_config)
-                search_tools.write_run_from_topics(topics_path=topics_path, run_path=run_path, hits=hits)
+                search_tools.write_run_car(topics_path=topics_path, run_path=run_path, hits=hits)
 
                 # Evaluate with evaluated runs.
                 eval_config = {
@@ -705,12 +733,9 @@ class Pipeline:
 
 
 if __name__ == '__main__':
-    search_tools = SearchTools()
-    xml_topics_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/newsir19-entity-ranking-topics.xml'
-    old_qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/newsir19-qrels-entity.txt'
-    topics_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/news_track.2019.entity.topics'
-    qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/news_track.2019.entity.qrels'
-
-    search_tools.write_topics_news_track(xml_topics_path, topics_path)
-
-    search_tools.write_qrels_news_track(xml_topics_path, old_qrels_path, qrels_path, ranking_type='entity')
+    eval_config = [('map', None), ('Rprec',None), ('recip_rank', None), ('ndcg',5), ('P',20), ('recall',40)]
+    eval_tools = EvalTools()
+    run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/entity.custom_anserini.500000_doc.100_words.title.fixed_qrels.run'
+    qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/news_track.2018.entity.qrels'
+    eval_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/entity.custom_anserini.500000_doc.100_words.title.fixed_qrels.run.summed.eval.map'
+    eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path, eval_config=eval_config)

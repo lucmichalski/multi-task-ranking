@@ -2,12 +2,23 @@
 from utils.trec_car_tools import iter_pages, Para, ParaText, ParaLink, Section, Image, List
 from protocol_buffers.document_pb2 import Document, DocumentContent, EntityLink,  EntityLinkTotal
 
+from REL.mention_detection import MentionDetection
+from REL.utils import process_results
+from REL.entity_disambiguation import EntityDisambiguation
+from REL.ner import Cmns, load_flair_ner
+
 from nltk.stem import PorterStemmer
 from string import punctuation
 
 import stream
+import urllib
 import copy
 import time
+import re
+import lmdb
+import pickle
+import sys
+import os
 
 
 class TrecCarParser:
@@ -21,6 +32,14 @@ class TrecCarParser:
         self.nlp = None
         self.linking_metadata = None
         self.stemmer = None
+        self.use_rel = False
+        self.mention_detection = None
+        self.tagger_ner = None
+        self.valid_page_ids = None
+        self.car_id_to_name_path = None
+        self.car_id_to_name_dict = None
+        self.valid_counter = 0
+        self.not_valid_counter = 0
 
     def get_manual_entity_links_from_para_bodies(self, bodies, text):
         """ Extract list manual entity_links (protocol_buffers/document.proto:EntityLink) from trec-car-tools
@@ -292,18 +311,117 @@ class TrecCarParser:
                             start_i = end_i
                             start_i_lower = end_i_lower
 
-            
+    def __rel_id_to_car_id(self, rel_id):
+        """ """
+        return 'enwiki:' + urllib.parse.quote(rel_id.replace('_', ' '), encoding='utf-8')
+
+
+    def __add_rel_entity_links(self):
+        """ Add REL entity linker links to all document contents. """
+
+        processed_document_contents = {}
+        for document_content in self.document.document_contents:
+            content_id = document_content.content_id
+            text = document_content.text
+            for i, sentence in enumerate(text.split(".")):
+                sentence_id = str(content_id+(str(i)))
+                processed_document_contents[sentence_id] = [str(sentence), []]
+
+        mentions_dataset, n_mentions = self.mention_detection.find_mentions(processed_document_contents, self.tagger_ner)
+        predictions, timing = self.entity_disambiguation.predict(mentions_dataset)
+        entity_links_dict = process_results(mentions_dataset, predictions, processed_document_contents)
+
+        env = lmdb.open(self.car_id_to_name_path, map_size=2e10)
+        with env.begin(write=False) as txn:
+
+            for document_content in self.document.document_contents:
+
+                content_id = document_content.content_id
+                text = document_content.text
+
+                i_sentence_start = 0
+                for i, sentence in enumerate(text.split(".")):
+                    sentence_id = str(content_id+(str(i)))
+                    if sentence_id in entity_links_dict:
+                        for entity_link in entity_links_dict[sentence_id]:
+
+                            if float(entity_link[4]) > 0.3:
+                                i_start = i_sentence_start + entity_link[0] + 1
+                                i_end = i_start + entity_link[1]
+                                span_text = text[i_start:i_end]
+
+                                entity_id = self.__rel_id_to_car_id(rel_id=entity_link[3])
+                                entity_name_pickle = txn.get(pickle.dumps(entity_id))
+
+                                if entity_name_pickle != None:
+                                    self.valid_counter += 1
+                                    #print('VALID: {}'.format(entity_id))
+                                    entity_name = pickle.loads(entity_name_pickle)
+
+                                    if entity_link[2] == span_text:
+
+                                        assert entity_link[2] == span_text, "word_text: '{}' , text[start_i:end_i]: '{}'".format(
+                                            entity_link[2], span_text)
+
+                                        anchor_text_location = EntityLink.AnchorTextLocation()
+                                        anchor_text_location.start = i_start
+                                        anchor_text_location.end = i_end
+
+                                        # Create new EntityLink message.
+                                        rel_entity_link = EntityLink()
+                                        rel_entity_link.anchor_text = entity_link[2]
+                                        rel_entity_link.entity_id = entity_id
+                                        rel_entity_link.entity_name = entity_name
+                                        rel_entity_link.anchor_text_location.MergeFrom(anchor_text_location)
+
+                                        document_content.rel_entity_links.append(rel_entity_link)
+
+                                    else:
+                                        regex = re.escape(entity_link[2])
+                                        for match in re.finditer(r'{}'.format(regex), sentence):
+                                            i_start = i_sentence_start + match.start()
+                                            i_end = i_sentence_start + match.end()
+                                            span_text = text[i_start:i_end]
+
+                                            assert entity_link[2] == span_text, "word_text: '{}' , text[start_i:end_i]: '{}'".format(
+                                                entity_link[2], span_text)
+
+                                            anchor_text_location = EntityLink.AnchorTextLocation()
+                                            anchor_text_location.start = i_start
+                                            anchor_text_location.end = i_end
+
+                                            # Create new EntityLink message.
+                                            rel_entity_link = EntityLink()
+                                            rel_entity_link.anchor_text = entity_link[2]
+                                            rel_entity_link.entity_id = entity_id
+                                            rel_entity_link.entity_name = entity_name
+                                            rel_entity_link.anchor_text_location.MergeFrom(anchor_text_location)
+
+                                            document_content.rel_entity_links.append(rel_entity_link)
+
+                                else:
+                                    self.not_valid_counter += 1
+
+                                    #print('NOT VALID: {}'.format(entity_id))
+
+                    i_sentence_start += len(sentence) + 1
+
+        print('*** valid: {} vs. not valid {} ***'.format(self.valid_counter, self.not_valid_counter))
+
+
     def __get_entity_link_totals_from_document_contents(self, document_contents, link_type='MANUAL'):
         """ Append entity_link_totals features (protocol_buffers/document.proto:EntityLinkTotals) from
         document_contents. """
-        assert link_type == 'MANUAL' or 'SYNTHETIC', "link_type: {} not 'MANUAL' or 'SYNTHETIC' flag".format(link_type)
+        assert link_type == 'MANUAL' or 'SYNTHETIC' or "REL", "link_type: {} not 'MANUAL' or 'SYNTHETIC' or 'REL' flag".format(link_type)
 
         def get_correct_entity_links(document_content, link_type):
             """ Return list of EntityLink message for either 'MANUAL' or 'SYNTHETIC' links. """
             if link_type == 'MANUAL':
                 return document_content.manual_entity_links
-            else:
+            elif link_type == 'SYNTHETIC':
                 return document_content.synthetic_entity_links
+            else:
+                return document_content.rel_entity_links
 
         # Build set of unique 'entity_id's of entities linked in document_contents
         entity_ids = []
@@ -365,6 +483,12 @@ class TrecCarParser:
             document_contents=self.document.document_contents, link_type='SYNTHETIC')
         self.document.synthetic_entity_link_totals.extend(synthetic_entity_link_totals)
 
+        if self.use_rel:
+            # Add list of synthetically tagged EntityLinkTotal messages by parsing list of DocumentContents messages.
+            rel_entity_link_totals = self.__get_entity_link_totals_from_document_contents(
+                document_contents=self.document.document_contents, link_type='REL')
+            self.document.rel_entity_link_totals.extend(rel_entity_link_totals)
+
 
     def write_documents_to_file(self, path, documents, buffer_size=10):
         """ Write list of Documents messages to binary file. """
@@ -419,6 +543,10 @@ class TrecCarParser:
         # Add synthetic tags to all DocumentContents.
         self.__add_synthetic_entity_links()
 
+        if self.use_rel:
+            # Add synthetic tags to all DocumentContents.
+            self.__add_rel_entity_links()
+
         # Add list of manually and synthetic tagged EntityLinkTotal messages by parsing list of
         # DocumentContents messages.
         self.__add_manual_and_sythetic_entity_link_totals()
@@ -427,13 +555,28 @@ class TrecCarParser:
 
 
     def parse_cbor_to_protobuf(self, read_path, write_path, num_docs, buffer_size=10, print_intervals=100,
-                               write_output=True):
+                               write_output=True, use_rel=False, rel_base_url=None, rel_wiki_year='2014',
+                               rel_model_path=None, car_id_to_name_path=None):
         """ Read TREC CAR cbor file to create a list of protobuffer Document messages
         (protocol_buffers/document.proto:Documents).  This list of messages are streammed to binary file using 'stream'
         package. """
+
         # list of Document messages.
         documents = []
         t_start = time.time()
+
+        if use_rel:
+            wiki_version = "wiki_" + rel_wiki_year
+            self.mention_detection = MentionDetection(rel_base_url, wiki_version)
+            self.tagger_ner = load_flair_ner("ner-fast")
+            #self.tagger_ner = Cmns(rel_base_url, wiki_version, n=5)
+            config = {
+                "mode": "eval",
+                "model_path": rel_model_path,
+            }
+
+            self.entity_disambiguation = EntityDisambiguation(rel_base_url, wiki_version, config)
+            self.car_id_to_name_path = car_id_to_name_path
 
         with open(read_path, 'rb') as f_read:
 
@@ -467,18 +610,19 @@ class TrecCarParser:
 
 
 if __name__ == '__main__':
-    # name = 'custom'
-    # year = 1
-    # read_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/testY{}.pages.cbor'.format(year)
-    # write_path = '/Users/iain/LocalStorage/coding/github/entity-linking-with-pyspark_processing/data/testY{}_{}.bin'.format(year, name)
-
-    for i in range(0,5):
-        read_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-{}-train.pages.cbor'.format(i)
-        write_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/fold-{}-train.pages.bin'.format(i)
-        num_docs = 10000
-        write_output = True
-        print_intervals = 10
-        buffer_size = 10
-        parser = TrecCarParser()
-        parser.parse_cbor_to_protobuf(read_path=read_path, write_path=write_path, num_docs=num_docs,
-                                      buffer_size=buffer_size, print_intervals=print_intervals, write_output=write_output)
+    car_id_to_name_path = '/Users/iain/LocalStorage/lmdb.map_id_to_name.v1'
+    read_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/benchmarkY2test-goldarticles.cbor'
+    write_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/testY2_custom_with_REL_2019_rel_0.3_el_conf.bin'
+    num_docs = 100
+    write_output = True
+    print_intervals = 10
+    buffer_size = 10
+    use_rel = False
+    rel_base_url = "/Users/iain/LocalStorage/coding/github/REL/"
+    rel_wiki_year = '2014'
+    rel_model_path = "/Users/iain/LocalStorage/coding/github/REL/ed-wiki-{}/model".format(rel_wiki_year)
+    parser = TrecCarParser()
+    parser.parse_cbor_to_protobuf(read_path=read_path, write_path=write_path, num_docs=num_docs,
+                                  buffer_size=buffer_size, print_intervals=print_intervals, write_output=write_output,
+                                  use_rel=use_rel, rel_base_url=rel_base_url, rel_wiki_year=rel_wiki_year,
+                                  rel_model_path=rel_model_path, car_id_to_name_path=car_id_to_name_path)
