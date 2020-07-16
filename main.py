@@ -45,6 +45,7 @@ if __name__ == '__main__':
     # from retrieval.dataset_processing import DatasetProcessing
     # from metadata import NewsPassagePaths
     #
+    #TEST
     qrels_path = '/nfs/trec_news_track/bert/train_passage/news_track.rain.passage.qrels'
     xml_topics_path = '/nfs/trec_news_track/data/2018/newsir18-topics.txt'
     run_path = '/nfs/trec_news_track/bert/train_passage/news_track.train.passage.250.bm25.rm3.run'
