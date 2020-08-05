@@ -23,7 +23,7 @@ def write_to_parquet(data, dir_path,  chunk):
     pd.DataFrame(data, columns=columns).to_parquet(parquet_path)
 
 
-def write_article_data_to_dir(read_path, dir_path, num_pages=1, chunks=100000, print_intervals=100, write_output=False):
+def write_article_data_to_dir(read_path, dir_path, num_docs=1, chunks=100000, print_intervals=100, write_output=False):
     """ Reads TREC news json file and writes chunks of data to parquet files in 'dir_path'. """
     # create new dir to store data chunks
     if (os.path.isdir(dir_path) == False) and write_output:
@@ -40,14 +40,14 @@ def write_article_data_to_dir(read_path, dir_path, num_pages=1, chunks=100000, p
             article = TrecNewsParser().build_article_from_json(article_json)
 
             # stops when 'num_pages' processed
-            if i >= num_pages:
+            if i >= num_docs:
                 break
 
             # add bytearray of trec_car_tool.Page object
             article_data.append([article['id'], bytearray(pickle.dumps(article))])
 
             # write data chunk to file
-            if ((i + 1) % chunks == 0) and (i != 0 or num_pages == 1):
+            if ((i + 1) % chunks == 0) and (i != 0 or num_docs == 1):
                 if write_output:
                     print('WRITING TO FILE: {}'.format(i))
                     write_to_parquet(data=article_data, dir_path=dir_path, chunk=chunk)
