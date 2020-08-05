@@ -109,8 +109,12 @@ def run_pyspark_pipeline(dir_path, spark, cores, out_path, rel_wiki_year, rel_ba
     @udf(returnType=BinaryType())
     def parse_udf(article_bytearray):
         # Parses trec_car_tools.Page object to create protobuf with entity linking.
+        print('article_bytearray:')
+        print(type(article_bytearray))
+        print(article_bytearray)
         article = pickle.loads(article_bytearray)
         doc = tnp_broadcast.parse_article_to_protobuf(article=article)
+        print('doc:')
         print(type(doc))
         print(doc)
         doc_bytearray = pickle.dumps(doc.SerializeToString())
