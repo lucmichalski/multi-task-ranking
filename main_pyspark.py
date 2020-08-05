@@ -47,7 +47,7 @@ if __name__ == '__main__':
     #                           print_intervals=print_intervals,
     #                           write_output=write_output)
 
-    out_path = '/nfs/trec_news_track/index/test_10000_out_v2/'
+    out_path = '/nfs/trec_news_track/index/test_10000_out_v3/'
     run_pyspark_pipeline(dir_path,
                          spark,
                          cores,
