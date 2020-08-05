@@ -97,18 +97,19 @@ def run_pyspark_pipeline(dir_path, spark, cores, out_path, rel_wiki_year, rel_ba
         print('repartitioning df')
         df_in = df_in.repartition(cores*4)
         print("Number of partitions should equal 4*cores --> {}".format(df_in.rdd.getNumPartitions()))
+    # broadcast model
+    tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
+                         rel_base_url=rel_base_url,
+                         rel_model_path=rel_model_path,
+                         car_id_to_name_path=car_id_to_name_path)
 
-
+    tnp_broadcast = spark.broadcast(tnp)
 
     @udf(returnType=BinaryType())
     def parse_udf(article_bytearray):
         # Parses trec_car_tools.Page object to create protobuf with entity linking.
         article = pickle.loads(article_bytearray)
-        tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
-                             rel_base_url=rel_base_url,
-                             rel_model_path=rel_model_path,
-                             car_id_to_name_path=car_id_to_name_path)
-        doc = tnp.parse_article_to_protobuf(article=article)
+        doc = tnp_broadcast.parse_article_to_protobuf(article=article)
         doc_bytearray = pickle.dumps(doc.SerializeToString())
         return doc_bytearray
 
