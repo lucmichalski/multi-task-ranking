@@ -213,8 +213,7 @@ class TrecNewsParser:
         self.car_id_to_name_path = car_id_to_name_path
 
 
-    def parse_json_to_protobuf(self, read_path, num_docs, rel_wiki_year, rel_base_url, rel_model_path,
-                               car_id_to_name_path, write_output=False, write_path=None, print_intervals=1000,
+    def parse_json_to_protobuf(self, read_path, num_docs, write_output=False, write_path=None, print_intervals=1000,
                                buffer_size=1000):
         """ """
         t_start = time.time()
@@ -230,11 +229,7 @@ class TrecNewsParser:
                     break
 
                 # parse page to create new document.
-                self.parse_article_to_protobuf(article=article,
-                                               rel_wiki_year=rel_wiki_year,
-                                               rel_base_url=rel_base_url,
-                                               rel_model_path=rel_model_path,
-                                               car_id_to_name_path=car_id_to_name_path)
+                self.parse_article_to_protobuf(article=article)
 
                 # Append Document message to document list.
                 documents.append(self.document)
@@ -264,11 +259,10 @@ if __name__ == '__main__':
     print_intervals = 100
     write_output = True
     write_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/news.bin'
-    TrecNewsParser().parse_json_to_protobuf(read_path=path,
-                                            num_docs=25,
-                                            rel_wiki_year=rel_wiki_year,
-                                            rel_base_url=rel_base_url,
-                                            rel_model_path=rel_model_path,
-                                            car_id_to_name_path=car_id_to_name_path,
-                                            print_intervals=print_intervals)
+    TrecNewsParser(rel_wiki_year=rel_wiki_year,
+                   rel_base_url=rel_base_url,
+                   rel_model_path=rel_model_path,
+                   car_id_to_name_path=car_id_to_name_path).parse_json_to_protobuf(read_path=path,
+                                                                                   num_docs=25,
+                                                                                   print_intervals=print_intervals)
 
