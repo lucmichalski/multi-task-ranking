@@ -60,6 +60,5 @@ if __name__ == '__main__':
     tnp = TrecNewsParser(rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path)
     tnp.parse_json_to_protobuf(read_path=read_path,
                                num_docs=num_docs,
-                               write_output=True,
+                               write_output=write_output,
                                print_intervals=print_intervals)
-read_path, num_docs, write_output=False, write_path=None, print_intervals=1000
