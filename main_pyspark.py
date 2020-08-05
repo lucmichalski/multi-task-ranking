@@ -42,6 +42,10 @@ if __name__ == '__main__':
 
     write_article_data_to_dir(read_path=read_path,
                               dir_path=dir_path,
+                              rel_wiki_year=rel_wiki_year,
+                              rel_base_url=rel_base_url,
+                              rel_model_path=rel_model_path,
+                              car_id_to_name_path=car_id_to_name_path,
                               num_docs=num_docs,
                               chunks=chunks,
                               print_intervals=print_intervals,
