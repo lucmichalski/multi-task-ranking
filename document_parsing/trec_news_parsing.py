@@ -60,6 +60,8 @@ class TrecNewsParser:
 
         self.__add_rel_entity_links()
 
+        return self.document
+
 
     def __build_text_from_contents(self, title, contents):
         """ """
@@ -231,10 +233,8 @@ class TrecNewsParser:
                     break
 
                 # parse page to create new document.
-                self.parse_article_to_protobuf(article=article)
-
                 # Append Document message to document list.
-                documents.append(self.document)
+                documents.append(self.parse_article_to_protobuf(article=article))
 
                 if ((i + 1) % print_intervals == 0):
                     print('----- DOC #{} -----'.format(i))
