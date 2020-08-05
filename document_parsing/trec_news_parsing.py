@@ -147,12 +147,34 @@ class TrecNewsParser:
                             #entity_name_pickle = txn.get(pickle.dumps(entity_id))
 
                             #if entity_name_pickle != None:
-                            if True:
-                                self.valid_counter += 1
-                                #entity_name = pickle.loads(entity_name_pickle)
-                                entity_name = entity_id
+                                #self.valid_counter += 1
+                            #entity_name = pickle.loads(entity_name_pickle)
+                            entity_name = entity_id
 
-                                if entity_link[2] == span_text:
+                            if entity_link[2] == span_text:
+
+                                assert entity_link[2] == span_text, \
+                                    "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
+
+                                anchor_text_location = EntityLink.AnchorTextLocation()
+                                anchor_text_location.start = i_start
+                                anchor_text_location.end = i_end
+
+                                # Create new EntityLink message.
+                                rel_entity_link = EntityLink()
+                                rel_entity_link.anchor_text = entity_link[2]
+                                rel_entity_link.entity_id = entity_id
+                                rel_entity_link.entity_name = entity_name
+                                rel_entity_link.anchor_text_location.MergeFrom(anchor_text_location)
+
+                                document_content.rel_entity_links.append(rel_entity_link)
+
+                            else:
+                                regex = re.escape(entity_link[2])
+                                for match in re.finditer(r'{}'.format(regex), sentence):
+                                    i_start = i_sentence_start + match.start()
+                                    i_end = i_sentence_start + match.end()
+                                    span_text = text[i_start:i_end]
 
                                     assert entity_link[2] == span_text, \
                                         "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
@@ -170,35 +192,13 @@ class TrecNewsParser:
 
                                     document_content.rel_entity_links.append(rel_entity_link)
 
-                                else:
-                                    regex = re.escape(entity_link[2])
-                                    for match in re.finditer(r'{}'.format(regex), sentence):
-                                        i_start = i_sentence_start + match.start()
-                                        i_end = i_sentence_start + match.end()
-                                        span_text = text[i_start:i_end]
+                            #else:
+                                #self.not_valid_counter += 1
 
-                                        assert entity_link[2] == span_text, \
-                                            "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
-
-                                        anchor_text_location = EntityLink.AnchorTextLocation()
-                                        anchor_text_location.start = i_start
-                                        anchor_text_location.end = i_end
-
-                                        # Create new EntityLink message.
-                                        rel_entity_link = EntityLink()
-                                        rel_entity_link.anchor_text = entity_link[2]
-                                        rel_entity_link.entity_id = entity_id
-                                        rel_entity_link.entity_name = entity_name
-                                        rel_entity_link.anchor_text_location.MergeFrom(anchor_text_location)
-
-                                        document_content.rel_entity_links.append(rel_entity_link)
-
-                            else:
-                                self.not_valid_counter += 1
 
                 i_sentence_start += len(sentence) + 1
 
-        print('*** valid: {} vs. not valid {} ***'.format(self.valid_counter, self.not_valid_counter))
+        #print('*** valid: {} vs. not valid {} ***'.format(self.valid_counter, self.not_valid_counter))
 
 
     def __init_rel_models(self, rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path):
