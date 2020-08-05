@@ -99,11 +99,13 @@ def run_pyspark_pipeline(dir_path, spark, cores, out_path, rel_wiki_year, rel_ba
         print("Number of partitions should equal 4*cores --> {}".format(df_in.rdd.getNumPartitions()))
 
     # broadcast model
+    print('loading TrecNewsParser')
     tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
                          rel_base_url=rel_base_url,
                          rel_model_path=rel_model_path,
                          car_id_to_name_path=car_id_to_name_path)
     sc = spark.sparkContext
+    print('broadcatsing TrecNewsParser')
     tnp_broadcast = sc.broadcast(tnp)
 
     @udf(returnType=BinaryType())
@@ -121,6 +123,7 @@ def run_pyspark_pipeline(dir_path, spark, cores, out_path, rel_wiki_year, rel_ba
         return doc_bytearray
 
     # Add index to DF.
+    print('buildings doc_bytearray -> entity linking and protobuf processing')
     df_parse = df_in.withColumn("doc_bytearray", parse_udf("article_bytearray"))
     df_parse = df_parse.withColumn(
         "index",
