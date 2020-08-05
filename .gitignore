@@ -131,3 +131,6 @@ dmypy.json
 .idea*
 data/temp/*
 !data/temp/file.txt
+
+wiki_*
+ed-wiki-*
