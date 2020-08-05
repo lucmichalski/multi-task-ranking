@@ -219,7 +219,7 @@ class TrecNewsParser:
         t_start = time.time()
 
         documents = []
-        with open(read_path) as txt_file:
+        with open(read_path, encoding='utf-8') as txt_file:
             for i, line in enumerate(txt_file):
                 article_json = json.loads(line)
 
@@ -229,7 +229,11 @@ class TrecNewsParser:
                     break
 
                 # parse page to create new document.
-                self.parse_article_to_protobuf(article=article)
+                self.parse_article_to_protobuf(article=article,
+                                               rel_wiki_year=rel_wiki_year,
+                                               rel_base_url=rel_base_url,
+                                               rel_model_path=rel_model_path,
+                                               car_id_to_name_path=car_id_to_name_path)
 
                 # Append Document message to document list.
                 documents.append(self.document)
