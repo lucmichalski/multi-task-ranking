@@ -32,7 +32,7 @@ def write_article_data_to_dir(read_path, dir_path, num_pages=1, chunks=100000, p
 
     chunk = 0
     article_data = []
-    with open(read_path) as f:
+    with open(read_path, encoding="utf-8") as f:
         t_start = time.time()
         for i, line in enumerate(f):
 
