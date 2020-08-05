@@ -124,33 +124,57 @@ class TrecNewsParser:
         entity_links_dict = process_results(mentions_dataset, predictions, processed_document_contents)
 
         # Connet to LMDB of: {pickle(car_id): pickle(car_name).}
-        env = lmdb.open(self.car_id_to_name_path, map_size=2e10)
-        with env.begin(write=False) as txn:
+        #env = lmdb.open(self.car_id_to_name_path, map_size=2e10)
+        #with env.begin(write=False) as txn:
 
-            for document_content in self.document.document_contents:
+        for document_content in self.document.document_contents:
 
-                content_id = document_content.content_id
-                text = document_content.text
+            content_id = document_content.content_id
+            text = document_content.text
 
-                i_sentence_start = 0
-                for i, sentence in enumerate(text.split(".")):
-                    sentence_id = str(content_id + (str(i)))
-                    if sentence_id in entity_links_dict:
-                        for entity_link in entity_links_dict[sentence_id]:
-                            # % of confidence in entity linking
-                            if float(entity_link[4]) >= 0.0:
-                                i_start = i_sentence_start + entity_link[0] + 1
-                                i_end = i_start + entity_link[1]
-                                span_text = text[i_start:i_end]
+            i_sentence_start = 0
+            for i, sentence in enumerate(text.split(".")):
+                sentence_id = str(content_id + (str(i)))
+                if sentence_id in entity_links_dict:
+                    for entity_link in entity_links_dict[sentence_id]:
+                        # % of confidence in entity linking
+                        if float(entity_link[4]) >= 0.0:
+                            i_start = i_sentence_start + entity_link[0] + 1
+                            i_end = i_start + entity_link[1]
+                            span_text = text[i_start:i_end]
 
-                                entity_id = self.__rel_id_to_car_id(rel_id=entity_link[3])
-                                entity_name_pickle = txn.get(pickle.dumps(entity_id))
+                            entity_id = self.__rel_id_to_car_id(rel_id=entity_link[3])
+                            #entity_name_pickle = txn.get(pickle.dumps(entity_id))
 
-                                if entity_name_pickle != None:
-                                    self.valid_counter += 1
-                                    entity_name = pickle.loads(entity_name_pickle)
+                            #if entity_name_pickle != None:
+                            if True:
+                                self.valid_counter += 1
+                                entity_name = pickle.loads(entity_name_pickle)
 
-                                    if entity_link[2] == span_text:
+                                if entity_link[2] == span_text:
+
+                                    assert entity_link[2] == span_text, \
+                                        "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
+
+                                    anchor_text_location = EntityLink.AnchorTextLocation()
+                                    anchor_text_location.start = i_start
+                                    anchor_text_location.end = i_end
+
+                                    # Create new EntityLink message.
+                                    rel_entity_link = EntityLink()
+                                    rel_entity_link.anchor_text = entity_link[2]
+                                    rel_entity_link.entity_id = entity_id
+                                    rel_entity_link.entity_name = entity_name
+                                    rel_entity_link.anchor_text_location.MergeFrom(anchor_text_location)
+
+                                    document_content.rel_entity_links.append(rel_entity_link)
+
+                                else:
+                                    regex = re.escape(entity_link[2])
+                                    for match in re.finditer(r'{}'.format(regex), sentence):
+                                        i_start = i_sentence_start + match.start()
+                                        i_end = i_sentence_start + match.end()
+                                        span_text = text[i_start:i_end]
 
                                         assert entity_link[2] == span_text, \
                                             "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
@@ -168,33 +192,10 @@ class TrecNewsParser:
 
                                         document_content.rel_entity_links.append(rel_entity_link)
 
-                                    else:
-                                        regex = re.escape(entity_link[2])
-                                        for match in re.finditer(r'{}'.format(regex), sentence):
-                                            i_start = i_sentence_start + match.start()
-                                            i_end = i_sentence_start + match.end()
-                                            span_text = text[i_start:i_end]
+                            else:
+                                self.not_valid_counter += 1
 
-                                            assert entity_link[2] == span_text, \
-                                                "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
-
-                                            anchor_text_location = EntityLink.AnchorTextLocation()
-                                            anchor_text_location.start = i_start
-                                            anchor_text_location.end = i_end
-
-                                            # Create new EntityLink message.
-                                            rel_entity_link = EntityLink()
-                                            rel_entity_link.anchor_text = entity_link[2]
-                                            rel_entity_link.entity_id = entity_id
-                                            rel_entity_link.entity_name = entity_name
-                                            rel_entity_link.anchor_text_location.MergeFrom(anchor_text_location)
-
-                                            document_content.rel_entity_links.append(rel_entity_link)
-
-                                else:
-                                    self.not_valid_counter += 1
-
-                    i_sentence_start += len(sentence) + 1
+                i_sentence_start += len(sentence) + 1
 
         print('*** valid: {} vs. not valid {} ***'.format(self.valid_counter, self.not_valid_counter))
 
@@ -256,13 +257,13 @@ if __name__ == '__main__':
     rel_wiki_year = '2019'
     rel_model_path = "/Users/iain/LocalStorage/coding/github/REL/ed-wiki-{}/model".format(rel_wiki_year)
     car_id_to_name_path = '/Users/iain/LocalStorage/lmdb.map_id_to_name.v1'
-    print_intervals = 100
+    print_intervals = 4
     write_output = True
     write_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/news.bin'
     TrecNewsParser(rel_wiki_year=rel_wiki_year,
                    rel_base_url=rel_base_url,
                    rel_model_path=rel_model_path,
                    car_id_to_name_path=car_id_to_name_path).parse_json_to_protobuf(read_path=path,
-                                                                                   num_docs=25,
+                                                                                   num_docs=100,
                                                                                    print_intervals=print_intervals)
 
