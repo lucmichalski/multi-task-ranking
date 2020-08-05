@@ -28,7 +28,7 @@ class TrecNewsParser:
         self.car_id_to_name_path = None
         self.not_valid_counter = 0
         self.valid_counter = 0
-        self.__init_rel_models(self, rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path)
+        self.__init_rel_models(rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path)
 
 
     def write_documents_to_file(self, path, documents, buffer_size=10):
