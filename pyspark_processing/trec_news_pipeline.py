@@ -111,6 +111,7 @@ def run_pyspark_pipeline(dir_path, spark, cores, out_path, rel_wiki_year, rel_ba
         # Parses trec_car_tools.Page object to create protobuf with entity linking.
         article = pickle.loads(article_bytearray)
         doc = tnp_broadcast.parse_article_to_protobuf(article=article)
+        print(type(doc))
         print(doc)
         doc_bytearray = pickle.dumps(doc.SerializeToString())
         return doc_bytearray
