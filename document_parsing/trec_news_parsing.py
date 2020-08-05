@@ -149,7 +149,8 @@ class TrecNewsParser:
                             #if entity_name_pickle != None:
                             if True:
                                 self.valid_counter += 1
-                                entity_name = pickle.loads(entity_name_pickle)
+                                #entity_name = pickle.loads(entity_name_pickle)
+                                entity_name = entity_id
 
                                 if entity_link[2] == span_text:
 
