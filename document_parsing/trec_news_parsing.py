@@ -198,7 +198,7 @@ class TrecNewsParser:
 
                 i_sentence_start += len(sentence) + 1
 
-        print('*** valid: {} vs. not valid {} ***'.format(self.valid_counter, self.not_valid_counter))
+        #print('*** valid: {} vs. not valid {} ***'.format(self.valid_counter, self.not_valid_counter))
 
 
     def __init_rel_models(self, rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path):
