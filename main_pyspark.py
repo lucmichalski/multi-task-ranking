@@ -47,18 +47,18 @@ if __name__ == '__main__':
     #                           print_intervals=print_intervals,
     #                           write_output=write_output)
 
-    # out_path = '/nfs/trec_news_track/index/test_10000_out_v2/'
-    # run_pyspark_pipeline(dir_path,
-    #                      spark,
-    #                      cores,
-    #                      out_path,
-    #                      rel_wiki_year,
-    #                      rel_base_url,
-    #                      rel_model_path,
-    #                      car_id_to_name_path)
+    out_path = '/nfs/trec_news_track/index/test_10000_out_v2/'
+    run_pyspark_pipeline(dir_path,
+                         spark,
+                         cores,
+                         out_path,
+                         rel_wiki_year,
+                         rel_base_url,
+                         rel_model_path,
+                         car_id_to_name_path)
 
-    tnp = TrecNewsParser(rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path)
-    tnp.parse_json_to_protobuf(read_path=read_path,
-                               num_docs=num_docs,
-                               write_output=write_output,
-                               print_intervals=print_intervals)
+    # tnp = TrecNewsParser(rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path)
+    # tnp.parse_json_to_protobuf(read_path=read_path,
+    #                            num_docs=num_docs,
+    #                            write_output=write_output,
+    #                            print_intervals=print_intervals)
