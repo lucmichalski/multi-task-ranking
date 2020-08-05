@@ -19,7 +19,7 @@ class TrecNewsParser:
     """ Class to parse TREC News (Washington Post) to protocol buffer Document  (protocol_buffers/document_pb2/Document)
     """
 
-    def __init__(self, rel_wiki_year=None, rel_base_url=None, rel_model_path=None, car_id_to_name_path=None):
+    def __init__(self, rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path):
 
         self.document = None
         self.mention_detection = None
