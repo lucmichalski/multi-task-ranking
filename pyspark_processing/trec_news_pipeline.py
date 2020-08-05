@@ -97,13 +97,14 @@ def run_pyspark_pipeline(dir_path, spark, cores, out_path, rel_wiki_year, rel_ba
         print('repartitioning df')
         df_in = df_in.repartition(cores*4)
         print("Number of partitions should equal 4*cores --> {}".format(df_in.rdd.getNumPartitions()))
+
     # broadcast model
     tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
                          rel_base_url=rel_base_url,
                          rel_model_path=rel_model_path,
                          car_id_to_name_path=car_id_to_name_path)
-
-    tnp_broadcast = spark.broadcast(tnp)
+    sc = spark.sparkContext
+    tnp_broadcast = sc.broadcast(tnp)
 
     @udf(returnType=BinaryType())
     def parse_udf(article_bytearray):
