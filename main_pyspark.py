@@ -34,6 +34,11 @@ if __name__ == '__main__':
     chunks = 1000
     print_intervals = 1000
     write_output = True
+    rel_wiki_year = '2019'
+    rel_base_url = '/nfs/trec_car/entity_processing/REL/'
+    rel_model_path = rel_base_url + 'ed-wiki-{}/model'.format(rel_wiki_year)
+    car_id_to_name_path = '/nfs/trec_news_track/lmdb.map_id_to_name.v1'
+
     # write_article_data_to_dir(read_path=read_path,
     #                           dir_path=dir_path,
     #                           num_pages=num_pages,
@@ -42,6 +47,13 @@ if __name__ == '__main__':
     #                           write_output=write_output)
 
     out_path = '/nfs/trec_news_track/index/test_10000_out/'
-    run_pyspark_pipeline(dir_path, spark, cores, out_path)
+    run_pyspark_pipeline(dir_path,
+                         spark,
+                         cores,
+                         out_path,
+                         rel_wiki_year,
+                         rel_base_url,
+                         rel_model_path,
+                         car_id_to_name_path)
 
 

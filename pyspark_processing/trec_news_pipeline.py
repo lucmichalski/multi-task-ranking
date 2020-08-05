@@ -70,7 +70,8 @@ def write_article_data_to_dir(read_path, dir_path, num_pages=1, chunks=100000, p
     print('PROCESSED DATA: {} --> processing time / page: {}'.format(time_delta, time_delta / (i + 1)))
 
 
-def run_pyspark_pipeline(dir_path, spark, cores, out_path):
+def run_pyspark_pipeline(dir_path, spark, cores, out_path, rel_wiki_year, rel_base_url, rel_model_path,
+                         car_id_to_name_path):
     """ Reads parquet files from 'dir_path' and parses trec_car_tools.Page object to create protobuf with entity
     linking. """
 
@@ -100,7 +101,11 @@ def run_pyspark_pipeline(dir_path, spark, cores, out_path):
         # Parses trec_car_tools.Page object to create protobuf with entity linking.
         article = pickle.loads(article_bytearray)
         tp = TrecNewsParser()
-        doc = tp.parse_article_to_protobuf(article=article)
+        doc = tp.parse_article_to_protobuf(article=article,
+                                           rel_wiki_year=rel_wiki_year,
+                                           rel_base_url=rel_base_url,
+                                           rel_model_path=rel_model_path,
+                                           car_id_to_name_path=car_id_to_name_path)
         doc_bytearray = pickle.dumps(doc.SerializeToString())
         return doc_bytearray
 

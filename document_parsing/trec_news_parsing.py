@@ -41,8 +41,11 @@ class TrecNewsParser:
         """ Retrieve protocol buffer message matching 'doc_id' from binary fire """
         return [d for d in stream.parse(path, Document) if d.doc_id == doc_id][0]
 
-    def parse_article_to_protobuf(self, article):
+    def parse_article_to_protobuf(self, article, rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path):
         """ """
+
+        self.__init_rel_models(rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path)
+
         # Initialise empty message.
         self.document = Document()
         self.document.doc_id = article['id']
@@ -196,12 +199,8 @@ class TrecNewsParser:
         print('*** valid: {} vs. not valid {} ***'.format(self.valid_counter, self.not_valid_counter))
 
 
-    def parse_json_to_protobuf(self, read_path, num_docs, rel_wiki_year, rel_base_url, rel_model_path,
-                               car_id_to_name_path, write_output=False, write_path=None, print_intervals=1000,
-                               buffer_size=1000):
+    def __init_rel_models(self, rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path):
         """ """
-        t_start = time.time()
-
         # Will require models and data saved paths
         wiki_version = "wiki_" + rel_wiki_year
         self.mention_detection = MentionDetection(rel_base_url, wiki_version)
@@ -213,12 +212,18 @@ class TrecNewsParser:
         self.entity_disambiguation = EntityDisambiguation(rel_base_url, wiki_version, config)
         self.car_id_to_name_path = car_id_to_name_path
 
+    def parse_json_to_protobuf(self, read_path, num_docs, rel_wiki_year, rel_base_url, rel_model_path,
+                               car_id_to_name_path, write_output=False, write_path=None, print_intervals=1000,
+                               buffer_size=1000):
+        """ """
+        t_start = time.time()
+
         documents = []
         with open(read_path) as txt_file:
             for i, line in enumerate(txt_file):
                 article_json = json.loads(line)
 
-                article = self.__build_article_from_json(article_json)
+                article = self.build_article_from_json(article_json)
 
                 if i+1 > num_docs:
                     break
