@@ -11,8 +11,8 @@ from pyspark_processing.trec_car_pipeline import write_pages_data_to_dir, run_py
 
 
 spark_drive_gbs = 50
-spark_executor_gbs = 2
-cores = 16
+spark_executor_gbs = 5
+cores = 8
 
 print('\n//////// RUNNING WITH CORES {} //////////'.format(cores))
 spark = SparkSession.\
