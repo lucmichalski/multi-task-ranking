@@ -56,12 +56,13 @@ if __name__ == '__main__':
     #                      rel_base_url,
     #                      rel_model_path,
     #                      car_id_to_name_path)
-
-    TrecNewsParser().parse_json_to_protobuf(read_path=read_path,
-                                            num_docs=num_docs,
-                                            rel_wiki_year=rel_wiki_year,
-                                            rel_base_url=rel_base_url,
-                                            rel_model_path=rel_model_path,
-                                            car_id_to_name_path=car_id_to_name_path,
-                                            print_intervals=print_intervals)
+    
+    tnp = TrecNewsParser(rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path)
+    tnp.parse_json_to_protobuf(read_path=read_path,
+                               num_docs=num_docs,
+                               rel_wiki_year=rel_wiki_year,
+                               rel_base_url=rel_base_url,
+                               rel_model_path=rel_model_path,
+                               car_id_to_name_path=car_id_to_name_path,
+                               print_intervals=print_intervals)
 

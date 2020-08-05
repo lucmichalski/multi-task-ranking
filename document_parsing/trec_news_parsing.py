@@ -19,7 +19,7 @@ class TrecNewsParser:
     """ Class to parse TREC News (Washington Post) to protocol buffer Document  (protocol_buffers/document_pb2/Document)
     """
 
-    def __init__(self):
+    def __init__(self, rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path):
 
         self.document = None
         self.mention_detection = None
@@ -28,6 +28,8 @@ class TrecNewsParser:
         self.car_id_to_name_path = None
         self.not_valid_counter = 0
         self.valid_counter = 0
+        self.__init_rel_models(self, rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path)
+
 
     def write_documents_to_file(self, path, documents, buffer_size=10):
         """ Write list of Documents messages to binary file. """
@@ -41,10 +43,8 @@ class TrecNewsParser:
         """ Retrieve protocol buffer message matching 'doc_id' from binary fire """
         return [d for d in stream.parse(path, Document) if d.doc_id == doc_id][0]
 
-    def parse_article_to_protobuf(self, article, rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path):
+    def parse_article_to_protobuf(self, article):
         """ """
-
-        self.__init_rel_models(rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path)
 
         # Initialise empty message.
         self.document = Document()
@@ -211,6 +211,7 @@ class TrecNewsParser:
         }
         self.entity_disambiguation = EntityDisambiguation(rel_base_url, wiki_version, config)
         self.car_id_to_name_path = car_id_to_name_path
+
 
     def parse_json_to_protobuf(self, read_path, num_docs, rel_wiki_year, rel_base_url, rel_model_path,
                                car_id_to_name_path, write_output=False, write_path=None, print_intervals=1000,
