@@ -1,11 +1,13 @@
 
-from protocol_buffers.document_pb2 import Document, DocumentContent, EntityLink,  EntityLinkTotal
+from protocol_buffers import document_pb2
+from retrieval.tools import SearchTools
 
 from REL.mention_detection import MentionDetection
 from REL.utils import process_results
 from REL.entity_disambiguation import EntityDisambiguation
 from REL.ner import Cmns, load_flair_ner
 
+import pandas as pd
 import urllib
 import pickle
 import stream
@@ -35,23 +37,92 @@ class TrecNewsParser:
         """ Write list of Documents messages to binary file. """
         stream.dump(path, *documents, buffer_size=buffer_size)
 
+
     def get_list_protobuf_messages(self, path):
         """ Retrieve list of protocol buffer messages from binary fire """
-        return [d for d in stream.parse(path, Document)]
+        return [d for d in stream.parse(path, document_pb2.Document)]
+
 
     def get_protobuf_message(self, path, doc_id):
         """ Retrieve protocol buffer message matching 'doc_id' from binary fire """
-        return [d for d in stream.parse(path, Document) if d.doc_id == doc_id][0]
+        return [d for d in stream.parse(path, document_pb2.Document) if d.doc_id == doc_id][0]
+
+
+    def __get_entity_link_totals_from_document_contents(self, document_contents, link_type='REL'):
+        """ Append entity_link_totals features (protocol_buffers/document.proto:EntityLinkTotals) from
+        document_contents. """
+        assert link_type ==  "REL", "link_type: {} not  'REL' flag".format(link_type)
+
+        def get_correct_entity_links(document_content, link_type):
+            """ Return list of EntityLink message for either 'MANUAL' or 'SYNTHETIC' links. """
+            if link_type == 'REL':
+                return document_content.manual_entity_links
+
+        # Build set of unique 'entity_id's of entities linked in document_contents
+        entity_ids = []
+        for document_content in document_contents:
+            entity_links = get_correct_entity_links(document_content=document_content, link_type=link_type)
+
+            for entity_link in entity_links:
+                entity_ids.append(entity_link.entity_id)
+        unique_entity_ids = set(entity_ids)
+
+        entity_link_totals = []
+        for unique_entity_id in unique_entity_ids:
+            # For each unique 'entity_id' loop over 'document_contents' to build anchor_text_data.
+            # 'anchor_text_data': key= 'anchor_text' of 'entity_id', value= number of times 'anchor_text' linked to
+            # 'entity_id' i.. frequency.
+            anchor_text_data = {}
+            for document_content in document_contents:
+                entity_links = get_correct_entity_links(document_content=document_content, link_type=link_type)
+
+                for entity_link in entity_links:
+                    if entity_link.entity_id == unique_entity_id:
+                        entity_name = entity_link.entity_name
+                        anchor_text = entity_link.anchor_text
+
+                        if anchor_text not in anchor_text_data:
+                            anchor_text_data[anchor_text] = 1
+                        else:
+                            anchor_text_data[anchor_text] += 1
+
+            # For each unique 'entity_id' transform 'anchor_text_data' to required data format for 'anchor_text_frequency'
+            anchor_text_frequencies = []
+            for k, v in anchor_text_data.items():
+                anchor_text_frequency = document_pb2.EntityLinkTotal.AnchorTextFrequency()
+                anchor_text_frequency.anchor_text = k
+                anchor_text_frequency.frequency = v
+                anchor_text_frequencies.append(anchor_text_frequency)
+
+            # Create an EntityLinkTotal message for 'entity_id'.
+            entity_link_total = document_pb2.EntityLinkTotal()
+            entity_link_total.entity_id = unique_entity_id
+            entity_link_total.entity_name = entity_name
+            entity_link_total.anchor_text_frequencies.extend(anchor_text_frequencies)
+
+            # Append to Document.entity_link_totals
+            entity_link_totals.append(entity_link_total)
+
+        return entity_link_totals
+
+
+    def __add_manual_and_sythetic_entity_link_totals(self):
+        """ """
+        # Add list of synthetically tagged EntityLinkTotal messages by parsing list of DocumentContents messages.
+        rel_entity_link_totals = self.__get_entity_link_totals_from_document_contents(
+            document_contents=self.document.document_contents, link_type='REL')
+        self.document.rel_entity_link_totals.extend(rel_entity_link_totals)
+
 
     def parse_article_to_protobuf(self, article):
         """ """
 
         # Initialise empty message.
-        self.document = Document()
+        self.document = document_pb2.Document()
         self.document.doc_id = article['id']
         self.document.doc_name = article['title']
 
-        document_content = DocumentContent()
+        document_content = document_pb2.DocumentContent()
         document_content.content_id = article['id']
         document_content.content_type = 1
         document_content.text = article['text']
@@ -59,6 +130,8 @@ class TrecNewsParser:
         self.document.document_contents.append(document_content)
 
         self.__add_rel_entity_links()
+
+        self.__add_manual_and_sythetic_entity_link_totals()
 
         return self.document
 
@@ -158,12 +231,12 @@ class TrecNewsParser:
                                 assert entity_link[2] == span_text, \
                                     "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
 
-                                anchor_text_location = EntityLink.AnchorTextLocation()
+                                anchor_text_location = document_pb2.EntityLink.AnchorTextLocation()
                                 anchor_text_location.start = i_start
                                 anchor_text_location.end = i_end
 
                                 # Create new EntityLink message.
-                                rel_entity_link = EntityLink()
+                                rel_entity_link = document_pb2.EntityLink()
                                 rel_entity_link.anchor_text = entity_link[2]
                                 rel_entity_link.entity_id = entity_id
                                 rel_entity_link.entity_name = entity_name
@@ -181,12 +254,12 @@ class TrecNewsParser:
                                     assert entity_link[2] == span_text, \
                                         "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
 
-                                    anchor_text_location = EntityLink.AnchorTextLocation()
+                                    anchor_text_location = document_pb2.EntityLink.AnchorTextLocation()
                                     anchor_text_location.start = i_start
                                     anchor_text_location.end = i_end
 
                                     # Create new EntityLink message.
-                                    rel_entity_link = EntityLink()
+                                    rel_entity_link = document_pb2.EntityLink()
                                     rel_entity_link.anchor_text = entity_link[2]
                                     rel_entity_link.entity_id = entity_id
                                     rel_entity_link.entity_name = entity_name
@@ -215,6 +288,37 @@ class TrecNewsParser:
         }
         self.entity_disambiguation = EntityDisambiguation(rel_base_url, wiki_version, config)
         self.car_id_to_name_path = car_id_to_name_path
+
+
+    def parse_run_file_to_parquet(self, run_path, index_path, write_output=False, write_path=None, num_docs=10,
+                                  print_intervals=1):
+        """ """
+        t_start = time.time()
+
+        search_tools = SearchTools(index_path=index_path)
+
+        data = []
+        with open(run_path, "r") as f_run:
+            # Loop over topics.
+            for i, line in enumerate(f_run):
+
+                query, _, doc_id, rank, _, _ = search_tools.retrieval_utils.unpack_run_line(line)
+                article_json = self.build_article_from_json(json.loads(search_tools.get_contents_from_docid(doc_id=doc_id)))
+                doc = self.parse_article_to_protobuf(article=article_json)
+                data.append([query, doc_id, rank, article_json, bytearray(pickle.dumps(doc.SerializeToString()))])
+
+                if i + 1 > num_docs:
+                    break
+
+                if ((i + 1) % print_intervals == 0):
+                    print('----- DOC #{} -----'.format(i))
+                    print(self.document.doc_id)
+                    time_delta = time.time() - t_start
+                    print('time elapse: {} --> time / page: {}'.format(time_delta, time_delta / (i + 1)))
+
+        if write_output:
+            columns = ['query', 'doc_id', 'rank', 'article', 'article_bytearray']
+            pd.DataFrame(data, columns=columns).to_parquet(write_path)
 
 
     def parse_json_to_protobuf(self, read_path, num_docs, write_output=False, write_path=None, print_intervals=1000,
@@ -258,13 +362,21 @@ if __name__ == '__main__':
     rel_wiki_year = '2019'
     rel_model_path = "/Users/iain/LocalStorage/coding/github/REL/ed-wiki-{}/model".format(rel_wiki_year)
     car_id_to_name_path = '/Users/iain/LocalStorage/lmdb.map_id_to_name.v1'
-    print_intervals = 4
+    print_intervals = 1
     write_output = True
     write_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/news.bin'
-    TrecNewsParser(rel_wiki_year=rel_wiki_year,
-                   rel_base_url=rel_base_url,
-                   rel_model_path=rel_model_path,
-                   car_id_to_name_path=car_id_to_name_path).parse_json_to_protobuf(read_path=path,
-                                                                                   num_docs=100,
-                                                                                   print_intervals=print_intervals)
+    tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
+                         rel_base_url=rel_base_url,
+                         rel_model_path=rel_model_path,
+                         car_id_to_name_path=car_id_to_name_path)
 
+    # tnp.parse_json_to_protobuf(read_path=path,num_docs=100,print_intervals=print_intervals)
+
+    index_path = '/Users/iain/LocalStorage/TREC-NEWS/WashingtonPost.v2/WashingtonPost.v2.index.anserini.v1'
+    run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/anserini.bm5.default.run'
+    tnp.parse_run_file_to_parquet(run_path=run_path,
+                                  index_path=index_path,
+                                  write_output=write_output,
+                                  write_path=write_path,
+                                  num_docs=3,
+                                  print_intervals=print_intervals)

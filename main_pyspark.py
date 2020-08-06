@@ -40,16 +40,16 @@ if __name__ == '__main__':
     rel_model_path = rel_base_url + 'ed-wiki-{}/model'.format(rel_wiki_year)
     car_id_to_name_path = '/nfs/trec_news_track/lmdb.map_id_to_name.v1'
 
-    write_article_data_to_dir(read_path=read_path,
-                              dir_path=dir_path,
-                              rel_wiki_year=rel_wiki_year,
-                              rel_base_url=rel_base_url,
-                              rel_model_path=rel_model_path,
-                              car_id_to_name_path=car_id_to_name_path,
-                              num_docs=num_docs,
-                              chunks=chunks,
-                              print_intervals=print_intervals,
-                              write_output=write_output)
+    # write_article_data_to_dir(read_path=read_path,
+    #                           dir_path=dir_path,
+    #                           rel_wiki_year=rel_wiki_year,
+    #                           rel_base_url=rel_base_url,
+    #                           rel_model_path=rel_model_path,
+    #                           car_id_to_name_path=car_id_to_name_path,
+    #                           num_docs=num_docs,
+    #                           chunks=chunks,
+    #                           print_intervals=print_intervals,
+    #                           write_output=write_output)
 
     out_path = '/nfs/trec_news_track/index/test_500_out_v2/'
     run_pyspark_pipeline(dir_path,
