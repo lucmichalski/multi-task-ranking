@@ -157,10 +157,9 @@ def get_passage_df(spark, passage_run_path, xml_topics_path, passage_parquet_pat
                                        xml_topics_path=xml_topics_path)
     passage_df = spark.read.parquet(passage_parquet_path)
     passage_df_with_entity_links = passage_df.withColumn("entity_links", get_synthetic_entity_link_ids_passage("article_bytearray"))
-    passage_df_with_entity_links_reduced = passage_df_with_entity_links.select("doc_id", "entity_links").dropDuplicates()
-    passage_join_df = passage_rank_df.join(passage_df_with_entity_links_reduced, on=['doc_id'], how='left')
-    passage_join_df_with_counts = passage_join_df.withColumn("entity_link_count", get_entity_links_count("entity_links"))
-    passage_join_df_with_counts_exploded = passage_join_df_with_counts.select("query", "doc_id", "passage_rank", "entity_links_count", explode("entity_links").alias("entity_id"))
+    passage_df_with_entity_links_counts = passage_df_with_entity_links.withColumn("entity_links_count", get_entity_links_count("entity_links"))
+    passage_join_df = passage_rank_df.join(passage_df_with_entity_links_counts, on=['doc_id'], how='left')
+    passage_join_df_with_counts_exploded = passage_join_df.select("query", "doc_id", "passage_rank", "entity_links_count", explode("entity_links").alias("entity_id"))
     return passage_join_df_with_counts_exploded
 
 
