@@ -5,7 +5,7 @@ from pyspark.sql.types import StringType, ArrayType, FloatType
 from pyspark.sql.functions import udf, row_number,  explode, desc
 
 import pickle
-
+import re
 
 def get_paragraph_data_from_run_file(spark, run_path, para_data, max_counter=10000000000):
     """ """
