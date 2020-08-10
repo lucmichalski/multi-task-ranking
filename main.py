@@ -10,30 +10,30 @@ from torch import nn
 if __name__ == '__main__':
 
     from document_parsing.trec_news_parsing import TrecNewsParser
-    from metadata import NewsPassagePaths
 
-    dir_path = '/nfs/trec_news_track/index/background_2018/'
-    num_docs = 100
-    print_intervals = 10
-    write_output = True
+    path = '/Users/iain/LocalStorage/TREC-NEWS/WashingtonPost.v2/data/TREC_Washington_Post_collection.v2.jl'
+    rel_base_url = "/Users/iain/LocalStorage/coding/github/REL/"
     rel_wiki_year = '2019'
-    rel_base_url = '/nfs/trec_car/entity_processing/REL/'
-    rel_model_path = rel_base_url + 'ed-wiki-{}/model'.format(rel_wiki_year)
-    car_id_to_name_path = '/nfs/trec_news_track/lmdb.map_id_to_name.v1'
-
-    out_path = 'nfs/trec_news_track/runs/anserini/background_2018/bm5_entity_100.pq'
-
-    run_path = '/nfs/trec_news_track/runs/anserini/background_2018/anserini.bm5.default.run'
-    index_path = NewsPassagePaths.index
+    rel_model_path = "/Users/iain/LocalStorage/coding/github/REL/ed-wiki-{}/model".format(rel_wiki_year)
+    car_id_to_name_path = '/Users/iain/LocalStorage/lmdb.map_id_to_name.v1'
+    print_intervals = 100
+    num_docs = 50000
+    chunks = 500
+    write_output = True
+    dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/2018_bm25_rm3_chunks_full_v1/'
     tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
                          rel_base_url=rel_base_url,
                          rel_model_path=rel_model_path,
                          car_id_to_name_path=car_id_to_name_path)
+
+    index_path = '/Users/iain/LocalStorage/TREC-NEWS/lucene-index-copy'
+    run_path = '/Users/iain/Downloads/anserini.bm5.rm3.default (1).run'
     tnp.parse_run_file_to_parquet(run_path=run_path,
                                   index_path=index_path,
                                   write_output=write_output,
-                                  write_path=out_path,
+                                  dir_path=dir_path,
                                   num_docs=num_docs,
+                                  chunks=chunks,
                                   print_intervals=print_intervals)
 
     # from metadata import NewsPassagePaths, CarEntityPaths

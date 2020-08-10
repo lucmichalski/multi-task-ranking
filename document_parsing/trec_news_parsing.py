@@ -15,6 +15,7 @@ import json
 import time
 import lmdb
 import re
+import os
 
 
 class TrecNewsParser:
@@ -51,12 +52,12 @@ class TrecNewsParser:
     def __get_entity_link_totals_from_document_contents(self, document_contents, link_type='REL'):
         """ Append entity_link_totals features (protocol_buffers/document.proto:EntityLinkTotals) from
         document_contents. """
-        assert link_type ==  "REL", "link_type: {} not  'REL' flag".format(link_type)
+        assert link_type == "REL", "link_type: {} not 'REL' flag".format(link_type)
 
         def get_correct_entity_links(document_content, link_type):
             """ Return list of EntityLink message for either 'MANUAL' or 'SYNTHETIC' links. """
             if link_type == 'REL':
-                return document_content.manual_entity_links
+                return document_content.rel_entity_links
 
         # Build set of unique 'entity_id's of entities linked in document_contents
         entity_ids = []
@@ -106,7 +107,7 @@ class TrecNewsParser:
         return entity_link_totals
 
 
-    def __add_manual_and_sythetic_entity_link_totals(self):
+    def __add_entity_link_totals(self):
         """ """
         # Add list of synthetically tagged EntityLinkTotal messages by parsing list of DocumentContents messages.
         rel_entity_link_totals = self.__get_entity_link_totals_from_document_contents(
@@ -131,7 +132,7 @@ class TrecNewsParser:
 
         self.__add_rel_entity_links()
 
-        self.__add_manual_and_sythetic_entity_link_totals()
+        self.__add_entity_link_totals()
 
         return self.document
 
@@ -199,81 +200,75 @@ class TrecNewsParser:
         entity_links_dict = process_results(mentions_dataset, predictions, processed_document_contents)
 
         # Connet to LMDB of: {pickle(car_id): pickle(car_name).}
-        #env = lmdb.open(self.car_id_to_name_path, map_size=2e10)
-        #with env.begin(write=False) as txn:
+        env = lmdb.open(self.car_id_to_name_path, map_size=2e10)
+        with env.begin(write=False) as txn:
 
-        for document_content in self.document.document_contents:
+            for document_content in self.document.document_contents:
 
-            content_id = document_content.content_id
-            text = document_content.text
+                content_id = document_content.content_id
+                text = document_content.text
 
-            i_sentence_start = 0
-            for i, sentence in enumerate(text.split(".")):
-                sentence_id = str(content_id + (str(i)))
-                if sentence_id in entity_links_dict:
-                    for entity_link in entity_links_dict[sentence_id]:
-                        # % of confidence in entity linking
-                        if float(entity_link[4]) >= 0.0:
-                            i_start = i_sentence_start + entity_link[0] + 1
-                            i_end = i_start + entity_link[1]
-                            span_text = text[i_start:i_end]
+                i_sentence_start = 0
+                for i, sentence in enumerate(text.split(".")):
+                    sentence_id = str(content_id + (str(i)))
+                    if sentence_id in entity_links_dict:
+                        for entity_link in entity_links_dict[sentence_id]:
+                            # % of confidence in entity linking
+                            if float(entity_link[4]) >= 0.0:
+                                i_start = i_sentence_start + entity_link[0] + 1
+                                i_end = i_start + entity_link[1]
+                                span_text = text[i_start:i_end]
 
-                            entity_id = self.__rel_id_to_car_id(rel_id=entity_link[3])
-                            #entity_name_pickle = txn.get(pickle.dumps(entity_id))
+                                entity_id = self.__rel_id_to_car_id(rel_id=entity_link[3])
+                                entity_name_pickle = txn.get(pickle.dumps(entity_id))
 
-                            #if entity_name_pickle != None:
-                                #self.valid_counter += 1
-                            #entity_name = pickle.loads(entity_name_pickle)
-                            entity_name = entity_id
+                                if entity_name_pickle != None:
+                                    self.valid_counter += 1
+                                    entity_name = pickle.loads(entity_name_pickle)
+                                    #entity_name = entity_id
 
-                            if entity_link[2] == span_text:
+                                    if entity_link[2] == span_text:
 
-                                assert entity_link[2] == span_text, \
-                                    "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
+                                        assert entity_link[2] == span_text, \
+                                            "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
 
-                                anchor_text_location = document_pb2.EntityLink.AnchorTextLocation()
-                                anchor_text_location.start = i_start
-                                anchor_text_location.end = i_end
+                                        anchor_text_location = document_pb2.EntityLink.AnchorTextLocation()
+                                        anchor_text_location.start = i_start
+                                        anchor_text_location.end = i_end
 
-                                # Create new EntityLink message.
-                                rel_entity_link = document_pb2.EntityLink()
-                                rel_entity_link.anchor_text = entity_link[2]
-                                rel_entity_link.entity_id = entity_id
-                                rel_entity_link.entity_name = entity_name
-                                rel_entity_link.anchor_text_location.MergeFrom(anchor_text_location)
+                                        # Create new EntityLink message.
+                                        rel_entity_link = document_pb2.EntityLink()
+                                        rel_entity_link.anchor_text = entity_link[2]
+                                        rel_entity_link.entity_id = entity_id
+                                        rel_entity_link.entity_name = entity_name
+                                        rel_entity_link.anchor_text_location.MergeFrom(anchor_text_location)
 
-                                document_content.rel_entity_links.append(rel_entity_link)
+                                        document_content.rel_entity_links.append(rel_entity_link)
 
-                            else:
-                                regex = re.escape(entity_link[2])
-                                for match in re.finditer(r'{}'.format(regex), sentence):
-                                    i_start = i_sentence_start + match.start()
-                                    i_end = i_sentence_start + match.end()
-                                    span_text = text[i_start:i_end]
+                                    else:
+                                        regex = re.escape(entity_link[2])
+                                        for match in re.finditer(r'{}'.format(regex), sentence):
+                                            i_start = i_sentence_start + match.start()
+                                            i_end = i_sentence_start + match.end()
+                                            span_text = text[i_start:i_end]
 
-                                    assert entity_link[2] == span_text, \
-                                        "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
+                                            assert entity_link[2] == span_text, \
+                                                "word_text: '{}' , text[start_i:end_i]: '{}'".format(entity_link[2], span_text)
 
-                                    anchor_text_location = document_pb2.EntityLink.AnchorTextLocation()
-                                    anchor_text_location.start = i_start
-                                    anchor_text_location.end = i_end
+                                            anchor_text_location = document_pb2.EntityLink.AnchorTextLocation()
+                                            anchor_text_location.start = i_start
+                                            anchor_text_location.end = i_end
 
-                                    # Create new EntityLink message.
-                                    rel_entity_link = document_pb2.EntityLink()
-                                    rel_entity_link.anchor_text = entity_link[2]
-                                    rel_entity_link.entity_id = entity_id
-                                    rel_entity_link.entity_name = entity_name
-                                    rel_entity_link.anchor_text_location.MergeFrom(anchor_text_location)
+                                            # Create new EntityLink message.
+                                            rel_entity_link = document_pb2.EntityLink()
+                                            rel_entity_link.anchor_text = entity_link[2]
+                                            rel_entity_link.entity_id = entity_id
+                                            rel_entity_link.entity_name = entity_name
+                                            rel_entity_link.anchor_text_location.MergeFrom(anchor_text_location)
 
-                                    document_content.rel_entity_links.append(rel_entity_link)
+                                            document_content.rel_entity_links.append(rel_entity_link)
 
-                            #else:
-                                #self.not_valid_counter += 1
-
-
-                i_sentence_start += len(sentence) + 1
-
-        #print('*** valid: {} vs. not valid {} ***'.format(self.valid_counter, self.not_valid_counter))
+                    i_sentence_start += len(sentence) + 1
 
 
     def __init_rel_models(self, rel_wiki_year, rel_base_url, rel_model_path, car_id_to_name_path):
@@ -290,25 +285,50 @@ class TrecNewsParser:
         self.car_id_to_name_path = car_id_to_name_path
 
 
-    def parse_run_file_to_parquet(self, run_path, index_path, write_output=False, write_path=None, num_docs=10,
-                                  print_intervals=1):
+    def parse_run_file_to_parquet(self, run_path,  index_path, chunks=1, write_output=False, dir_path=None,
+                                  num_docs=10, print_intervals=1):
         """ """
+
+        # create new dir to store data chunks
+        if (os.path.isdir(dir_path) == False) and write_output:
+            print('making dir: {}'.format(dir_path))
+            os.mkdir(dir_path)
+
+        def write_chunk(article_data, dir_path, chunk):
+            """ write data chunks to parquet """
+            parquet_path = dir_path + 'article_data_chunk_' + str(chunk) + '.parquet'
+            columns = ['query', 'doc_id', 'rank', 'article', 'article_bytearray']
+            pd.DataFrame(article_data, columns=columns).to_parquet(parquet_path)
+
         t_start = time.time()
 
         search_tools = SearchTools(index_path=index_path)
 
-        data = []
+        chunk = 0
+        article_data = []
         with open(run_path, "r") as f_run:
             # Loop over topics.
-            for i, line in enumerate(f_run):
+            i = 0
+            for line in f_run:
 
                 query, _, doc_id, rank, _, _ = search_tools.retrieval_utils.unpack_run_line(line)
+
                 article_json = self.build_article_from_json(json.loads(search_tools.get_contents_from_docid(doc_id=doc_id)))
                 doc = self.parse_article_to_protobuf(article=article_json)
-                data.append([query, doc_id, rank, article_json, bytearray(pickle.dumps(doc.SerializeToString()))])
+                article_data.append([query, doc_id, rank, article_json, bytearray(pickle.dumps(doc.SerializeToString()))])
 
                 if i + 1 > num_docs:
                     break
+
+                # write data chunk to file
+                if ((i + 1) % chunks == 0) and (i != 0 or num_docs == 1):
+                    if write_output:
+                        print('WRITING TO FILE: {}'.format(i))
+                        write_chunk(article_data=article_data, dir_path=dir_path, chunk=chunk)
+
+                        # begin new list
+                        article_data = []
+                        chunk += 1
 
                 if ((i + 1) % print_intervals == 0):
                     print('----- DOC #{} -----'.format(i))
@@ -316,9 +336,11 @@ class TrecNewsParser:
                     time_delta = time.time() - t_start
                     print('time elapse: {} --> time / page: {}'.format(time_delta, time_delta / (i + 1)))
 
-        if write_output:
-            columns = ['query', 'doc_id', 'rank', 'article', 'article_bytearray']
-            pd.DataFrame(data, columns=columns).to_parquet(write_path)
+                i += 1
+
+        if write_output and (len(article_data) > 0):
+            print('WRITING FINAL FILE: {}'.format(i))
+            write_chunk(article_data=article_data, dir_path=dir_path, chunk=chunk)
 
 
     def parse_json_to_protobuf(self, read_path, num_docs, write_output=False, write_path=None, print_intervals=1000,
@@ -362,21 +384,22 @@ if __name__ == '__main__':
     rel_wiki_year = '2019'
     rel_model_path = "/Users/iain/LocalStorage/coding/github/REL/ed-wiki-{}/model".format(rel_wiki_year)
     car_id_to_name_path = '/Users/iain/LocalStorage/lmdb.map_id_to_name.v1'
-    print_intervals = 1
+    print_intervals = 100
+    num_docs = 500
+    chunks = 100
     write_output = True
-    write_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/news.bin'
+    dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/2018_bm25_chunks_full_v3/'
     tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
                          rel_base_url=rel_base_url,
                          rel_model_path=rel_model_path,
                          car_id_to_name_path=car_id_to_name_path)
 
-    # tnp.parse_json_to_protobuf(read_path=path,num_docs=100,print_intervals=print_intervals)
-
-    index_path = '/Users/iain/LocalStorage/TREC-NEWS/WashingtonPost.v2/WashingtonPost.v2.index.anserini.v1'
+    index_path = '/Users/iain/LocalStorage/TREC-NEWS/lucene-index-copy'
     run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/anserini.bm5.default.run'
     tnp.parse_run_file_to_parquet(run_path=run_path,
                                   index_path=index_path,
                                   write_output=write_output,
-                                  write_path=write_path,
-                                  num_docs=3,
+                                  dir_path=dir_path,
+                                  num_docs=num_docs,
+                                  chunks=chunks,
                                   print_intervals=print_intervals)
