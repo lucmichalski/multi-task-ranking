@@ -2,7 +2,7 @@
 from protocol_buffers import document_pb2
 
 from pyspark.sql.types import StringType, ArrayType, FloatType
-from pyspark.sql.functions import udf, row_number,  explode, desc
+from pyspark.sql.functions import udf, row_number, explode, desc, col
 
 import pickle
 import re
