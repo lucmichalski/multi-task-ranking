@@ -101,9 +101,7 @@ def get_passage_id_map(xml_topics_path):
 
 def get_top_100_rank(spark, run_path, rank_type='entity', k=100, xml_topics_path=None):
     """"""
-    if rank_type == 'passage':
-        print('using pasage id map')
-        passage_id_map = get_passage_id_map(xml_topics_path=xml_topics_path)
+    id_map = get_passage_id_map(xml_topics_path=xml_topics_path)
 
     data = []
     with open(run_path, 'r', encoding='utf-8') as f_run:
@@ -111,8 +109,8 @@ def get_top_100_rank(spark, run_path, rank_type='entity', k=100, xml_topics_path
             query, _, doc_id, rank, _, _ = line.split()
             if int(rank) <= k:
                 if rank_type == 'passage':
-                    if query in passage_id_map:
-                        data.append([passage_id_map[str(query)], str(doc_id), int(rank)])
+                    if query in id_map:
+                        data.append([id_map[str(query)], str(doc_id), int(rank)])
                 else:
                     data.append([str(query), str(doc_id), int(rank)])
 
@@ -164,13 +162,13 @@ def get_passage_df(spark, passage_run_path, xml_topics_path, passage_parquet_pat
     return passage_join_df_with_counts_exploded
 
 
-def get_entity_df(spark, entity_run_path, entity_parquet_path):
+def get_entity_df(spark, entity_run_path, entity_parquet_path, xml_topics_path):
     """"""
     entity_rank_df = get_top_100_rank(spark=spark,
                                       run_path=entity_run_path,
                                       rank_type='entity',
                                       k=100,
-                                      xml_topics_path=None)
+                                      xml_topics_path=xml_topics_path)
     entity_df = spark.read.parquet(entity_parquet_path).select(col("page_id").alias("doc_id"), "doc_bytearray")
     entity_join_df = entity_rank_df.join(entity_df, on=['doc_id'], how='left')
     #entity_df_with_entity_links = entity_join_df.withColumn("entity_links", get_synthetic_entity_link_ids_entity("doc_bytearray"))
