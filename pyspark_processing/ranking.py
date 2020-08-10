@@ -140,13 +140,13 @@ def get_synthetic_entity_link_ids_entity(doc_bytearray):
         synthetic_entity_links += document_content.synthetic_entity_links
     return [str(s.entity_id) for s in synthetic_entity_links]
 
-def format_joined_df(df):
-    """"""
-    df_with_counts = df.withColumn("entity_links_count", get_entity_links_count("entity_links"))
-    df_with_counts_exploded = df_with_counts.select("query", "doc_id", "rank", "entity_links_count", explode("entity_links").alias("entity_link"))
-    df_with_weighted_links_exploded = df_with_counts_exploded.withColumn("rank_weighting", get_rank_weighting("rank"))
-    df_with_norm_weighted_links_exploded = df_with_weighted_links_exploded.withColumn("norm_rank_weighting", get_norm_rank_weighting("rank_weighting", "entity_links_count"))
-    return df_with_norm_weighted_links_exploded
+# def format_joined_df(df):
+#     """"""
+#     df_with_counts = df.withColumn("entity_links_count", get_entity_links_count("entity_links"))
+#     df_with_counts_exploded = df_with_counts.select("query", "doc_id", "rank", "entity_links_count", explode("entity_links").alias("entity_link"))
+#     df_with_weighted_links_exploded = df_with_counts_exploded.withColumn("rank_weighting", get_rank_weighting("rank"))
+#     df_with_norm_weighted_links_exploded = df_with_weighted_links_exploded.withColumn("norm_rank_weighting", get_norm_rank_weighting("rank_weighting", "entity_links_count"))
+#     return df_with_norm_weighted_links_exploded
 
 def get_passage_df(spark, passage_run_path, xml_topics_path, passage_parquet_path):
     """"""
