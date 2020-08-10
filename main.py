@@ -8,33 +8,40 @@ from retrieval.tools import EvalTools, SearchTools, default_eval_config
 from torch import nn
 
 if __name__ == '__main__':
+    ev = EvalTools()
+    run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/just_graph.run'
+    qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/news_track.2018.passage.qrels'
+    eval_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/just_graph.run.eval.v1'
+    ev.write_eval_from_qrels_and_run(run_path=run_path,
+                                     qrels_path=qrels_path,
+                                     eval_path=eval_path)
 
-    from document_parsing.trec_news_parsing import TrecNewsParser
-
-    path = '/Users/iain/LocalStorage/TREC-NEWS/WashingtonPost.v2/data/TREC_Washington_Post_collection.v2.jl'
-    rel_base_url = "/Users/iain/LocalStorage/coding/github/REL/"
-    rel_wiki_year = '2019'
-    rel_model_path = "/Users/iain/LocalStorage/coding/github/REL/ed-wiki-{}/model".format(rel_wiki_year)
-    car_id_to_name_path = '/Users/iain/LocalStorage/lmdb.map_id_to_name.v1'
-    print_intervals = 100
-    num_docs = 50000
-    chunks = 500
-    write_output = True
-    dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/2018_bm25_rm3_chunks_full_v1/'
-    tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
-                         rel_base_url=rel_base_url,
-                         rel_model_path=rel_model_path,
-                         car_id_to_name_path=car_id_to_name_path)
-
-    index_path = '/Users/iain/LocalStorage/TREC-NEWS/lucene-index-copy'
-    run_path = '/Users/iain/Downloads/anserini.bm5.rm3.default (1).run'
-    tnp.parse_run_file_to_parquet(run_path=run_path,
-                                  index_path=index_path,
-                                  write_output=write_output,
-                                  dir_path=dir_path,
-                                  num_docs=num_docs,
-                                  chunks=chunks,
-                                  print_intervals=print_intervals)
+    # from document_parsing.trec_news_parsing import TrecNewsParser
+    #
+    # path = '/Users/iain/LocalStorage/TREC-NEWS/WashingtonPost.v2/data/TREC_Washington_Post_collection.v2.jl'
+    # rel_base_url = "/Users/iain/LocalStorage/coding/github/REL/"
+    # rel_wiki_year = '2019'
+    # rel_model_path = "/Users/iain/LocalStorage/coding/github/REL/ed-wiki-{}/model".format(rel_wiki_year)
+    # car_id_to_name_path = '/Users/iain/LocalStorage/lmdb.map_id_to_name.v1'
+    # print_intervals = 100
+    # num_docs = 50000
+    # chunks = 500
+    # write_output = True
+    # dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/2018_bm25_rm3_chunks_full_v1/'
+    # tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
+    #                      rel_base_url=rel_base_url,
+    #                      rel_model_path=rel_model_path,
+    #                      car_id_to_name_path=car_id_to_name_path)
+    #
+    # index_path = '/Users/iain/LocalStorage/TREC-NEWS/lucene-index-copy'
+    # run_path = '/Users/iain/Downloads/anserini.bm5.rm3.default (1).run'
+    # tnp.parse_run_file_to_parquet(run_path=run_path,
+    #                               index_path=index_path,
+    #                               write_output=write_output,
+    #                               dir_path=dir_path,
+    #                               num_docs=num_docs,
+    #                               chunks=chunks,
+    #                               print_intervals=print_intervals)
 
     # from metadata import NewsPassagePaths, CarEntityPaths
     # from retrieval.tools import SearchTools
@@ -109,12 +116,12 @@ if __name__ == '__main__':
     # dev_data_dir_path_passage =  '/nfs/trec_news_track/bert/test_passage/news_track_test_passage_250_bm25_rm3_bert_chunks_scaled_rel/'
     # dev_qrels_path_passage = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.qrels'
     # dev_run_path_passage = '/nfs/trec_news_track/bert/test_passage/news_track.test.passage.250.bm25.rm3.run'
-
+    #
     # train_data_dir_path_entity = None #'/nfs/trec_news_track/runs/anserini/bert/news_track_train_bm25_100000_50_words_bert_chunks_scaled_rel/'
     # dev_data_dir_path_entity = '/nfs/trec_news_track/runs/anserini/bert/news_track_test_bm25_100000_50_words_bert_chunks_scaled_rel/'
     # dev_qrels_path_entity = '/nfs/trec_news_track/bert/test_entity/news_track.test.entity.qrels'
     # dev_run_path_entity = '/nfs/trec_news_track/runs/anserini/bert/news_track.test.bm25.100000.title+contents.50_words.run'
-
+    #
     # experiment = FineTuningReRankingExperiments(model_path=model_path,
     #                                             extra_layers=extra_layers,
     #                                             train_batch_size=train_batch_size,
@@ -124,7 +131,7 @@ if __name__ == '__main__':
                                                 # dev_data_dir_path_entity=dev_data_dir_path_entity,
                                                 # dev_qrels_path_entity=dev_qrels_path_entity,
                                                 # dev_run_path_entity=dev_run_path_entity,
-
+                                                #
                                                 # train_data_dir_path_passage=train_data_dir_path_passage,
                                                 # dev_data_dir_path_passage=dev_data_dir_path_passage,
                                                 # dev_qrels_path_passage=dev_qrels_path_passage,

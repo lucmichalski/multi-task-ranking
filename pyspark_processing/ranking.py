@@ -211,6 +211,7 @@ def get_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_par
     df = passage_df.join(entity_df, on=['query', 'entity_id'], how='left').dropna()
     df.show()
 
+    print("BUILDING GRAPH WEIGHTS")
     @udf(returnType=FloatType())
     def get_graph_weight(passage_rank, entity_rank, entity_links_count):
         return 1 / (passage_rank * entity_rank * entity_links_count)
