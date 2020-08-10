@@ -83,7 +83,7 @@ def get_news_ids_maps(xml_topics_path, rank_type='passage'):
     """ Build dict map from intermediate ids to Washington Post ids {intermediate_id: passage_id} """
     passage_id_map = {}
     entity_id_map = {}
-    with open(xml_topics_path, 'r', encoding='utf-8') as f:
+    with open(xml_topics_path, 'r') as f:
         for line in f:
             # Passage intermediate_id
             if '<num>' in line:
@@ -126,9 +126,8 @@ def get_top_100_rank(spark, run_path, rank_type='entity', k=100, xml_topics_path
         for line in f_run:
             query, _, doc_id, rank, _, _ = line.split()
             if int(rank) <= k:
-                if rank_type == 'passage':
-                    if query in id_map:
-                        data.append([id_map[str(query)], str(doc_id), int(rank)])
+                if query in id_map:
+                    data.append([id_map[str(query)], str(doc_id), int(rank)])
                 else:
                     data.append([str(query), str(doc_id), int(rank)])
 
