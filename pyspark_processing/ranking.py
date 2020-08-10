@@ -120,6 +120,7 @@ def get_news_ids_maps(xml_topics_path, rank_type='passage'):
 def get_top_100_rank(spark, run_path, rank_type='entity', k=100, xml_topics_path=None):
     """"""
     id_map = get_news_ids_maps(xml_topics_path=xml_topics_path, rank_type=rank_type)
+    print(id_map)
 
     data = []
     with open(run_path, 'r', encoding='utf-8') as f_run:
