@@ -27,6 +27,21 @@ def get_paragraph_data_from_run_file(spark, run_path, para_data, max_counter=100
 
     return df
 
+@udf(returnType=FloatType())
+def get_entity_links_count(entity_link_ids):
+    return float(len(entity_link_ids))
+
+@udf(returnType=FloatType())
+def get_rank_weighting(rank):
+    #return 1.0/rank*rank
+    return 1.0/rank
+
+@udf(returnType=FloatType())
+def get_norm_rank_weighting(rank_weighting, entity_links_count):
+    if entity_links_count == 0.0:
+        return 0.0
+    return rank_weighting/entity_links_count
+
 def get_ranked_entities_from_paragraph_data(df, output_path):
     """ """
 
@@ -38,26 +53,12 @@ def get_ranked_entities_from_paragraph_data(df, output_path):
         synthetic_entity_links = document_pb2.DocumentContent.FromString(content).synthetic_entity_links
         return [str(s.entity_id) for s in synthetic_entity_links]
 
-    @udf(returnType=FloatType())
-    def get_entity_links_count(synthetic_entity_link_ids):
-        return float(len(synthetic_entity_link_ids))
-
-    @udf(returnType=FloatType())
-    def get_rank_weighting(rank):
-        return 1.0/rank*rank
-
-    @udf(returnType=FloatType())
-    def get_norm_rank_weighting(rank_weighting, entity_links_count):
-        if entity_links_count == 0.0:
-            return 0.0
-        return rank_weighting/entity_links_count
-
     df_with_links = df.withColumn("synthetic_entity_link_ids", get_synthetic_entity_link_ids("content_bytearray"))
     df_with_links_with_counts = df_with_links.withColumn("entity_links_count", get_entity_links_count("synthetic_entity_link_ids"))
 
     df_with_links_exploded = df_with_links_with_counts.select("query", "rank", "entity_links_count", explode("synthetic_entity_link_ids").alias("synthetic_entity_link_id"))
-    df_with_weighted_links_exploded =  df_with_links_exploded.withColumn("rank_weighting", get_rank_weighting("rank"))
-    df_with_norm_weighted_links_exploded =  df_with_weighted_links_exploded.withColumn("norm_rank_weighting", get_norm_rank_weighting("rank_weighting", "entity_links_count"))
+    df_with_weighted_links_exploded = df_with_links_exploded.withColumn("rank_weighting", get_rank_weighting("rank"))
+    df_with_norm_weighted_links_exploded = df_with_weighted_links_exploded.withColumn("norm_rank_weighting", get_norm_rank_weighting("rank_weighting", "entity_links_count"))
 
     df_entity_rank = df_with_norm_weighted_links_exploded.groupBy("query", "synthetic_entity_link_id").agg({"norm_rank_weighting": "sum"})
 
@@ -139,6 +140,13 @@ def get_synthetic_entity_link_ids_entity(doc_bytearray):
         synthetic_entity_links += document_content.synthetic_entity_links
     return [str(s.entity_id) for s in synthetic_entity_links]
 
+def format_joined_df(df):
+    """"""
+    df_with_counts = df.withColumn("entity_links_count", get_entity_links_count("entity_links"))
+    df_with_counts_exploded = df_with_counts.select("query", "doc_id", "rank", "entity_links_count", explode("entity_links").alias("entity_link"))
+    df_with_weighted_links_exploded = df_with_counts_exploded.withColumn("rank_weighting", get_rank_weighting("rank"))
+    df_with_norm_weighted_links_exploded = df_with_weighted_links_exploded.withColumn("norm_rank_weighting", get_norm_rank_weighting("rank_weighting", "entity_links_count"))
+    return df_with_norm_weighted_links_exploded
 
 def get_passage_df(spark, passage_run_path, xml_topics_path, passage_parquet_path):
     """"""
@@ -151,7 +159,8 @@ def get_passage_df(spark, passage_run_path, xml_topics_path, passage_parquet_pat
     passage_df_with_entity_links = passage_df.withColumn("entity_links", get_synthetic_entity_link_ids_passage("article_bytearray"))
     passage_df_with_entity_links_reduced = passage_df_with_entity_links.select("doc_id", "entity_links").dropDuplicates()
     passage_join_df = passage_rank_df.join(passage_df_with_entity_links_reduced, on=['doc_id'], how='left')
-    return passage_join_df
+    df = format_joined_df(df=passage_join_df)
+    return df
 
 
 def get_entity_df(spark, entity_run_path, entity_parquet_path):
@@ -164,7 +173,7 @@ def get_entity_df(spark, entity_run_path, entity_parquet_path):
     entity_df = spark.read.parquet(entity_parquet_path).select(col("page_id").alias("doc_id"), "doc_bytearray")
     entity_join_df = entity_rank_df.join(entity_df, on=['doc_id'], how='left')
     entity_df_with_entity_links = entity_join_df.withColumn("entity_links", get_synthetic_entity_link_ids_entity("doc_bytearray"))
-
     entity_df_with_entity_links_reduced = entity_df_with_entity_links.select("doc_id", "query", "rank", "entity_links").dropDuplicates()
-    return entity_df_with_entity_links_reduced
+    df = format_joined_df(df=entity_df_with_entity_links_reduced)
+    return df
 
