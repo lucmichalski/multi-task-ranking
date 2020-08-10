@@ -83,7 +83,7 @@ def get_news_ids_maps(xml_topics_path, rank_type='passage'):
     """ Build dict map from intermediate ids to Washington Post ids {intermediate_id: passage_id} """
     passage_id_map = {}
     entity_id_map = {}
-    with open(xml_topics_path, 'r') as f:
+    with open(xml_topics_path, 'r', encoding='utf-8') as f:
         for line in f:
             # Passage intermediate_id
             if '<num>' in line:
