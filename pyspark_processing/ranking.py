@@ -110,26 +110,24 @@ def get_news_ids_maps(xml_topics_path, rank_type='passage'):
                     entity_id = line[start_i:end_i]
                     entity_id_map[entity_temp_id] = entity_id
 
-    if rank_type == 'passage':
-        return passage_id_map
-    elif rank_type == 'entity':
-        return entity_id_map
-    else:
-        print("ERROR")
+    return passage_id_map, entity_id_map
+
 
 def get_top_100_rank(spark, run_path, rank_type='entity', k=100, xml_topics_path=None):
     """"""
-    id_map = get_news_ids_maps(xml_topics_path=xml_topics_path, rank_type=rank_type)
-    print(id_map)
+    passage_id_map, entity_id_map = get_news_ids_maps(xml_topics_path=xml_topics_path, rank_type=rank_type)
 
     data = []
     with open(run_path, 'r', encoding='utf-8') as f_run:
         for line in f_run:
             query, _, doc_id, rank, _, _ = line.split()
             if int(rank) <= k:
-                if query in id_map:
-                    data.append([id_map[str(query)], str(doc_id), int(rank)])
-                else:
+                if rank_type == 'passage':
+                    if query in passage_id_map:
+                        data.append([passage_id_map[str(query)], str(doc_id), int(rank)])
+                    else:
+                        data.append([str(query), str(doc_id), int(rank)])
+                elif rank_type == 'entity':
                     data.append([str(query), str(doc_id), int(rank)])
 
     return spark.createDataFrame(data, ["query", "doc_id", "{}_rank".format(rank_type)])
