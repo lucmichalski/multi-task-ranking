@@ -121,6 +121,8 @@ def get_top_100_rank(spark, run_path, rank_type='entity', k=100, xml_topics_path
 @udf(returnType=ArrayType(StringType()))
 def get_synthetic_entity_link_ids_passage(article_bytearray):
     """"""
+    if article_bytearray == None:
+        return []
     article = pickle.loads(article_bytearray)
     synthetic_entity_links = document_pb2.Document.FromString(article).document_contents[0].rel_entity_links
     return [str(s.entity_id) for s in synthetic_entity_links]
@@ -129,6 +131,8 @@ def get_synthetic_entity_link_ids_passage(article_bytearray):
 @udf(returnType=ArrayType(StringType()))
 def get_synthetic_entity_link_ids_entity(doc_bytearray):
     """"""
+    if doc_bytearray == None:
+        return []
     doc = pickle.loads(doc_bytearray)
     synthetic_entity_links = []
     for document_content in document_pb2.Document.FromString(doc).document_contents:
