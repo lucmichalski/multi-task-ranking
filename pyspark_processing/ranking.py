@@ -191,3 +191,47 @@ def get_entity_df(spark, entity_run_path, entity_parquet_path, xml_topics_path):
     return entity_df_with_entity_links_reduced
 
 
+def get_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_parquet_path, entity_run_path,
+                   entity_parquet_path, entity_xml_topics_path):
+    print("BUILDING PASSAGE DF")
+    passage_df = get_passage_df(spark=spark,
+                                passage_run_path=passage_run_path,
+                                xml_topics_path=passage_xml_topics_path,
+                                passage_parquet_path=passage_parquet_path)
+    passage_df.show()
+
+    print("BUILDING ENTITY DF")
+    entity_df = get_entity_df(spark=spark,
+                              entity_run_path=entity_run_path,
+                              xml_topics_path=entity_xml_topics_path,
+                              entity_parquet_path=entity_parquet_path)
+    entity_df.show()
+
+    print("JOINING")
+    df = passage_df.join(entity_df, on=['query', 'entity_id'], how='left').dropna()
+    df.show()
+
+    @udf(returnType=FloatType())
+    def get_graph_weight(passage_rank, entity_rank, entity_links_count):
+        return 1 / (passage_rank * entity_rank * entity_links_count)
+
+    df_weighting = df.withColumn("graph_weigh", get_graph_weight("passage_rank", "entity_rank", "entity_links_count"))
+    df_entity_rank = df_weighting.groupBy("query", "doc_id").agg({"graph_weigh": "sum"})
+
+    return df_entity_rank
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
