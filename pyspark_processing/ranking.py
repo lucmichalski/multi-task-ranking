@@ -259,7 +259,7 @@ def write_run_with(run_path, spark, passage_run_path, passage_xml_topics_path, p
     print(data[:5])
     with open(run_path, 'w') as f:
         old_query = ''
-        for query, doc_id, _, _, _, _, _, _, _, _, total_score in data:
+        for query, doc_id, _, _, _, _, _, _, _, total_score in data:
             if old_query != query:
                 rank = 1
             f.write(" ".join((query, "Q0", str(doc_id), str(rank), "{:.6f}".format(total_score), "ENTITY-LINKS")) + '\n')
@@ -270,7 +270,7 @@ def write_run_with(run_path, spark, passage_run_path, passage_xml_topics_path, p
 
 
 
-
+*
 
 
 
