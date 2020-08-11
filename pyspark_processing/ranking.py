@@ -225,9 +225,21 @@ def build_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_p
     def get_passage_score(passage_rank):
         return 1 / passage_rank
 
+    print("BUILDING GRAPH WEIGHTS")
+    @udf(returnType=FloatType())
+    def get_norm_score(score, norm_factor):
+        if (score == 0) or (norm_factor == 0):
+            return 0.0
+        return score / norm_factor
+
     df_weighting = df.withColumn("graph_weigh", get_graph_weight("passage_rank", "entity_rank", "entity_links_count"))
     df_entity_rank = df_weighting.groupBy("query", "doc_id", "passage_rank").agg({"graph_weigh": "sum"}).fillna(0.0)
-    df_entity_rank_with_passage_score = df_entity_rank.withColumn("passage_score", get_passage_score("passage_rank"))
+
+    df_norm = df_weighting.groupBy("query").agg({"sum(graph_weigh)": "sum"})
+
+    df_entity_rank_with_norm = df_entity_rank.join(df_norm, on=["query"])
+    df_entity_rank_with_norm_score = df_entity_rank_with_norm.withColumn("norm_score", get_norm_score("sum(graph_weigh)", "sum(sum(graph_weigh))"))
+    df_entity_rank_with_passage_score = df_entity_rank_with_norm_score.withColumn("passage_score", get_passage_score("passage_rank"))
 
     return df_entity_rank_with_passage_score.toPandas().sort_values(["query", "passage_score"], ascending=False)
 
@@ -243,7 +255,7 @@ def write_run_with(run_path, spark, passage_run_path, passage_xml_topics_path, p
     df['score'] = (df['alpha'] * df['passage_score']) + (df['beta'] * df['sum(graph_weigh)'])
 
     print('writing to run file: {}'.format(run_path))
-    data = df.sort_values(["query", "score"], ascending=False).values.tolist()
+    data = df.sort_values(["query", "norm_score"], ascending=False).values.tolist()
     print("SAMPLE DATA")
     print(data[:5])
     with open(run_path, 'w') as f:
