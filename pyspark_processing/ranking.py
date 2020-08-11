@@ -208,7 +208,7 @@ def get_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_par
     entity_df.show()
 
     print("JOINING")
-    df = passage_df.join(entity_df, on=['query', 'entity_id'], how='left').dropna()
+    df = passage_df.join(entity_df, on=['query', 'entity_id'], how='left').fillna(0)
     df.show()
 
     print("BUILDING GRAPH WEIGHTS")
