@@ -241,6 +241,8 @@ def write_run_with(run_path, spark, passage_run_path, passage_xml_topics_path, p
 
     print('writing to run file: {}'.format(run_path))
     data = df.sort_values(["query", "score"], ascending=False).values.tolist()
+    print("SAMPLE DATA")
+    print(data[:5])
     with open(run_path, 'w') as f:
         old_query = ''
         for query, doc_id, _, _, _, _, _, score in data:
