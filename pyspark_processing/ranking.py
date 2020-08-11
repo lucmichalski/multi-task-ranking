@@ -216,7 +216,8 @@ def build_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_p
     def get_graph_weight(passage_rank, entity_rank, entity_links_count):
         if (entity_rank == 0) or (passage_rank == 0):
             return 0
-        return 1 / (passage_rank * entity_rank * entity_links_count)
+        # return 1 / (passage_rank * entity_rank * entity_links_count)
+        return 1 / (entity_rank * entity_links_count)
 
     @udf(returnType=FloatType())
     def get_passage_score(passage_rank):
