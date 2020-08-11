@@ -191,7 +191,7 @@ def get_entity_df(spark, entity_run_path, entity_parquet_path, xml_topics_path):
     return entity_df_with_entity_links_reduced
 
 
-def get_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_parquet_path, entity_run_path,
+def build_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_parquet_path, entity_run_path,
                    entity_parquet_path, entity_xml_topics_path):
     print("BUILDING PASSAGE DF")
     passage_df = get_passage_df(spark=spark,
@@ -227,6 +227,29 @@ def get_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_par
     df_entity_rank_with_passage_score = df_entity_rank.withColumn("passage_score", get_passage_score("passage_rank"))
 
     return df_entity_rank_with_passage_score.toPandas().sort_values(["query", "passage_score"], ascending=False)
+
+
+def write_run_with(run_path, spark, passage_run_path, passage_xml_topics_path, passage_parquet_path, entity_run_path,
+                   entity_parquet_path, entity_xml_topics_path, alpha=1.0, beta=1.0):
+    """"""
+
+    df = build_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_parquet_path, entity_run_path,
+                          entity_parquet_path, entity_xml_topics_path)
+    df['alpha'] = alpha
+    df['beta'] = beta
+    df['score'] = (df['alpha'] * df['passage_score']) + (df['beta'] * df['sum(graph_weigh)'])
+
+    print('writing to run file: {}'.format(run_path))
+    data = df.sort_values(["query", "score"], ascending=False).values.tolist()
+    with open(run_path, 'w') as f:
+        old_query = ''
+        for query, doc_id, _, _, _, _, _, score in data:
+            if old_query != query:
+                rank = 1
+            f.write(" ".join((query, "Q0", str(doc_id), str(rank), "{:.6f}".format(score), "ENTITY-LINKS")) + '\n')
+            old_query = query
+            rank += 1
+
 
 
 
