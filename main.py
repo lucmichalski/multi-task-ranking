@@ -8,13 +8,21 @@ from retrieval.tools import EvalTools, SearchTools, default_eval_config
 from torch import nn
 
 if __name__ == '__main__':
-    ev = EvalTools()
-    run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/just_graph.run'
-    qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/news_track.2018.passage.qrels'
-    eval_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/just_graph.run.eval.v1'
-    ev.write_eval_from_qrels_and_run(run_path=run_path,
-                                     qrels_path=qrels_path,
-                                     eval_path=eval_path)
+    # ev = EvalTools()
+    # run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/just_graph.run'
+    # qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/news_track.2018.passage.qrels'
+    # eval_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/just_graph.run.eval.v1'
+    # ev.write_eval_from_qrels_and_run(run_path=run_path,
+    #                                  qrels_path=qrels_path,
+    #                                  eval_path=eval_path)
+    alphas = [0.0, 0.25, 0.5, 0.75, 1.0]
+    betas = [0.0, 0.25, 0.5, 0.75, 1.0]
+
+    for alpha in alphas:
+        for beta in betas:
+            s = """anserini/eval/trec_eval.9.0.4/trec_eval -c -M1000 -m ndcg_cut.5 -c -M1000 -m map -c -M1000 -m recip_rank -c -M1000 -m P.20 -c -M1000 -m ndcg_cut.20 -c -M1000 -m Rprec -c -M1000 -m recall.40 -c -M1000 -m recall.100 /nfs/trec_news_track/data/2018/news_track.2018.passage.qrels /nfs/trec_news_track/runs/anserini/graph/combined_entity_graph_scores_alpha_{}_beta_{}.run > /nfs/trec_news_track/runs/anserini/graph/combined_entity_graph_scores_alpha_{}_beta_{}.run.eval.v1""".format(alpha, beta, alpha, beta)
+            print(s)
+            print("")
 
     # from document_parsing.trec_news_parsing import TrecNewsParser
     #
