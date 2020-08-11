@@ -251,7 +251,7 @@ def write_run_with(run_path, spark, passage_run_path, passage_xml_topics_path, p
                           entity_parquet_path, entity_xml_topics_path)
     df['alpha'] = alpha
     df['beta'] = beta
-    df['total_score'] = (df['alpha'] * df['passage_score']) + (df['beta'] * df['sum(graph_weigh)'])
+    df['total_score'] = (df['alpha'] * df['passage_score']) + (df['beta'] * df['norm_score'])
 
     print('writing to run file: {}'.format(run_path))
     data = df.sort_values(["query", "total_score"], ascending=False).values.tolist()
