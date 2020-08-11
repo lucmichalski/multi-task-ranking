@@ -208,7 +208,7 @@ def get_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_par
     entity_df.show()
 
     print("JOINING")
-    df = passage_df.join(entity_df, on=['query', 'entity_id'], how='left').fillna(0)
+    df = passage_df.join(entity_df, on=['query', 'entity_id'], how='left').fillna(0.0)
     df.show()
 
     print("BUILDING GRAPH WEIGHTS")
@@ -218,10 +218,15 @@ def get_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_par
             return 0
         return 1 / (passage_rank * entity_rank * entity_links_count)
 
-    df_weighting = df.withColumn("graph_weigh", get_graph_weight("passage_rank", "entity_rank", "entity_links_count"))
-    df_entity_rank = df_weighting.groupBy("query", "doc_id").agg({"graph_weigh": "sum"})
+    @udf(returnType=FloatType())
+    def get_passage_score(passage_rank):
+        return 1 / passage_rank
 
-    return df_entity_rank
+    df_weighting = df.withColumn("graph_weigh", get_graph_weight("passage_rank", "entity_rank", "entity_links_count"))
+    df_entity_rank = df_weighting.groupBy("query", "doc_id", "passage_rank").agg({"graph_weigh": "sum"}).fillna(0.0)
+    df_entity_rank_with_passage_score = df_entity_rank.withColumn("passage_score", get_passage_score("passage_rank"))
+
+    return df_entity_rank_with_passage_score.toPandas().sort_values(["query"])
 
 
 
