@@ -226,7 +226,7 @@ def get_news_graph(spark, passage_run_path, passage_xml_topics_path, passage_par
     df_entity_rank = df_weighting.groupBy("query", "doc_id", "passage_rank").agg({"graph_weigh": "sum"}).fillna(0.0)
     df_entity_rank_with_passage_score = df_entity_rank.withColumn("passage_score", get_passage_score("passage_rank"))
 
-    return df_entity_rank_with_passage_score.toPandas().sort_values(["query"])
+    return df_entity_rank_with_passage_score.toPandas().sort_values(["query", "passage_score"], ascending=False)
 
 
 
