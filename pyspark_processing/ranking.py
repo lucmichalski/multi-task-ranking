@@ -270,7 +270,6 @@ def write_run_with(run_path, spark, passage_run_path, passage_xml_topics_path, p
 
 
 
-*
 
 
 
