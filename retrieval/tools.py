@@ -2,7 +2,7 @@
 from pyserini.search import pysearch
 from pyserini.index import pyutils
 from pyserini.analysis.pyanalysis import get_lucene_analyzer, Analyzer
-from metadata import NewsPassagePaths
+from metadata import NewsPassagePaths, CarEntityPaths
 
 from collections import Counter
 import pandas as pd
@@ -869,18 +869,44 @@ if __name__ == '__main__':
     #                              qrels_pasage_path_2=qrels_pasage_path_2,
     #                              fold_path=fold_path)
 
-    search_tools = SearchTools()
-    run_file_base = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/anserini_bm25_default_entity_scaled'
-    fold_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_{}_entity.topics'.format(i) for i in [0,1,2,3,4]]
-    run_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/entity.2018.custom_anserini.500000_doc.100_words.title+contents.fixed_qrels.run',
-                 '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/entity.2019.custom_anserini.500000_doc.100_words.title+contents.fixed_qrels.run']
-    xml_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/newsir18-topics.txt',
-                        '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/newsir19-background-linking-topics.xml']
-    ranking_type = 'entity'
-    use_xml = False
-    search_tools.write_news_folds_to_runs(run_file_base=run_file_base,
-                                          fold_topics_paths=fold_topics_paths,
-                                          run_paths=run_paths,
-                                          xml_topics_paths=xml_topics_paths,
-                                          ranking_type=ranking_type,
-                                          use_xml=use_xml)
+    # search_tools = SearchTools()
+    # run_file_base = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/anserini_bm25_default_entity_scaled'
+    # fold_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_{}_entity.topics'.format(i) for i in [0,1,2,3,4]]
+    # run_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/entity.2018.custom_anserini.500000_doc.100_words.title+contents.fixed_qrels.run',
+    #              '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/entity.2019.custom_anserini.500000_doc.100_words.title+contents.fixed_qrels.run']
+    # xml_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/newsir18-topics.txt',
+    #                     '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/newsir19-background-linking-topics.xml']
+    # ranking_type = 'entity'
+    # use_xml = False
+    # search_tools.write_news_folds_to_runs(run_file_base=run_file_base,
+    #                                       fold_topics_paths=fold_topics_paths,
+    #                                       run_paths=run_paths,
+    #                                       xml_topics_paths=xml_topics_paths,
+    #                                       ranking_type=ranking_type,
+    #                                       use_xml=use_xml)
+    bm25_searcher_config = {
+        'BM25': {'k1': 0.9,
+                 'b': 0.4}
+    }
+    bm25_rm3_searcher_config = {
+        'BM25+RM3': {'k1': 0.9,
+                     'b': 0.4,
+                     'fb_terms': 10,
+                     'fb_docs': 10,
+                     'original_query_weight': 0.5}
+    }
+    index_path = CarEntityPaths.index
+    search_tools = SearchTools(index_path=index_path, searcher_config=bm25_searcher_config)
+
+    run_path = '/nfs/trec_news_track/runs/anserini/folds/test_entity_fold_0_bm25.run'
+    qrels_path = '/nfs/trec_news_track/data/5_fold/entity_fold_0.qrels'
+    query_type = 'title+content'
+    words = 100
+    hits = 50000
+    search_tools.write_entity_run_news(run_path=run_path,
+                                       qrels_path=qrels_path,
+                                       query_type=query_type,
+                                       words=words,
+                                       hits=hits,
+                                       news_index_path=NewsPassagePaths.index)
+
