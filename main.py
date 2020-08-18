@@ -23,12 +23,12 @@ if __name__ == '__main__':
                     }
     }
     index_path = CarEntityPaths.index
-    search_tools = SearchTools(index_path=index_path, searcher_config=bm25_rm3_searcher_config)
+    search_tools = SearchTools(index_path=index_path, searcher_config=bm25_searcher_config)
     query_type = 'title+contents'
     words = 100
     hits = 500000
 
-    run_paths = ['/nfs/trec_news_track/runs/anserini/folds/entity_ranking_fold_{}_bm25_rm3.run'.format(i) for i in [0,1,2,3,4]]
+    run_paths = ['/nfs/trec_news_track/runs/anserini/folds/entity_ranking_fold_{}_bm25.run'.format(i) for i in [0,1,2,3,4]]
     qrels_paths = ['/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_entity.qrels'.format(i) for i in [0,1,2,3,4]]
 
     for run_path, qrels_path in zip(run_paths, qrels_paths):
