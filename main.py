@@ -10,12 +10,12 @@ from torch import nn
 if __name__ == '__main__':
     bm25_searcher_config = {
         'BM25': {'k1': 0.9,
-                 'b': 0.4}
+                 'b': 0.1}
     }
     bm25_rm3_searcher_config = {
         'BM25+RM3': {'BM25':
-                         {'k1': 0.9,
-                          'b': 0.4},
+                         {'k1': 5.5,
+                          'b': 0.1},
                      'RM3':
                          {'fb_terms': 10,
                           'fb_docs': 10,
