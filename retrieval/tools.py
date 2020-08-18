@@ -443,10 +443,12 @@ class SearchTools:
                         qrels_dict[query] = [doc_id]
                     else:
                         qrels_dict[query].append(doc_id)
-
+        query_counter = 0
         # Begin writing to run file.
         with open(run_path, "w", encoding='utf-8') as f_run:
             for query_id, valid_docs in qrels_dict.items():
+                query_counter += 1
+                print('query {} / {}'.format(query_counter, len(qrels_dict)))
                 # Build query (limit to 'words' number of query terms).
                 query_dict = json.loads(search_tools_news.get_contents_from_docid(query_id))
                 query = self.process_query_news(query_dict=query_dict, query_type=query_type)
@@ -884,29 +886,4 @@ if __name__ == '__main__':
     #                                       xml_topics_paths=xml_topics_paths,
     #                                       ranking_type=ranking_type,
     #                                       use_xml=use_xml)
-    bm25_searcher_config = {
-        'BM25': {'k1': 0.9,
-                 'b': 0.4}
-    }
-    bm25_rm3_searcher_config = {
-        'BM25+RM3': {'k1': 0.9,
-                     'b': 0.4,
-                     'fb_terms': 10,
-                     'fb_docs': 10,
-                     'original_query_weight': 0.5}
-    }
-    index_path = CarEntityPaths.index
-    search_tools = SearchTools(index_path=index_path, searcher_config=bm25_searcher_config)
-
-    run_path = '/nfs/trec_news_track/runs/anserini/folds/test_entity_fold_0_bm25.run'
-    qrels_path = '/nfs/trec_news_track/data/5_fold/entity_fold_0.qrels'
-    query_type = 'title+content'
-    words = 100
-    hits = 50000
-    search_tools.write_entity_run_news(run_path=run_path,
-                                       qrels_path=qrels_path,
-                                       query_type=query_type,
-                                       words=words,
-                                       hits=hits,
-                                       news_index_path=NewsPassagePaths.index)
 
