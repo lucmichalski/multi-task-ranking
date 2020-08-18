@@ -8,6 +8,8 @@ from retrieval.tools import EvalTools, SearchTools, default_eval_config
 from torch import nn
 
 if __name__ == '__main__':
+
+    
     bm25_searcher_config = {
         'BM25': {'k1': 0.9,
                  'b': 0.4}
@@ -24,6 +26,8 @@ if __name__ == '__main__':
     }
     index_path = CarEntityPaths.index
     search_tools = SearchTools(index_path=index_path, searcher_config=bm25_searcher_config)
+
+
     # query_type = 'title+contents'
     # words = 100
     # hits = 500000
