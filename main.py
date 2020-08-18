@@ -20,9 +20,9 @@ if __name__ == '__main__':
                      'original_query_weight': 0.5}
     }
     index_path = CarEntityPaths.index
-    search_tools = SearchTools(index_path=index_path, searcher_config=bm25_searcher_config)
+    search_tools = SearchTools(index_path=index_path, searcher_config=bm25_rm3_searcher_config)
 
-    run_path = '/nfs/trec_news_track/runs/anserini/folds/test_entity_fold_0_bm25.run'
+    run_path = '/nfs/trec_news_track/runs/anserini/folds/test_entity_fold_0_bm25_rm3.run'
     qrels_path = '/nfs/trec_news_track/data/5_fold/entity_fold_0.qrels'
     query_type = 'title+contents'
     words = 100
