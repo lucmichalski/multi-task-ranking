@@ -8,6 +8,32 @@ from retrieval.tools import EvalTools, SearchTools, default_eval_config
 from torch import nn
 
 if __name__ == '__main__':
+    bm25_searcher_config = {
+        'BM25': {'k1': 0.9,
+                 'b': 0.4}
+    }
+    bm25_rm3_searcher_config = {
+        'BM25+RM3': {'k1': 0.9,
+                     'b': 0.4,
+                     'fb_terms': 10,
+                     'fb_docs': 10,
+                     'original_query_weight': 0.5}
+    }
+    index_path = CarEntityPaths.index
+    search_tools = SearchTools(index_path=index_path, searcher_config=bm25_searcher_config)
+
+    run_path = '/nfs/trec_news_track/runs/anserini/folds/test_entity_fold_0_bm25.run'
+    qrels_path = '/nfs/trec_news_track/data/5_fold/entity_fold_0.qrels'
+    query_type = 'title+content'
+    words = 100
+    hits = 50000
+    search_tools.write_entity_run_news(run_path=run_path,
+                                       qrels_path=qrels_path,
+                                       query_type=query_type,
+                                       words=words,
+                                       hits=hits,
+                                       news_index_path=NewsPassagePaths.index)
+
     # ev = EvalTools()
     # run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/just_graph.run'
     # qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/news_track.2018.passage.qrels'
