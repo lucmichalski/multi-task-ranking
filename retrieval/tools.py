@@ -851,6 +851,7 @@ class Pipeline:
 
 
 if __name__ == '__main__':
+    pass
     # eval_config = [('map', None), ('Rprec',None), ('recip_rank', None), ('ndcg',5), ('P',20), ('recall',40)]
     # eval_tools = EvalTools()
     # run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/entity.custom_anserini.500000_doc.100_words.title.fixed_qrels.run'
