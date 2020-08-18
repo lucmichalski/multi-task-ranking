@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     run_path = '/nfs/trec_news_track/runs/anserini/folds/test_entity_fold_0_bm25.run'
     qrels_path = '/nfs/trec_news_track/data/5_fold/entity_fold_0.qrels'
-    query_type = 'title+content'
+    query_type = 'title+contents'
     words = 100
     hits = 50000
     search_tools.write_entity_run_news(run_path=run_path,
