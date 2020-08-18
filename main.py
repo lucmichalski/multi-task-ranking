@@ -40,7 +40,7 @@ if __name__ == '__main__':
     #                                        hits=hits,
     #                                        news_index_path=NewsPassagePaths.index)
     hits = 1000
-    printing_step = 1000
+    printing_step = 50
     run_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_bm25_rm3_1000.run'
     topics_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity.topics'
     search_tools.write_run_car(topics_path, run_path, hits=hits, printing_step=printing_step)
