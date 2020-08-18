@@ -24,21 +24,26 @@ if __name__ == '__main__':
     }
     index_path = CarEntityPaths.index
     search_tools = SearchTools(index_path=index_path, searcher_config=bm25_searcher_config)
-    query_type = 'title+contents'
-    words = 100
-    hits = 500000
-
-    run_paths = ['/nfs/trec_news_track/runs/anserini/folds/entity_ranking_fold_{}_bm25.run'.format(i) for i in [0,1,2,3,4]]
-    qrels_paths = ['/nfs/trec_news_track/data/5_fold/entity_fold_{}.qrels'.format(i) for i in [0,1,2,3,4]]
-
-    for run_path, qrels_path in zip(run_paths, qrels_paths):
-
-        search_tools.write_entity_run_news(run_path=run_path,
-                                           qrels_path=qrels_path,
-                                           query_type=query_type,
-                                           words=words,
-                                           hits=hits,
-                                           news_index_path=NewsPassagePaths.index)
+    # query_type = 'title+contents'
+    # words = 100
+    # hits = 500000
+    #
+    # run_paths = ['/nfs/trec_news_track/runs/anserini/folds/entity_ranking_fold_{}_bm25.run'.format(i) for i in [0,1,2,3,4]]
+    # qrels_paths = ['/nfs/trec_news_track/data/5_fold/entity_fold_{}.qrels'.format(i) for i in [0,1,2,3,4]]
+    #
+    # for run_path, qrels_path in zip(run_paths, qrels_paths):
+    #
+    #     search_tools.write_entity_run_news(run_path=run_path,
+    #                                        qrels_path=qrels_path,
+    #                                        query_type=query_type,
+    #                                        words=words,
+    #                                        hits=hits,
+    #                                        news_index_path=NewsPassagePaths.index)
+    hits = 1000
+    printing_step = 1000
+    run_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_bm25_rm3_1000.run'
+    topics_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity.topics'
+    search_tools.write_run_car(topics_path, run_path, hits=hits, printing_step=printing_step)
 
     # ev = EvalTools()
     # run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/just_graph.run'
