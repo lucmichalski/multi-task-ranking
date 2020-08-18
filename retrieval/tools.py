@@ -81,7 +81,7 @@ class RetrievalUtils:
                         query, _, doc_id, score = self.unpack_qrels_line(line)
                         if query not in qrels_dict:
                             qrels_dict[query] = {}
-                        if float(score) > 0.0:
+                        if float(score) >= 0.0:
                             # key: query, value: list of doc_ids
                             qrels_dict[query][doc_id] = float(score)
 
@@ -859,18 +859,18 @@ if __name__ == '__main__':
     # eval_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/entity.custom_anserini.500000_doc.100_words.title.fixed_qrels.run.summed.eval.map'
     # eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path, eval_config=eval_config)
 
-    # qrels_entity_path_1 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2018.entity.qrels'
-    # qrels_entity_path_2 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2019.entity.qrels'
-    # qrels_passage_path_1 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2018.passage.qrels'
-    # qrels_pasage_path_2 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2019.passage.qrels'
-    # fold_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_'
-    # search_tools = SearchTools()
-    #
-    # search_tools.get_merge_qrels(qrels_entity_path_1=qrels_entity_path_1,
-    #                              qrels_entity_path_2=qrels_entity_path_2,
-    #                              qrels_passage_path_1=qrels_passage_path_1,
-    #                              qrels_pasage_path_2=qrels_pasage_path_2,
-    #                              fold_path=fold_path)
+    qrels_entity_path_1 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2018.entity.qrels'
+    qrels_entity_path_2 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2019.entity.qrels'
+    qrels_passage_path_1 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2018.passage.qrels'
+    qrels_pasage_path_2 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2019.passage.qrels'
+    fold_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_'
+    search_tools = SearchTools()
+
+    search_tools.get_merge_qrels(qrels_entity_path_1=qrels_entity_path_1,
+                                 qrels_entity_path_2=qrels_entity_path_2,
+                                 qrels_passage_path_1=qrels_passage_path_1,
+                                 qrels_pasage_path_2=qrels_pasage_path_2,
+                                 fold_path=fold_path)
 
     # search_tools = SearchTools()
     # run_file_base = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/anserini_bm25_default_entity_scaled'
