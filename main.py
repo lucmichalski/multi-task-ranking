@@ -15,14 +15,22 @@ if __name__ == '__main__':
     # ev.write_eval_from_qrels_and_run(run_path=run_path,
     #                                  qrels_path=qrels_path,
     #                                  eval_path=eval_path)
-    alphas = [0.0, 0.25, 0.5, 0.75, 1.0]
-    betas = [0.0, 0.25, 0.5, 0.75, 1.0]
+    # alphas = [0.0, 0.001, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1.0]
+    # betas = [0.0, 0.001, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1.0]
+    #
+    # for alpha in alphas:
+    #     for beta in betas:
+    #         s = """anserini/eval/trec_eval.9.0.4/trec_eval -c -M1000 -m ndcg_cut.5 -c -M1000 -m map -c -M1000 -m recip_rank -c -M1000 -m P.20 -c -M1000 -m ndcg_cut.20 -c -M1000 -m Rprec -c -M1000 -m recall.40 -c -M1000 -m recall.100 /nfs/trec_news_track/data/2018/news_track.2018.passage.qrels /nfs/trec_news_track/runs/anserini/graph/norm_combined_entity_graph_scores_alpha_{}_beta_{}.run > /nfs/trec_news_track/runs/anserini/graph/combined_entity_graph_scores_alpha_{}_beta_{}.run.eval.v1""".format(alpha, beta, alpha, beta)
+    #         print(s)
+    #         print("")
 
-    for alpha in alphas:
-        for beta in betas:
-            s = """anserini/eval/trec_eval.9.0.4/trec_eval -c -M1000 -m ndcg_cut.5 -c -M1000 -m map -c -M1000 -m recip_rank -c -M1000 -m P.20 -c -M1000 -m ndcg_cut.20 -c -M1000 -m Rprec -c -M1000 -m recall.40 -c -M1000 -m recall.100 /nfs/trec_news_track/data/2018/news_track.2018.passage.qrels /nfs/trec_news_track/runs/anserini/graph/combined_entity_graph_scores_alpha_{}_beta_{}.run > /nfs/trec_news_track/runs/anserini/graph/combined_entity_graph_scores_alpha_{}_beta_{}.run.eval.v1""".format(alpha, beta, alpha, beta)
-            print(s)
-            print("")
+    from retrieval.tools import RetrievalUtils
+    import random
+
+
+
+
+
 
     # from document_parsing.trec_news_parsing import TrecNewsParser
     #

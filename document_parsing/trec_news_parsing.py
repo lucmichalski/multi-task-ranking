@@ -379,27 +379,98 @@ class TrecNewsParser:
 
 if __name__ == '__main__':
 
-    path = '/Users/iain/LocalStorage/TREC-NEWS/WashingtonPost.v2/data/TREC_Washington_Post_collection.v2.jl'
+    # path = '/Users/iain/LocalStorage/TREC-NEWS/WashingtonPost.v2/data/TREC_Washington_Post_collection.v2.jl'
+    # rel_base_url = "/Users/iain/LocalStorage/coding/github/REL/"
+    # rel_wiki_year = '2019'
+    # rel_model_path = "/Users/iain/LocalStorage/coding/github/REL/ed-wiki-{}/model".format(rel_wiki_year)
+    # car_id_to_name_path = '/Users/iain/LocalStorage/lmdb.map_id_to_name.v1'
+    # print_intervals = 100
+    # num_docs = 500
+    # chunks = 100
+    # write_output = True
+    # dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/2018_bm25_chunks_full_v3/'
+    # tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
+    #                      rel_base_url=rel_base_url,
+    #                      rel_model_path=rel_model_path,
+    #                      car_id_to_name_path=car_id_to_name_path)
+    #
+    # index_path = '/Users/iain/LocalStorage/TREC-NEWS/lucene-index-copy'
+    # run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/anserini.bm5.default.run'
+    # tnp.parse_run_file_to_parquet(run_path=run_path,
+    #                               index_path=index_path,
+    #                               write_output=write_output,
+    #                               dir_path=dir_path,
+    #                               num_docs=num_docs,
+    #                               chunks=chunks,
+    #                               print_intervals=print_intervals)
+
+    from retrieval.tools import SearchTools, RetrievalUtils
+
+    def get_qrels(qrels_path):
+        ru = RetrievalUtils()
+        if isinstance(qrels_path, str):
+            # Get max score form qrels file to normalise with.
+            qrels_dict = {}
+            with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
+                # Read each line of qrels file.
+                for line in qrels_file:
+                    if len(line) > 4:
+                        query, _, doc_id, score = ru.unpack_qrels_line(line)
+                        if query not in qrels_dict:
+                            qrels_dict[query] = []
+                        qrels_dict[query].append(doc_id)
+
+            return qrels_dict
+
     rel_base_url = "/Users/iain/LocalStorage/coding/github/REL/"
     rel_wiki_year = '2019'
     rel_model_path = "/Users/iain/LocalStorage/coding/github/REL/ed-wiki-{}/model".format(rel_wiki_year)
     car_id_to_name_path = '/Users/iain/LocalStorage/lmdb.map_id_to_name.v1'
-    print_intervals = 100
-    num_docs = 500
-    chunks = 100
-    write_output = True
-    dir_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/2018_bm25_chunks_full_v3/'
+
+    qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/news_track.2018.entity.qrels'
+    index_path = '/Users/iain/LocalStorage/TREC-NEWS/lucene-index-copy'
+
+    search_tools = SearchTools(index_path=index_path)
+
     tnp = TrecNewsParser(rel_wiki_year=rel_wiki_year,
                          rel_base_url=rel_base_url,
                          rel_model_path=rel_model_path,
                          car_id_to_name_path=car_id_to_name_path)
 
-    index_path = '/Users/iain/LocalStorage/TREC-NEWS/lucene-index-copy'
-    run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/anserini.bm5.default.run'
-    tnp.parse_run_file_to_parquet(run_path=run_path,
-                                  index_path=index_path,
-                                  write_output=write_output,
-                                  dir_path=dir_path,
-                                  num_docs=num_docs,
-                                  chunks=chunks,
-                                  print_intervals=print_intervals)
+    qrels = get_qrels(qrels_path)
+    print(qrels)
+    doc_id_list = qrels.keys()
+
+    data = {}
+    correct_sum = 0.0
+    false_negative_sum = 0.0
+    false_positive_sum = 0.0
+    counter = 0
+    for doc_id in doc_id_list:
+        print('================================')
+        print(doc_id)
+        article_json = tnp.build_article_from_json(json.loads(search_tools.get_contents_from_docid(doc_id=doc_id)))
+        doc = tnp.parse_article_to_protobuf(article=article_json)
+
+        entity_links_ids = set([entity_link_totals.entity_id for entity_link_totals in doc.rel_entity_link_totals])
+
+        qrels_doc_ids = set(qrels[doc_id])
+
+        intersection = qrels_doc_ids.intersection(entity_links_ids)
+        difference = entity_links_ids.difference(qrels_doc_ids)
+
+        correct_sum += len(intersection)
+        false_negative_sum += len(qrels_doc_ids) - len(intersection)
+        false_positive_sum += len(entity_links_ids) - len(intersection)
+
+
+    print('||||||||||||||||||||||||||||||||')
+    print(correct_sum, false_negative_sum, false_positive_sum)
+    precision = correct_sum/(correct_sum+false_positive_sum)
+    recall = correct_sum/(correct_sum+false_negative_sum)
+    f1 = 2 * ((precision*recall)/(precision+recall))
+    print('precision: {}'.format(precision))
+    print('recall: {}'.format(recall))
+    print('f1: {}'.format(f1))
+
+

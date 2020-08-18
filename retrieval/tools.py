@@ -70,6 +70,24 @@ class RetrievalUtils:
         else:
             return None
 
+    def get_qrels_scaled_dict(self, qrels_path):
+        """ Build a dictionary from a qrels file with normalised relevance: {query: {rel#1: score},... }. """
+        if isinstance(qrels_path, str):
+            qrels_dict = {}
+            with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
+                # Read each line of qrels file.
+                for line in qrels_file:
+                    if len(line) > 4:
+                        query, _, doc_id, score = self.unpack_qrels_line(line)
+                        if query not in qrels_dict:
+                            qrels_dict[query] = {}
+                        if float(score) > 0.0:
+                            # key: query, value: list of doc_ids
+                            qrels_dict[query][doc_id] = float(score)
+
+            return qrels_dict
+        else:
+            return None
 
     def test_valid_line_car(self, line):
         """ Return bool whether valid starting substring is in line"""
@@ -329,7 +347,7 @@ class SearchTools:
         with open(new_qrels_path, 'w') as f_new:
             with open(old_qrels_path, 'r') as f_old:
                 for line in f_old:
-                    if self.retrieval_utils.test_valid_line(line):
+                    if self.retrieval_utils.test_valid_line_car(line):
                         query, q, doc_id, old_score = self.retrieval_utils.unpack_qrels_line(line=line)
                         assert int(old_score) in mapped_scores, "score: {} not in mapped_scores: {}".format(old_score, mapped_scores)
                         new_score = mapped_scores[int(old_score)]
@@ -392,7 +410,8 @@ class SearchTools:
                 try:
                     if 'content' in content.keys():
                         if isinstance(content['content'], dict) == False:
-                            text = re.sub(r'<a href=.*\</a>', '', str(content['content']))
+                            rule = r'<a href=.*\>|<a class=.*\>|<span class=.*\>|</span>|<span>|</span>|<i>|</i>|<strong>|</strong>|<b>|</b>|<br />'
+                            text = re.sub(rule, '', str(content['content']))
                             content_text += " " + str(text)
                 except:
                     print('FAILED TO PARSE CONTENTS')
@@ -466,6 +485,91 @@ class SearchTools:
                     # Next rank.
                     rank += 1
 
+
+    def get_merge_qrels(self, qrels_entity_path_1, qrels_entity_path_2, qrels_passage_path_1, qrels_pasage_path_2,
+                        fold_path, k=5):
+
+        search_tools = SearchTools()
+        entity_qrels_1 = search_tools.retrieval_utils.get_qrels_scaled_dict(qrels_entity_path_1)
+        entity_qrels_2 = search_tools.retrieval_utils.get_qrels_scaled_dict(qrels_entity_path_2)
+        passage_qrels_1 = search_tools.retrieval_utils.get_qrels_scaled_dict(qrels_passage_path_1)
+        passage_qrels_2 = search_tools.retrieval_utils.get_qrels_scaled_dict(qrels_pasage_path_2)
+        entity_merge_qrels = {**entity_qrels_1, **entity_qrels_2}
+        passage_merge_qrels = {**passage_qrels_1, **passage_qrels_2}
+        unique_keys = list(set(list(entity_merge_qrels.keys()) + list(passage_merge_qrels.keys())))
+
+        min_size = int(len(unique_keys) / k)
+        remainder = int(len(unique_keys) % k)
+        remained_added = 0
+
+        k_id_lists = []
+        index_counter = 0
+        for i in range(1, k+1):
+            if remained_added < remainder:
+                length = min_size + 1
+                remained_added += 1
+            else:
+                length = min_size
+            id_list = unique_keys[index_counter:index_counter+length]
+            k_id_lists.append(id_list)
+            index_counter += length
+
+        for k_count, id_list in enumerate(k_id_lists):
+            for query_type in ['passage', 'entity']:
+                k_qrels_path = fold_path + str(k_count) + '_{}.qrels'.format(query_type)
+                if query_type == 'passage':
+                    merge_qrels = passage_merge_qrels
+                else:
+                    merge_qrels = entity_merge_qrels
+                with open(k_qrels_path, 'w') as f_qrels:
+                    for i in id_list:
+                        if i in merge_qrels:
+                            for doc_id, score in merge_qrels[i].items():
+                                f_qrels.write(" ".join((i, '0', doc_id, str(score))) + '\n')
+
+                k_topics_path = fold_path + str(k_count) + '_{}.topics'.format(query_type)
+                with open(k_topics_path, 'w') as f_topics:
+                    for i in id_list:
+                        f_topics.write(i + '\n')
+
+
+    def write_news_folds_to_runs(self, run_file_base, fold_topics_paths, run_paths, xml_topics_paths,
+                                 ranking_type='passage', use_xml=False):
+        """ """
+        assert ranking_type == 'passage' or ranking_type == 'entity'
+
+        if use_xml:
+            id_map = {}
+            for xml_topics_path in xml_topics_paths:
+                passage_id_map, entity_id_map = self.get_news_ids_maps(xml_topics_path=xml_topics_path, ranking_type=ranking_type)
+                if ranking_type == 'passage':
+                    id_map.update(passage_id_map)
+                else:
+                    id_map.update(entity_id_map)
+        else:
+            id_map = {}
+
+        run_data = []
+        for run_path in run_paths:
+            with open(run_path, 'r') as f_run:
+                run_data += f_run.read().splitlines()
+        print(run_data)
+
+        print(id_map)
+        # Expect folds to be 0 - K
+        for fold_i, fold_path in enumerate(fold_topics_paths):
+            fold_run_path = '{}_fold_{}.run'.format(run_file_base, fold_i)
+            with open(fold_path, 'r') as f_fold:
+                fold_ids = f_fold.read().splitlines()
+            with open(fold_run_path, 'w') as f_run_fold:
+                for line in run_data:
+                    query, q, doc_id, rank, score, name = self.retrieval_utils.unpack_run_line(line=line)
+                    if query in id_map:
+                        query_id = id_map[query]
+                    else:
+                        query_id = query
+                    if query_id in fold_ids:
+                        f_run_fold.write(" ".join((query_id, q, doc_id, rank, score, name)) + '\n')
 
 ###############################################################################
 ################################ Eval Class ###################################
@@ -745,9 +849,38 @@ class Pipeline:
 
 
 if __name__ == '__main__':
-    eval_config = [('map', None), ('Rprec',None), ('recip_rank', None), ('ndcg',5), ('P',20), ('recall',40)]
-    eval_tools = EvalTools()
-    run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/entity.custom_anserini.500000_doc.100_words.title.fixed_qrels.run'
-    qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/news_track.2018.entity.qrels'
-    eval_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/entity.custom_anserini.500000_doc.100_words.title.fixed_qrels.run.summed.eval.map'
-    eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path, eval_config=eval_config)
+    # eval_config = [('map', None), ('Rprec',None), ('recip_rank', None), ('ndcg',5), ('P',20), ('recall',40)]
+    # eval_tools = EvalTools()
+    # run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/entity.custom_anserini.500000_doc.100_words.title.fixed_qrels.run'
+    # qrels_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/news_track.2018.entity.qrels'
+    # eval_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/entity.custom_anserini.500000_doc.100_words.title.fixed_qrels.run.summed.eval.map'
+    # eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path, eval_config=eval_config)
+
+    # qrels_entity_path_1 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2018.entity.qrels'
+    # qrels_entity_path_2 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2019.entity.qrels'
+    # qrels_passage_path_1 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2018.passage.qrels'
+    # qrels_pasage_path_2 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2019.passage.qrels'
+    # fold_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_'
+    # search_tools = SearchTools()
+    #
+    # search_tools.get_merge_qrels(qrels_entity_path_1=qrels_entity_path_1,
+    #                              qrels_entity_path_2=qrels_entity_path_2,
+    #                              qrels_passage_path_1=qrels_passage_path_1,
+    #                              qrels_pasage_path_2=qrels_pasage_path_2,
+    #                              fold_path=fold_path)
+
+    search_tools = SearchTools()
+    run_file_base = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/anserini_bm25_default_entity_scaled'
+    fold_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_{}_entity.topics'.format(i) for i in [0,1,2,3,4]]
+    run_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/entity.2018.custom_anserini.500000_doc.100_words.title+contents.fixed_qrels.run',
+                 '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/entity.2019.custom_anserini.500000_doc.100_words.title+contents.fixed_qrels.run']
+    xml_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/newsir18-topics.txt',
+                        '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/newsir19-background-linking-topics.xml']
+    ranking_type = 'entity'
+    use_xml = False
+    search_tools.write_news_folds_to_runs(run_file_base=run_file_base,
+                                          fold_topics_paths=fold_topics_paths,
+                                          run_paths=run_paths,
+                                          xml_topics_paths=xml_topics_paths,
+                                          ranking_type=ranking_type,
+                                          use_xml=use_xml)
