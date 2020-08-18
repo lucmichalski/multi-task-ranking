@@ -16,8 +16,8 @@ if __name__ == '__main__':
     }
     bm25_rm3_searcher_config = {
         'BM25+RM3': {'BM25':
-                         {'k1': 5.5,
-                          'b': 0.1},
+                         {'k1': 0.9,
+                          'b': 0.4},
                      'RM3':
                          {'fb_terms': 10,
                           'fb_docs': 10,
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     printing_step = 50
     # run_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_bm25_rm3_1000.run'
     # topics_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity.topics'
-    run_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_bm25_rm3_1000.run'
+    run_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity_bm25_rm3_1000_2.run'
     topics_path = '/nfs/trec_car/data/entity_ranking/testY2_manual_entity_data/testY2_manual_entity.topics'
     search_tools.write_run_car(topics_path, run_path, hits=hits, printing_step=printing_step)
 
