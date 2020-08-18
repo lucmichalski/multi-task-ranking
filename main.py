@@ -13,11 +13,14 @@ if __name__ == '__main__':
                  'b': 0.4}
     }
     bm25_rm3_searcher_config = {
-        'BM25+RM3': {'k1': 0.9,
-                     'b': 0.4,
-                     'fb_terms': 10,
-                     'fb_docs': 10,
-                     'original_query_weight': 0.5}
+        'BM25+RM3': {'BM25':
+                         {'k1': 0.9,
+                          'b': 0.4},
+                     'RM3':
+                         {'fb_terms': 10,
+                          'fb_docs': 10,
+                          'original_query_weight': 0.5}
+                    }
     }
     index_path = CarEntityPaths.index
     search_tools = SearchTools(index_path=index_path, searcher_config=bm25_rm3_searcher_config)
