@@ -23,7 +23,7 @@ if __name__ == '__main__':
                     }
     }
     index_path = CarEntityPaths.index
-    search_tools = SearchTools(index_path=index_path, searcher_config=bm25_searcher_config)
+    search_tools = SearchTools(index_path=index_path, searcher_config=bm25_rm3_searcher_config)
     # query_type = 'title+contents'
     # words = 100
     # hits = 500000
