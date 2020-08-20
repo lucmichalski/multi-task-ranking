@@ -9,43 +9,45 @@ from torch import nn
 
 if __name__ == '__main__':
 
-    # query_type = 'title+contents'
-    # words = 100
-    # hits = 100000
-    # fold = 4
-    # base_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/'.format(fold)
-    # datasets = ['train']
-    # index_path = CarEntityPaths.index
-    #
-    # for model in ['bm25']:
-    #     run_paths = [base_path + 'entity_{}_{}.run'.format(i, model) for i in datasets]
-    #     qrels_paths = [base_path + 'entity_{}.qrels'.format(i) for i in datasets]
-    #     for run_path, qrels_path in zip(run_paths, qrels_paths):
-    #         if model == 'bm25':
-    #             searcher_config = {
-    #                 'BM25': {'k1': 0.9,
-    #                          'b': 0.4}
-    #             }
-    #         else:
-    #             searcher_config = {
-    #                 'BM25+RM3': {'BM25':
-    #                                  {'k1': 0.9,
-    #                                   'b': 0.4},
-    #                              'RM3':
-    #                                  {'fb_terms': 10,
-    #                                   'fb_docs': 10,
-    #                                   'original_query_weight': 0.5}
-    #                              }
-    #             }
-    #
-    #         search_tools = SearchTools(index_path=index_path, searcher_config=searcher_config)
-    #
-    #         search_tools.write_entity_run_news(run_path=run_path,
-    #                                            qrels_path=qrels_path,
-    #                                            query_type=query_type,
-    #                                            words=words,
-    #                                            hits=hits,
-    #                                            news_index_path=NewsPassagePaths.index)
+    query_type = 'title+contents'
+    words = 100
+    folds = [0,1,2,3,4]
+    models = ['bm25', 'bm25_rm3']
+    datasets = ['test', 'valid', 'train']
+    hits_list = [500, 500, 1000]
+    index_path = CarEntityPaths.index
+
+    for fold in folds:
+        for model in models:
+            base_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/'.format(fold)
+            run_paths = [base_path + 'passage_{}_{}.run'.format(i, model) for i in datasets]
+            qrels_paths = [base_path + 'passage_{}.qrels'.format(i) for i in datasets]
+            for run_path, qrels_path, hits in zip(run_paths, qrels_paths, hits_list):
+                if model == 'bm25':
+                    searcher_config = {
+                        'BM25': {'k1': 0.9,
+                                 'b': 0.4}
+                    }
+                else:
+                    searcher_config = {
+                        'BM25+RM3': {'BM25':
+                                         {'k1': 0.9,
+                                          'b': 0.4},
+                                     'RM3':
+                                         {'fb_terms': 10,
+                                          'fb_docs': 10,
+                                          'original_query_weight': 0.5}
+                                     }
+                    }
+
+                search_tools = SearchTools(index_path=index_path, searcher_config=searcher_config)
+
+                search_tools.write_entity_run_news(run_path=run_path,
+                                                   qrels_path=qrels_path,
+                                                   query_type=query_type,
+                                                   words=words,
+                                                   hits=hits,
+                                                   news_index_path=NewsPassagePaths.index)
     # datasets = ['test', 'valid', 'train']
     # folds = [1,2,3,4]
     # training_datasets = [False, False, True]
@@ -78,44 +80,44 @@ if __name__ == '__main__':
     #                               query_type=query_type,
     #                               car_index_path=car_index_path)
 
-    folds = [0,1,2,3,4]
-    for fold in folds:
-        model_path = None
-        dev_batch_size = 64
-        train_batch_size = 8
-        train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_data/'.format(fold)
-        dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_data/'.format(fold)
-        dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.qrels'.format(fold)
-        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.run'.format(fold)
-
-        experiments = FineTuningReRankingExperiments(
-            model_path = None,
-            extra_layers = False,
-            dev_batch_size = None,
-            train_batch_size = None,
-            train_data_dir_path_passage = None,
-            train_data_dir_path_entity = train_data_dir_path_entity,
-            dev_data_dir_path_passage = None,
-            dev_data_dir_path_entity = dev_data_dir_path_entity,
-            dev_qrels_path_passage = None,
-            dev_qrels_path_entity = dev_qrels_path_entity,
-            dev_run_path_passage = None,
-            dev_run_path_entity = dev_run_path_entity)
-
-        epochs = 3
-        lr = 3e-5
-        experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
-        experiment_name = '1st_entity_bert_train_{}epoch+{}lr'.format(epochs, lr)
-        experiments.run_experiment_single_head(
-            head_flag='entity',
-            epochs=epochs,
-            lr=lr,
-            eps=1e-8,
-            weight_decay=0.01,
-            warmup_percentage=0.1,
-            experiments_dir=experiments_dir,
-            experiment_name=experiment_name,
-            logging_steps=100)
+    # folds = [0,1,2,3,4]
+    # for fold in folds:
+    #     model_path = None
+    #     dev_batch_size = 64
+    #     train_batch_size = 8
+    #     train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_data/'.format(fold)
+    #     dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_data/'.format(fold)
+    #     dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.qrels'.format(fold)
+    #     dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.run'.format(fold)
+    #
+    #     experiments = FineTuningReRankingExperiments(
+    #         model_path = None,
+    #         extra_layers = False,
+    #         dev_batch_size = None,
+    #         train_batch_size = None,
+    #         train_data_dir_path_passage = None,
+    #         train_data_dir_path_entity = train_data_dir_path_entity,
+    #         dev_data_dir_path_passage = None,
+    #         dev_data_dir_path_entity = dev_data_dir_path_entity,
+    #         dev_qrels_path_passage = None,
+    #         dev_qrels_path_entity = dev_qrels_path_entity,
+    #         dev_run_path_passage = None,
+    #         dev_run_path_entity = dev_run_path_entity)
+    #
+    #     epochs = 3
+    #     lr = 3e-5
+    #     experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
+    #     experiment_name = '1st_entity_bert_train_{}epoch+{}lr'.format(epochs, lr)
+    #     experiments.run_experiment_single_head(
+    #         head_flag='entity',
+    #         epochs=epochs,
+    #         lr=lr,
+    #         eps=1e-8,
+    #         weight_decay=0.01,
+    #         warmup_percentage=0.1,
+    #         experiments_dir=experiments_dir,
+    #         experiment_name=experiment_name,
+    #         logging_steps=100)
 
 
     # hits = 1000
