@@ -19,7 +19,7 @@ class DatasetProcessing:
     retrieval_utils = RetrievalUtils()
 
     def __init__(self, qrels_path, run_path, index_path, data_dir_path, max_length=512, context_path=None,
-                tokenizer=BertTokenizer.from_pretrained('bert-base-uncased'), binary_qrels=True):
+                 tokenizer=BertTokenizer.from_pretrained('bert-base-uncased'), binary_qrels=True):
 
         # Path to qrels file.
         self.qrels_path = qrels_path
@@ -270,7 +270,7 @@ class DatasetProcessing:
 
 
     def build_news_dataset(self, training_dataset=False, chuck_topic_size=1e8, ranking_type='passage',
-                           query_type='title+contents', car_index_path=None, xml_topics_path=None):
+                           query_type='title+contents', car_index_path=None):
         """ Build TREC News Track dataset and save data chucks of data_dir_path. If sequential flag is True (validation
         dataset) and if False (training dataset). """
 
@@ -286,11 +286,7 @@ class DatasetProcessing:
         # Number of topics processed in each chuck before being processed.
         self.chuck_topic_size = chuck_topic_size
 
-        if ranking_type == 'passage':
-            passage_id_map, entity_id_map = self.search_tools.get_news_ids_maps(xml_topics_path=xml_topics_path,
-                                                                                ranking_type=ranking_type)
-        else:
-            search_tools_car = SearchTools(index_path=car_index_path)
+        search_tools_car = SearchTools(index_path=car_index_path)
 
         with open(self.run_path, 'r', encoding='utf-8') as f_run:
 
@@ -311,14 +307,9 @@ class DatasetProcessing:
                         # write final chuck to file.
                         self.__write_chuck_to_directory()
 
-                if ranking_type == 'passage':
-                    # Decode query.
-                    query_id_news = passage_id_map[query_id]
-                    query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id_news))
-                    query = self.search_tools.process_query_news(query_dict=query_dict, query_type=query_type)
-                else:
-                    query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
-                    query = self.search_tools.process_query_news(query_dict=query_dict, query_type=query_type)
+
+                query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
+                query = self.search_tools.process_query_news(query_dict=query_dict, query_type=query_type)
 
                 # Extract text from index using doc_id.
                 if ranking_type == 'passage':

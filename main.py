@@ -9,43 +9,73 @@ from torch import nn
 
 if __name__ == '__main__':
 
+    # query_type = 'title+contents'
+    # words = 100
+    # hits = 100000
+    # fold = 4
+    # base_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/'.format(fold)
+    # datasets = ['train']
+    # index_path = CarEntityPaths.index
+    #
+    # for model in ['bm25']:
+    #     run_paths = [base_path + 'entity_{}_{}.run'.format(i, model) for i in datasets]
+    #     qrels_paths = [base_path + 'entity_{}.qrels'.format(i) for i in datasets]
+    #     for run_path, qrels_path in zip(run_paths, qrels_paths):
+    #         if model == 'bm25':
+    #             searcher_config = {
+    #                 'BM25': {'k1': 0.9,
+    #                          'b': 0.4}
+    #             }
+    #         else:
+    #             searcher_config = {
+    #                 'BM25+RM3': {'BM25':
+    #                                  {'k1': 0.9,
+    #                                   'b': 0.4},
+    #                              'RM3':
+    #                                  {'fb_terms': 10,
+    #                                   'fb_docs': 10,
+    #                                   'original_query_weight': 0.5}
+    #                              }
+    #             }
+    #
+    #         search_tools = SearchTools(index_path=index_path, searcher_config=searcher_config)
+    #
+    #         search_tools.write_entity_run_news(run_path=run_path,
+    #                                            qrels_path=qrels_path,
+    #                                            query_type=query_type,
+    #                                            words=words,
+    #                                            hits=hits,
+    #                                            news_index_path=NewsPassagePaths.index)
+
+    qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/entity_test.qrels'
+    run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/entity_test_bm25.run'
+    index_path = NewsPassagePaths.index
+    data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/entity_test_data/'
+    max_length = 512
+    context_path = None
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    binary_qrels = False
+    dp = DatasetProcessing(qrels_path=qrels_path,
+                           run_path=run_path,
+                           index_path=index_path,
+                           data_dir_path=data_dir_path,
+                           max_length=max_length,
+                           context_path=context_path,
+                           tokenizer=tokenizer,
+                           binary_qrels=binary_qrels)
+
+    training_dataset = False
+    chuck_topic_size = 1000
+    ranking_type = 'entity'
     query_type = 'title+contents'
-    words = 100
-    hits = 100000
-    fold = 4
-    base_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/'.format(fold)
-    datasets = ['train']
-    index_path = CarEntityPaths.index
+    car_index_path = CarEntityPaths.index
+    dp.build_news_dataset(training_dataset=training_dataset,
+                          chuck_topic_size=chuck_topic_size,
+                          ranking_type=ranking_type,
+                          query_type=query_type,
+                          car_index_path=car_index_path)
 
-    for model in ['bm25']:
-        run_paths = [base_path + 'entity_{}_{}.run'.format(i, model) for i in datasets]
-        qrels_paths = [base_path + 'entity_{}.qrels'.format(i) for i in datasets]
-        for run_path, qrels_path in zip(run_paths, qrels_paths):
-            if model == 'bm25':
-                searcher_config = {
-                    'BM25': {'k1': 0.9,
-                             'b': 0.4}
-                }
-            else:
-                searcher_config = {
-                    'BM25+RM3': {'BM25':
-                                     {'k1': 0.9,
-                                      'b': 0.4},
-                                 'RM3':
-                                     {'fb_terms': 10,
-                                      'fb_docs': 10,
-                                      'original_query_weight': 0.5}
-                                 }
-                }
 
-            search_tools = SearchTools(index_path=index_path, searcher_config=searcher_config)
-
-            search_tools.write_entity_run_news(run_path=run_path,
-                                               qrels_path=qrels_path,
-                                               query_type=query_type,
-                                               words=words,
-                                               hits=hits,
-                                               news_index_path=NewsPassagePaths.index)
     # hits = 1000
     # printing_step = 50
     # run_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_bm25_rm3_1000.run.v2'

@@ -269,32 +269,33 @@ class SearchTools:
         """ Build dict map from intermediate ids to Washington Post ids {intermediate_id: passage_id} """
         passage_id_map = {}
         entity_id_map = {}
-        with open(xml_topics_path, 'r') as f:
-            for line in f:
-                # Passage intermediate_id
-                if '<num>' in line:
-                    start_i = [m.span() for m in re.finditer('<num> Number: ', line)][0][1]
-                    end_i = [m.span() for m in re.finditer(' </num>', line)][0][0]
-                    passage_temp_id = line[start_i:end_i]
-                # Passage id
-                if '<docid>' in line:
-                    start_i = [m.span() for m in re.finditer('<docid>', line)][0][1]
-                    end_i = [m.span() for m in re.finditer('</docid>', line)][0][0]
-                    passage_id = line[start_i:end_i]
-                    passage_id_map[passage_temp_id] = passage_id
+        if isinstance(xml_topics_path, str):
+            with open(xml_topics_path, 'r') as f:
+                for line in f:
+                    # Passage intermediate_id
+                    if '<num>' in line:
+                        start_i = [m.span() for m in re.finditer('<num> Number: ', line)][0][1]
+                        end_i = [m.span() for m in re.finditer(' </num>', line)][0][0]
+                        passage_temp_id = line[start_i:end_i]
+                    # Passage id
+                    if '<docid>' in line:
+                        start_i = [m.span() for m in re.finditer('<docid>', line)][0][1]
+                        end_i = [m.span() for m in re.finditer('</docid>', line)][0][0]
+                        passage_id = line[start_i:end_i]
+                        passage_id_map[passage_temp_id] = passage_id
 
-                if ranking_type == 'entity':
-                    # Entity intermediate_id
-                    if '<id>' in line:
-                        start_i = [m.span() for m in re.finditer('<id> ', line)][0][1]
-                        end_i = [m.span() for m in re.finditer(' </id>', line)][0][0]
-                        entity_temp_id = line[start_i:end_i]
-                    # Entity id
-                    if '<link>' in line:
-                        start_i = [m.span() for m in re.finditer('<link>', line)][0][1]
-                        end_i = [m.span() for m in re.finditer('</link>', line)][0][0]
-                        entity_id = line[start_i:end_i]
-                        entity_id_map[entity_temp_id] = entity_id
+                    if ranking_type == 'entity':
+                        # Entity intermediate_id
+                        if '<id>' in line:
+                            start_i = [m.span() for m in re.finditer('<id> ', line)][0][1]
+                            end_i = [m.span() for m in re.finditer(' </id>', line)][0][0]
+                            entity_temp_id = line[start_i:end_i]
+                        # Entity id
+                        if '<link>' in line:
+                            start_i = [m.span() for m in re.finditer('<link>', line)][0][1]
+                            end_i = [m.span() for m in re.finditer('</link>', line)][0][0]
+                            entity_id = line[start_i:end_i]
+                            entity_id_map[entity_temp_id] = entity_id
 
         return passage_id_map, entity_id_map
 
