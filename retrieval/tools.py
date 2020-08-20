@@ -7,7 +7,9 @@ from metadata import NewsPassagePaths, CarEntityPaths
 from collections import Counter
 import pandas as pd
 import numpy as np
+import random
 import urllib
+import shutil
 import math
 import json
 import os
@@ -573,6 +575,60 @@ class SearchTools:
                     if query_id in fold_ids:
                         f_run_fold.write(" ".join((query_id, q, doc_id, rank, score, name)) + '\n')
 
+    def write_fold_data_folders(self, fold_dir_base, fold_topics_bases, k=5):
+        """ """
+        path_dicts = {}
+        for k_i in range(k):
+            passage_qrels_path = fold_topics_bases + '_{}_passage.qrels'.format(k_i)
+            passage_topics_path = fold_topics_bases + '_{}_passage.topics'.format(k_i)
+            entity_qrels_path = fold_topics_bases + '_{}_entity.qrels'.format(k_i)
+            entity_topics_path = fold_topics_bases + '_{}_entity.topics'.format(k_i)
+            path_dicts[k_i] = (passage_qrels_path, passage_topics_path, entity_qrels_path, entity_topics_path)
+
+        for k_i in range(k):
+            # make dir
+            fold_dir_path = fold_dir_base + '_{}_data/'.format(k_i)
+            os.mkdir(fold_dir_path)
+
+            # Get ids
+            remaining_ids = list(range(k))
+            remaining_ids.remove(k_i)
+            random.shuffle(remaining_ids)
+            valid_i = remaining_ids.pop(0)
+
+            # Test data
+            for i, dataset in zip([k_i, valid_i], ['test', 'valid']):
+                old_passage_test_qrels, old_passage_test_topics, old_entity_test_qrels, old_entity_test_topics = path_dicts[i]
+
+                new_passage_test_qrels = fold_dir_path + 'passage_{}.qrels'.format(dataset)
+                new_passage_test_topics = fold_dir_path + 'passage_{}.topics'.format(dataset)
+                new_entity_test_qrels = fold_dir_path + 'entity_{}.qrels'.format(dataset)
+                new_entity_test_topics = fold_dir_path + 'entity_{}.topics'.format(dataset)
+                shutil.copy(old_passage_test_qrels, new_passage_test_qrels)
+                shutil.copy(old_passage_test_topics, new_passage_test_topics)
+                shutil.copy(old_entity_test_qrels, new_entity_test_qrels)
+                shutil.copy(old_entity_test_topics, new_entity_test_topics)
+
+            def update_file(new_path, old_path):
+                with open(new_path, 'a+') as f_new:
+                    with open(old_path, 'r') as f_old:
+                        for line in f_old:
+                            f_new.write(line.strip() + '\n')
+
+            for train_i in remaining_ids:
+                old_passage_train_qrels_i, old_passage_train_topics_i, old_entity_train_qrels_i, old_entity_train_topics_i = path_dicts[train_i]
+
+                new_passage_train_qrels_i = fold_dir_path + 'passage_train.qrels'
+                new_passage_train_topics_i = fold_dir_path + 'passage_train.topics'
+                new_entity_train_qrels_i = fold_dir_path + 'entity_train.qrels'
+                new_entity_train_topics_i = fold_dir_path + 'entity_train.topics'
+
+                update_file(new_path=new_passage_train_qrels_i, old_path=old_passage_train_qrels_i)
+                update_file(new_path=new_passage_train_topics_i, old_path=old_passage_train_topics_i)
+                update_file(new_path=new_entity_train_qrels_i, old_path=old_entity_train_qrels_i)
+                update_file(new_path=new_entity_train_topics_i, old_path=old_entity_train_topics_i)
+
+
 ###############################################################################
 ################################ Eval Class ###################################
 ###############################################################################
@@ -851,7 +907,6 @@ class Pipeline:
 
 
 if __name__ == '__main__':
-    pass
     # eval_config = [('map', None), ('Rprec',None), ('recip_rank', None), ('ndcg',5), ('P',20), ('recall',40)]
     # eval_tools = EvalTools()
     # run_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/entity.custom_anserini.500000_doc.100_words.title.fixed_qrels.run'
@@ -859,32 +914,38 @@ if __name__ == '__main__':
     # eval_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/entity.custom_anserini.500000_doc.100_words.title.fixed_qrels.run.summed.eval.map'
     # eval_tools.write_eval_from_qrels_and_run(run_path=run_path, qrels_path=qrels_path, eval_path=eval_path, eval_config=eval_config)
 
-    qrels_entity_path_1 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2018.entity.qrels'
-    qrels_entity_path_2 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2019.entity.qrels'
-    qrels_passage_path_1 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2018.passage.qrels'
-    qrels_pasage_path_2 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2019.passage.qrels'
-    fold_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_'
-    search_tools = SearchTools()
+    # qrels_entity_path_1 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2018.entity.qrels'
+    # qrels_entity_path_2 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2019.entity.qrels'
+    # qrels_passage_path_1 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2018.passage.qrels'
+    # qrels_pasage_path_2 = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/news_track.2019.passage.qrels'
+    # fold_path = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_'
+    # search_tools = SearchTools()
+    #
+    # search_tools.get_merge_qrels(qrels_entity_path_1=qrels_entity_path_1,
+    #                              qrels_entity_path_2=qrels_entity_path_2,
+    #                              qrels_passage_path_1=qrels_passage_path_1,
+    #                              qrels_pasage_path_2=qrels_pasage_path_2,
+    #                              fold_path=fold_path)
 
-    search_tools.get_merge_qrels(qrels_entity_path_1=qrels_entity_path_1,
-                                 qrels_entity_path_2=qrels_entity_path_2,
-                                 qrels_passage_path_1=qrels_passage_path_1,
-                                 qrels_pasage_path_2=qrels_pasage_path_2,
-                                 fold_path=fold_path)
+    search_tools = SearchTools()
+    run_file_base = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/anserini_bm25_rm3_default_passage_scaled'
+    fold_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_{}_entity.topics'.format(i) for i in [0,1,2,3,4]]
+    run_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/background.2018.anserini.bm5.rm3.default.run',
+                 '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/background.2019.anserini.bm5.rm3.default.run']
+    xml_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/newsir18-topics.txt',
+                        '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/newsir19-background-linking-topics.xml']
+    ranking_type = 'passage'
+    use_xml = True
+    search_tools.write_news_folds_to_runs(run_file_base=run_file_base,
+                                          fold_topics_paths=fold_topics_paths,
+                                          run_paths=run_paths,
+                                          xml_topics_paths=xml_topics_paths,
+                                          ranking_type=ranking_type,
+                                          use_xml=use_xml)
 
     # search_tools = SearchTools()
-    # run_file_base = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/anserini_bm25_default_entity_scaled'
-    # fold_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_{}_entity.topics'.format(i) for i in [0,1,2,3,4]]
-    # run_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/entity.2018.custom_anserini.500000_doc.100_words.title+contents.fixed_qrels.run',
-    #              '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/entity.2019.custom_anserini.500000_doc.100_words.title+contents.fixed_qrels.run']
-    # xml_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/newsir18-topics.txt',
-    #                     '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/newsir19-background-linking-topics.xml']
-    # ranking_type = 'entity'
-    # use_xml = False
-    # search_tools.write_news_folds_to_runs(run_file_base=run_file_base,
-    #                                       fold_topics_paths=fold_topics_paths,
-    #                                       run_paths=run_paths,
-    #                                       xml_topics_paths=xml_topics_paths,
-    #                                       ranking_type=ranking_type,
-    #                                       use_xml=use_xml)
+    # fold_topics_bases = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold'
+    # fold_dir_base = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold'
+    # search_tools.write_fold_data_folders(fold_dir_base=fold_dir_base,
+    #                                      fold_topics_bases=fold_topics_bases)
 
