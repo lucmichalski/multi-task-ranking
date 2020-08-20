@@ -9,38 +9,43 @@ from torch import nn
 
 if __name__ == '__main__':
 
-    bm25_searcher_config = {
-        'BM25': {'k1': 0.9,
-                 'b': 0.4}
-    }
-    bm25_rm3_searcher_config = {
-        'BM25+RM3': {'BM25':
-                         {'k1': 0.9,
-                          'b': 0.4},
-                     'RM3':
-                         {'fb_terms': 10,
-                          'fb_docs': 10,
-                          'original_query_weight': 0.5}
-                    }
-    }
-    index_path = CarEntityPaths.index
-    search_tools = SearchTools(index_path=index_path, searcher_config=bm25_rm3_searcher_config)
-
     query_type = 'title+contents'
     words = 100
     hits = 500000
-
-    run_paths = ['/nfs/trec_news_track/runs/anserini/folds/entity_ranking_fold_{}_bm25_rm3.run'.format(i) for i in [0,1,2,3,4]]
-    qrels_paths = ['/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_entity.qrels'.format(i) for i in [0,1,2,3,4]]
+    fold = 0
+    base_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/'.format(fold)
+    datasets = ['test', 'valid', 'train']
+    run_paths = [base_path + 'entity_{}.run'.format(i) for i in datasets]
+    qrels_paths = [base_path + 'entity_{}.qrels'.format(i) for i in datasets]
+    index_path = CarEntityPaths.index
 
     for run_path, qrels_path in zip(run_paths, qrels_paths):
+        for model in ['bm25', 'bm25_rm3']:
+            if model == 'bm25':
+                searcher_config = {
+                    'BM25': {'k1': 0.9,
+                             'b': 0.4}
+                }
+            else:
+                searcher_config = {
+                    'BM25+RM3': {'BM25':
+                                     {'k1': 0.9,
+                                      'b': 0.4},
+                                 'RM3':
+                                     {'fb_terms': 10,
+                                      'fb_docs': 10,
+                                      'original_query_weight': 0.5}
+                                 }
+                }
 
-        search_tools.write_entity_run_news(run_path=run_path,
-                                           qrels_path=qrels_path,
-                                           query_type=query_type,
-                                           words=words,
-                                           hits=hits,
-                                           news_index_path=NewsPassagePaths.index)
+            search_tools = SearchTools(index_path=index_path, searcher_config=searcher_config)
+
+            search_tools.write_entity_run_news(run_path=run_path,
+                                               qrels_path=qrels_path,
+                                               query_type=query_type,
+                                               words=words,
+                                               hits=hits,
+                                               news_index_path=NewsPassagePaths.index)
     # hits = 1000
     # printing_step = 50
     # run_path = '/nfs/trec_car/data/entity_ranking/testY2_automatic_entity_data/testY2_automatic_entity_bm25_rm3_1000.run.v2'
