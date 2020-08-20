@@ -78,41 +78,44 @@ if __name__ == '__main__':
     #                               query_type=query_type,
     #                               car_index_path=car_index_path)
 
-    model_path = None
-    dev_batch_size = 64
-    train_batch_size = 8
-    train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/entity_train_bert_data/'
-    dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/entity_valid_bert_data/'
-    dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/passage_valid.qrels'
-    dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/passage_valid.run'
+    folds = [0,1,2,3,4]
+    for fold in folds:
+        model_path = None
+        dev_batch_size = 64
+        train_batch_size = 8
+        train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_data/'.format(fold)
+        dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_data/'.format(fold)
+        dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.qrels'.format(fold)
+        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.run'.format(fold)
 
-    experiments = FineTuningReRankingExperiments(
-        model_path = None,
-        extra_layers = False,
-        dev_batch_size = None,
-        train_batch_size = None,
-        train_data_dir_path_passage = None,
-        train_data_dir_path_entity = train_data_dir_path_entity,
-        dev_data_dir_path_passage = None,
-        dev_data_dir_path_entity = dev_data_dir_path_entity,
-        dev_qrels_path_passage = None,
-        dev_qrels_path_entity = dev_qrels_path_entity,
-        dev_run_path_passage = None,
-        dev_run_path_entity = dev_run_path_entity)
+        experiments = FineTuningReRankingExperiments(
+            model_path = None,
+            extra_layers = False,
+            dev_batch_size = None,
+            train_batch_size = None,
+            train_data_dir_path_passage = None,
+            train_data_dir_path_entity = train_data_dir_path_entity,
+            dev_data_dir_path_passage = None,
+            dev_data_dir_path_entity = dev_data_dir_path_entity,
+            dev_qrels_path_passage = None,
+            dev_qrels_path_entity = dev_qrels_path_entity,
+            dev_run_path_passage = None,
+            dev_run_path_entity = dev_run_path_entity)
 
-    epochs = 3
-    lr = 3e-5
-    experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/'
-    experiments.run_experiment_single_head(
-        head_flag='entity',
-        epochs=epochs,
-        lr=lr,
-        eps=1e-8,
-        weight_decay=0.01,
-        warmup_percentage=0.1,
-        experiments_dir=None,
-        experiment_name=None,
-        logging_steps=100)
+        epochs = 3
+        lr = 3e-5
+        experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
+        experiment_name = '1st_entity_bert_train_{}epoch+{}lr'.format(epochs, lr)
+        experiments.run_experiment_single_head(
+            head_flag='entity',
+            epochs=epochs,
+            lr=lr,
+            eps=1e-8,
+            weight_decay=0.01,
+            warmup_percentage=0.1,
+            experiments_dir=experiments_dir,
+            experiment_name=experiment_name,
+            logging_steps=100)
 
 
     # hits = 1000
