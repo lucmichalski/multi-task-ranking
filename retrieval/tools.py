@@ -491,6 +491,47 @@ class SearchTools:
                     rank += 1
 
 
+    def write_passage_run_news(self, run_path, qrels_path, query_type, words=100, hits=1000):
+        """ Write PySerini BM25 for TREC News Track - query_type {'passage', 'entity}. """
+        assert query_type == 'title' or query_type == 'title+contents'
+
+        # Build qrels of both relevant and non-relevant documents.
+        query_list = []
+        with open(qrels_path, 'r', encoding="utf-8") as qrels_file:
+            # Read each line of qrels file.
+            for line in qrels_file:
+                if len(line) > 4:
+                    query, _, doc_id, score = self.retrieval_utils.unpack_qrels_line(line)
+                    if query not in query_list:
+                        query_list.append(query)
+
+        query_counter = 0
+        # Begin writing to run file.
+        with open(run_path, "w", encoding='utf-8') as f_run:
+            for query_id in query_list:
+                query_counter += 1
+                print('query {} / {}'.format(query_counter, len(query_list)))
+                # Build query (limit to 'words' number of query terms).
+                query_dict = json.loads(self.get_contents_from_docid(query_id))
+                query = self.process_query_news(query_dict=query_dict, query_type=query_type)
+                query = " ".join(query.split(" ")[:words])
+
+                # Get 'hits' many documents from entity index.
+                try:
+                    retrieved_hits = self.search(query=query, hits=hits)
+                except:
+                    retrieved_hits = self.search(query=query.encode('utf-8'), hits=hits)
+
+                rank = 1
+                # Write valid retrieved docs to file.
+                for hit in retrieved_hits:
+                    # Create and write run file.
+                    run_line = " ".join((query_id, "Q0", hit[0], str(rank), "{:.6f}".format(hit[1]), "PYSERINI")) + '\n'
+                    f_run.write(run_line)
+                    # Next rank.
+                    rank += 1
+
+
     def get_merge_qrels(self, qrels_entity_path_1, qrels_entity_path_2, qrels_passage_path_1, qrels_pasage_path_2,
                         fold_path, k=5):
 
@@ -575,6 +616,7 @@ class SearchTools:
                         query_id = query
                     if query_id in fold_ids:
                         f_run_fold.write(" ".join((query_id, q, doc_id, rank, score, name)) + '\n')
+
 
     def write_fold_data_folders(self, fold_dir_base, fold_topics_bases, k=5):
         """ """
