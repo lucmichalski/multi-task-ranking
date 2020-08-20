@@ -52,7 +52,7 @@ if __name__ == '__main__':
         qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/entity_{}.qrels'.format(dataset)
         run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/entity_{}_bm25.run'.format(dataset)
         index_path = NewsPassagePaths.index
-        data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/entity_{}_data/'.format(dataset)
+        data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/entity_{}_bert_data/'.format(dataset)
         max_length = 512
         context_path = None
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
