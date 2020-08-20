@@ -12,7 +12,7 @@ if __name__ == '__main__':
     query_type = 'title+contents'
     words = 100
     hits = 500000
-    fold = 1
+    fold = 0
     base_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/'.format(fold)
     datasets = ['test', 'valid', 'train']
     index_path = CarEntityPaths.index
