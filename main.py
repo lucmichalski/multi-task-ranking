@@ -12,11 +12,11 @@ if __name__ == '__main__':
     query_type = 'title+contents'
     words = 100
     hits = 100000
-    fold = 0
+    fold = 1
     base_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/'.format(fold)
     datasets = ['train']
     index_path = CarEntityPaths.index
-    
+
     for model in ['bm25']:
         run_paths = [base_path + 'entity_{}_{}.run'.format(i, model) for i in datasets]
         qrels_paths = [base_path + 'entity_{}.qrels'.format(i) for i in datasets]
