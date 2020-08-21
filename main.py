@@ -138,7 +138,7 @@ if __name__ == '__main__':
             dev_qrels_path_entity = dev_qrels_path_entity,
             dev_run_path_entity = dev_run_path_entity)
 
-        experiments.inference(head_flag='entity', rerank_run_path=rerank_run_path, cap_rank=None, do_eval=True)
+        experiments.inference(head_flag='entity', rerank_run_path=rerank_run_path, cap_rank=100, do_eval=False)
 
     # hits = 1000
     # printing_step = 50
