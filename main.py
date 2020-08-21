@@ -128,7 +128,7 @@ if __name__ == '__main__':
         dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test.qrels'.format(fold)
         dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_bm25.run'.format(fold)
 
-        rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_bert_100.run'
+        rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_bert_100.run'.format(fold)
 
         experiments = FineTuningReRankingExperiments(
             model_path = model_path,
