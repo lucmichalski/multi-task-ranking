@@ -101,9 +101,9 @@ if __name__ == '__main__':
             dev_run_path_entity = dev_run_path_entity)
 
         epochs = 3
-        lr = 3e-5
+        lr = 5e-5
         experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
-        experiment_name = '1st_entity_bert_train_{}epoch+{}lr'.format(epochs, lr)
+        experiment_name = '2nd_entity_bert_train_{}epoch+{}lr'.format(epochs, lr)
         experiments.run_experiment_single_head(
             head_flag='entity',
             epochs=epochs,
