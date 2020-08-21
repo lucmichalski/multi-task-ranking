@@ -93,15 +93,11 @@ if __name__ == '__main__':
         experiments = FineTuningReRankingExperiments(
             model_path = None,
             extra_layers = False,
-            dev_batch_size = None,
-            train_batch_size = None,
-            train_data_dir_path_passage = None,
+            dev_batch_size = dev_batch_size,
+            train_batch_size = train_batch_size,
             train_data_dir_path_entity = train_data_dir_path_entity,
-            dev_data_dir_path_passage = None,
             dev_data_dir_path_entity = dev_data_dir_path_entity,
-            dev_qrels_path_passage = None,
             dev_qrels_path_entity = dev_qrels_path_entity,
-            dev_run_path_passage = None,
             dev_run_path_entity = dev_run_path_entity)
 
         epochs = 3
