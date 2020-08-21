@@ -88,7 +88,7 @@ if __name__ == '__main__':
         train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_data/'.format(fold)
         dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_data/'.format(fold)
         dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid.qrels'.format(fold)
-        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid.run'.format(fold)
+        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bm25_rm3.run'.format(fold)
 
         experiments = FineTuningReRankingExperiments(
             model_path = None,
