@@ -268,6 +268,7 @@ class MultiTaskDataset():
 
             for paths in [bert_paths, query_paths]:
                 for path in paths:
+                    print('processing: {}'.format(path))
 
                     in_dataset = torch.load(path)
                     data_loader = DataLoader(in_dataset, sampler=SequentialSampler(in_dataset), batch_size=batch_size)
@@ -275,7 +276,7 @@ class MultiTaskDataset():
                     id_list = []
                     cls_tokens = []
 
-                    for batch in data_loader:
+                    for i, batch in enumerate(data_loader):
                         b_id_list = batch[0]
                         b_input_ids = batch[1].to(device)
                         with torch.no_grad():
@@ -283,6 +284,9 @@ class MultiTaskDataset():
 
                         id_list.append(b_id_list)
                         cls_tokens.append(b_cls_tokens.cpu())
+
+                        if (i + 1) % 10000 == 0:
+                            print("processed: {} / {}".format(i + 1, len(data_loader)))
 
                     id_list_tensor = torch.cat(cls_tokens)
                     cls_tokens_tensor = torch.cat(cls_tokens)
