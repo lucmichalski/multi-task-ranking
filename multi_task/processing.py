@@ -15,15 +15,15 @@ from transformers import BertTokenizer, BertModel, BertPreTrainedModel
 dataset_metadata = {
     'entity_train':
         (
-        '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_1000.run',
+        '/nfs/trec_car/data/entity_ranking/multi_task_data/entity_train_all_queries_BM25_1000.run',
         '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity.qrels'),
 
     'entity_dev':
-        ('/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_1000.run',
+        ('/nfs/trec_car/data/entity_ranking/multi_task_data/entity_dev_all_queries_BM25_1000.run',
          '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity.qrels'),
 
     'entity_test':
-        ('/nfs/trec_car/data/entity_ranking/testY1_hierarchical_entity_data/testY1_hierarchical_entity_1000.run',
+        ('/nfs/trec_car/data/entity_ranking/multi_task_data/entity_test_all_queries_BM25_1000.run',
          '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_entity_data/testY1_hierarchical_entity.qrels'),
 
     'passage_train':
@@ -40,124 +40,39 @@ dataset_metadata = {
          '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage.qrels')
 }
 
+class MultiTaskDataset():
 
-def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_metadata):
-    """ """
+    def __init__(self, dataset_metadata=dataset_metadata):
 
-    for dataset_name, dataset_paths in dataset_metadata.items():
-
-        print('======= {} ======='.format(dataset_name))
-        run_path = dataset_paths[0]
-        qrels_path = dataset_paths[1]
-
-        # Define ranking type.
-        if 'passage' in dataset_name:
-            index_path = CarPassagePaths.index
-        elif 'entity' in dataset_name:
-            index_path = CarEntityPaths.index
-        else:
-            index_path = None
-            print("NOT VALID DATASET")
-
-        # Define dataset type.
-        if 'train' in dataset_name:
-            dataset_type = 'train'
-        elif 'dev' in dataset_name:
-            dataset_type = 'dev'
-        elif 'test' in dataset_name:
-            dataset_type = 'test'
-        else:
-            dataset_type = None
-            print("NOT VALID DATASET")
-
-        search_tools = SearchTools(index_path=index_path)
-        qrels = search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=qrels_path)
-        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-
-        start_time = time.time()
-
-        # Read run files
-        row_i = 0
-        query_i = -1
-        data = []
-
-        query_i_list = []
-        query_input_ids_list = []
-
-        input_ids_list = []
-        row_i_list = []
-
-        past_query = ''
-        with open(run_path, 'r') as f:
-            for line in f:
-                query_encoded, _, doc_id, rank, score, _ = search_tools.retrieval_utils.unpack_run_line(line)
+        self.dataset_metadata = dataset_metadata
+        # Dataset counters.
+        self.row_i = 0
+        self.query_i = -1
+        self.chunk_i = 0
+        # Chunk data.
+        self.row_data = []
+        self.row_i_list = []
+        self.input_ids_list = []
+        self.query_i_list = []
+        self.query_input_ids_list = []
 
 
-                # Decode query.
-                try:
-                    query = search_tools.decode_query_car(q=query_encoded)
-                except ValueError:
-                    print(
-                        "URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
-                    query = search_tools.process_query_car(q=query_encoded)
+    def __reset_chunk(self):
+        """ """
+        self.row_data = []
+        self.query_i_list = []
+        self.query_input_ids_list = []
+        self.input_ids_list = []
+        self.row_i_list = []
 
-                # Get relevant score
-                try:
-                    if doc_id in qrels[query_encoded]:
-                        relevant = 1
-                    else:
-                        relevant = 0
-                except:
-                    relevant = 0
 
-                # Get text.
-                text_full = search_tools.get_contents_from_docid(doc_id=doc_id)
-                if 'entity' in dataset_name:
-                    text = text_full.split('\n')[0]
-                else:
-                    text = text_full
-
-                input_ids = tokenizer.encode(text=text,
-                                             max_length=512,
-                                             add_special_tokens=True,
-                                             pad_to_max_length=True)
-
-                # Set query id.
-                if past_query != query_encoded:
-                    query_i += 1
-                    query_input_ids = tokenizer.encode(text=query,
-                                                       max_length=512,
-                                                       add_special_tokens=True,
-                                                       pad_to_max_length=True)
-                    query_i_list.append([query_i])
-                    query_input_ids_list.append(query_input_ids)
-
-                # Append data.
-                row = [row_i, query_i, dataset_name, run_path, dataset_type, query_encoded, doc_id, rank, score, relevant]
-                data.append(row)
-
-                # Append tensor data.
-                input_ids_list.append(input_ids)
-                row_i_list.append([row_i])
-
-                # Print update.
-                if row_i % print_intervals == 0:
-                    end_time = time.time()
-
-                    print("-- {} -- dataset time: {:.2f} ---".format(row_i, end_time-start_time))
-                    print(row)
-                row_i += 1
-
-                # Re-set query counter.
-                past_query = query_encoded
-
-        # --- Write data to files ---
-
-        # Data.
-        parquet_path = dir_path + dataset_name + '_data.parquet'
+    def write_chunk(self, dir_path, dataset_name):
+        """ """
+        # Row data.
+        parquet_path = dir_path + dataset_name + '_data_chunk_{}.parquet'.format(self.chunk_i)
         columns = ['row_i', 'query_i', 'dataset_name', 'run_path', 'dataset_type', 'query', 'doc_id', 'rank', 'score', 'relevant']
         print('saving data to: {}'.format(parquet_path))
-        pd.DataFrame(data, columns=columns).to_parquet(parquet_path)
+        pd.DataFrame(self.row_data, columns=columns).to_parquet(parquet_path)
 
         # Torch E/P dataset.
         def write_to_pt_file(tensor_path, list_1, list_2):
@@ -165,15 +80,132 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
             print('saving tensor to: {}'.format(tensor_path))
             torch.save(obj=dataset, f=tensor_path)
 
-        tensor_path = dir_path + dataset_name + '_bert_data.pt'
+        tensor_path = dir_path + dataset_name + '_bert_datachunk_{}.pt'.format(self.chunk_i)
         write_to_pt_file(tensor_path=tensor_path,
-                         list_1=row_i_list,
-                         list_2=input_ids_list)
+                         list_1=self.row_i_list,
+                         list_2=self.input_ids_list)
 
-        tensor_path = dir_path + dataset_name + '_bert_query_data.pt'
+        tensor_path = dir_path + dataset_name + '_bert_query_datachunk_{}.pt'.format(self.chunk_i)
         write_to_pt_file(tensor_path=tensor_path,
-                         list_1=query_i_list,
-                         list_2=query_input_ids_list)
+                         list_1=self.query_i_list,
+                         list_2=self.query_input_ids_list)
+
+
+    def build_datasets(self, dir_path, chuck_size=500000, print_intervals=100000):
+        """ """
+
+        for dataset_name, dataset_paths in self.dataset_metadata.items():
+
+            # Reset chunk.
+            self.__reset_chunk()
+
+            # Initialise .
+            self.row_i = 0
+            self.query_i = -1
+
+            print('======= {} ======='.format(dataset_name))
+            run_path = dataset_paths[0]
+            qrels_path = dataset_paths[1]
+
+            # Define ranking type.
+            if 'passage' in dataset_name:
+                index_path = CarPassagePaths.index
+            elif 'entity' in dataset_name:
+                index_path = CarEntityPaths.index
+            else:
+                index_path = None
+                print("NOT VALID DATASET")
+
+            # Define dataset type.
+            if 'train' in dataset_name:
+                dataset_type = 'train'
+            elif 'dev' in dataset_name:
+                dataset_type = 'dev'
+            elif 'test' in dataset_name:
+                dataset_type = 'test'
+            else:
+                dataset_type = None
+                print("NOT VALID DATASET")
+
+            search_tools = SearchTools(index_path=index_path)
+            qrels = search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=qrels_path)
+            tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+
+            start_time = time.time()
+
+            # Read run files
+            past_query = ''
+            with open(run_path, 'r') as f:
+                for line in f:
+                    # Unpack run line.
+                    query_encoded, _, doc_id, rank, score, _ = search_tools.retrieval_utils.unpack_run_line(line)
+
+                    # Decode query.
+                    try:
+                        query = search_tools.decode_query_car(q=query_encoded)
+                    except ValueError:
+                        print(
+                            "URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
+                        query = search_tools.process_query_car(q=query_encoded)
+
+                    # Get relevant score
+                    try:
+                        if doc_id in qrels[query_encoded]:
+                            relevant = 1
+                        else:
+                            relevant = 0
+                    except:
+                        relevant = 0
+
+                    # Get text and input ids.
+                    text_full = search_tools.get_contents_from_docid(doc_id=doc_id)
+                    if 'entity' in dataset_name:
+                        text = text_full.split('\n')[0]
+                    else:
+                        text = text_full
+                    input_ids = tokenizer.encode(text=text,
+                                                 max_length=512,
+                                                 add_special_tokens=True,
+                                                 pad_to_max_length=True)
+                    self.input_ids_list.append(input_ids)
+                    self.row_i_list.append([self.row_i])
+
+                    # Set query id.
+                    if past_query != query_encoded:
+                        self.query_i += 1
+                        query_input_ids = tokenizer.encode(text=query,
+                                                           max_length=512,
+                                                           add_special_tokens=True,
+                                                           pad_to_max_length=True)
+                        self.query_i_list.append([self.query_i])
+                        self.query_input_ids_list.append(query_input_ids)
+
+                    # Append data.
+                    row = [self.row_i, self.query_i, dataset_name, run_path, dataset_type, query_encoded, doc_id, rank, score, relevant]
+                    self.row_data.append(row)
+
+                    # Print update.
+                    if self.row_i % print_intervals == 0:
+                        end_time = time.time()
+                        print("-- {} -- dataset time: {:.2f} ---".format(self.row_i, end_time-start_time))
+                        print(row)
+
+                    # Write chunk.
+                    if (self.row_i % chuck_size == 0) and (self.row_i != 0):
+                        self.write_chunk(dir_path=dir_path, dataset_name=dataset_name)
+                        self.__reset_chunk()
+                        self.chunk_i += 1
+
+                    # Re-set query counter.
+                    self.row_i += 1
+                    past_query = query_encoded
+
+            #  Write final chunk.
+            if len(self.input_ids_list) > 0:
+                self.write_chunk(dir_path=dir_path, dataset_name=dataset_name)
+                self.__reset_chunk()
+                self.chunk_i += 1
+
 
 
 def cls_processing(dir_path, batch_size=64, dataset_metadata=dataset_metadata):
