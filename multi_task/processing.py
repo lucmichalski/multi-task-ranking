@@ -6,6 +6,7 @@ from learning.models import BertCLS
 import pandas as pd
 import torch
 import time
+import os
 
 from torch.utils.data import TensorDataset, DataLoader, SequentialSampler
 from transformers import BertTokenizer, BertModel, BertPreTrainedModel
@@ -66,32 +67,49 @@ class MultiTaskDataset():
         self.row_i_list = []
 
 
+    def __write_to_pt_file(self, tensor_path, list_1, list_2):
+        """ """
+        dataset = TensorDataset(torch.tensor(list_1), torch.tensor(list_2))
+        print('saving tensor to: {}'.format(tensor_path))
+        torch.save(obj=dataset, f=tensor_path)
+
+
+    def __make_dir(self, dir_path):
+        """ """
+        if (os.path.isdir(dir_path) == False):
+            print('making dir: {}'.format(dir_path))
+            os.mkdir(dir_path)
+
+
     def write_chunk(self, dir_path, dataset_name):
         """ """
         print('=== WRITING CHUNK {} ==='.format(self.chunk_i))
         # Row data.
-        parquet_path = dir_path + dataset_name + '_data_chunk_{}.parquet'.format(self.chunk_i)
+        row_dir_path = dir_path + dataset_name + '_row_data/'
+        self.__make_dir(row_dir_path)
+        parquet_path = row_dir_path + 'chunk_{}.parquet'.format(self.chunk_i)
         columns = ['row_i', 'query_i', 'dataset_name', 'run_path', 'dataset_type', 'query', 'doc_id', 'rank', 'score', 'relevant']
         print('saving data to: {}'.format(parquet_path))
         pd.DataFrame(self.row_data, columns=columns).to_parquet(parquet_path)
 
-        def write_to_pt_file(tensor_path, list_1, list_2):
-            dataset = TensorDataset(torch.tensor(list_1), torch.tensor(list_2))
-            print('saving tensor to: {}'.format(tensor_path))
-            torch.save(obj=dataset, f=tensor_path)
+        # BERT content data.
+        bert_dir_path = dir_path + dataset_name + '_bert_data/'
+        self.__make_dir(bert_dir_path)
+        tensor_path = bert_dir_path + 'chunk_{}.pt'.format(self.chunk_i)
+        self.__write_to_pt_file(tensor_path=tensor_path,
+                                list_1=self.row_i_list,
+                                list_2=self.input_ids_list)
 
-        tensor_path = dir_path + dataset_name + '_bert_data_chunk_{}.pt'.format(self.chunk_i)
-        write_to_pt_file(tensor_path=tensor_path,
-                         list_1=self.row_i_list,
-                         list_2=self.input_ids_list)
-
-        tensor_path = dir_path + dataset_name + '_bert_query_data_chunk_{}.pt'.format(self.chunk_i)
-        write_to_pt_file(tensor_path=tensor_path,
-                         list_1=self.query_i_list,
-                         list_2=self.query_input_ids_list)
+        # BERT query data.
+        bert_query_dir_path = dir_path + dataset_name + '_bert_query_data/'
+        self.__make_dir(bert_query_dir_path)
+        tensor_path = bert_query_dir_path + 'chunk_{}.pt'.format(self.chunk_i)
+        self.__write_to_pt_file(tensor_path=tensor_path,
+                                list_1=self.query_i_list,
+                                list_2=self.query_input_ids_list)
 
 
-    def build_datasets(self, dir_path, chuck_size=500000, print_intervals=100000):
+    def build_datasets(self, dir_path, chuck_size=250000, print_intervals=100000):
         """ """
 
         for dataset_name, dataset_paths in self.dataset_metadata.items():
