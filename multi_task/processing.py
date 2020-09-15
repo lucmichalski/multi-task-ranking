@@ -38,7 +38,7 @@ dataset_metadata = {
          '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage.qrels')
 }
 
-def get_dataset(dir_path, print_intervals=100000, dataset_metadata=dataset_metadata):
+def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_metadata):
 
     for dataset_name, dataset_paths in dataset_metadata.items():
         run_path = dataset_paths[0]
