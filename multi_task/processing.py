@@ -234,25 +234,31 @@ def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
         entity_queries = set(search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=entity_qrels_path).keys())
         passage_queries = set(search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=passage_qrels_path).keys())
 
-        def write_topics(dir_path, missing_queries, dataset, ranking_type):
+        def write_topics(dir_path, original_queries, missing_queries, dataset, ranking_type):
             """ """
             if len(missing_queries) > 0:
                 print('{} missing queries for {} {} dataset'.format(len(missing_queries), ranking_type, dataset))
-                missing_queries_path = dir_path + ranking_type + '_' + dataset + '_missing_queries.topics'
+                missing_queries_path = dir_path + ranking_type + '_' + dataset + '_all_queries.topics'
+                all_queries = sorted(list(original_queries + missing_queries))
+                print('-> all_queries: {}'.format(len(all_queries)))
                 with open(missing_queries_path, 'w') as f:
-                    for q in list(missing_queries):
+                    for q in list(all_queries):
                         f.write(q + '\n')
             else:
                 print('No missing queries for {} {} dataset'.format(ranking_type, dataset))
 
+        # Build all entity queries.
         missing_entity_queries = passage_queries - entity_queries
         write_topics(dir_path=dir_path,
+                     original_queries=entity_queries,
                      missing_queries=missing_entity_queries,
                      dataset=dataset,
                      ranking_type='entity')
 
+        # Build all passage queries.
         missing_passage_queries = entity_queries - passage_queries
         write_topics(dir_path=dir_path,
+                     original_queries=passage_queries,
                      missing_queries=missing_passage_queries,
                      dataset=dataset,
                      ranking_type='passage')
