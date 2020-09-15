@@ -129,14 +129,14 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
         # --- Write data to files ---
 
         # Data.
-        parquet_path = dir_path + '_' + dataset_name + '.parquet'
+        parquet_path = dir_path + dataset_name + '_data.parquet'
         columns = ['i', 'dataset_name', 'run_path', 'dataset_type', 'query', 'doc_id', 'rank', 'score', 'relevant']
         print('saving data to: {}'.format(parquet_path))
         pd.DataFrame(data, columns=columns).to_parquet(parquet_path)
 
         # Torch dataset.
         dataset = TensorDataset(torch.tensor(i_list), torch.tensor(input_ids_list))
-        tensor_path = dir_path + '_' + dataset_name + '_input_data_.pt'
+        tensor_path = dir_path  + dataset_name + '_bert_data_.pt'
         # Save tensor dataset to tensor_path.
         print('saving tensor to: {}'.format(tensor_path))
         torch.save(obj=dataset, f=tensor_path)
