@@ -14,31 +14,31 @@ from transformers import BertTokenizer, BertModel, BertPreTrainedModel
 
 # Metadata.
 dataset_metadata = {
-    'entity_train':
-        (
-        '/nfs/trec_car/data/entity_ranking/multi_task_data/entity_train_all_queries_BM25_1000.run',
-        '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity.qrels'),
+    # 'entity_train':
+    #     (
+    #     '/nfs/trec_car/data/entity_ranking/multi_task_data/entity_train_all_queries_BM25_1000.run',
+    #     '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity.qrels'),
 
     'entity_dev':
         ('/nfs/trec_car/data/entity_ranking/multi_task_data/entity_dev_all_queries_BM25_1000.run',
          '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity.qrels'),
 
-    'entity_test':
-        ('/nfs/trec_car/data/entity_ranking/multi_task_data/entity_test_all_queries_BM25_1000.run',
-         '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_entity_data/testY1_hierarchical_entity.qrels'),
-
-    'passage_train':
-        (
-        '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_train_passage_1000.run',
-        '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_train_passage.qrels'),
-
-    'passage_dev':
-        ('/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_1000.run',
-         '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'),
-
-    'passage_test':
-        ('/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage_1000.run',
-         '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage.qrels')
+    # 'entity_test':
+    #     ('/nfs/trec_car/data/entity_ranking/multi_task_data/entity_test_all_queries_BM25_1000.run',
+    #      '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_entity_data/testY1_hierarchical_entity.qrels'),
+    #
+    # 'passage_train':
+    #     (
+    #     '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_train_passage_1000.run',
+    #     '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_train_passage.qrels'),
+    #
+    # 'passage_dev':
+    #     ('/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_1000.run',
+    #      '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'),
+    #
+    # 'passage_test':
+    #     ('/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage_1000.run',
+    #      '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage.qrels')
 }
 
 class MultiTaskDataset():
@@ -81,11 +81,26 @@ class MultiTaskDataset():
             os.mkdir(dir_path)
 
 
+    def __get_content_dir_path(self, dir_path, dataset_name):
+        """ """
+        return dir_path + dataset_name + '_content_data/'
+
+
+    def __get_bert_dir_path(self, dir_path, dataset_name):
+        """ """
+        return dir_path + dataset_name + '_bert_data/'
+
+
+    def __get_query_dir_path(self, dir_path, dataset_name):
+        """ """
+        return dir_path + dataset_name + '_bert_query_data/'
+
+
     def write_chunk(self, dir_path, dataset_name):
         """ """
         print('=== WRITING CHUNK {} ==='.format(self.chunk_i))
         # Content data.
-        content_dir_path = dir_path + dataset_name + '_content_data/'
+        content_dir_path = self.__get_content_dir_path(dir_path=dir_path, dataset_name=dataset_name)
         self.__make_dir(content_dir_path)
         parquet_path = content_dir_path + 'chunk_{}.parquet'.format(self.chunk_i)
         columns = ['content_i', 'query_i', 'dataset_name', 'run_path', 'dataset_type', 'query', 'doc_id', 'rank', 'score', 'relevant']
@@ -93,7 +108,7 @@ class MultiTaskDataset():
         pd.DataFrame(self.content_data, columns=columns).to_parquet(parquet_path)
 
         # BERT data.
-        bert_dir_path = dir_path + dataset_name + '_bert_data/'
+        bert_dir_path = self.__get_bert_dir_path(dir_path=dir_path, dataset_name=dataset_name)
         self.__make_dir(bert_dir_path)
         tensor_path = bert_dir_path + 'chunk_{}.pt'.format(self.chunk_i)
         self.__write_to_pt_file(tensor_path=tensor_path,
@@ -101,7 +116,7 @@ class MultiTaskDataset():
                                 list_2=self.bert_input_ids_list)
 
         # BERT query data.
-        bert_query_dir_path = dir_path + dataset_name + '_bert_query_data/'
+        bert_query_dir_path = self.__get_query_dir_path(dir_path=dir_path, dataset_name=dataset_name)
         self.__make_dir(bert_query_dir_path)
         tensor_path = bert_query_dir_path + 'chunk_{}.pt'.format(self.chunk_i)
         self.__write_to_pt_file(tensor_path=tensor_path,
@@ -226,51 +241,61 @@ class MultiTaskDataset():
                 self.chunk_i += 1
 
 
+    def cls_processing(self, dir_path, batch_size=64):
+        """ """
+        # Load BERT model to get CLS token.
+        model = BertCLS.from_pretrained('bert-base-uncased')
 
-def cls_processing(dir_path, batch_size=64, dataset_metadata=dataset_metadata):
-    """ """
-    # Load BERT model to get CLS token.
-    model = BertCLS.from_pretrained('bert-base-uncased')
+        # Use GPUs if available.
+        if torch.cuda.is_available():
+            # Tell PyTorch to use the GPU.
+            print('There are %d GPU(s) available.' % torch.cuda.device_count())
+            print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
+            model.cuda()
+            device = torch.device("cuda")
+        # Otherwise use CPU.
+        else:
+            print('No GPU available, using the CPU instead.')
+            device = torch.device("cpu")
 
-    # Use GPUs if available.
-    if torch.cuda.is_available():
-        # Tell PyTorch to use the GPU.
-        print('There are %d GPU(s) available.' % torch.cuda.device_count())
-        print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
-        model.cuda()
-        device = torch.device("cuda")
-    # Otherwise use CPU.
-    else:
-        print('No GPU available, using the CPU instead.')
-        device = torch.device("cpu")
+        for dataset_name in self.dataset_metadata.keys():
 
+            bert_dir_path = self.__get_bert_dir_path(dir_path=dir_path, dataset_name=dataset_name)
+            query_dir_path = self.__get_query_dir_path(dir_path=dir_path, dataset_name=dataset_name)
 
-    for dataset_name in dataset_metadata.keys():
+            bert_paths = [bert_dir_path + f for f in os.listdir(bert_dir_path)]
+            query_paths = [bert_dir_path + f for f in os.listdir(query_dir_path)]
 
-        tensor_path = dir_path + dataset_name + '_bert_data.pt'
-        dataset = torch.load(tensor_path)
-        data_loader = DataLoader(dataset, sampler=SequentialSampler(dataset), batch_size=batch_size)
+            for paths in [bert_paths, query_paths]:
+                for path in paths:
 
-        id_list = []
-        cls_tokens = []
+                    in_dataset = torch.load(path)
+                    data_loader = DataLoader(in_dataset, sampler=SequentialSampler(in_dataset), batch_size=batch_size)
 
-        for batch in data_loader:
-            b_id_list = batch[0]
-            b_input_ids = batch[1].to(device)
-            with torch.no_grad():
-                b_cls_tokens = model.get_BERT_cls_vector(input_ids=b_input_ids)
+                    id_list = []
+                    cls_tokens = []
 
-            id_list.append(b_id_list)
-            cls_tokens.append(b_cls_tokens.cpu())
+                    for batch in data_loader:
+                        b_id_list = batch[0]
+                        b_input_ids = batch[1].to(device)
+                        with torch.no_grad():
+                            b_cls_tokens = model.get_BERT_cls_vector(input_ids=b_input_ids)
 
-        id_list_tensor = torch.cat(cls_tokens)
-        cls_tokens_tensor = torch.cat(cls_tokens)
+                        id_list.append(b_id_list)
+                        cls_tokens.append(b_cls_tokens.cpu())
 
-        dataset = TensorDataset(id_list_tensor, cls_tokens_tensor)
-        tensor_path = dir_path + dataset_name + '_bert_cls_tokens.pt'
-        # Save tensor dataset to tensor_path.
-        print('saving tensor to: {}'.format(tensor_path))
-        torch.save(obj=dataset, f=tensor_path)
+                    id_list_tensor = torch.cat(cls_tokens)
+                    cls_tokens_tensor = torch.cat(cls_tokens)
+
+                    out_dataset = TensorDataset(id_list_tensor, cls_tokens_tensor)
+                    tensor_dir = dir_path + path.split('/')[-2:][0] + '_processed/'
+                    if (os.path.isdir(tensor_dir) == False):
+                        print('making dir: {}'.format(dir_path))
+                        os.mkdir(tensor_dir)
+                    tensor_path = tensor_dir + path.split('/')[-1:]
+                    # Save tensor dataset to tensor_path.
+                    print('saving tensor to: {}'.format(tensor_path))
+                    torch.save(obj=out_dataset, f=tensor_path)
 
 
 def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
