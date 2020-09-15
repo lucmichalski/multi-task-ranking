@@ -68,13 +68,13 @@ class MultiTaskDataset():
 
     def write_chunk(self, dir_path, dataset_name):
         """ """
+        print('=== WRITING CHUNK {} ==='.format(self.chunk_i))
         # Row data.
         parquet_path = dir_path + dataset_name + '_data_chunk_{}.parquet'.format(self.chunk_i)
         columns = ['row_i', 'query_i', 'dataset_name', 'run_path', 'dataset_type', 'query', 'doc_id', 'rank', 'score', 'relevant']
         print('saving data to: {}'.format(parquet_path))
         pd.DataFrame(self.row_data, columns=columns).to_parquet(parquet_path)
 
-        # Torch E/P dataset.
         def write_to_pt_file(tensor_path, list_1, list_2):
             dataset = TensorDataset(torch.tensor(list_1), torch.tensor(list_2))
             print('saving tensor to: {}'.format(tensor_path))
