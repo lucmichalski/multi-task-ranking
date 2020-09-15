@@ -38,7 +38,7 @@ dataset_metadata = {
          '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage.qrels')
 }
 
-def build_datasets(dir_path, print_intervals=10000, dataset_metadata=dataset_metadata):
+def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_metadata):
 
     for dataset_name, dataset_paths in dataset_metadata.items():
 
@@ -111,14 +111,20 @@ def build_datasets(dir_path, print_intervals=10000, dataset_metadata=dataset_met
                 # Append data.
                 row = [i, dataset_name, run_path, dataset_type, query_encoded, doc_id, rank, score, relevant]
                 data.append(row)
-                i += 1
+
+                # Print update.
                 if i % print_intervals == 0:
                     print("-- {} --".format(i))
                     print(row)
+                i += 1
 
                 # Append tensor data.
                 input_ids_list.append(input_ids)
                 i_list.append([i])
+
+                # Small datasets.
+                if i > 10000:
+                    break
 
         # --- Write data to files ---
 
