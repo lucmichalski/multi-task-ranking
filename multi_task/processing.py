@@ -112,19 +112,15 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
                 row = [i, dataset_name, run_path, dataset_type, query_encoded, doc_id, rank, score, relevant]
                 data.append(row)
 
+                # Append tensor data.
+                input_ids_list.append(input_ids)
+                i_list.append([i])
+
                 # Print update.
                 if i % print_intervals == 0:
                     print("-- {} --".format(i))
                     print(row)
                 i += 1
-
-                # Append tensor data.
-                input_ids_list.append(input_ids)
-                i_list.append([i])
-
-                # Small datasets.
-                if i > 10000:
-                    break
 
         # --- Write data to files ---
 
@@ -136,7 +132,7 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
 
         # Torch dataset.
         dataset = TensorDataset(torch.tensor(i_list), torch.tensor(input_ids_list))
-        tensor_path = dir_path  + dataset_name + '_bert_data_.pt'
+        tensor_path = dir_path  + dataset_name + '_bert_data.pt'
         # Save tensor dataset to tensor_path.
         print('saving tensor to: {}'.format(tensor_path))
         torch.save(obj=dataset, f=tensor_path)
