@@ -161,6 +161,34 @@ class BertMultiTaskRankerLarge(BertPreTrainedModel):
         return loss, logits
 
 
+class BertCLS(BertPreTrainedModel):
+
+    def __init__(self, config):
+        super().__init__(config)
+        # Initialise BERT setup.
+        self.bert = BertModel(config)
+        # Initialise BERT weights.
+        self.init_weights()
+
+    def get_BERT_cls_vector(self,
+                            input_ids,
+                            attention_mask=None,
+                            token_type_ids=None,
+                            position_ids=None,
+                            head_mask=None,
+                            inputs_embeds=None):
+        """ Returns BERT pooled_output (i.e. CLS vector) applying dropout. """
+        # Get BERT outputs.
+        outputs = self.bert(input_ids=input_ids,
+                            attention_mask=attention_mask,
+                            token_type_ids=token_type_ids,
+                            position_ids=position_ids,
+                            head_mask=head_mask,
+                            inputs_embeds=inputs_embeds)
+        # Apply dropout to pooled_output (i.e. CLS vector) and apply dropout.
+        return outputs[1]
+
+
 if __name__ == '__main__':
 
     test = MyDataParallel(my_methods=['forward_a', 'forward_'])

@@ -635,7 +635,7 @@ class FineTuningReRankingExperiments:
                                        scores=BERT_scores, cap_rank=cap_rank)
 
 
-    def inference(self, head_flag, rerank_run_path, cap_rank=None, do_eval=True):
+    def inference(self, head_flag, rerank_run_path, cap_rank=None, do_eval=False):
         """ Run inference and produce BERT re-ranking run and evaluation. """
         assert head_flag == 'passage' or head_flag == 'entity'
 
