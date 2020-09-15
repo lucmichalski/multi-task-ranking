@@ -47,24 +47,24 @@ class MultiTaskDataset():
 
         self.dataset_metadata = dataset_metadata
         # Dataset counters.
-        self.row_i = 0
+        self.content_i = 0
         self.query_i = -1
         self.chunk_i = 0
         # Chunk data.
-        self.row_data = []
-        self.row_i_list = []
-        self.input_ids_list = []
+        self.content_data = []
+        self.bert_i_list = []
+        self.bert_input_ids_list = []
         self.query_i_list = []
         self.query_input_ids_list = []
 
 
     def __reset_chunk(self):
         """ """
-        self.row_data = []
+        self.content_data = []
+        self.bert_input_ids_list = []
+        self.bert_i_list = []
         self.query_i_list = []
         self.query_input_ids_list = []
-        self.input_ids_list = []
-        self.row_i_list = []
 
 
     def __write_to_pt_file(self, tensor_path, list_1, list_2):
@@ -84,21 +84,21 @@ class MultiTaskDataset():
     def write_chunk(self, dir_path, dataset_name):
         """ """
         print('=== WRITING CHUNK {} ==='.format(self.chunk_i))
-        # Row data.
-        row_dir_path = dir_path + dataset_name + '_row_data/'
-        self.__make_dir(row_dir_path)
-        parquet_path = row_dir_path + 'chunk_{}.parquet'.format(self.chunk_i)
-        columns = ['row_i', 'query_i', 'dataset_name', 'run_path', 'dataset_type', 'query', 'doc_id', 'rank', 'score', 'relevant']
+        # Content data.
+        content_dir_path = dir_path + dataset_name + '_content_data/'
+        self.__make_dir(content_dir_path)
+        parquet_path = content_dir_path + 'chunk_{}.parquet'.format(self.chunk_i)
+        columns = ['content_i', 'query_i', 'dataset_name', 'run_path', 'dataset_type', 'query', 'doc_id', 'rank', 'score', 'relevant']
         print('saving data to: {}'.format(parquet_path))
-        pd.DataFrame(self.row_data, columns=columns).to_parquet(parquet_path)
+        pd.DataFrame(self.content_data, columns=columns).to_parquet(parquet_path)
 
-        # BERT content data.
+        # BERT data.
         bert_dir_path = dir_path + dataset_name + '_bert_data/'
         self.__make_dir(bert_dir_path)
         tensor_path = bert_dir_path + 'chunk_{}.pt'.format(self.chunk_i)
         self.__write_to_pt_file(tensor_path=tensor_path,
-                                list_1=self.row_i_list,
-                                list_2=self.input_ids_list)
+                                list_1=self.bert_i_list,
+                                list_2=self.bert_input_ids_list)
 
         # BERT query data.
         bert_query_dir_path = dir_path + dataset_name + '_bert_query_data/'
@@ -109,18 +109,18 @@ class MultiTaskDataset():
                                 list_2=self.query_input_ids_list)
 
 
-    def build_datasets(self, dir_path, chuck_size=250000, print_intervals=100000):
+    def build_datasets(self, dir_path, chuck_size=250000, print_intervals=50000):
         """ """
 
         for dataset_name, dataset_paths in self.dataset_metadata.items():
 
-            # Reset chunk.
-            self.__reset_chunk()
-
-            # Initialise .
-            self.row_i = 0
+            # Initialise dataset.
+            self.content_i = 0
             self.query_i = -1
             self.chunk_i = 0
+
+            # Reset chunk.
+            self.__reset_chunk()
 
             print('======= {} ======='.format(dataset_name))
             run_path = dataset_paths[0]
@@ -186,8 +186,8 @@ class MultiTaskDataset():
                                                  max_length=512,
                                                  add_special_tokens=True,
                                                  pad_to_max_length=True)
-                    self.input_ids_list.append(input_ids)
-                    self.row_i_list.append([self.row_i])
+                    self.bert_input_ids_list.append(input_ids)
+                    self.bert_i_list.append([self.content_i])
 
                     # Set query id.
                     if past_query != query_encoded:
@@ -200,27 +200,27 @@ class MultiTaskDataset():
                         self.query_input_ids_list.append(query_input_ids)
 
                     # Append data.
-                    row = [self.row_i, self.query_i, dataset_name, run_path, dataset_type, query_encoded, doc_id, rank, score, relevant]
-                    self.row_data.append(row)
+                    row = [self.content_i, self.query_i, dataset_name, run_path, dataset_type, query_encoded, doc_id, rank, score, relevant]
+                    self.content_data.append(row)
 
                     # Print update.
-                    if self.row_i % print_intervals == 0:
+                    if self.content_i % print_intervals == 0:
                         end_time = time.time()
-                        print("-- {} -- dataset time: {:.2f} ---".format(self.row_i, end_time-start_time))
+                        print("-- {} -- dataset time: {:.2f} ---".format(self.content_i, end_time-start_time))
                         print(row)
 
                     # Write chunk.
-                    if (self.row_i % chuck_size == 0) and (self.row_i != 0):
+                    if (self.content_i % chuck_size == 0) and (self.content_i != 0):
                         self.write_chunk(dir_path=dir_path, dataset_name=dataset_name)
                         self.__reset_chunk()
                         self.chunk_i += 1
 
                     # Re-set query counter.
-                    self.row_i += 1
+                    self.content_i += 1
                     past_query = query_encoded
 
             #  Write final chunk.
-            if len(self.input_ids_list) > 0:
+            if len(self.bert_input_ids_list) > 0:
                 self.write_chunk(dir_path=dir_path, dataset_name=dataset_name)
                 self.__reset_chunk()
                 self.chunk_i += 1
