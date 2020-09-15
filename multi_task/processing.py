@@ -245,7 +245,7 @@ def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
                     for q in list(all_queries):
                         f.write(q + '\n')
             else:
-                print('No missing queries for {} {} dataset'.format(ranking_type, dataset))
+                print('No missing queries for {} {} dataset (total: {})'.format(ranking_type, dataset, len(original_queries)))
 
         # Build all entity queries.
         missing_entity_queries = passage_queries - entity_queries
