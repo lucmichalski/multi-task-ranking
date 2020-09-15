@@ -38,9 +38,11 @@ dataset_metadata = {
          '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage.qrels')
 }
 
-def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_metadata):
+def build_datasets(dir_path, print_intervals=10000, dataset_metadata=dataset_metadata):
 
     for dataset_name, dataset_paths in dataset_metadata.items():
+
+        print('======= {} ======='.format(dataset_name))
         run_path = dataset_paths[0]
         qrels_path = dataset_paths[1]
 
@@ -107,7 +109,7 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
                                              pad_to_max_length=True)
 
                 # Append data.
-                row = [i, dataset_name, run_path, dataset_type, query, doc_id, rank, score, relevant]
+                row = [i, dataset_name, run_path, dataset_type, query_encoded, doc_id, rank, score, relevant]
                 data.append(row)
                 i += 1
                 if i % print_intervals == 0:
@@ -123,6 +125,7 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
         # Data.
         parquet_path = dir_path + '_' + dataset_name + '.parquet'
         columns = ['i', 'dataset_name', 'run_path', 'dataset_type', 'query', 'doc_id', 'rank', 'score', 'relevant']
+        print('saving data to: {}'.format(parquet_path))
         pd.DataFrame(data, columns=columns).to_parquet(parquet_path)
 
         # Torch dataset.
