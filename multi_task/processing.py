@@ -5,6 +5,7 @@ from learning.models import BertCLS
 
 import pandas as pd
 import torch
+import time
 
 from torch.utils.data import TensorDataset, DataLoader, SequentialSampler
 from transformers import BertTokenizer, BertModel, BertPreTrainedModel
@@ -73,6 +74,8 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
         qrels = search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=qrels_path)
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
+        start_time = time.time()
+
         # Read run files
         row_i = 0
         query_i = -1
@@ -138,7 +141,9 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
 
                 # Print update.
                 if row_i % print_intervals == 0:
-                    print("-- {} --".format(row_i))
+                    end_time = time.time()
+
+                    print("-- {} -- time: {:.2f} ---".format(row_i, end_time-start_time))
                     print(row)
                 row_i += 1
 
