@@ -92,15 +92,6 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
             for line in f:
                 query_encoded, _, doc_id, rank, score, _ = search_tools.retrieval_utils.unpack_run_line(line)
 
-                # Set query id.
-                if past_query != query_encoded:
-                    query_i += 1
-                    query_input_ids = tokenizer.encode(text=text,
-                                                       max_length=512,
-                                                       add_special_tokens=True,
-                                                       pad_to_max_length=True)
-                    query_i_list.append([query_i])
-                    query_input_ids_list.append(query_input_ids)
 
                 # Decode query.
                 try:
@@ -130,6 +121,16 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
                                              max_length=512,
                                              add_special_tokens=True,
                                              pad_to_max_length=True)
+
+                # Set query id.
+                if past_query != query_encoded:
+                    query_i += 1
+                    query_input_ids = tokenizer.encode(text=query,
+                                                       max_length=512,
+                                                       add_special_tokens=True,
+                                                       pad_to_max_length=True)
+                    query_i_list.append([query_i])
+                    query_input_ids_list.append(query_input_ids)
 
                 # Append data.
                 row = [row_i, query_i, dataset_name, run_path, dataset_type, query_encoded, doc_id, rank, score, relevant]
