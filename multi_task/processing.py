@@ -143,7 +143,7 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
                 if row_i % print_intervals == 0:
                     end_time = time.time()
 
-                    print("-- {} -- time: {:.2f} ---".format(row_i, end_time-start_time))
+                    print("-- {} -- dataset time: {:.2f} ---".format(row_i, end_time-start_time))
                     print(row)
                 row_i += 1
 
