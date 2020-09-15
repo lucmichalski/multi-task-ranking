@@ -216,7 +216,43 @@ def cls_processing(dir_path, batch_size=64, dataset_metadata=dataset_metadata):
         cls_tokens_tensor = torch.cat(cls_tokens)
 
         dataset = TensorDataset(id_list_tensor, cls_tokens_tensor)
-        tensor_path = dir_path  + dataset_name + '_bert_cls_tokens.pt'
+        tensor_path = dir_path + dataset_name + '_bert_cls_tokens.pt'
         # Save tensor dataset to tensor_path.
         print('saving tensor to: {}'.format(tensor_path))
         torch.save(obj=dataset, f=tensor_path)
+
+
+def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
+    """ """
+    for dataset in ['dev', 'train', 'test']:
+
+        entity_qrels_path = dataset_metadata['entity_' + dataset][1]
+        passage_qrels_path = dataset_metadata['passage_' + dataset][1]
+
+        search_tools = SearchTools(index_path=None)
+
+        entity_queries = set(search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=entity_qrels_path).keys())
+        passage_queries = set(search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=passage_qrels_path).keys())
+
+        def write_topics(dir_path, missing_queries, dataset, ranking_type):
+            """ """
+            if len(missing_queries) > 0:
+                print('{}} missing queries for {} {} dataset'.format(len(missing_queries), ranking_type, dataset))
+                missing_queries_path = dir_path + '_' + ranking_type + '_' + 'missing_queries.topics'
+                with open(missing_queries_path, 'w') as f:
+                    for q in list(missing_queries_path):
+                        f.write(q + '\n')
+            else:
+                print('No missing queries for {} {} dataset'.format(ranking_type, dataset))
+
+        missing_entity_queries = passage_queries - entity_queries
+        write_topics(dir_path=dir_path,
+                     missing_queries=missing_entity_queries,
+                     dataset=dataset,
+                     ranking_type='entity')
+
+        missing_passage_queries = entity_queries - passage_queries
+        write_topics(dir_path=dir_path,
+                     missing_queries=missing_passage_queries,
+                     dataset=dataset,
+                     ranking_type='passage')
