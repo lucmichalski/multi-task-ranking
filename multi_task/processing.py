@@ -151,9 +151,6 @@ def build_datasets(dir_path, print_intervals=100000, dataset_metadata=dataset_me
                 # Re-set query counter.
                 past_query = query_encoded
 
-                if row_i > 10000:
-                    break
-
         # --- Write data to files ---
 
         # Data.
