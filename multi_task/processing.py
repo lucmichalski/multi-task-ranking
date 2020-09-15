@@ -80,12 +80,12 @@ class MultiTaskDataset():
             print('saving tensor to: {}'.format(tensor_path))
             torch.save(obj=dataset, f=tensor_path)
 
-        tensor_path = dir_path + dataset_name + '_bert_datachunk_{}.pt'.format(self.chunk_i)
+        tensor_path = dir_path + dataset_name + '_bert_data_chunk_{}.pt'.format(self.chunk_i)
         write_to_pt_file(tensor_path=tensor_path,
                          list_1=self.row_i_list,
                          list_2=self.input_ids_list)
 
-        tensor_path = dir_path + dataset_name + '_bert_query_datachunk_{}.pt'.format(self.chunk_i)
+        tensor_path = dir_path + dataset_name + '_bert_query_data_chunk_{}.pt'.format(self.chunk_i)
         write_to_pt_file(tensor_path=tensor_path,
                          list_1=self.query_i_list,
                          list_2=self.query_input_ids_list)
