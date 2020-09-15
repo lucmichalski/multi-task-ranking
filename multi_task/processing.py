@@ -285,7 +285,7 @@ class MultiTaskDataset():
                         id_list.append(b_id_list)
                         cls_tokens.append(b_cls_tokens.cpu())
 
-                        if (i + 1) % 1000 == 0:
+                        if (i + 1) % 100 == 0:
                             print("processed: {} / {}".format(i + 1, len(data_loader)))
 
                     id_list_tensor = torch.cat(cls_tokens)
