@@ -239,7 +239,7 @@ def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
             if len(missing_queries) > 0:
                 print('{} missing queries for {} {} dataset'.format(len(missing_queries), ranking_type, dataset))
                 missing_queries_path = dir_path + ranking_type + '_' + dataset + '_all_queries.topics'
-                all_queries = sorted(list(original_queries + missing_queries))
+                all_queries = sorted(list(original_queries) + list(missing_queries))
                 print('-> all_queries: {}'.format(len(all_queries)))
                 with open(missing_queries_path, 'w') as f:
                     for q in list(all_queries):
