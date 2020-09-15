@@ -120,6 +120,7 @@ class MultiTaskDataset():
             # Initialise .
             self.row_i = 0
             self.query_i = -1
+            self.chunk_i = 0
 
             print('======= {} ======='.format(dataset_name))
             run_path = dataset_paths[0]
