@@ -80,7 +80,7 @@ class DatasetProcessing:
             if query in self.qrels:
                 if doc_id in self.qrels[query]:
                     if self.binary_qrels:
-                        self.labels_list.append(1.0)
+                        self.labels_list.append([1.0])
                     else:
                         self.labels_list.append([self.qrels[query][doc_id]])
                 else:
