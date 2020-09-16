@@ -14,31 +14,31 @@ from transformers import BertTokenizer, BertModel, BertPreTrainedModel
 
 # Metadata.
 dataset_metadata = {
-    # 'entity_train':
-    #     (
-    #     '/nfs/trec_car/data/entity_ranking/multi_task_data/entity_train_all_queries_BM25_1000.run',
-    #     '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity.qrels'),
+    'entity_train':
+        (
+        '/nfs/trec_car/data/entity_ranking/multi_task_data/entity_train_all_queries_BM25_1000.run',
+        '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity.qrels'),
 
     'entity_dev':
         ('/nfs/trec_car/data/entity_ranking/multi_task_data/entity_dev_all_queries_BM25_1000.run',
          '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity.qrels'),
 
-    # 'entity_test':
-    #     ('/nfs/trec_car/data/entity_ranking/multi_task_data/entity_test_all_queries_BM25_1000.run',
-    #      '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_entity_data/testY1_hierarchical_entity.qrels'),
-    #
-    # 'passage_train':
-    #     (
-    #     '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_train_passage_1000.run',
-    #     '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_train_passage.qrels'),
-    #
-    # 'passage_dev':
-    #     ('/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_1000.run',
-    #      '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'),
-    #
-    # 'passage_test':
-    #     ('/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage_1000.run',
-    #      '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage.qrels')
+    'entity_test':
+        ('/nfs/trec_car/data/entity_ranking/multi_task_data/entity_test_all_queries_BM25_1000.run',
+         '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_entity_data/testY1_hierarchical_entity.qrels'),
+
+    'passage_train':
+        (
+        '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_train_passage_1000.run',
+        '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_train_passage.qrels'),
+
+    'passage_dev':
+        ('/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_1000.run',
+         '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'),
+
+    'passage_test':
+        ('/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage_1000.run',
+         '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/testY1_hierarchical_passage.qrels')
 }
 
 class MultiTaskDataset():
@@ -267,11 +267,11 @@ class MultiTaskDataset():
             query_paths = [bert_dir_path + f for f in os.listdir(query_dir_path)]
 
             for paths in [bert_paths, query_paths]:
-                for path in paths:
-                    print('processing: {}'.format(path))
+                for read_path in paths:
+                    print('processing: {}'.format(read_path))
 
-                    in_dataset = torch.load(path)
-                    data_loader = DataLoader(in_dataset, sampler=SequentialSampler(in_dataset), batch_size=batch_size)
+                    read_dataset = torch.load(read_path)
+                    data_loader = DataLoader(read_dataset, sampler=SequentialSampler(read_dataset), batch_size=batch_size)
 
                     id_list = []
                     cls_tokens = []
@@ -291,15 +291,15 @@ class MultiTaskDataset():
                     id_list_tensor = torch.cat(cls_tokens)
                     cls_tokens_tensor = torch.cat(cls_tokens)
 
-                    out_dataset = TensorDataset(id_list_tensor, cls_tokens_tensor)
-                    tensor_dir = dir_path + path.split('/')[-2:][0] + '_processed/'
-                    if (os.path.isdir(tensor_dir) == False):
+                    write_dataset = TensorDataset(id_list_tensor, cls_tokens_tensor)
+                    write_dir = dir_path + read_path.split('/')[-2:][0] + '_processed/'
+                    if (os.path.isdir(write_dir) == False):
                         print('making dir: {}'.format(dir_path))
-                        os.mkdir(tensor_dir)
-                    tensor_path = tensor_dir + path.split('/')[-1:]
+                        os.mkdir(write_dir)
+                    write_path = write_dir + read_path.split('/')[-1:][0]
                     # Save tensor dataset to tensor_path.
-                    print('saving tensor to: {}'.format(tensor_path))
-                    torch.save(obj=out_dataset, f=tensor_path)
+                    print('saving tensor to: {}'.format(write_path))
+                    torch.save(obj=write_dataset, f=write_path)
 
 
 def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
