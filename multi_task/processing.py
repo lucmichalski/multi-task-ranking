@@ -246,7 +246,7 @@ class MultiTaskDataset():
         # Load BERT model to get CLS token.
         model = BertCLS.from_pretrained('bert-base-uncased')
         model.eval()
-        
+
         # Use GPUs if available.
         if torch.cuda.is_available():
             # Tell PyTorch to use the GPU.
@@ -286,7 +286,7 @@ class MultiTaskDataset():
                         id_list.append(b_id_list)
                         cls_tokens.append(b_cls_tokens.cpu())
 
-                        if (i + 1) % 100 == 0:
+                        if (i + 1) % 10 == 0:
                             print("processed: {} / {}".format(i + 1, len(data_loader)))
 
                     id_list_tensor = torch.cat(cls_tokens)
