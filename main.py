@@ -7,7 +7,18 @@ from retrieval.dataset_processing import DatasetProcessing, BertTokenizer
 from retrieval.tools import EvalTools, SearchTools, default_eval_config
 from torch import nn
 
+from multi_task.processing import MultiTaskDataset, create_extra_queries
+
+
 if __name__ == '__main__':
+
+    dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data/'
+
+    #MultiTaskDataset().build_datasets(dir_path=dir_path)
+
+    #create_extra_queries(dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data/')
+
+    MultiTaskDataset().cls_processing(dir_path=dir_path, batch_size=64*10)
 
     # query_type = 'title+contents'
     # words = 100
@@ -115,30 +126,30 @@ if __name__ == '__main__':
     #         experiment_name=experiment_name,
     #         logging_steps=100)
 
-    folds = [0,1,2,3,4]
-    model_paths = ['/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch3_batch151/',
-                   '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch1_batch157/',
-                   '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch3_batch151/',
-                   '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch1_batch157/',
-                   '/nfs/trec_news_track/data/5_fold/scaled_5fold_4_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch3_batch100/']
-    for fold, model_path in zip(folds, model_paths):
-        dev_batch_size = 64
-        train_batch_size = 8
-        dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_bert_data/'.format(fold)
-        dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test.qrels'.format(fold)
-        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_bm25.run'.format(fold)
-
-        rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_bert_100.run'.format(fold)
-
-        experiments = FineTuningReRankingExperiments(
-            model_path = model_path,
-            extra_layers = False,
-            dev_batch_size = dev_batch_size,
-            dev_data_dir_path_entity = dev_data_dir_path_entity,
-            dev_qrels_path_entity = dev_qrels_path_entity,
-            dev_run_path_entity = dev_run_path_entity)
-
-        experiments.inference(head_flag='entity', rerank_run_path=rerank_run_path, cap_rank=100, do_eval=False)
+    # folds = [0,1,2,3,4]
+    # model_paths = ['/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch3_batch151/',
+    #                '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch1_batch157/',
+    #                '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch3_batch151/',
+    #                '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch1_batch157/',
+    #                '/nfs/trec_news_track/data/5_fold/scaled_5fold_4_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch3_batch100/']
+    # for fold, model_path in zip(folds, model_paths):
+    #     dev_batch_size = 64
+    #     train_batch_size = 8
+    #     dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_bert_data/'.format(fold)
+    #     dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test.qrels'.format(fold)
+    #     dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_bm25.run'.format(fold)
+    #
+    #     rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_bert_100.run'.format(fold)
+    #
+    #     experiments = FineTuningReRankingExperiments(
+    #         model_path = model_path,
+    #         extra_layers = False,
+    #         dev_batch_size = dev_batch_size,
+    #         dev_data_dir_path_entity = dev_data_dir_path_entity,
+    #         dev_qrels_path_entity = dev_qrels_path_entity,
+    #         dev_run_path_entity = dev_run_path_entity)
+    #
+    #     experiments.inference(head_flag='entity', rerank_run_path=rerank_run_path, cap_rank=100, do_eval=False)
 
     # hits = 1000
     # printing_step = 50
