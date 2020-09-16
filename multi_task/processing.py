@@ -124,7 +124,7 @@ class MultiTaskDataset():
                                 list_2=self.query_input_ids_list)
 
 
-    def build_datasets(self, dir_path, chuck_size=250000, print_intervals=50000):
+    def build_datasets(self, dir_path, max_rank=100, chuck_size=250000, print_intervals=50000):
         """ """
 
         for dataset_name, dataset_paths in self.dataset_metadata.items():
@@ -174,65 +174,66 @@ class MultiTaskDataset():
                     # Unpack run line.
                     query_encoded, _, doc_id, rank, score, _ = search_tools.retrieval_utils.unpack_run_line(line)
 
-                    # Decode query.
-                    try:
-                        query = search_tools.decode_query_car(q=query_encoded)
-                    except ValueError:
-                        print(
-                            "URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
-                        query = search_tools.process_query_car(q=query_encoded)
+                    if int(rank) >= max_rank:
+                        # Decode query.
+                        try:
+                            query = search_tools.decode_query_car(q=query_encoded)
+                        except ValueError:
+                            print(
+                                "URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
+                            query = search_tools.process_query_car(q=query_encoded)
 
-                    # Get relevant score
-                    try:
-                        if doc_id in qrels[query_encoded]:
-                            relevant = 1
-                        else:
+                        # Get relevant score
+                        try:
+                            if doc_id in qrels[query_encoded]:
+                                relevant = 1
+                            else:
+                                relevant = 0
+                        except:
                             relevant = 0
-                    except:
-                        relevant = 0
 
-                    # Get text and input ids.
-                    text_full = search_tools.get_contents_from_docid(doc_id=doc_id)
-                    if 'entity' in dataset_name:
-                        text = text_full.split('\n')[0]
-                    else:
-                        text = text_full
-                    input_ids = tokenizer.encode(text=text,
-                                                 max_length=512,
-                                                 add_special_tokens=True,
-                                                 pad_to_max_length=True)
-                    self.bert_input_ids_list.append(input_ids)
-                    self.bert_i_list.append([self.content_i])
+                        # Get text and input ids.
+                        text_full = search_tools.get_contents_from_docid(doc_id=doc_id)
+                        if 'entity' in dataset_name:
+                            text = text_full.split('\n')[0]
+                        else:
+                            text = text_full
+                        input_ids = tokenizer.encode(text=text,
+                                                     max_length=512,
+                                                     add_special_tokens=True,
+                                                     pad_to_max_length=True)
+                        self.bert_input_ids_list.append(input_ids)
+                        self.bert_i_list.append([self.content_i])
 
-                    # Set query id.
-                    if past_query != query_encoded:
-                        self.query_i += 1
-                        query_input_ids = tokenizer.encode(text=query,
-                                                           max_length=512,
-                                                           add_special_tokens=True,
-                                                           pad_to_max_length=True)
-                        self.query_i_list.append([self.query_i])
-                        self.query_input_ids_list.append(query_input_ids)
+                        # Set query id.
+                        if past_query != query_encoded:
+                            self.query_i += 1
+                            query_input_ids = tokenizer.encode(text=query,
+                                                               max_length=512,
+                                                               add_special_tokens=True,
+                                                               pad_to_max_length=True)
+                            self.query_i_list.append([self.query_i])
+                            self.query_input_ids_list.append(query_input_ids)
 
-                    # Append data.
-                    row = [self.content_i, self.query_i, dataset_name, run_path, dataset_type, query_encoded, doc_id, rank, score, relevant]
-                    self.content_data.append(row)
+                        # Append data.
+                        row = [self.content_i, self.query_i, dataset_name, run_path, dataset_type, query_encoded, doc_id, rank, score, relevant]
+                        self.content_data.append(row)
 
-                    # Print update.
-                    if self.content_i % print_intervals == 0:
-                        end_time = time.time()
-                        print("-- {} -- dataset time: {:.2f} ---".format(self.content_i, end_time-start_time))
-                        print(row)
+                        # Print update.
+                        if self.content_i % print_intervals == 0:
+                            end_time = time.time()
+                            print("-- {} -- dataset time: {:.2f} ---".format(self.content_i, end_time-start_time))
+                            print(row)
 
-                    # Write chunk.
-                    if (self.content_i % chuck_size == 0) and (self.content_i != 0):
-                        self.write_chunk(dir_path=dir_path, dataset_name=dataset_name)
-                        self.__reset_chunk()
-                        self.chunk_i += 1
+                        # Write chunk.
+                        if (self.content_i % chuck_size == 0) and (self.content_i != 0):
+                            self.write_chunk(dir_path=dir_path, dataset_name=dataset_name)
+                            self.__reset_chunk()
+                            self.chunk_i += 1
 
-                    # Re-set query counter.
-                    self.content_i += 1
-                    past_query = query_encoded
+                        # Re-set query counter.
+                        self.content_i += 1
+                        past_query = query_encoded
 
             #  Write final chunk.
             if len(self.bert_input_ids_list) > 0:
