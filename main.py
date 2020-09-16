@@ -71,7 +71,7 @@ if __name__ == '__main__':
             max_length = 512
             context_path = None
             tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-            binary_qrels = False
+            binary_qrels = True
             dp = DatasetProcessing(qrels_path=qrels_path,
                                    run_path=run_path,
                                    index_path=index_path,
