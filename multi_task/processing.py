@@ -245,7 +245,8 @@ class MultiTaskDataset():
         """ """
         # Load BERT model to get CLS token.
         model = BertCLS.from_pretrained('bert-base-uncased')
-
+        model.eval()
+        
         # Use GPUs if available.
         if torch.cuda.is_available():
             # Tell PyTorch to use the GPU.
