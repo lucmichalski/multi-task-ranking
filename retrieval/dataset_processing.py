@@ -317,6 +317,7 @@ class DatasetProcessing:
                 else:
                     try:
                         doc = search_tools_car.get_contents_from_docid(doc_id=doc_id)
+                        doc = doc.split('\n')[0]
                     except:
                         print("COULD NOT FIND DOC ID IN INDEX")
                         doc = doc_id
