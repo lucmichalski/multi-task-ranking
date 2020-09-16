@@ -81,7 +81,7 @@ if __name__ == '__main__':
                                    tokenizer=tokenizer,
                                    binary_qrels=binary_qrels)
 
-            chuck_topic_size = 1000
+            chuck_topic_size = 100
             ranking_type = 'entity'
             query_type = 'title+contents'
             car_index_path = CarEntityPaths.index
