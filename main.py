@@ -61,37 +61,37 @@ if __name__ == '__main__':
     #                                                words=words,
     #                                                hits=hits,
     #                                                news_index_path=NewsPassagePaths.index)
-    datasets = ['test', 'valid', 'train']
-    folds = [0,1,2,3,4]
-    training_datasets = [False, False, True]
-    for fold in folds:
-        for dataset, training_dataset in zip(datasets, training_datasets):
-            qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}.qrels'.format(fold, dataset)
-            run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_BM25_ranking_1000.run'.format(fold, dataset)
-            index_path = NewsPassagePaths.index
-            data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_bert_ranking_data/'.format(fold, dataset)
-            max_length = 512
-            context_path = None
-            tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-            binary_qrels = True
-            dp = DatasetProcessing(qrels_path=qrels_path,
-                                   run_path=run_path,
-                                   index_path=index_path,
-                                   data_dir_path=data_dir_path,
-                                   max_length=max_length,
-                                   context_path=context_path,
-                                   tokenizer=tokenizer,
-                                   binary_qrels=binary_qrels)
-
-            chuck_topic_size = 100
-            ranking_type = 'entity'
-            query_type = 'title+contents'
-            car_index_path = CarEntityPaths.index
-            dp.build_news_dataset(training_dataset=training_dataset,
-                                  chuck_topic_size=chuck_topic_size,
-                                  ranking_type=ranking_type,
-                                  query_type=query_type,
-                                  car_index_path=car_index_path)
+    # datasets = ['test', 'valid', 'train']
+    # folds = [0,1,2,3,4]
+    # training_datasets = [False, False, True]
+    # for fold in folds:
+    #     for dataset, training_dataset in zip(datasets, training_datasets):
+    #         qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}.qrels'.format(fold, dataset)
+    #         run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_BM25_ranking_1000.run'.format(fold, dataset)
+    #         index_path = NewsPassagePaths.index
+    #         data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_bert_ranking_data/'.format(fold, dataset)
+    #         max_length = 512
+    #         context_path = None
+    #         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    #         binary_qrels = True
+    #         dp = DatasetProcessing(qrels_path=qrels_path,
+    #                                run_path=run_path,
+    #                                index_path=index_path,
+    #                                data_dir_path=data_dir_path,
+    #                                max_length=max_length,
+    #                                context_path=context_path,
+    #                                tokenizer=tokenizer,
+    #                                binary_qrels=binary_qrels)
+    #
+    #         chuck_topic_size = 100
+    #         ranking_type = 'entity'
+    #         query_type = 'title+contents'
+    #         car_index_path = CarEntityPaths.index
+    #         dp.build_news_dataset(training_dataset=training_dataset,
+    #                               chuck_topic_size=chuck_topic_size,
+    #                               ranking_type=ranking_type,
+    #                               query_type=query_type,
+    #                               car_index_path=car_index_path)
 
     # folds = [0,1,2,3,4]
     # for fold in folds:

@@ -174,7 +174,7 @@ class MultiTaskDataset():
                     # Unpack run line.
                     query_encoded, _, doc_id, rank, score, _ = search_tools.retrieval_utils.unpack_run_line(line)
 
-                    if int(rank) >= max_rank:
+                    if int(rank) <= max_rank:
                         # Decode query.
                         try:
                             query = search_tools.decode_query_car(q=query_encoded)
