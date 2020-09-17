@@ -129,7 +129,7 @@ if __name__ == '__main__':
         epochs = 2
         lr = 8e-6
         experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
-        experiment_name = 'passage_ranking_bert_train_{}epoch+{}lr'.format(epochs, lr)
+        experiment_name = 'entity_ranking_bert_train_{}epoch+{}lr'.format(epochs, lr)
         experiments.run_experiment_single_head(
             head_flag='entity',
             epochs=epochs,
