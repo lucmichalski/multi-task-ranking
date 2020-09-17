@@ -126,7 +126,7 @@ if __name__ == '__main__':
             warmup_percentage=0.1,
             experiments_dir=experiments_dir,
             experiment_name=experiment_name,
-            logging_steps=500)
+            logging_steps=1000)
 
     # folds = [0,1,2,3,4]
     # model_paths = ['/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/1st_entity_bert_train_3epoch+3e-05lr/epoch3_batch151/',
