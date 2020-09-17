@@ -98,20 +98,33 @@ if __name__ == '__main__':
         model_path = None
         dev_batch_size = 64
         train_batch_size = 8
-        train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_train_bert_ranking_data/'.format(fold)
-        dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_bert_ranking_data/'.format(fold)
-        dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.qrels'.format(fold)
-        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_ranking_1000.run'.format(fold)
+
+        # train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_ranking_data/'.format(fold)
+        # dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_ranking_data/'.format(fold)
+        # dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid.qrels'.format(fold)
+        # dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_BM25_ranking_1000.run'.format(fold)
+
+        train_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_train_bert_ranking_data/'.format(fold)
+        dev_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_bert_ranking_data/'.format(fold)
+        dev_qrels_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.qrels'.format(fold)
+        dev_run_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_ranking_1000.run'.format(fold)
 
         experiments = FineTuningReRankingExperiments(
             model_path = None,
             extra_layers = False,
             dev_batch_size = dev_batch_size,
             train_batch_size = train_batch_size,
-            train_data_dir_path_entity = train_data_dir_path_entity,
-            dev_data_dir_path_entity = dev_data_dir_path_entity,
-            dev_qrels_path_entity = dev_qrels_path_entity,
-            dev_run_path_entity = dev_run_path_entity)
+
+            # train_data_dir_path_entity = train_data_dir_path_entity,
+            # dev_data_dir_path_entity = dev_data_dir_path_entity,
+            # dev_qrels_path_entity = dev_qrels_path_entity,
+            # dev_run_path_entity = dev_run_path_entity,
+
+            train_data_dir_path_passage = train_data_dir_path_passage,
+            dev_data_dir_path_passage = dev_data_dir_path_passage,
+            dev_qrels_path_passage = dev_qrels_path_passage,
+            dev_run_path_passage = dev_run_path_passage,
+        )
 
         epochs = 2
         lr = 2e-5
