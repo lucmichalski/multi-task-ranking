@@ -266,7 +266,7 @@ class MultiTaskDataset():
             query_dir_path = self.__get_query_dir_path(dir_path=dir_path, dataset_name=dataset_name)
 
             bert_paths = [bert_dir_path + f for f in os.listdir(bert_dir_path)]
-            query_paths = [bert_dir_path + f for f in os.listdir(query_dir_path)]
+            query_paths = [query_dir_path + f for f in os.listdir(query_dir_path)]
 
             for paths in [bert_paths, query_paths]:
                 for read_path in paths:
