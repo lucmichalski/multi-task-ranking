@@ -63,8 +63,8 @@ class FineTuningReRankingExperiments:
         self.dev_qrels_path_entity = dev_qrels_path_entity
 
         # Dictionary from a qrels file. Key: query, value: list of relevant doc_ids.
-        self.dev_qrels_passage = self.retrieval_utils.get_qrels_norm_dict(qrels_path=dev_qrels_path_passage)
-        self.dev_qrels_entity = self.retrieval_utils.get_qrels_norm_dict(qrels_path=dev_qrels_path_entity)
+        self.dev_qrels_passage = self.retrieval_utils.get_qrels_binary_dict(qrels_path=dev_qrels_path_passage)
+        self.dev_qrels_entity = self.retrieval_utils.get_qrels_binary_dict(qrels_path=dev_qrels_path_entity)
 
         # List of tuples from run file (query, doc_id, R).
         self.dev_run_data_passage = self.__get_run_data(run_path=dev_run_path_passage, qrels=self.dev_qrels_passage)
