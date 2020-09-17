@@ -7,6 +7,7 @@ import pandas as pd
 import torch
 import time
 import os
+import re
 
 from torch.utils.data import TensorDataset, DataLoader, SequentialSampler
 from transformers import BertTokenizer, BertModel, BertPreTrainedModel
