@@ -98,10 +98,10 @@ if __name__ == '__main__':
         model_path = None
         dev_batch_size = 64
         train_batch_size = 8
-        train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_ranking_data/'.format(fold)
-        dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_ranking_data/'.format(fold)
-        dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid.qrels'.format(fold)
-        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_BM25_ranking_1000.run'.format(fold)
+        train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_train_bert_ranking_data/'.format(fold)
+        dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_bert_ranking_data/'.format(fold)
+        dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.qrels'.format(fold)
+        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_ranking_1000.run'.format(fold)
 
         experiments = FineTuningReRankingExperiments(
             model_path = None,
@@ -116,9 +116,9 @@ if __name__ == '__main__':
         epochs = 2
         lr = 2e-5
         experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
-        experiment_name = 'entity_ranking_bert_train_{}epoch+{}lr'.format(epochs, lr)
+        experiment_name = 'passage_ranking_bert_train_{}epoch+{}lr'.format(epochs, lr)
         experiments.run_experiment_single_head(
-            head_flag='entity',
+            head_flag='passage',
             epochs=epochs,
             lr=lr,
             eps=1e-8,
