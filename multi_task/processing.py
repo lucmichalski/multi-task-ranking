@@ -329,7 +329,7 @@ class MultiTaskDataset():
         entity_content_path = self.__get_content_dir_path(dir_path=dir_path, dataset_name=dataset_name)
         print('reading parquet file: {}'.format(entity_content_path))
         df_entity_content = pd.read_parquet(entity_content_path)
-        i = df_entity_content['query_i'].iloc[0]
+        i = df_entity_content['content_i'].iloc[0]
         print(i, type(i))
         print('----- df_entity_content  -------')
         print(df_entity_content.head())
@@ -338,15 +338,15 @@ class MultiTaskDataset():
         entity_cls_path = self.__get_bert_dir_path(dir_path=dir_path, dataset_name=dataset_name)
         entity_i_to_cls = self.__get_id_to_cls_map(dir_path=entity_cls_path)
 
-        for query_i in sorted(list(df_entity_content['query_i'].unique())):
-            print('=== QUERY {} ==='.format(query_i))
-            print(type(query_i))
-            df_entity_content_query = df_entity_content[df_entity_content['query'] == query_i]
+        for content_i in sorted(list(df_entity_content['content_i'].unique())):
+            print('=== content_i: {} ==='.format(content_i))
+            print(type(content_i))
+            df_entity_content_query = df_entity_content[df_entity_content['content_i'] == query_i]
             print('----- df_entity_content_query  -------')
             print(df_entity_content_query.head())
             print()
             print('----- Entity CLS  -------')
-            print(entity_i_to_cls[query_i])
+            print(entity_i_to_cls[content_i])
             print('--------------------------------')
 
             break
