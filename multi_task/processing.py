@@ -358,18 +358,18 @@ class MultiTaskDataset():
             print('=== query_i: {} ==='.format(query_i))
             print(query_i_to_cls[query_i])
 
-        for content_i in content_i_list:
-            print('=== content_i: {} ==='.format(content_i))
-            print(type(content_i))
-            df_entity_content_query = df_entity_content[df_entity_content['content_i'] == content_i]
-            print('----- df_entity_content_query  -------')
-            print(df_entity_content_query.head())
-            print()
-            print('----- Entity CLS  -------')
-            print(entity_i_to_cls[content_i])
-            print('--------------------------------')
+            for content_i in content_i_list:
+                print('=== content_i: {} ==='.format(content_i))
+                print(type(content_i))
+                df_entity_content_query = df_entity_content[df_entity_content['content_i'] == content_i]
+                print('----- df_entity_content_query  -------')
+                print(df_entity_content_query.head())
+                print()
+                print('----- Entity CLS  -------')
+                print(entity_i_to_cls[content_i])
+                print('--------------------------------')
 
-            break
+                break
 
 
 def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
