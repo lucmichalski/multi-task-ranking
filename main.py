@@ -101,7 +101,7 @@ if __name__ == '__main__':
         train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_ranking_data/'.format(fold)
         dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_ranking_data/'.format(fold)
         dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid.qrels'.format(fold)
-        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_BM25_ranking.run'.format(fold)
+        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_BM25_ranking_1000.run'.format(fold)
 
         experiments = FineTuningReRankingExperiments(
             model_path = None,
