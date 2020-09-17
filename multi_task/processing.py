@@ -290,7 +290,7 @@ class MultiTaskDataset():
                         if (i + 1) % 10 == 0:
                             print("processed: {} / {}".format(i + 1, len(data_loader)))
 
-                    id_list_tensor = torch.cat(cls_tokens)
+                    id_list_tensor = torch.cat(id_list)
                     cls_tokens_tensor = torch.cat(cls_tokens)
 
                     write_dataset = TensorDataset(id_list_tensor, cls_tokens_tensor)
