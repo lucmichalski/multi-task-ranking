@@ -304,6 +304,43 @@ class MultiTaskDataset():
                     torch.save(obj=write_dataset, f=write_path)
 
 
+    def __get_id_to_cls_map(self, dir_path):
+        """ """
+        path_list = os.listdir(dir_path)
+        path_list.sort(key=lambda f: int(re.sub('\D', '', f)))
+        print('ordered files: {}'.format(path_list))
+
+        id_to_cls_map = {}
+        i = 0
+        for file_name in path_list:
+            if file_name[len(file_name) - 3:] == '.pt':
+                path = os.path.join(dir_path, file_name)
+                print('loadings data from: {}'.format(path))
+                dataset = torch.load(path)
+                for _, cls_token in dataset:
+                    id_to_cls_map[i] = cls_token
+                    i += 1
+
+        return id_to_cls_map
+
+
+    def get_query_specific_data(self, dir_path, dataset_name):
+        """ """
+        # Content entity data
+        entity_content_path = self.__get_content_dir_path(dir_path=dir_path, dataset_name=dataset_name)
+        df_entity_content = pd.read_parquet(entity_content_path)
+        print(df_entity_content.head())
+
+        entity_cls_path = self.__get_bert_dir_path(dir_path=dir_path, dataset_name=dataset_name)
+        entity_i_to_cls = self.__get_id_to_cls_map(dir_path=entity_cls_path)
+
+        for query_i in sorted(list(df_entity_content['query_i'].unique()))
+            df_entity_content = df_entity_content[df_entity_content['query'] == query_i]
+            print(df_entity_content.head())
+            print(entity_i_to_cls[query_i])
+            break
+
+
 def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
     """ """
     for dataset in ['dev', 'train', 'test']:
@@ -344,3 +381,5 @@ def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
                      missing_queries=missing_passage_queries,
                      dataset=dataset,
                      ranking_type='passage')
+
+
