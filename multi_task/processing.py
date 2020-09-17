@@ -341,7 +341,7 @@ class MultiTaskDataset():
         for content_i in sorted(list(df_entity_content['content_i'].unique())):
             print('=== content_i: {} ==='.format(content_i))
             print(type(content_i))
-            df_entity_content_query = df_entity_content[df_entity_content['content_i'] == query_i]
+            df_entity_content_query = df_entity_content[df_entity_content['content_i'] == content_i]
             print('----- df_entity_content_query  -------')
             print(df_entity_content_query.head())
             print()
