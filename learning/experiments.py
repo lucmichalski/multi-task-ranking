@@ -410,7 +410,7 @@ class FineTuningReRankingExperiments:
                     # Calculate average training loss
                     avg_train_loss = train_loss / (train_step + 1)
 
-                    logging.info('----- Epoch {} / Batch {} -----\n'.format(str(epoch_i), str(train_step + 1)))
+                    logging.info('----- Epoch {} & Batch {} / {} -----\n'.format(str(epoch_i), str(train_step + 1), str(len(train_dataloader))))
                     logging.info("Training loss: {0:.5f}".format(avg_train_loss))
                     logging.info("Training time: {:}".format(self.__format_time(time.time() - train_start_time)))
 
