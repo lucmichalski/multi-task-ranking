@@ -311,15 +311,13 @@ class MultiTaskDataset():
         print('ordered files: {}'.format(path_list))
 
         id_to_cls_map = {}
-        i = 0
         for file_name in path_list:
             if file_name[len(file_name) - 3:] == '.pt':
                 path = os.path.join(dir_path, file_name)
                 print('loadings data from: {}'.format(path))
                 dataset = torch.load(path)
-                for _, cls_token in dataset:
-                    id_to_cls_map[i] = cls_token
-                    i += 1
+                for i, cls_token in dataset:
+                    id_to_cls_map[int(i.numpy())] = cls_token
 
         return id_to_cls_map
 
@@ -334,7 +332,7 @@ class MultiTaskDataset():
         entity_cls_path = self.__get_bert_dir_path(dir_path=dir_path, dataset_name=dataset_name)
         entity_i_to_cls = self.__get_id_to_cls_map(dir_path=entity_cls_path)
 
-        for query_i in sorted(list(df_entity_content['query_i'].unique()))
+        for query_i in sorted(list(df_entity_content['query_i'].unique())):
             df_entity_content = df_entity_content[df_entity_content['query'] == query_i]
             print(df_entity_content.head())
             print(entity_i_to_cls[query_i])
