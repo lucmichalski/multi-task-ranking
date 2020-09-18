@@ -347,7 +347,7 @@ class MultiTaskDataset():
         #df = pd.read_parquet(content_path)
         #print(df.head())
         run_data = {}
-        for i, row in pd.read_parquet(content_path).itterows():
+        for i, row in pd.read_parquet(content_path).itterrows():
             query = row['query']
             query_i = row['query_i']
             content_i = row['content_i']
