@@ -314,6 +314,14 @@ class MultiTaskDataset():
                     print('saving tensor to: {}'.format(write_path))
                     torch.save(obj=write_dataset, f=write_path)
 
+    def __get_query_data(self, dir_path, entity_dataset_name):
+        """ """
+
+        query_list = df_entity_content['query'].to_list()
+
+        query_data = {}
+
+
 
     def __get_id_to_cls_map(self, dir_path):
         """ """
@@ -333,6 +341,27 @@ class MultiTaskDataset():
         return id_to_cls_map
 
 
+    def __get_run_data(self, content_path):
+        """ """
+        print('reading parquet file: {}'.format(content_path))
+        df = pd.read_parquet(content_path)
+        print(df.head())
+        run_data = {}
+        for i, row in df.itterows():
+            query = row['query']
+            query_i = row['query_i']
+            content_i = row['content_i']
+            if query not in run_data:
+                run_data[query] = {
+                    'query_i': query_i,
+                    'content_i': [content_i]
+                }
+            else:
+                run_data[query]['content_i'].append(content_i)
+
+        return run_data
+
+
     def get_query_specific_data(self, dir_path, dataset):
         """ """
         entity_dataset_name = 'entity_' + dataset
@@ -340,71 +369,74 @@ class MultiTaskDataset():
 
         # Content entity data
         entity_content_path = self.__get_content_dir_path(dir_path=dir_path, dataset_name=entity_dataset_name)
-        print('reading parquet file: {}'.format(entity_content_path))
-        df_entity_content = pd.read_parquet(entity_content_path, engine='pyarrow')
-        print('----- df_entity_content  -------')
-        print(df_entity_content.head())
-        print('--------------------------------')
-        print()
-
-        # Content passgae data
-        passage_content_path = self.__get_content_dir_path(dir_path=dir_path, dataset_name=passage_dataset_name)
-        print('reading parquet file: {}'.format(passage_content_path))
-        df_passage_content = pd.read_parquet(entity_content_path, engine='pyarrow')
-        print('----- df_entity_content  -------')
-        print(df_entity_content.head())
-        print('--------------------------------')
-        print()
-
+        df_entity_content = pd.read_parquet(entity_content_path)
+        entity_run_data = self.__get_run_data(content_path=df_entity_content)
+        for key, value in entity_run_data.items():
+            print(key, value)
+            break
+        # print('----- df_entity_content  -------')
+        # print(df_entity_content.head())
+        # print('--------------------------------')
+        # print()
         #
-        query_i_list = sorted(df_passage_content['query_i'].to_list())
-
-        # Query dats.
-        query_cls_path = self.__get_query_processed_dir_path(dir_path=dir_path, dataset_name=entity_dataset_name)
-        query_i_to_cls = self.__get_id_to_cls_map(dir_path=query_cls_path)
-
-        # Entity CLS data
-        entity_cls_path = self.__get_bert_processed_dir_path(dir_path=dir_path, dataset_name=entity_dataset_name)
-        entity_i_to_cls = self.__get_id_to_cls_map(dir_path=entity_cls_path)
-
-        # Passage CLS data.
-        passage_cls_path = self.__get_bert_processed_dir_path(dir_path=dir_path, dataset_name=passage_dataset_name)
-        passage_i_to_cls = self.__get_id_to_cls_map(dir_path=passage_cls_path)
-
-        for query_i in query_i_list:
-            print('=== query_i: {} ==='.format(query_i))
-            print(query_i_to_cls[query_i])
-
-            entity_i_list = sorted(df_entity_content[df_entity_content['query_i'] == query_i]['content_i'].to_list())
-
-            passage_i_list = sorted(df_passage_content[df_passage_content['query_i'] == query_i]['content_i'].to_list())
-
-            for content_i in entity_i_list:
-                print('=== content_i: {} ==='.format(content_i))
-                print(type(content_i))
-                df_entity_content_query = df_entity_content[df_entity_content['content_i'] == content_i]
-                print('----- df_entity_content_query  -------')
-                print(df_entity_content_query.head())
-                print()
-                print('----- Entity CLS  -------')
-                print(entity_i_to_cls[content_i])
-                print('--------------------------------')
-
-                break
-
-            for content_i in passage_i_list:
-                print('=== content_i: {} ==='.format(content_i))
-                print(type(content_i))
-                df_passage_content_query = df_passage_content[df_passage_content['content_i'] == content_i]
-                print('----- df_entity_content_query  -------')
-                print(df_passage_content_query.head())
-                print()
-                print('----- Entity CLS  -------')
-                print(passage_i_to_cls[content_i])
-                print('--------------------------------')
-
-                break
-
+        # # Content passgae data
+        # passage_content_path = self.__get_content_dir_path(dir_path=dir_path, dataset_name=passage_dataset_name)
+        # print('reading parquet file: {}'.format(passage_content_path))
+        # df_passage_content = pd.read_parquet(entity_content_path)
+        # print('----- df_entity_content  -------')
+        # print(df_entity_content.head())
+        # print('--------------------------------')
+        # print()
+        #
+        # #
+        # query_i_list = sorted(df_passage_content['query_i'].to_list())
+        #
+        # # Query dats.
+        # query_cls_path = self.__get_query_processed_dir_path(dir_path=dir_path, dataset_name=entity_dataset_name)
+        # query_i_to_cls = self.__get_id_to_cls_map(dir_path=query_cls_path)
+        #
+        # # Entity CLS data
+        # entity_cls_path = self.__get_bert_processed_dir_path(dir_path=dir_path, dataset_name=entity_dataset_name)
+        # entity_i_to_cls = self.__get_id_to_cls_map(dir_path=entity_cls_path)
+        #
+        # # Passage CLS data.
+        # passage_cls_path = self.__get_bert_processed_dir_path(dir_path=dir_path, dataset_name=passage_dataset_name)
+        # passage_i_to_cls = self.__get_id_to_cls_map(dir_path=passage_cls_path)
+        #
+        # for query_i in query_i_list:
+        #     print('=== query_i: {} ==='.format(query_i))
+        #     print(query_i_to_cls[query_i])
+        #
+        #     entity_i_list = sorted(df_entity_content[df_entity_content['query_i'] == query_i]['content_i'].to_list())
+        #
+        #     passage_i_list = sorted(df_passage_content[df_passage_content['query_i'] == query_i]['content_i'].to_list())
+        #
+        #     for content_i in entity_i_list:
+        #         print('=== content_i: {} ==='.format(content_i))
+        #         print(type(content_i))
+        #         df_entity_content_query = df_entity_content[df_entity_content['content_i'] == content_i]
+        #         print('----- df_entity_content_query  -------')
+        #         print(df_entity_content_query.head())
+        #         print()
+        #         print('----- Entity CLS  -------')
+        #         print(entity_i_to_cls[content_i])
+        #         print('--------------------------------')
+        #
+        #         break
+        #
+        #     for content_i in passage_i_list:
+        #         print('=== content_i: {} ==='.format(content_i))
+        #         print(type(content_i))
+        #         df_passage_content_query = df_passage_content[df_passage_content['content_i'] == content_i]
+        #         print('----- df_entity_content_query  -------')
+        #         print(df_passage_content_query.head())
+        #         print()
+        #         print('----- Entity CLS  -------')
+        #         print(passage_i_to_cls[content_i])
+        #         print('--------------------------------')
+        #
+        #         break
+        #
 
 def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
     """ """
