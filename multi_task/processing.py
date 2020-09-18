@@ -339,7 +339,7 @@ class MultiTaskDataset():
         passage_dataset_name = 'passage_' + dataset
 
         # Content entity data
-        entity_content_path = self.__get_content_dir_path(dir_path=dir_path, dataset_name=entity_dataset_name)
+        entity_content_path = self.__get_content_dir_path(dir_path=dir_path, dataset_name=entity_dataset_name) + 'chunk_0.parquet'
         print('reading parquet file: {}'.format(entity_content_path))
         df_entity_content = pd.read_parquet(entity_content_path)
         print('----- df_entity_content  -------')
