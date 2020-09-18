@@ -344,10 +344,10 @@ class MultiTaskDataset():
     def __get_run_data(self, content_path):
         """ """
         print('reading parquet file: {}'.format(content_path))
-        df = pd.read_parquet(content_path)
-        print(df.head())
+        #df = pd.read_parquet(content_path)
+        #print(df.head())
         run_data = {}
-        for i, row in df.itterows():
+        for i, row in pd.read_parquet(content_path).itterows():
             query = row['query']
             query_i = row['query_i']
             content_i = row['content_i']
@@ -369,8 +369,8 @@ class MultiTaskDataset():
 
         # Content entity data
         entity_content_path = self.__get_content_dir_path(dir_path=dir_path, dataset_name=entity_dataset_name)
-        df_entity_content = pd.read_parquet(entity_content_path)
-        entity_run_data = self.__get_run_data(content_path=df_entity_content)
+        #df_entity_content = pd.read_parquet(entity_content_path)
+        entity_run_data = self.__get_run_data(content_path=entity_content_path)
         for key, value in entity_run_data.items():
             print(key, value)
             break
