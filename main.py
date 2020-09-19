@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
         dev_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test_bert_ranking_data/'.format(fold)
         dev_qrels_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test.qrels'.format(fold)
-        dev_run_path_passage= '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test_ranking_1000.run'
+        dev_run_path_passage= '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test_ranking_1000.run'.format(fold)
 
         rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_bert_ranking_1000.run'.format(fold)
 
