@@ -165,27 +165,27 @@ if __name__ == '__main__':
         # dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test.qrels'.format(fold)
         # dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_BM25_ranking_1000.run'.format(fold)
 
-        dev_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test_bert_ranking_data/'.format(fold)
-        dev_qrels_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test.qrels'.format(fold)
-        dev_run_path_passage= '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test_ranking_1000.run'.format(fold)
+        dev_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_bert_ranking_data/'.format(fold)
+        dev_qrels_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test.qrels'.format(fold)
+        dev_run_path_passage= '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_BM25_ranking_1000.run'.format(fold)
 
-        rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_bert_ranking_1000.run'.format(fold)
+        rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_bert_ranking_1000.run'.format(fold)
 
         experiments = FineTuningReRankingExperiments(
             model_path = model_path,
             extra_layers = False,
             dev_batch_size = dev_batch_size,
 
-            # dev_data_dir_path_entity = dev_data_dir_path_entity,
-            # dev_qrels_path_entity = dev_qrels_path_entity,
-            # dev_run_path_entity = dev_run_path_entity,
+            dev_data_dir_path_entity = dev_data_dir_path_entity,
+            dev_qrels_path_entity = dev_qrels_path_entity,
+            dev_run_path_entity = dev_run_path_entity,
 
-            dev_data_dir_path_passage=dev_data_dir_path_passage,
-            dev_qrels_path_passage=dev_qrels_path_passage,
-            dev_run_path_passage=dev_run_path_passage,
+            # dev_data_dir_path_passage=dev_data_dir_path_passage,
+            # dev_qrels_path_passage=dev_qrels_path_passage,
+            # dev_run_path_passage=dev_run_path_passage,
         )
 
-        experiments.inference(head_flag='passage', rerank_run_path=rerank_run_path, cap_rank=1000, do_eval=False)
+        experiments.inference(head_flag='entity', rerank_run_path=rerank_run_path, cap_rank=1000, do_eval=False)
 
     # hits = 1000
     # printing_step = 50
