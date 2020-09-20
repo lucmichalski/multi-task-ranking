@@ -142,20 +142,20 @@ if __name__ == '__main__':
         #     logging_steps=1000)
 
     folds = [0,1,2,3,4]
-    model_paths = [
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_4_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
-        ]
     # model_paths = [
-        # '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/entity_ranking_bert_train_2epoch+2e-05lr/epoch2_batch2000/',
-        # '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/entity_ranking_bert_train_2epoch+2e-05lr/epoch2_batch1000/',
-        # '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/entity_ranking_bert_train_2epoch+2e-05lr/epoch1_batch2000/',
-        # '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/entity_ranking_bert_train_2epoch+2e-05lr/epoch1_batch3000/',
-        # '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/entity_ranking_bert_train_2epoch+2e-05lr/epoch1_batch6000/',
-    # ]
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_4_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
+    #     ]
+    model_paths = [
+        '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/entity_ranking_bert_train_2epoch+2e-05lr/epoch2_batch2000/',
+        '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/entity_ranking_bert_train_2epoch+2e-05lr/epoch2_batch1000/',
+        '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/entity_ranking_bert_train_2epoch+2e-05lr/epoch1_batch2000/',
+        '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/entity_ranking_bert_train_2epoch+2e-05lr/epoch1_batch3000/',
+        '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/entity_ranking_bert_train_2epoch+2e-05lr/epoch1_batch6000/',
+    ]
 
     for fold, model_path in zip(folds, model_paths):
         dev_batch_size = 64
