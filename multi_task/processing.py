@@ -552,8 +552,8 @@ class MultiTaskDatasetByQuery():
                 self.token_list.append(input_ids)
                 self.cls_id += 1
 
-            print(len(self.cls_id), len(self.token_list))
-            print(self.cls_id)
+            print(len(self.cls_id_list), len(self.token_list))
+            print(self.cls_id_list)
             print(self.token_list)
             break
 
