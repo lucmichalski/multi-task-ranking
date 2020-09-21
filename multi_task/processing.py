@@ -591,7 +591,7 @@ class MultiTaskDatasetByQuery():
             cls_tokens_tensor = torch.cat(cls_tokens).numpy().tolist()
             cls_map = {}
             for i, cls in zip(id_list_tensor, cls_tokens_tensor):
-                cls_map[int(i)] = cls
+                cls_map[int(i[0])] = cls
             print(cls_map)
             print(len(cls_map))
             break
