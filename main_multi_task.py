@@ -2,4 +2,4 @@
 from multi_task.processing import MultiTaskDatasetByQuery
 
 if __name__ == '__main__':
-    MultiTaskDatasetByQuery().get_task_run_and_qrels(dataset='dev')
+    MultiTaskDatasetByQuery().build_dataset_by_query(dataset='dev')
