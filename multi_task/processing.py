@@ -571,7 +571,7 @@ class MultiTaskDatasetByQuery():
                 self.token_list.append(input_ids)
                 self.cls_id += 1
 
-            # ======== PROCESS BERT ========
+            # ======== PROCESS BERT CLS ========
             dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
             data_loader = DataLoader(dataset, sampler=SequentialSampler(dataset), batch_size=batch_size)
 
@@ -591,14 +591,23 @@ class MultiTaskDatasetByQuery():
             cls_map = {}
             for i, cls in zip(id_list_tensor, cls_tokens_tensor):
                 cls_map[int(i[0])] = cls
-            print(list(cls_map.keys()))
-            print(len(cls_map))
-            print(len(cls_map[1]))
-            break
 
+            # ======== PROCESS CLS TOKENS ========
+            # Add query CLS token.
+            query_cls_id = query_dataset['query']['cls_id']
+            query_dataset['query']['cls_token'] = cls_map[query_cls_id]
 
+            for doc_id in query_dataset['entity'].keys():
+                entity_cls_id = query_dataset['entity'][doc_id]['cls_id']
+                query_dataset['entity'][doc_id]['cls_token'] = cls_map[entity_cls_id]
 
-        # for dataset in ['dev', 'train', 'test']:
+            for doc_id in query_dataset['passage'].keys():
+                passage_cls_id = query_dataset['passage'][doc_id]['cls_id']
+                query_dataset['passage'][doc_id]['cls_token'] = cls_map[passage_cls_id]
+
+            print(query_dataset)
+
+            # for dataset in ['dev', 'train', 'test']:
         #     for task in ['entity', 'passage']:
         #         dataset_name = task + '_' + dataset
         #
