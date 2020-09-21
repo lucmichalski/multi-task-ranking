@@ -587,11 +587,14 @@ class MultiTaskDatasetByQuery():
                 id_list.append(b_id_list)
                 cls_tokens.append(b_cls_tokens.cpu())
 
-            id_list_tensor = torch.cat(id_list)
-            cls_tokens_tensor = torch.cat(cls_tokens)
+            id_list_tensor = torch.cat(id_list).numpy().tolist()
+            cls_tokens_tensor = torch.cat(cls_tokens).numpy().tolist()
 
-            print(id_list_tensor.shape)
-            print(cls_tokens_tensor.shape)
+            print(id_list_tensor[0])
+            print(cls_tokens_tensor[0])
+            print(len(id_list_tensor))
+            print(len(cls_tokens_tensor))
+
             break
 
 
