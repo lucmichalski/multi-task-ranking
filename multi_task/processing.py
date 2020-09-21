@@ -487,6 +487,7 @@ class MultiTaskDatasetByQuery():
             self.cls_id = 0
 
             # Update query_dataset.
+            query_dataset[query] = {}
             query_dataset[query]['query_id'] = query
             query_dataset[query]['cls_id'] = self.cls_id
 
