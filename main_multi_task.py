@@ -2,4 +2,5 @@
 from multi_task.processing import MultiTaskDatasetByQuery
 
 if __name__ == '__main__':
-    MultiTaskDatasetByQuery().build_dataset_by_query(dataset='dev')
+    dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_new/'
+    MultiTaskDatasetByQuery().build_dataset_by_query(dir_path=dir_path)
