@@ -593,7 +593,7 @@ class MultiTaskDatasetByQuery():
                 cls_map[int(i[0])] = cls
             print(list(cls_map.keys()))
             print(len(cls_map))
-            print(cls)
+            print(len(cls_map[1]))
             break
 
 
