@@ -316,10 +316,7 @@ class MultiTaskDataset():
 
     def __get_query_data(self, dir_path, entity_dataset_name):
         """ """
-
-        query_list = df_entity_content['query'].to_list()
-
-        query_data = {}
+        pass
 
 
 
@@ -437,6 +434,85 @@ class MultiTaskDataset():
         #
         #         break
         #
+
+class MultiTaskDatasetByQuery():
+
+    def __init__(self, dataset_metadata=dataset_metadata):
+
+        self.dataset_metadata = dataset_metadata
+
+    def get_task_run_and_qrels(self, dataset, task='entity', max_rank=100):
+        """ """
+        dataset_name = task + '_' + dataset
+        dataset_paths = self.dataset_metadata[dataset_name]
+
+        # Define ranking type.
+        if task == 'passage':
+            index_path = CarPassagePaths.index
+        elif task == 'entity':
+            index_path = CarEntityPaths.index
+        else:
+            index_path = None
+            print("NOT VALID DATASET")
+
+        search_tools = SearchTools(index_path=index_path)
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+
+        qrels_path = dataset_paths[1]
+        qrels_dict = search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=qrels_path)
+
+        run_path = dataset_paths[0]
+        run_dict = {}
+        past_query = ''
+        with open(run_path, 'r') as f:
+            for line in f:
+                # Unpack run line.
+                query, _, doc_id, rank, _, _ = search_tools.retrieval_utils.unpack_run_line(line)
+
+                if int(rank) <= max_rank:
+                    if query not in run_dict:
+                        run_dict[query] = []
+                    run_dict[query].append([query, doc_id, rank])
+
+
+        return run_dict, qrels_dict
+
+
+    def build_dataset_by_query(self, dataset='dev', max_rank=100):
+        """ """
+
+        entity_run_dict, entity_qrels_dict = self. get_task_run_and_qrels(dataset, task='entity', max_rank=max_rank)
+        passage_run_dict, passage_qrels_dict = self. get_task_run_and_qrels(dataset, task='passage', max_rank=max_rank)
+
+        assert sorted(list(entity_run_dict.keys())) == sorted(list(passage_run_dict.keys()))
+
+        dataset = {}
+        for query in sorted(list(entity_run_dict.keys())):
+            print(query)
+            break
+
+
+
+        # for dataset in ['dev', 'train', 'test']:
+        #     for task in ['entity', 'passage']:
+        #         dataset_name = task + '_' + dataset
+        #
+        #         dataset_paths = self.dataset_metadata[dataset_name]
+        #         run_path = dataset_paths[0]
+        #         qrels_path = dataset_paths[1]
+        #
+        #         # Define ranking type.
+        #         if task == 'passage':
+        #             index_path = CarPassagePaths.index
+        #         elif task == 'entity':
+        #             index_path = CarEntityPaths.index
+        #         else:
+        #             index_path = None
+        #             print("NOT VALID DATASET")
+        #
+        #         search_tools = SearchTools(index_path=index_path)
+        #         qrels = search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=qrels_path)
+
 
 def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
     """ """
