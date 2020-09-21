@@ -468,21 +468,40 @@ class MultiTaskDatasetByQuery():
         return run_dict, qrels_dict
 
 
-    def build_dataset_by_query(self, dataset='dev', max_rank=100):
+    def build_dataset_by_query(self, dataset='dev', max_rank=100, batch_size=64):
         """ """
+
+        model = BertCLS.from_pretrained('bert-base-uncased')
+        model.eval()
+
+        # Use GPUs if available.
+        if torch.cuda.is_available():
+            # Tell PyTorch to use the GPU.
+            print('There are %d GPU(s) available.' % torch.cuda.device_count())
+            print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
+            model.cuda()
+            device = torch.device("cuda")
+        # Otherwise use CPU.
+        else:
+            print('No GPU available, using the CPU instead.')
+            device = torch.device("cpu")
 
         entity_run_dict, entity_qrels_dict = self. get_task_run_and_qrels(dataset, task='entity', max_rank=max_rank)
         passage_run_dict, passage_qrels_dict = self. get_task_run_and_qrels(dataset, task='passage', max_rank=max_rank)
 
-        assert sorted(list(entity_run_dict.keys())) == sorted(list(passage_run_dict.keys()))
+        entity_query_list = sorted(list(entity_run_dict.keys()))
+        passage_query_list = sorted(list(passage_run_dict.keys()))
+
+        assert entity_query_list == passage_query_list
 
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         search_tools_passage = SearchTools(index_path=CarPassagePaths.index)
         search_tools_entity = SearchTools(index_path=CarEntityPaths.index)
 
-        for query in sorted(list(entity_run_dict.keys())):
+        for i, query in entity_query_list:
+            print("Processing {} ({} / {})".format(query, i+1, len(entity_query_list)))
+
             # Reset query dataset.
-            print(query)
             query_dataset = {}
             self.cls_id = 0
 
@@ -553,7 +572,26 @@ class MultiTaskDatasetByQuery():
                 self.cls_id += 1
 
             # ======== PROCESS BERT ========
-            print(len(self.cls_id_list), len(self.token_list))
+            dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
+            data_loader = DataLoader(dataset, sampler=SequentialSampler(dataset), batch_size=batch_size)
+
+            id_list = []
+            cls_tokens = []
+
+            for i, batch in enumerate(data_loader):
+                b_id_list = batch[0]
+                b_input_ids = batch[1].to(device)
+                with torch.no_grad():
+                    b_cls_tokens = model.get_BERT_cls_vector(input_ids=b_input_ids)
+
+                id_list.append(b_id_list)
+                cls_tokens.append(b_cls_tokens.cpu())
+
+            id_list_tensor = torch.cat(id_list)
+            cls_tokens_tensor = torch.cat(cls_tokens)
+
+            print(id_list_tensor)
+            print(cls_tokens_tensor)
             break
 
 
