@@ -552,6 +552,7 @@ class MultiTaskDatasetByQuery():
                 self.token_list.append(input_ids)
                 self.cls_id += 1
 
+            # ======== PROCESS BERT ========
             print(len(self.cls_id_list), len(self.token_list))
             break
 
