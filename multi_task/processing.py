@@ -577,7 +577,6 @@ class MultiTaskDatasetByQuery():
 
             id_list = []
             cls_tokens = []
-
             for i, batch in enumerate(data_loader):
                 b_id_list = batch[0]
                 b_input_ids = batch[1].to(device)
@@ -592,8 +591,9 @@ class MultiTaskDatasetByQuery():
             cls_map = {}
             for i, cls in zip(id_list_tensor, cls_tokens_tensor):
                 cls_map[int(i[0])] = cls
-            print(cls_map)
+            print(list(cls_map.keys()))
             print(len(cls_map))
+            print(cls)
             break
 
 
