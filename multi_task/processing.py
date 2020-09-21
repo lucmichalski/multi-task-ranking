@@ -498,7 +498,7 @@ class MultiTaskDatasetByQuery():
         search_tools_passage = SearchTools(index_path=CarPassagePaths.index)
         search_tools_entity = SearchTools(index_path=CarEntityPaths.index)
 
-        for i, query in entity_query_list:
+        for i, query in enumerate(entity_query_list):
             print("Processing {} ({} / {})".format(query, i+1, len(entity_query_list)))
 
             # Reset query dataset.
