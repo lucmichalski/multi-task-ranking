@@ -638,7 +638,6 @@ class MultiTaskDatasetByQuery():
                 query_json_path = dataset_dir_path + '{}_data.json'.format(query_i)
                 with open(query_json_path, 'w') as f:
                     json.dump(query_dataset, f, indent=4)
-                break
 
 
 
