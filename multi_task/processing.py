@@ -590,8 +590,8 @@ class MultiTaskDatasetByQuery():
             id_list_tensor = torch.cat(id_list)
             cls_tokens_tensor = torch.cat(cls_tokens)
 
-            print(id_list_tensor)
-            print(cls_tokens_tensor)
+            print(id_list_tensor.shape)
+            print(cls_tokens_tensor.shape)
             break
 
 
