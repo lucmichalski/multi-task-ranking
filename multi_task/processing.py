@@ -554,6 +554,13 @@ class MultiTaskDatasetByQuery():
                     query_dataset['passage'][doc_id] = {}
                     query_dataset['passage'][doc_id]['rank'] = rank
                     query_dataset['passage'][doc_id]['cls_id'] = self.cls_id
+                    if query in passage_qrels_dict:
+                        if doc_id in passage_qrels_dict[query]:
+                            query_dataset['passage'][doc_id]['relevant'] = 1
+                        else:
+                            query_dataset['passage'][doc_id]['relevant'] = 0
+                    else:
+                        query_dataset['passage'][doc_id]['relevant'] = 0
 
                     text = search_tools_passage.get_contents_from_docid(doc_id=doc_id)
                     input_ids = tokenizer.encode(text=text,
@@ -575,6 +582,13 @@ class MultiTaskDatasetByQuery():
                     query_dataset['entity'][doc_id] = {}
                     query_dataset['entity'][doc_id]['rank'] = rank
                     query_dataset['entity'][doc_id]['cls_id'] = self.cls_id
+                    if query in entity_qrels_dict:
+                        if doc_id in entity_qrels_dict[query]:
+                            query_dataset['entity'][doc_id]['relevant'] = 1
+                        else:
+                            query_dataset['entity'][doc_id]['relevant'] = 0
+                    else:
+                        query_dataset['entity'][doc_id]['relevant'] = 0
 
                     text_full = search_tools_entity.get_contents_from_docid(doc_id=doc_id)
                     text = text_full.split('\n')[0]
