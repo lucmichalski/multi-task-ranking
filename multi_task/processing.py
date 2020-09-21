@@ -440,30 +440,21 @@ class MultiTaskDatasetByQuery():
     def __init__(self, dataset_metadata=dataset_metadata):
 
         self.dataset_metadata = dataset_metadata
+        self.cls_id = 0
+        self.token_list = []
+        self.cls_id_list = []
 
     def get_task_run_and_qrels(self, dataset, task='entity', max_rank=100):
         """ """
         dataset_name = task + '_' + dataset
         dataset_paths = self.dataset_metadata[dataset_name]
 
-        # Define ranking type.
-        if task == 'passage':
-            index_path = CarPassagePaths.index
-        elif task == 'entity':
-            index_path = CarEntityPaths.index
-        else:
-            index_path = None
-            print("NOT VALID DATASET")
-
-        search_tools = SearchTools(index_path=index_path)
-        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-
+        search_tools = SearchTools()
         qrels_path = dataset_paths[1]
         qrels_dict = search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=qrels_path)
 
         run_path = dataset_paths[0]
         run_dict = {}
-        past_query = ''
         with open(run_path, 'r') as f:
             for line in f:
                 # Unpack run line.
@@ -473,7 +464,6 @@ class MultiTaskDatasetByQuery():
                     if query not in run_dict:
                         run_dict[query] = []
                     run_dict[query].append([query, doc_id, rank])
-
 
         return run_dict, qrels_dict
 
@@ -486,9 +476,41 @@ class MultiTaskDatasetByQuery():
 
         assert sorted(list(entity_run_dict.keys())) == sorted(list(passage_run_dict.keys()))
 
-        dataset = {}
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        search_tools_passage = SearchTools(index_path=CarPassagePaths.index)
+        search_tools_entity = SearchTools(index_path=CarEntityPaths.index)
+
         for query in sorted(list(entity_run_dict.keys())):
+            # Reset query dataset.
             print(query)
+            query_dataset = {}
+            self.cls_id = 0
+
+            # Update query_dataset.
+            query_dataset[query]['query_id'] = query
+            query_dataset[query]['cls_id'] = self.cls_id
+
+            # Update BERT cls input
+            try:
+                query_decoded = search_tools_passage.decode_query_car(q=query)
+            except ValueError:
+                print(
+                    "URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
+                query_decoded = search_tools_passage.process_query_car(q=query)
+
+            input_ids = tokenizer.encode(text=query_decoded,
+                                         max_length=512,
+                                         add_special_tokens=True,
+                                         pad_to_max_length=True)
+            self.cls_id_list.append([self.cls_id])
+            self.token_list.append(input_ids)
+
+            self.cls_id += 1
+
+            print(query_dataset)
+            print(self.cls_id_list)
+            print(self.token_list)
+
             break
 
 
