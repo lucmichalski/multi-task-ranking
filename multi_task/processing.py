@@ -6,6 +6,7 @@ from learning.models import BertCLS
 import pandas as pd
 import torch
 import time
+import json
 import os
 import re
 
@@ -444,6 +445,14 @@ class MultiTaskDatasetByQuery():
         self.token_list = []
         self.cls_id_list = []
 
+
+    def __make_dir(self, dir_path):
+        """ """
+        if (os.path.isdir(dir_path) == False):
+            print('making dir: {}'.format(dir_path))
+            os.mkdir(dir_path)
+
+
     def get_task_run_and_qrels(self, dataset, task='entity', max_rank=100):
         """ """
         dataset_name = task + '_' + dataset
@@ -468,7 +477,7 @@ class MultiTaskDatasetByQuery():
         return run_dict, qrels_dict
 
 
-    def build_dataset_by_query(self, dataset='dev', max_rank=100, batch_size=64):
+    def build_dataset_by_query(self, dir_path, max_rank=100, batch_size=64):
         """ """
 
         model = BertCLS.from_pretrained('bert-base-uncased')
@@ -486,146 +495,137 @@ class MultiTaskDatasetByQuery():
             print('No GPU available, using the CPU instead.')
             device = torch.device("cpu")
 
-        entity_run_dict, entity_qrels_dict = self. get_task_run_and_qrels(dataset, task='entity', max_rank=max_rank)
-        passage_run_dict, passage_qrels_dict = self. get_task_run_and_qrels(dataset, task='passage', max_rank=max_rank)
+        for dataset in ['dev', 'test', 'train']:
 
-        entity_query_list = sorted(list(entity_run_dict.keys()))
-        passage_query_list = sorted(list(passage_run_dict.keys()))
+            dataset_dir_path = dir_path + '{}_data/'.format(dataset)
+            self.__make_dir(dataset_dir_path)
 
-        assert entity_query_list == passage_query_list
+            entity_run_dict, entity_qrels_dict = self. get_task_run_and_qrels(dataset=dataset, task='entity', max_rank=max_rank)
+            passage_run_dict, passage_qrels_dict = self. get_task_run_and_qrels(dataset=dataset, task='passage', max_rank=max_rank)
 
-        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        search_tools_passage = SearchTools(index_path=CarPassagePaths.index)
-        search_tools_entity = SearchTools(index_path=CarEntityPaths.index)
+            entity_query_list = sorted(list(entity_run_dict.keys()))
+            passage_query_list = sorted(list(passage_run_dict.keys()))
 
-        for i, query in enumerate(entity_query_list):
-            print("Processing {} ({} / {})".format(query, i+1, len(entity_query_list)))
+            assert entity_query_list == passage_query_list
 
-            # Reset query dataset.
-            query_dataset = {}
-            self.cls_id = 0
+            tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+            search_tools_passage = SearchTools(index_path=CarPassagePaths.index)
+            search_tools_entity = SearchTools(index_path=CarEntityPaths.index)
 
-            # ======== PROCESS QUERY ========
-            query_dataset['query'] = {}
-            query_dataset['query']['query_id'] = query
-            query_dataset['query']['cls_id'] = self.cls_id
+            for query_i, query in enumerate(entity_query_list):
+                print("Processing {} ({} / {})".format(query, query_i+1, len(entity_query_list)))
 
-            # Update BERT cls input
-            try:
-                query_decoded = search_tools_passage.decode_query_car(q=query)
-            except ValueError:
-                print(
-                    "URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
-                query_decoded = search_tools_passage.process_query_car(q=query)
+                # Reset query dataset.
+                query_dataset = {}
+                self.cls_id = 0
+                self.cls_id_list = []
+                self.token_list = []
 
-            input_ids = tokenizer.encode(text=query_decoded,
-                                         max_length=512,
-                                         add_special_tokens=True,
-                                         pad_to_max_length=True)
+                # ======== PROCESS QUERY ========
+                query_dataset['query'] = {}
+                query_dataset['query']['query_id'] = query
+                query_dataset['query']['cls_id'] = self.cls_id
 
-            # Add CLS data.
-            self.cls_id_list.append([self.cls_id])
-            self.token_list.append(input_ids)
-            self.cls_id += 1
+                # Update BERT cls input
+                try:
+                    query_decoded = search_tools_passage.decode_query_car(q=query)
+                except ValueError:
+                    print(
+                        "URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
+                    query_decoded = search_tools_passage.process_query_car(q=query)
 
-            # ======== PROCESS PASSAGE ========
-            passage_run_data = passage_run_dict[query]
-            query_dataset['passage'] = {}
-            for run_data in passage_run_data:
-                doc_id = run_data[0]
-                rank = run_data[1]
-
-                query_dataset['passage'][doc_id] = {}
-                query_dataset['passage'][doc_id]['rank'] = rank
-                query_dataset['passage'][doc_id]['cls_id'] = self.cls_id
-
-                text = search_tools_passage.get_contents_from_docid(doc_id=doc_id)
-                input_ids = tokenizer.encode(text=text,
+                input_ids = tokenizer.encode(text=query_decoded,
                                              max_length=512,
                                              add_special_tokens=True,
                                              pad_to_max_length=True)
+
                 # Add CLS data.
                 self.cls_id_list.append([self.cls_id])
                 self.token_list.append(input_ids)
                 self.cls_id += 1
 
-            # ======== PROCESS ENTITY ========
-            entity_run_data = entity_run_dict[query]
-            query_dataset['entity'] = {}
-            for run_data in entity_run_data:
-                doc_id = run_data[0]
-                rank = run_data[1]
+                # ======== PROCESS PASSAGE ========
+                passage_run_data = passage_run_dict[query]
+                query_dataset['passage'] = {}
+                for run_data in passage_run_data:
+                    doc_id = run_data[0]
+                    rank = run_data[1]
 
-                query_dataset['entity'][doc_id] = {}
-                query_dataset['entity'][doc_id]['rank'] = rank
-                query_dataset['entity'][doc_id]['cls_id'] = self.cls_id
+                    query_dataset['passage'][doc_id] = {}
+                    query_dataset['passage'][doc_id]['rank'] = rank
+                    query_dataset['passage'][doc_id]['cls_id'] = self.cls_id
 
-                text_full = search_tools_entity.get_contents_from_docid(doc_id=doc_id)
-                text = text_full.split('\n')[0]
-                input_ids = tokenizer.encode(text=text,
-                                             max_length=512,
-                                             add_special_tokens=True,
-                                             pad_to_max_length=True)
-                # Add CLS data.
-                self.cls_id_list.append([self.cls_id])
-                self.token_list.append(input_ids)
-                self.cls_id += 1
+                    text = search_tools_passage.get_contents_from_docid(doc_id=doc_id)
+                    input_ids = tokenizer.encode(text=text,
+                                                 max_length=512,
+                                                 add_special_tokens=True,
+                                                 pad_to_max_length=True)
+                    # Add CLS data.
+                    self.cls_id_list.append([self.cls_id])
+                    self.token_list.append(input_ids)
+                    self.cls_id += 1
 
-            # ======== PROCESS BERT CLS ========
-            dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
-            data_loader = DataLoader(dataset, sampler=SequentialSampler(dataset), batch_size=batch_size)
+                # ======== PROCESS ENTITY ========
+                entity_run_data = entity_run_dict[query]
+                query_dataset['entity'] = {}
+                for run_data in entity_run_data:
+                    doc_id = run_data[0]
+                    rank = run_data[1]
 
-            id_list = []
-            cls_tokens = []
-            for i, batch in enumerate(data_loader):
-                b_id_list = batch[0]
-                b_input_ids = batch[1].to(device)
-                with torch.no_grad():
-                    b_cls_tokens = model.get_BERT_cls_vector(input_ids=b_input_ids)
+                    query_dataset['entity'][doc_id] = {}
+                    query_dataset['entity'][doc_id]['rank'] = rank
+                    query_dataset['entity'][doc_id]['cls_id'] = self.cls_id
 
-                id_list.append(b_id_list)
-                cls_tokens.append(b_cls_tokens.cpu())
+                    text_full = search_tools_entity.get_contents_from_docid(doc_id=doc_id)
+                    text = text_full.split('\n')[0]
+                    input_ids = tokenizer.encode(text=text,
+                                                 max_length=512,
+                                                 add_special_tokens=True,
+                                                 pad_to_max_length=True)
+                    # Add CLS data.
+                    self.cls_id_list.append([self.cls_id])
+                    self.token_list.append(input_ids)
+                    self.cls_id += 1
 
-            id_list_tensor = torch.cat(id_list).numpy().tolist()
-            cls_tokens_tensor = torch.cat(cls_tokens).numpy().tolist()
-            cls_map = {}
-            for i, cls in zip(id_list_tensor, cls_tokens_tensor):
-                cls_map[int(i[0])] = cls
+                # ======== PROCESS BERT CLS ========
+                dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
+                data_loader = DataLoader(dataset, sampler=SequentialSampler(dataset), batch_size=batch_size)
 
-            # ======== PROCESS CLS TOKENS ========
-            # Add query CLS token.
-            query_cls_id = query_dataset['query']['cls_id']
-            query_dataset['query']['cls_token'] = cls_map[query_cls_id]
+                id_list = []
+                cls_tokens = []
+                for batch in data_loader:
+                    b_id_list = batch[0]
+                    b_input_ids = batch[1].to(device)
+                    with torch.no_grad():
+                        b_cls_tokens = model.get_BERT_cls_vector(input_ids=b_input_ids)
 
-            for doc_id in query_dataset['entity'].keys():
-                entity_cls_id = query_dataset['entity'][doc_id]['cls_id']
-                query_dataset['entity'][doc_id]['cls_token'] = cls_map[entity_cls_id]
+                    id_list.append(b_id_list)
+                    cls_tokens.append(b_cls_tokens.cpu())
 
-            for doc_id in query_dataset['passage'].keys():
-                passage_cls_id = query_dataset['passage'][doc_id]['cls_id']
-                query_dataset['passage'][doc_id]['cls_token'] = cls_map[passage_cls_id]
+                id_list_tensor = torch.cat(id_list).numpy().tolist()
+                cls_tokens_tensor = torch.cat(cls_tokens).numpy().tolist()
+                cls_map = {}
+                for cls_i, cls_token in zip(id_list_tensor, cls_tokens_tensor):
+                    cls_map[int(cls_i[0])] = cls_token
 
-            print(query_dataset)
+                # ======== PROCESS CLS TOKENS ========
+                # Add query CLS token.
+                query_cls_id = query_dataset['query']['cls_id']
+                query_dataset['query']['cls_token'] = cls_map[query_cls_id]
 
-            # for dataset in ['dev', 'train', 'test']:
-        #     for task in ['entity', 'passage']:
-        #         dataset_name = task + '_' + dataset
-        #
-        #         dataset_paths = self.dataset_metadata[dataset_name]
-        #         run_path = dataset_paths[0]
-        #         qrels_path = dataset_paths[1]
-        #
-        #         # Define ranking type.
-        #         if task == 'passage':
-        #             index_path = CarPassagePaths.index
-        #         elif task == 'entity':
-        #             index_path = CarEntityPaths.index
-        #         else:
-        #             index_path = None
-        #             print("NOT VALID DATASET")
-        #
-        #         search_tools = SearchTools(index_path=index_path)
-        #         qrels = search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=qrels_path)
+                for doc_id in query_dataset['entity'].keys():
+                    entity_cls_id = query_dataset['entity'][doc_id]['cls_id']
+                    query_dataset['entity'][doc_id]['cls_token'] = cls_map[entity_cls_id]
+
+                for doc_id in query_dataset['passage'].keys():
+                    passage_cls_id = query_dataset['passage'][doc_id]['cls_id']
+                    query_dataset['passage'][doc_id]['cls_token'] = cls_map[passage_cls_id]
+
+                query_json_path = dataset_dir_path + '{}_data.json'.format(query_i)
+                with open(query_json_path, 'w') as f:
+                    json.dump(query_dataset, f, indent=4)
+                break
+
 
 
 def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
