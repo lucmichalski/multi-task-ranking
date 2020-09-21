@@ -463,7 +463,7 @@ class MultiTaskDatasetByQuery():
                 if int(rank) <= max_rank:
                     if query not in run_dict:
                         run_dict[query] = []
-                    run_dict[query].append([query, doc_id, rank])
+                    run_dict[query].append([doc_id, rank])
 
         return run_dict, qrels_dict
 
@@ -486,10 +486,10 @@ class MultiTaskDatasetByQuery():
             query_dataset = {}
             self.cls_id = 0
 
-            # Update query_dataset.
-            query_dataset[query] = {}
-            query_dataset[query]['query_id'] = query
-            query_dataset[query]['cls_id'] = self.cls_id
+            # ======== PROCESS QUERY ========
+            query_dataset['query'] = {}
+            query_dataset['query']['query_id'] = query
+            query_dataset['query']['cls_id'] = self.cls_id
 
             # Update BERT cls input
             try:
@@ -503,15 +503,56 @@ class MultiTaskDatasetByQuery():
                                          max_length=512,
                                          add_special_tokens=True,
                                          pad_to_max_length=True)
+
+            # Add CLS data.
             self.cls_id_list.append([self.cls_id])
             self.token_list.append(input_ids)
-
             self.cls_id += 1
 
-            print(query_dataset)
-            print(self.cls_id_list)
-            print(self.token_list)
+            # ======== PROCESS PASSAGE ========
+            passage_run_data = passage_run_dict[query]
+            query_dataset['passage'] = {}
+            for run_data in passage_run_data:
+                doc_id = run_data[0]
+                rank = run_data[1]
 
+                query_dataset['passage'][doc_id] = {}
+                query_dataset['passage'][doc_id]['rank'] = rank
+                query_dataset['passage'][doc_id]['cls_id'] = self.cls_id
+
+                text = search_tools_passage.get_contents_from_docid(doc_id=doc_id)
+                input_ids = tokenizer.encode(text=text,
+                                             max_length=512,
+                                             add_special_tokens=True,
+                                             pad_to_max_length=True)
+                # Add CLS data.
+                self.cls_id_list.append([self.cls_id])
+                self.token_list.append(input_ids)
+                self.cls_id += 1
+
+            # ======== PROCESS ENTITY ========
+            entity_run_data = entity_run_dict[query]
+            query_dataset['entity'] = {}
+            for run_data in entity_run_data:
+                doc_id = run_data[0]
+                rank = run_data[1]
+
+                query_dataset['entity'][doc_id] = {}
+                query_dataset['entity'][doc_id]['rank'] = rank
+                query_dataset['entity'][doc_id]['cls_id'] = self.cls_id
+
+                text_full = search_tools_entity.get_contents_from_docid(doc_id=doc_id)
+                text = text_full.split('\n')[0]
+                input_ids = tokenizer.encode(text=text,
+                                             max_length=512,
+                                             add_special_tokens=True,
+                                             pad_to_max_length=True)
+                # Add CLS data.
+                self.cls_id_list.append([self.cls_id])
+                self.token_list.append(input_ids)
+                self.cls_id += 1
+
+            print(query_dataset)
             break
 
 
