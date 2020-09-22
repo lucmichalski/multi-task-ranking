@@ -24,7 +24,7 @@ def write_run_to_file(query, run_data, run_path, how):
             rank += 1
 
 
-def get_read_data(dataset, how='euclidean', parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
+def rerank_runs(dataset, how='euclidean', parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
     """ """
     dir_path = parent_dir_path + '{}_data/'.format(dataset)
 
