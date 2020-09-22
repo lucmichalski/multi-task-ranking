@@ -179,6 +179,7 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
         device = torch.device("cpu")
 
     loss_total = 0
+    train_batches = len(train_data_loader)
     # ========================================
     #               Training
     # ========================================
@@ -187,25 +188,19 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
     model.train()
     print(len(train_data_loader))
     for i, train_batch in enumerate(train_data_loader):
-
+        print('batch {} / {}'.format(i+1, train_batches))
         model.zero_grad()
         inputs, labels = train_batch
-        print(inputs.shape)
         outputs = model.forward(inputs)
-        print(outputs)
 
         # Calculate Loss: softmax --> cross entropy loss
         loss = loss_func(outputs, labels)
-        print(loss)
+        print('-> {}'.format(loss))
         # Getting gradients w.r.t. parameters
         loss.sum().backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        optimizer.step()
 
-        # loss_total +=
-        # loss.sum().backward()
-        # torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
-        # optimizer.step()
-
-        break
 
 
 
