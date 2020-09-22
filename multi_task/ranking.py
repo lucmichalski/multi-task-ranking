@@ -2,6 +2,7 @@
 from torch.utils.data import TensorDataset, DataLoader, SequentialSampler, RandomSampler
 from scipy.spatial import distance
 
+import random
 import json
 import torch
 import os
@@ -97,8 +98,10 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
 
     # ==== Build training data ====
     print('Build training data')
-    train_input_list = []
-    train_labels_list = []
+    train_input_list_R = []
+    train_labels_list_R = []
+    train_input_list_N = []
+    train_labels_list_N = []
     for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if 'data.json' in f]:
 
         query_dict = get_dict_from_json(path=train_query_path)
@@ -108,13 +111,24 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
         for doc_id in query_dict['passage'].keys():
             doc_cls = query_dict['passage'][doc_id]['cls_token']
             relevant = query_dict['passage'][doc_id]['relevant']
-
             input = query_cls + doc_cls
-            train_input_list.append(input)
-            train_labels_list.append([relevant])
+            if relevant == 0:
+                train_input_list_N.append(input)
+                train_labels_list_N.append([relevant])
+            else:
+                train_input_list_R.append(input)
+                train_labels_list_R.append([relevant])
 
-    print('-> {} training examples'.format(len(train_labels_list)))
-    train_dataset = TensorDataset(torch.tensor(train_input_list), torch.tensor(train_labels_list))
+    print('-> {} training R examples'.format(len(train_input_list_R)))
+    print('-> {} training N examples'.format(len(train_input_list_N)))
+    idx_list = list(range(len(train_input_list_R)))
+    diff = len(train_labels_list_N) - len(train_input_list_R)
+    # randomly sample diff number of samples.
+    for idx in random.choices(idx_list, k=diff):
+        train_input_list_N.append(train_input_list_R[idx])
+        train_labels_list_N.append(train_labels_list_R[idx])
+    print('-> {} class balancing'.format(len(train_labels_list_N)))
+    train_dataset = TensorDataset(torch.tensor(train_input_list_N), torch.tensor(train_labels_list_N))
     train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
 
     # ==== Build dev data ====
