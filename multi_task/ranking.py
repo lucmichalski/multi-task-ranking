@@ -110,7 +110,7 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
 
         for doc_id in query_dict['passage'].keys():
             doc_cls = query_dict['passage'][doc_id]['cls_token']
-            relevant = query_dict['passage'][doc_id]['relevant']
+            relevant = float(query_dict['passage'][doc_id]['relevant'])
             input = query_cls + doc_cls
             if relevant == 0:
                 train_input_list_N.append(input)
@@ -143,7 +143,7 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
 
         for doc_id in query_dict['passage'].keys():
             doc_cls = query_dict['passage'][doc_id]['cls_token']
-            relevant = query_dict['passage'][doc_id]['relevant']
+            relevant = float(query_dict['passage'][doc_id]['relevant'])
 
             input = query_cls + doc_cls
             dev_input_list.append(input)
