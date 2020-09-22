@@ -31,28 +31,46 @@ def rerank_runs(dataset, how='euclidean', parent_dir_path='/nfs/trec_car/data/en
     passage_qrels = dataset_metadata['passage_' + dataset][1]
     entity_qrels = dataset_metadata['entity_' + dataset][1]
 
-
     entity_links_path = dir_path + 'passage_to_entity.json'
     entity_links_dict = get_dict_from_json(path=entity_links_path)
 
     for query_path in [dir_path + f for f in os.listdir(dir_path) if 'data.json' in f]:
+
+        # === QUERY DATA ===
         query_dict = get_dict_from_json(path=query_path)
         query = query_dict['query']['query_id']
-
         query_cls = query_dict['query']['cls_token']
 
-        run_data = []
+        # === PASSAGE DATA ===
+        passage_run_data = []
         for doc_id in query_dict['passage'].keys():
             doc_cls = query_dict['passage'][doc_id]['cls_token']
 
-            if how == 'euclidean' :
-                score = - distance.euclidean(query_cls,  doc_cls)
-                run_path = dir_path + how + '_passage.run'
+            if how == 'euclidean':
+                passage_score = - distance.euclidean(query_cls,  doc_cls)
+                passage_run_path = dir_path + how + '_passage.run'
             else:
                 raise
 
-            run_data.append((doc_id, score))
+            passage_run_data.append((doc_id, passage_score))
 
-        write_run_to_file(query=query, run_data=run_data, run_path=run_path, how=how)
+        write_run_to_file(query=query, run_data=passage_run_data, run_path=passage_run_path, how=how)
 
-    EvalTools().write_eval_from_qrels_and_run(qrels_path=passage_qrels, run_path=run_path)
+        # === ENTITY DATA ===
+        entity_run_data = []
+        for doc_id in query_dict['entity'].keys():
+            doc_cls = query_dict['entity'][doc_id]['cls_token']
+
+            if how == 'euclidean':
+                entity_score = - distance.euclidean(query_cls, doc_cls)
+                entity_run_path = dir_path + how + '_entity.run'
+            else:
+                raise
+
+            entity_run_data.append((doc_id, entity_score))
+
+        write_run_to_file(query=query, run_data=entity_run_data, run_path=entity_run_path, how=how)
+
+    # === EVAL RUNS ===
+    EvalTools().write_eval_from_qrels_and_run(qrels_path=passage_qrels, run_path=passage_run_path)
+    EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
