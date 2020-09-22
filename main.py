@@ -12,8 +12,8 @@ from multi_task.processing import MultiTaskDatasetByQuery
 
 
 if __name__ == '__main__':
-    dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/'
-    MultiTaskDatasetByQuery().build_dataset_by_query(dir_path=dir_path, max_rank=1000)
+    # dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/'
+    # MultiTaskDatasetByQuery().build_dataset_by_query(dir_path=dir_path, max_rank=1000)
 
     #dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_new/'
     #
@@ -96,55 +96,55 @@ if __name__ == '__main__':
     #                               query_type=query_type,
     #                               car_index_path=car_index_path)
 
-    # folds = [0,1,2,3,4]
-    # for fold in folds:
-    #     model_path = None
-    #     dev_batch_size = 64
-    #     train_batch_size = 8
-    #
-    #     train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_ranking_data/'.format(fold)
-    #     dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_ranking_data/'.format(fold)
-    #     dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid.qrels'.format(fold)
-    #     dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_BM25_ranking_1000.run'.format(fold)
+    folds = [0]
+    gpus = 3
+    for fold in folds:
+        model_path = None
+        dev_batch_size = 64 * gpus
+        train_batch_size = 8 * gpus
 
-        # train_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_train_bert_ranking_data/'.format(fold)
-        # dev_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_bert_ranking_data/'.format(fold)
-        # dev_qrels_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.qrels'.format(fold)
-        # dev_run_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_ranking_1000.run'.format(fold)
+        train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_ranking_data/'.format(fold)
+        dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_ranking_data/'.format(fold)
+        dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid.qrels'.format(fold)
+        dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_BM25_ranking_1000.run'.format(fold)
 
-        # experiments = FineTuningReRankingExperiments(
-        #     model_path = None,
-        #     extra_layers = False,
-        #     dev_batch_size = dev_batch_size,
-        #     train_batch_size = train_batch_size,
-        #
-        #     train_data_dir_path_entity = train_data_dir_path_entity,
-        #     dev_data_dir_path_entity = dev_data_dir_path_entity,
-        #     dev_qrels_path_entity = dev_qrels_path_entity,
-        #     dev_run_path_entity = dev_run_path_entity,
-            #
-            # train_data_dir_path_passage = train_data_dir_path_passage,
-            # dev_data_dir_path_passage = dev_data_dir_path_passage,
-            # dev_qrels_path_passage = dev_qrels_path_passage,
-            # dev_run_path_passage = dev_run_path_passage,
-        # )
-        #
-        # epochs = 2
-        # lr = 8e-6
-        # experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
-        # experiment_name = 'entity_ranking_bert_train_{}epoch+{}lr'.format(epochs, lr)
-        # experiments.run_experiment_single_head(
-        #     head_flag='entity',
-        #     epochs=epochs,
-        #     lr=lr,
-        #     eps=1e-8,
-        #     weight_decay=0.01,
-        #     warmup_percentage=0.1,
-        #     experiments_dir=experiments_dir,
-        #     experiment_name=experiment_name,
-        #     logging_steps=1000)
+        train_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_train_bert_ranking_data/'.format(fold)
+        dev_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_bert_ranking_data/'.format(fold)
+        dev_qrels_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.qrels'.format(fold)
+        dev_run_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_ranking_1000.run'.format(fold)
 
-    folds = [0,1,2,3,4]
+        experiments = FineTuningReRankingExperiments(
+            model_path = None,
+            extra_layers = False,
+            dev_batch_size = dev_batch_size,
+            train_batch_size = train_batch_size,
+
+            train_data_dir_path_entity = train_data_dir_path_entity,
+            dev_data_dir_path_entity = dev_data_dir_path_entity,
+            dev_qrels_path_entity = dev_qrels_path_entity,
+            dev_run_path_entity = dev_run_path_entity,
+
+            train_data_dir_path_passage = train_data_dir_path_passage,
+            dev_data_dir_path_passage = dev_data_dir_path_passage,
+            dev_qrels_path_passage = dev_qrels_path_passage,
+            dev_run_path_passage = dev_run_path_passage,
+        )
+
+        epochs = 2
+        lr = 5e-6
+        experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
+        experiment_name = 'multi_task_ranking_bert_train_{}epoch+{}lr'.format(epochs, lr)
+        experiments.run_experiment_multi_head(
+            epochs=epochs,
+            lr=lr,
+            eps=1e-8,
+            weight_decay=0.01,
+            warmup_percentage=0.1,
+            experiments_dir=experiments_dir,
+            experiment_name=experiment_name,
+            logging_steps=1000)
+
+    #folds = [0,1,2,3,4]
     # model_paths = [
     #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
     #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/',
