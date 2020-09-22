@@ -20,7 +20,7 @@ def write_run_to_file(query, run_data, run_path, how):
     rank = 1
     with open(run_path, 'a+') as f:
         for doc_id, score in run_data:
-            f.write(' '.join((query, 'Q0', doc_id, rank, score, how)) + '\n')
+            f.write(' '.join((query, 'Q0', doc_id, str(rank), str(score), how)) + '\n')
             rank += 1
 
 
