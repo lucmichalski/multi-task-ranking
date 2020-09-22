@@ -176,6 +176,7 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
 
         model.zero_grad()
         inputs, pred = train_batch
+        print(inputs.shape)
         outputs = model.forward(inputs)
         print(outputs)
 
