@@ -6,6 +6,7 @@ from pyspark.sql import SparkSession, Window
 from protocol_buffers import document_pb2
 
 import pickle
+import json
 
 dataset_metadata = {
     'entity_train':
@@ -89,4 +90,7 @@ def build_passage_to_entity_maps(content_path, spark, max_rank, dir_path, datase
 
         print("dataset_dict len = {}".format(len(dataset_dict)))
 
-        print(dataset_dict)
+        write_json_path = dateset_dir + 'passage_to_entity.json'
+        print('writing to: {}'.format(write_json_path))
+        with open(write_json_path, 'w') as f:
+            json.dump(write_json_path, f, indent=4)
