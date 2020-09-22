@@ -142,7 +142,7 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
     # ==== Model setup ====
 
     model = torch.nn.Sequential(
-        torch.nn.Linear(1, 1536),
+        torch.nn.Linear(1536, 1536),
         torch.nn.ReLU(),
         torch.nn.Linear(1536, 64),
         torch.nn.ReLU(),
