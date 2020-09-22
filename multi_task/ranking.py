@@ -108,6 +108,7 @@ def train_model(batch_size=512, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
     entity_qrels = dataset_metadata['entity_' + 'dev'][1]
 
     # ==== Build training data ====
+    print('Build training data')
     train_input_list = []
     train_pred_list = []
     for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if 'data.json' in f]:
@@ -128,6 +129,7 @@ def train_model(batch_size=512, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
     train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
 
     # ==== Build dev data ====
+    print('Build dev data')
     dev_input_list = []
     dev_pred_list = []
     for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if 'data.json' in f]:
