@@ -93,4 +93,4 @@ def build_passage_to_entity_maps(content_path, spark, max_rank, dir_path, datase
         write_json_path = dateset_dir + 'passage_to_entity.json'
         print('writing to: {}'.format(write_json_path))
         with open(write_json_path, 'w') as f:
-            json.dump(write_json_path, f, indent=4)
+            json.dump(dataset_dict, f, indent=4)
