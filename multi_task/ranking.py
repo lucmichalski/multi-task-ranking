@@ -113,7 +113,7 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
             train_input_list.append(input)
             train_pred_list.append([relevant])
 
-    print('-> {} training examples'.format(train_pred_list))
+    print('-> {} training examples'.format(len(train_pred_list)))
     train_dataset = TensorDataset(torch.tensor(train_input_list), torch.tensor(train_pred_list))
     train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
 
@@ -135,7 +135,7 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
             dev_input_list.append(input)
             dev_pred_list.append([relevant])
 
-    print('-> {} dev examples'.format(train_pred_list))
+    print('-> {} dev examples'.format(len(dev_pred_list)))
     dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_pred_list))
     dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
 
