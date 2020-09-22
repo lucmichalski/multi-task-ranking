@@ -70,7 +70,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
                     entity_score = - distance.euclidean(query_cls, doc_cls)
                     entity_run_path = dir_path + how + '_entity.run'
                 elif how == 'original':
-                    entity_score = - query_dict['entity'][doc_id]['rank']
+                    entity_score = - float(query_dict['entity'][doc_id]['rank'])
                     entity_run_path = dir_path + how + '_entity.run'
                 else:
                     raise
