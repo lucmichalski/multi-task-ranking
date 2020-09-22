@@ -24,7 +24,7 @@ def write_run_to_file(query, run_data, run_path, how):
             rank += 1
 
 
-def rerank_runs(dataset, how='euclidean', parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
+def rerank_runs(dataset, how=, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
     """ """
     dir_path = parent_dir_path + '{}_data/'.format(dataset)
 
@@ -34,43 +34,51 @@ def rerank_runs(dataset, how='euclidean', parent_dir_path='/nfs/trec_car/data/en
     entity_links_path = dir_path + 'passage_to_entity.json'
     entity_links_dict = get_dict_from_json(path=entity_links_path)
 
-    for query_path in [dir_path + f for f in os.listdir(dir_path) if 'data.json' in f]:
+    for how in ['euclidean', 'original']:
 
-        # === QUERY DATA ===
-        query_dict = get_dict_from_json(path=query_path)
-        query = query_dict['query']['query_id']
-        query_cls = query_dict['query']['cls_token']
+        for query_path in [dir_path + f for f in os.listdir(dir_path) if 'data.json' in f]:
 
-        # === PASSAGE DATA ===
-        passage_run_data = []
-        for doc_id in query_dict['passage'].keys():
-            doc_cls = query_dict['passage'][doc_id]['cls_token']
+            # === QUERY DATA ===
+            query_dict = get_dict_from_json(path=query_path)
+            query = query_dict['query']['query_id']
+            query_cls = query_dict['query']['cls_token']
 
-            if how == 'euclidean':
-                passage_score = - distance.euclidean(query_cls,  doc_cls)
-                passage_run_path = dir_path + how + '_passage.run'
-            else:
-                raise
+            # === PASSAGE DATA ===
+            passage_run_data = []
+            for doc_id in query_dict['passage'].keys():
+                doc_cls = query_dict['passage'][doc_id]['cls_token']
 
-            passage_run_data.append((doc_id, passage_score))
+                if how == 'euclidean':
+                    passage_score = - distance.euclidean(query_cls,  doc_cls)
+                    passage_run_path = dir_path + how + '_passage.run'
+                elif how == 'original':
+                    passage_score = - query_dict['passage'][doc_id]['rank']
+                    passage_run_path = dir_path + how + '_passage.run'
+                else:
+                    raise
 
-        write_run_to_file(query=query, run_data=passage_run_data, run_path=passage_run_path, how=how)
+                passage_run_data.append((doc_id, passage_score))
 
-        # === ENTITY DATA ===
-        entity_run_data = []
-        for doc_id in query_dict['entity'].keys():
-            doc_cls = query_dict['entity'][doc_id]['cls_token']
+            write_run_to_file(query=query, run_data=passage_run_data, run_path=passage_run_path, how=how)
 
-            if how == 'euclidean':
-                entity_score = - distance.euclidean(query_cls, doc_cls)
-                entity_run_path = dir_path + how + '_entity.run'
-            else:
-                raise
+            # === ENTITY DATA ===
+            entity_run_data = []
+            for doc_id in query_dict['entity'].keys():
+                doc_cls = query_dict['entity'][doc_id]['cls_token']
 
-            entity_run_data.append((doc_id, entity_score))
+                if how == 'euclidean':
+                    entity_score = - distance.euclidean(query_cls, doc_cls)
+                    entity_run_path = dir_path + how + '_entity.run'
+                elif how == 'original':
+                    entity_score = - query_dict['entity'][doc_id]['rank']
+                    entity_run_path = dir_path + how + '_entity.run'
+                else:
+                    raise
 
-        write_run_to_file(query=query, run_data=entity_run_data, run_path=entity_run_path, how=how)
+                entity_run_data.append((doc_id, entity_score))
 
-    # === EVAL RUNS ===
-    EvalTools().write_eval_from_qrels_and_run(qrels_path=passage_qrels, run_path=passage_run_path)
-    EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
+            write_run_to_file(query=query, run_data=entity_run_data, run_path=entity_run_path, how=how)
+
+        # === EVAL RUNS ===
+        EvalTools().write_eval_from_qrels_and_run(qrels_path=passage_qrels, run_path=passage_run_path)
+        EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
