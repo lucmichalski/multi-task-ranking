@@ -70,7 +70,7 @@ if __name__ == '__main__':
     for fold in folds:
         for dataset, training_dataset in zip(datasets, training_datasets):
             qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}.qrels'.format(fold, dataset)
-            run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}_BM25_RM3_ranking_1000.run'.format(fold, dataset)
+            run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}_ranking_1000_rm3.run'.format(fold, dataset)
             index_path = NewsPassagePaths.index
             data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}_bert_ranking_data_RM3/'.format(fold, dataset)
             max_length = 512
