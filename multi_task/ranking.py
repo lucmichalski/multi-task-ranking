@@ -31,8 +31,8 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
     passage_qrels = dataset_metadata['passage_' + dataset][1]
     entity_qrels = dataset_metadata['entity_' + dataset][1]
 
-    entity_links_path = dir_path + 'passage_to_entity.json'
-    entity_links_dict = get_dict_from_json(path=entity_links_path)
+    # entity_links_path = dir_path + 'passage_to_entity.json'
+    # entity_links_dict = get_dict_from_json(path=entity_links_path)
 
     for how in ['euclidean', 'original']:
 
@@ -52,7 +52,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
                     passage_score = - distance.euclidean(query_cls,  doc_cls)
                     passage_run_path = dir_path + how + '_passage.run'
                 elif how == 'original':
-                    passage_score = - query_dict['passage'][doc_id]['rank']
+                    passage_score = - float(query_dict['passage'][doc_id]['rank'])
                     passage_run_path = dir_path + how + '_passage.run'
                 else:
                     raise
@@ -82,3 +82,16 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
         # === EVAL RUNS ===
         EvalTools().write_eval_from_qrels_and_run(qrels_path=passage_qrels, run_path=passage_run_path)
         EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
+
+
+def train_model(parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
+    """ """
+    dir_path = parent_dir_path + '{}_data/'
+
+    passage_qrels = dataset_metadata['passage_' + 'dev'][1]
+    entity_qrels = dataset_metadata['entity_' + 'dev'][1]
+
+    entity_links_path = dir_path + 'passage_to_entity.json'
+    entity_links_dict = get_dict_from_json(path=entity_links_path)
+
+
