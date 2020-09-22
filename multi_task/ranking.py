@@ -198,8 +198,12 @@ def train_model(batch_size=64, lr=0.01, parent_dir_path='/nfs/trec_car/data/enti
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
 
-        if i % 100 == 0:
+        if i % 1000 == 0:
             print('batch: {} / {} -> loss: {}'.format(i+1, train_batches, loss))
+            o = outputs.tolist()
+            l = labels.tolist()
+            print([(i[0], i[1]) for i in zip(o, l)])
+
 
 
 
