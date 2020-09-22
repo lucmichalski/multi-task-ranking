@@ -98,7 +98,7 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
     # ==== Build training data ====
     print('Build training data')
     train_input_list = []
-    train_pred_list = []
+    train_labels_list = []
     for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if 'data.json' in f]:
 
         query_dict = get_dict_from_json(path=train_query_path)
@@ -111,16 +111,16 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
 
             input = query_cls + doc_cls
             train_input_list.append(input)
-            train_pred_list.append([relevant])
+            train_labels_list.append([relevant])
 
-    print('-> {} training examples'.format(len(train_pred_list)))
-    train_dataset = TensorDataset(torch.tensor(train_input_list), torch.tensor(train_pred_list))
+    print('-> {} training examples'.format(len(train_labels_list)))
+    train_dataset = TensorDataset(torch.tensor(train_input_list), torch.tensor(train_labels_list))
     train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
 
     # ==== Build dev data ====
     print('Build dev data')
     dev_input_list = []
-    dev_pred_list = []
+    dev_labels_list = []
     for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if 'data.json' in f]:
 
         query_dict = get_dict_from_json(path=dev_query_path)
@@ -133,10 +133,10 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
 
             input = query_cls + doc_cls
             dev_input_list.append(input)
-            dev_pred_list.append([relevant])
+            dev_labels_list.append([relevant])
 
-    print('-> {} dev examples'.format(len(dev_pred_list)))
-    dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_pred_list))
+    print('-> {} dev examples'.format(len(dev_labels_list)))
+    dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
     dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
 
     # ==== Model setup ====
@@ -175,10 +175,16 @@ def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
     for i, train_batch in enumerate(train_data_loader):
 
         model.zero_grad()
-        inputs, pred = train_batch
+        inputs, labels = train_batch
         print(inputs.shape)
         outputs = model.forward(inputs)
         print(outputs)
+
+        # Calculate Loss: softmax --> cross entropy loss
+        loss = loss_func(outputs, labels)
+        print(loss)
+        # Getting gradients w.r.t. parameters
+        loss.backward()
 
         # loss_total +=
         # loss.sum().backward()
