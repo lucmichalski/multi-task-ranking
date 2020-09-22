@@ -87,19 +87,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
         EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
 
 
-def get_linear_model():
-    """ """
-    # another way to define a network
-    return torch.nn.Sequential(
-        torch.nn.Linear(1, 1536),
-        torch.nn.ReLU(),
-        torch.nn.Linear(1536, 64),
-        torch.nn.ReLU(),
-        torch.nn.Linear(64, 1),
-    )
-
-
-def train_model(batch_size=512, lr=0.001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
+def train_model(batch_size=128, lr=0.001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
@@ -125,6 +113,7 @@ def train_model(batch_size=512, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
             train_input_list.append(input)
             train_pred_list.append([relevant])
 
+    print('-> {} training examples'.format(train_pred_list))
     train_dataset = TensorDataset(torch.tensor(train_input_list), torch.tensor(train_pred_list))
     train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
 
@@ -146,12 +135,19 @@ def train_model(batch_size=512, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
             dev_input_list.append(input)
             dev_pred_list.append([relevant])
 
+    print('-> {} dev examples'.format(train_pred_list))
     dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_pred_list))
     dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
 
     # ==== Model setup ====
 
-    model = get_linear_model()
+    model = torch.nn.Sequential(
+        torch.nn.Linear(1, 1536),
+        torch.nn.ReLU(),
+        torch.nn.Linear(1536, 64),
+        torch.nn.ReLU(),
+        torch.nn.Linear(64, 1),
+    )
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     loss_func = torch.nn.MSELoss()  # this is for regression mean squared loss
 
@@ -168,16 +164,25 @@ def train_model(batch_size=512, lr=0.001, parent_dir_path='/nfs/trec_car/data/en
         print('No GPU available, using the CPU instead.')
         device = torch.device("cpu")
 
+    loss_total = 0
     # ========================================
     #               Training
     # ========================================
 
-    loss_total = 0
+
     model.train()
     print(len(train_data_loader))
     for i, train_batch in enumerate(train_data_loader):
-        model.zero_grad()
 
+        model.zero_grad()
+        inputs, pred = train_batch
+        outputs = model.forward(inputs)
+        print(outputs)
+
+        # loss_total +=
+        # loss.sum().backward()
+        # torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+        # optimizer.step()
 
         break
 
