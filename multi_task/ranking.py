@@ -54,4 +54,5 @@ def rerank_runs(dataset, how='euclidean', parent_dir_path='/nfs/trec_car/data/en
             run_data.append((doc_id, score))
 
         write_run_to_file(query=query, run_data=run_data, run_path=run_path, how=how)
-        EvalTools().write_eval_from_qrels_and_run(qrels_path=passage_qrels, run_path=run_path)
+
+    EvalTools().write_eval_from_qrels_and_run(qrels_path=passage_qrels, run_path=run_path)
