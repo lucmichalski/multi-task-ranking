@@ -7,7 +7,7 @@ import time
 from protocol_buffers import document_pb2
 import pickle
 
-from pyspark_processing.trec_car_pipeline import write_pages_data_to_dir, run_pyspark_pipeline
+#from pyspark_processing.trec_car_pipeline import write_pages_data_to_dir, run_pyspark_pipeline
 from pyspark_processing.multi_task import build_passage_to_entity_maps
 
 spark_drive_gbs = 50
@@ -29,7 +29,8 @@ if __name__ == '__main__':
     dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'
     max_rank = 100
     build_passage_to_entity_maps(content_path=content_path, spark=spark, max_rank=max_rank, dir_path=dir_path)
-    from document_parsing.trec_news_parsing import TrecNewsParser
+
+    #from document_parsing.trec_news_parsing import TrecNewsParser
     # from pyspark_processing.trec_news_pipeline import write_article_data_to_dir, run_pyspark_pipeline
     #
     # read_path = '/nfs/trec_news_track/WashingtonPost.v2/data/TREC_Washington_Post_collection.v2.jl'
