@@ -178,15 +178,15 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
         print('No GPU available, using the CPU instead.')
         device = torch.device("cpu")
 
-    loss_total = 0
+    train_loss_total = 0.0
     train_batches = len(train_data_loader)
+    dev_batches = len(dev_data_loader)
+
     # ========================================
     #               Training
     # ========================================
-
-
     model.train()
-    for i, train_batch in enumerate(train_data_loader):
+    for i_train, train_batch in enumerate(train_data_loader):
         model.zero_grad()
         inputs, labels = train_batch
         outputs = model.forward(inputs)
@@ -198,14 +198,34 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
 
-        if i % 500 == 0:
-            print('batch: {} / {} -> loss: {}'.format(i+1, train_batches, loss))
-            print('======= inputs =====')
-            print(inputs)
-            print('======= labels =====')
-            print(labels)
-            print('======= outputs =====')
-            print(outputs)
+        train_loss_total += loss.sum().item()
+
+        if i_train % 500 == 0:
+            print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/i_train))
+            # print('======= inputs =====')
+            # print(inputs)
+            # print('======= labels =====')
+            # print(labels)
+            # print('======= outputs =====')
+            # print(outputs)
+
+            model.eval()
+            dev_loss_total = 0.0
+            for i_dev, dev_batch in enumerate(dev_data_loader):
+                inputs, labels = dev_batch
+
+                with torch.no_grad():
+                    outputs = model.forward(inputs)
+                    loss = loss_func(outputs, labels)
+
+                    dev_loss = loss.sum().item()
+
+            print('av. dev loss = {}'.format(dev_loss/i_dev))
+
+
+
+
+
 
 
 
