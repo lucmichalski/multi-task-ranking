@@ -167,8 +167,6 @@ def train_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/data/e
         torch.nn.ReLU(),
         torch.nn.Linear(64, 1),
     )
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    loss_func = torch.nn.MSELoss()  # this is for regression mean squared loss
 
     # Use GPUs if available.
     if torch.cuda.is_available():
@@ -183,10 +181,14 @@ def train_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/data/e
         print('No GPU available, using the CPU instead.')
         device = torch.device("cpu")
 
-    train_batches = len(train_data_loader)
-    dev_batches = len(dev_data_loader)
+    # ==== Experiments ====
 
     for epoch in range(1,4):
+
+        train_batches = len(train_data_loader)
+        dev_batches = len(dev_data_loader)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+        loss_func = torch.nn.MSELoss()  # this is for regression mean squared loss
         train_loss_total = 0.0
     #
         print('====== EPOCH {} ======'.format(epoch))
