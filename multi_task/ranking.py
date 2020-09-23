@@ -225,7 +225,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         # ==== Experiments ====
         max_map = 0.0
         state_dict = None
-        for epoch in range(1,2):
+        for epoch in range(1,10):
 
             train_batches = len(train_data_loader)
             dev_batches = len(dev_data_loader)
@@ -338,9 +338,11 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         # ========================================
         print('LOADING BEST MODEL WEIGHTS')
         model.load_state_dict(state_dict)
+        model.eval()
         test_label = []
         test_score = []
         for i_test, test_batch in enumerate(test_data_loader):
+
             inputs, labels = test_batch
 
             with torch.no_grad():
@@ -365,7 +367,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
                     rank = 1
                     fake_score = 1000
                     for doc_id in topic_run:
-                        f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')))
+                        f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')) + '\n')
                         rank += 1
                         fake_score -= 1
 
@@ -383,7 +385,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
                 rank = 1
                 fake_score = 1000
                 for doc_id in topic_run:
-                    f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')))
+                    f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')) + '\n')
                     rank += 1
                     fake_score -= 1
 
