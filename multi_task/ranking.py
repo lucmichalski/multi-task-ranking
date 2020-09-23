@@ -183,11 +183,12 @@ def train_model(batch_size=64, lr=0.005, parent_dir_path='/nfs/trec_car/data/ent
         print('No GPU available, using the CPU instead.')
         device = torch.device("cpu")
 
-    train_loss_total = 0.0
     train_batches = len(train_data_loader)
     dev_batches = len(dev_data_loader)
 
     for epoch in range(1,4):
+        train_loss_total = 0.0
+
         print('====== EPOCH {} ======'.format(epoch))
         # ========================================
         #               Training
