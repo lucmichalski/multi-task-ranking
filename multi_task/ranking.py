@@ -155,7 +155,7 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
     print('-> {} dev examples'.format(len(dev_labels_list)))
     dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
     dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
-
+    print(dev_run_data)
     # ==== Model setup ====
 
     model = torch.nn.Sequential(
