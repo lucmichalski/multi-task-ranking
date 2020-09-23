@@ -240,25 +240,39 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
             # Store topic query and count number of topics.
             topic_query = None
             map_sum = 0.0
-            topic_run = []
+            topic_counter = 0
+            topic_run_data = []
             for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
                 query, doc_id, label_ground_truth = run_data
 
                 assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
 
                 if (topic_query != None) and (topic_query != query):
-                    if topic_query in dev_qrels
+                    if topic_query in dev_qrels:
                         R = len(dev_qrels[topic_query])
                     else:
                         R = 0
+                    topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                    topic_run = [i[0] for i in topic_run_data]
                     map = EvalTools().get_map(run=topic_run, R=R)
                     map_sum += map
                     # Start new topic run.
-                    topic_run = []
+                    topic_counter += 1
+                    topic_run_data = []
 
-                topic_run.append([label, score])
+                topic_run_data.append([label, score])
                 # Update topic run.
                 topic_query = query
+
+            if len(topic_run_data) > 0:
+                if topic_query in dev_qrels:
+                    R = len(dev_qrels[topic_query])
+                else:
+                    R = 0
+                topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                topic_run = [i[0] for i in topic_run_data]
+                map = EvalTools().get_map(run=topic_run, R=R)
+                map_sum += map
 
             print('MAP = {}'.format(map_sum/topic_counter))
 
