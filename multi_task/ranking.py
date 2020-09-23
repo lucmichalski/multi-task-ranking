@@ -150,7 +150,7 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
             input = query_cls + doc_cls
             dev_input_list.append(input)
             dev_labels_list.append([relevant])
-            dev_run_data.append((query,doc_id,relevant))
+            dev_run_data.append([query,doc_id,relevant])
 
     print('-> {} dev examples'.format(len(dev_labels_list)))
     dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
