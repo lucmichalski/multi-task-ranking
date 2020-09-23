@@ -102,7 +102,6 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
     test_dir_path = parent_dir_path + 'test_data/'
 
 
-
     for task in ['passage', 'entity']:
         print('===================================')
         print('============= {} ================'.format(task))
@@ -110,8 +109,8 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
 
         test_run_path = test_dir_path + 'cls_feedforward_{}.run'.format(task)
 
-        dev_qrels_path = dataset_metadata['passage_' + 'dev'][1]
-        test_qrels_path = dataset_metadata['entity_' + 'test'][1]
+        dev_qrels_path = dataset_metadata['{}_dev'.format(task)][1]
+        test_qrels_path = dataset_metadata['{}_test'.format(task)][1]
 
         # ==== Build training data ====
         print('Build training data')
