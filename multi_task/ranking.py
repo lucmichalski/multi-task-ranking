@@ -2,6 +2,7 @@
 from torch.utils.data import TensorDataset, DataLoader, SequentialSampler, RandomSampler
 from scipy.spatial import distance
 
+import itertools
 import random
 import json
 import torch
@@ -135,6 +136,7 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
     print('Build dev data')
     dev_input_list = []
     dev_labels_list = []
+    dev_run_data = []
     for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if 'data.json' in f]:
 
         query_dict = get_dict_from_json(path=dev_query_path)
@@ -148,6 +150,7 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
             input = query_cls + doc_cls
             dev_input_list.append(input)
             dev_labels_list.append([relevant])
+            dev_run_data.append((query,doc_id,relevant))
 
     print('-> {} dev examples'.format(len(dev_labels_list)))
     dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
@@ -201,7 +204,7 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
         train_loss_total += loss.sum().item()
 
         if i_train % 500 == 0:
-            print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/i_train))
+            print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/(i_train+1)))
             # print('======= inputs =====')
             # print(inputs)
             # print('======= labels =====')
@@ -211,6 +214,8 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
 
             model.eval()
             dev_loss_total = 0.0
+            dev_score = []
+            dev_label = []
             for i_dev, dev_batch in enumerate(dev_data_loader):
                 inputs, labels = dev_batch
 
@@ -218,9 +223,13 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
                     outputs = model.forward(inputs)
                     loss = loss_func(outputs, labels)
 
-                    dev_loss = loss.sum().item()
+                    dev_loss_total += loss.sum().item()
+                    dev_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
+                    dev_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
 
-            print('av. dev loss = {}'.format(dev_loss/i_dev))
+            print(dev_score)
+            print(dev_label)
+            print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
 
 
 
