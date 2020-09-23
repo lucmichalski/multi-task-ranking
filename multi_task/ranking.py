@@ -190,8 +190,8 @@ def train_model(batch_size=64, lr=0.001, parent_dir_path='/nfs/trec_car/data/ent
     # ========================================
     #               Training
     # ========================================
-    model.train()
     for i_train, train_batch in enumerate(train_data_loader):
+        model.train()
         model.zero_grad()
         inputs, labels = train_batch
         outputs = model.forward(inputs)
