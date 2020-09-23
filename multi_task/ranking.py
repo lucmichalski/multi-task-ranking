@@ -198,7 +198,7 @@ def train_model(batch_size=4, lr=0.0001, parent_dir_path='/nfs/trec_car/data/ent
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
 
-        if i % 1000 == 0:
+        if i % 500 == 0:
             print('batch: {} / {} -> loss: {}'.format(i+1, train_batches, loss))
             print('======= inputs =====')
             print(inputs)
