@@ -226,7 +226,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         # ==== Experiments ====
         max_map = 0.0
         state_dict = None
-        for epoch in range(1,3):
+        for epoch in range(1,10):
 
             train_batches = len(train_data_loader)
             dev_batches = len(dev_data_loader)
@@ -334,6 +334,9 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
                         max_map = map
                         print('*** NEW MAX MAP ({}) *** -> update state dict'.format(max_map))
 
+        # ========================================
+        #                  Test
+        # ========================================
         print('LOADING BEST MODEL WEIGHTS')
         model.load_state_dict(state_dict)
         test_label = []
@@ -377,12 +380,13 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         if len(topic_run_data) > 0:
             topic_run_data.sort(key=lambda x: x[1], reverse=True)
             topic_run = [i[0] for i in topic_run_data]
-            rank = 1
-            fake_score = 1000
-            for doc_id in topic_run:
-                f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')))
-                rank += 1
-                fake_score -= 1
+            with open(test_run_path, 'a+') as f:
+                rank = 1
+                fake_score = 1000
+                for doc_id in topic_run:
+                    f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')))
+                    rank += 1
+                    fake_score -= 1
 
         EvalTools.write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
 
