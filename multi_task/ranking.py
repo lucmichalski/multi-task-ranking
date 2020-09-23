@@ -187,6 +187,7 @@ def train_model(batch_size=64, lr=0.01, parent_dir_path='/nfs/trec_car/data/enti
 
     model.train()
     for i, train_batch in enumerate(train_data_loader):
+        print(train_batch)
         model.zero_grad()
         inputs, labels = train_batch
         outputs = model.forward(inputs)
@@ -197,7 +198,7 @@ def train_model(batch_size=64, lr=0.01, parent_dir_path='/nfs/trec_car/data/enti
         loss.sum().backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
-
+        break
         if i % 1000 == 0:
             print('batch: {} / {} -> loss: {}'.format(i+1, train_batches, loss))
             o = outputs.tolist()
