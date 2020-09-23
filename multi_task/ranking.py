@@ -188,8 +188,9 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         device = torch.device("cpu")
 
     # ==== Experiments ====
-
-    for epoch in range(1,11):
+    max_map = 0.0
+    state_dict = None
+    for epoch in range(1,5):
 
         train_batches = len(train_data_loader)
         dev_batches = len(dev_data_loader)
@@ -289,8 +290,15 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
                     map_sum += EvalTools().get_map(run=topic_run, R=R)
 
                 print('Original MAP = {}'.format(original_map_sum/topic_counter))
-                print('MAP = {}'.format(map_sum/topic_counter))
+                map = map_sum/topic_counter
+                print('MAP = {}'.format(map))
 
+                if max_map < map:
+                    state_dict = model.state_dict()
+                    max_map = map
+                    print('*** NEW MAX MAP ({}) - update state dict'.format(max_map))
+
+    model.load_state_dict(state_dict)
 
 
 
