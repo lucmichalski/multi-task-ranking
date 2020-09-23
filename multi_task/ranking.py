@@ -227,16 +227,18 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
                     dev_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
                     dev_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
 
-            assert len(dev_score) == len(dev_label) == len(dev_run_data)
+            assert len(dev_score) == len(dev_label) == len(dev_run_data), "{} == {} == {}".format(len(dev_score), len(dev_label), len(dev_run_data))
             print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
 
             # Store topic query and count number of topics.
             topic_query = None
             topic_counter = 0
             map_sum = 0.0
+
             for label, score, dev_run_data in zip(dev_label, dev_score, dev_run_data):
                 query, doc_id, label_ground_truth = dev_run_data
-                assert label == label_ground_truth, print("score {} == label_ground_truth {}".format(label, label_ground_truth))
+
+                assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
 
                 if (topic_query != None) and (topic_query != query):
                     map_sum += 1.0
