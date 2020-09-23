@@ -39,7 +39,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
     # entity_links_path = dir_path + 'passage_to_entity.json'
     # entity_links_dict = get_dict_from_json(path=entity_links_path)
 
-    for how in ['euclidean', 'original']:
+    for how in ['euclidean', 'original', 'cosine_sim']:
 
         for query_path in [dir_path + f for f in os.listdir(dir_path) if 'data.json' in f]:
 
@@ -55,6 +55,9 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
 
                 if how == 'euclidean':
                     passage_score = - distance.euclidean(query_cls,  doc_cls)
+                    passage_run_path = dir_path + how + '_passage.run'
+                elif how == 'cosine_sim':
+                    passage_score = 1 - distance.cosine(query_cls,  doc_cls)
                     passage_run_path = dir_path + how + '_passage.run'
                 elif how == 'original':
                     passage_score = - float(query_dict['passage'][doc_id]['rank'])
@@ -74,6 +77,9 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
                 if how == 'euclidean':
                     entity_score = - distance.euclidean(query_cls, doc_cls)
                     entity_run_path = dir_path + how + '_entity.run'
+                elif how == 'cosine_sim':
+                    entity_score = 1 - distance.cosine(query_cls, doc_cls)
+                    entity_run_path = dir_path + how + '_entity.run'
                 elif how == 'original':
                     entity_score = - float(query_dict['entity'][doc_id]['rank'])
                     entity_run_path = dir_path + how + '_entity.run'
@@ -89,7 +95,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
         EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
 
 
-def train_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
+def train_model(batch_size=256, lr=0.0005, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
@@ -183,7 +189,7 @@ def train_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/data/e
 
     # ==== Experiments ====
 
-    for epoch in range(1,4):
+    for epoch in range(1,6):
 
         train_batches = len(train_data_loader)
         dev_batches = len(dev_data_loader)
