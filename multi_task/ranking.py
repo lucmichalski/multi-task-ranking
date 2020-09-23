@@ -204,6 +204,11 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
         train_loss_total += loss.sum().item()
 
         if i_train % 500 == 0:
+
+            # ========================================
+            #               Validation
+            # ========================================
+
             print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/(i_train+1)))
             # print('======= inputs =====')
             # print(inputs)
@@ -235,8 +240,8 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
             topic_counter = 0
             map_sum = 0.0
 
-            for label, score, dev_run_data in zip(dev_label, dev_score, dev_run_data):
-                query, doc_id, label_ground_truth = dev_run_data
+            for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
+                query, doc_id, label_ground_truth = run_data
 
                 assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
 
