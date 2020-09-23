@@ -105,7 +105,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
 
     for task in ['passage', 'entity']:
         print('===================================')
-        print('============= TASK ================')
+        print('============= {} ================'.format(task))
         print('===================================')
 
         test_run_path = test_dir_path + 'cls_feedforward_{}.run'.format(task)
@@ -363,7 +363,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
                     rank = 1
                     fake_score = 1000
                     for doc_id in topic_run:
-                        f.write(" ".join((topic_query, 'Q0', doc_id, rank, fake_score, 'cls_feedforward')))
+                        f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')))
                         rank += 1
                         fake_score -= 1
 
@@ -380,7 +380,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
             rank = 1
             fake_score = 1000
             for doc_id in topic_run:
-                f.write(" ".join((topic_query, 'Q0', doc_id, rank, fake_score, 'cls_feedforward')))
+                f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')))
                 rank += 1
                 fake_score -= 1
 
