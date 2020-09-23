@@ -298,6 +298,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
                     max_map = map
                     print('*** NEW MAX MAP ({}) - update state dict'.format(max_map))
 
+    print('LOADING BEST MODEL WEIGHTS')
     model.load_state_dict(state_dict)
 
 
