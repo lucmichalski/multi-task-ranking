@@ -387,7 +387,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
                     rank += 1
                     fake_score -= 1
 
-        EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
+        #EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
 
 
 
