@@ -236,15 +236,13 @@ def train_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/en
             map_sum = 0.0
             for label, score, dev_run_data in zip(dev_label, dev_score, dev_run_data):
                 query, doc_id, label_ground_truth = dev_run_data
-                assert score == label_ground_truth
+                assert label == label_ground_truth, print("score {} == label_ground_truth {}".format(label, label_ground_truth))
 
                 if (topic_query != None) and (topic_query != query):
                     map_sum += 1.0
 
                     topic_counter += 1
                     # Start new topic run.
-                    original_topic = []
-                    BERT_scores = []
 
                     # Update topic run.
                 topic_query = query
