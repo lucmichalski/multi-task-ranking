@@ -88,7 +88,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
         EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
 
 
-def train_model(batch_size=4, lr=0.01, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
+def train_model(batch_size=4, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
@@ -190,14 +190,6 @@ def train_model(batch_size=4, lr=0.01, parent_dir_path='/nfs/trec_car/data/entit
         model.zero_grad()
         inputs, labels = train_batch
         outputs = model.forward(inputs)
-        print('======= inputs =====')
-        print(inputs)
-        print('======= labels =====')
-
-        print(labels)
-        print('======= outputs =====')
-
-        print(outputs)
 
         # Calculate Loss: softmax --> cross entropy loss
         loss = loss_func(outputs, labels)
@@ -205,11 +197,15 @@ def train_model(batch_size=4, lr=0.01, parent_dir_path='/nfs/trec_car/data/entit
         loss.sum().backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
-        break
+
         if i % 1000 == 0:
             print('batch: {} / {} -> loss: {}'.format(i+1, train_batches, loss))
-            o = outputs.tolist()
-            l = labels.tolist()
+            print('======= inputs =====')
+            print(inputs)
+            print('======= labels =====')
+            print(labels)
+            print('======= outputs =====')
+            print(outputs)
 
 
 
