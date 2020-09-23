@@ -89,7 +89,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
         EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
 
 
-def train_model(batch_size=64, lr=0.001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
+def train_model(batch_size=64, lr=0.005, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
@@ -187,68 +187,88 @@ def train_model(batch_size=64, lr=0.001, parent_dir_path='/nfs/trec_car/data/ent
     train_batches = len(train_data_loader)
     dev_batches = len(dev_data_loader)
 
-    # ========================================
-    #               Training
-    # ========================================
-    for i_train, train_batch in enumerate(train_data_loader):
-        model.train()
-        model.zero_grad()
-        inputs, labels = train_batch
-        outputs = model.forward(inputs)
+    for epoch in range(1,4):
+        print('====== EPOCH {} ======'.format(epoch))
+        # ========================================
+        #               Training
+        # ========================================
+        for i_train, train_batch in enumerate(train_data_loader):
+            model.train()
+            model.zero_grad()
+            inputs, labels = train_batch
+            outputs = model.forward(inputs)
 
-        # Calculate Loss: softmax --> cross entropy loss
-        loss = loss_func(outputs, labels)
-        # Getting gradients w.r.t. parameters
-        loss.sum().backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-        optimizer.step()
+            # Calculate Loss: softmax --> cross entropy loss
+            loss = loss_func(outputs, labels)
+            # Getting gradients w.r.t. parameters
+            loss.sum().backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
 
-        train_loss_total += loss.sum().item()
+            train_loss_total += loss.sum().item()
 
-        if i_train % 500 == 0:
+            if i_train % 500 == 0:
 
-            # ========================================
-            #               Validation
-            # ========================================
+                # ========================================
+                #               Validation
+                # ========================================
 
-            print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/(i_train+1)))
-            # print('======= inputs =====')
-            # print(inputs)
-            # print('======= labels =====')
-            # print(labels)
-            # print('======= outputs =====')
-            # print(outputs)
+                print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/(i_train+1)))
+                # print('======= inputs =====')
+                # print(inputs)
+                # print('======= labels =====')
+                # print(labels)
+                # print('======= outputs =====')
+                # print(outputs)
 
-            model.eval()
-            dev_loss_total = 0.0
-            dev_score = []
-            dev_label = []
-            for i_dev, dev_batch in enumerate(dev_data_loader):
-                inputs, labels = dev_batch
+                model.eval()
+                dev_loss_total = 0.0
+                dev_score = []
+                dev_label = []
+                for i_dev, dev_batch in enumerate(dev_data_loader):
+                    inputs, labels = dev_batch
 
-                with torch.no_grad():
-                    outputs = model.forward(inputs)
-                    loss = loss_func(outputs, labels)
+                    with torch.no_grad():
+                        outputs = model.forward(inputs)
+                        loss = loss_func(outputs, labels)
 
-                    dev_loss_total += loss.sum().item()
-                    dev_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
-                    dev_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
+                        dev_loss_total += loss.sum().item()
+                        dev_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
+                        dev_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
 
-            assert len(dev_score) == len(dev_label) == len(dev_run_data), "{} == {} == {}".format(len(dev_score), len(dev_label), len(dev_run_data))
-            print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
+                assert len(dev_score) == len(dev_label) == len(dev_run_data), "{} == {} == {}".format(len(dev_score), len(dev_label), len(dev_run_data))
+                print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
 
-            # Store topic query and count number of topics.
-            topic_query = None
-            original_map_sum = 0.0
-            map_sum = 0.0
-            topic_counter = 0
-            topic_run_data = []
-            for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
-                query, doc_id, label_ground_truth = run_data
+                # Store topic query and count number of topics.
+                topic_query = None
+                original_map_sum = 0.0
+                map_sum = 0.0
+                topic_counter = 0
+                topic_run_data = []
+                for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
+                    query, doc_id, label_ground_truth = run_data
 
-                assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
+                    assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
 
-                if (topic_query != None) and (topic_query != query):
+                    if (topic_query != None) and (topic_query != query):
+                        if topic_query in dev_qrels:
+                            R = len(dev_qrels[topic_query])
+                        else:
+                            R = 0
+                        original_run = [i[0] for i in topic_run_data]
+                        original_map_sum += EvalTools().get_map(run=original_run, R=R)
+                        topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                        topic_run = [i[0] for i in topic_run_data]
+                        map_sum += EvalTools().get_map(run=topic_run, R=R)
+                        # Start new topic run.
+                        topic_counter += 1
+                        topic_run_data = []
+
+                    topic_run_data.append([label, score])
+                    # Update topic run.
+                    topic_query = query
+
+                if len(topic_run_data) > 0:
                     if topic_query in dev_qrels:
                         R = len(dev_qrels[topic_query])
                     else:
@@ -258,27 +278,9 @@ def train_model(batch_size=64, lr=0.001, parent_dir_path='/nfs/trec_car/data/ent
                     topic_run_data.sort(key=lambda x: x[1], reverse=True)
                     topic_run = [i[0] for i in topic_run_data]
                     map_sum += EvalTools().get_map(run=topic_run, R=R)
-                    # Start new topic run.
-                    topic_counter += 1
-                    topic_run_data = []
 
-                topic_run_data.append([label, score])
-                # Update topic run.
-                topic_query = query
-
-            if len(topic_run_data) > 0:
-                if topic_query in dev_qrels:
-                    R = len(dev_qrels[topic_query])
-                else:
-                    R = 0
-                original_run = [i[0] for i in topic_run_data]
-                original_map_sum += EvalTools().get_map(run=original_run, R=R)
-                topic_run_data.sort(key=lambda x: x[1], reverse=True)
-                topic_run = [i[0] for i in topic_run_data]
-                map_sum += EvalTools().get_map(run=topic_run, R=R)
-
-            print('Original MAP = {}'.format(original_map_sum/topic_counter))
-            print('MAP = {}'.format(map_sum/topic_counter))
+                print('Original MAP = {}'.format(original_map_sum/topic_counter))
+                print('MAP = {}'.format(map_sum/topic_counter))
 
 
 
