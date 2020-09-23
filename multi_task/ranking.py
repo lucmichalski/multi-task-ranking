@@ -225,7 +225,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         # ==== Experiments ====
         max_map = 0.0
         state_dict = None
-        for epoch in range(1,10):
+        for epoch in range(1,2):
 
             train_batches = len(train_data_loader)
             dev_batches = len(dev_data_loader)
