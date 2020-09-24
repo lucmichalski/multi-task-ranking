@@ -453,7 +453,7 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
 
                 if task == 'passage':
 
-                    added_data = False
+                    # added_data = False
                     if doc_id in entity_links_dict:
                         for entity_link in list(set(entity_links_dict[doc_id])):
                             if entity_link in query_dict['entity']:
@@ -466,16 +466,16 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                                 else:
                                     train_input_list_R.append(input)
                                     train_labels_list_R.append([relevant])
-                                added_data = True
+                                # added_data = True
 
-                    if added_data == False:
-                        input = doc_cls + doc_cls
-                        if relevant == 0:
-                            train_input_list_N.append(input)
-                            train_labels_list_N.append([relevant])
-                        else:
-                            train_input_list_R.append(input)
-                            train_labels_list_R.append([relevant])
+                    # if added_data == False:
+                    #     input = doc_cls + doc_cls
+                    #     if relevant == 0:
+                    #         train_input_list_N.append(input)
+                    #         train_labels_list_N.append([relevant])
+                    #     else:
+                    #         train_input_list_R.append(input)
+                    #         train_labels_list_R.append([relevant])
 
         print('-> {} training R examples'.format(len(train_input_list_R)))
         print('-> {} training N examples'.format(len(train_input_list_N)))
