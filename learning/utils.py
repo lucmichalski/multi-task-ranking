@@ -14,6 +14,7 @@ class BertDataset(Dataset):
 
         # Unpack dataset in sorted order based on file name.
         path_list = os.listdir(data_dir_path)
+        print(path_list)
         path_list.sort(key=lambda f: int(float(re.sub('\D', '', f))))
         print('ordered files: {}'.format(path_list))
         for file_name in path_list:
