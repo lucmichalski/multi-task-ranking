@@ -111,16 +111,14 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
 
         if bi_encode:
             test_run_path = test_dir_path + 'cls_feedforward_bi_encoding_{}.run'.format(task)
+            file_name = 'data_bi_encode.json'
         else:
             test_run_path = test_dir_path + 'cls_feedforward_{}.run'.format(task)
+            file_name = 'data.json'
 
         dev_qrels_path = dataset_metadata['{}_dev'.format(task)][1]
         test_qrels_path = dataset_metadata['{}_test'.format(task)][1]
 
-        if bi_encode:
-            file_name = 'data_bi_encode.json'
-        else:
-            file_name = 'data.json'
         # ==== Build training data ====
         print('Build training data')
         train_input_list_R = []
@@ -137,7 +135,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
                 doc_cls = query_dict[task][doc_id]['cls_token']
                 relevant = float(query_dict[task][doc_id]['relevant'])
                 if bi_encode:
-                    input = query_cls
+                    input = doc_cls
                 else:
                     input = query_cls + doc_cls
                 if relevant == 0:
@@ -176,7 +174,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
                 doc_cls = query_dict[task][doc_id]['cls_token']
                 relevant = float(query_dict[task][doc_id]['relevant'])
                 if bi_encode:
-                    input = query_cls
+                    input = doc_cls
                 else:
                     input = query_cls + doc_cls
                 dev_input_list.append(input)
@@ -204,7 +202,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
                 doc_cls = query_dict[task][doc_id]['cls_token']
                 relevant = float(query_dict[task][doc_id]['relevant'])
                 if bi_encode:
-                    input = query_cls
+                    input = doc_cls
                 else:
                     input = query_cls + doc_cls
                 test_input_list.append(input)
