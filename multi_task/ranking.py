@@ -491,39 +491,61 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
 
         # # ==== Build dev data ====
         #
-        # print('Build dev data')
-        # dev_input_list = []
-        # dev_labels_list = []
-        # dev_run_data = []
-        # dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
-        # entity_links_dict = get_dict_from_json(path=dev_entity_links_path)
-        # for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
-        #
-        #     query_dict = get_dict_from_json(path=dev_query_path)
-        #     query = query_dict['query']['query_id']
-        #
-        #     for doc_id in query_dict[task].keys():
-        #         doc_cls = query_dict[task][doc_id]['cls_token']
-        #         relevant = float(query_dict[task][doc_id]['relevant'])
-        #
-        #         if task == 'passage':
-        #
-        #             entity_link_list = entity_links_dict[query]
-        #             for entity_link in entity_link_list:
-        #                 if entity_link in query_dict['entity']:
-        #                     context_cls = query_dict['entity'][entity_link]['cls_token']
-        #                     input = doc_cls + context_cls
-        #
-        #                     dev_input_list.append(input)
-        #                     dev_labels_list.append([relevant])
-        #                     dev_run_data.append([query, doc_id, relevant])
-        #
-        # print('-> {} dev examples'.format(len(dev_labels_list)))
-        # dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
-        # dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
-        #
-        # # ==== Build test data ====
-        #
+        print('Build dev data')
+        dev_input_list = []
+        dev_labels_list = []
+        dev_run_data = []
+        dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
+        entity_links_dict = get_dict_from_json(path=dev_entity_links_path)
+        for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
+
+            query_dict = get_dict_from_json(path=dev_query_path)
+            query = query_dict['query']['query_id']
+
+            for doc_id in query_dict[task].keys():
+                doc_cls = query_dict[task][doc_id]['cls_token']
+                relevant = float(query_dict[task][doc_id]['relevant'])
+
+                if task == 'passage':
+
+                    entity_link_list = entity_links_dict[query]
+                    for entity_link in entity_link_list:
+                        if entity_link in query_dict['entity']:
+                            context_cls = query_dict['entity'][entity_link]['cls_token']
+                            input = doc_cls + context_cls
+
+                            dev_input_list.append(input)
+                            dev_labels_list.append([relevant])
+                            dev_run_data.append([query, doc_id, relevant])
+
+
+                if task == 'passage':
+
+                    added_data = False
+                    if doc_id in entity_links_dict:
+                        for entity_link in list(set(entity_links_dict[doc_id])):
+                            if entity_link in query_dict['entity']:
+                                context_cls = query_dict['entity'][entity_link]['cls_token']
+                                input = doc_cls + context_cls
+
+                                dev_input_list.append(input)
+                                dev_labels_list.append([relevant])
+                                dev_run_data.append([query, doc_id, relevant])
+                                added_data = True
+
+                    if added_data == False:
+                        input = doc_cls + doc_cls
+                        dev_input_list.append(input)
+                        dev_labels_list.append([relevant])
+                        dev_run_data.append([query, doc_id, relevant])
+
+
+        print('-> {} dev examples'.format(len(dev_labels_list)))
+        dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
+        dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
+
+        # ==== Build test data ====
+
         # print('Build test data')
         # test_input_list = []
         # test_labels_list = []
@@ -619,73 +641,73 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                     # print('======= outputs =====')
                     # print(outputs)
         #
-        #             model.eval()
-        #             dev_loss_total = 0.0
-        #             dev_score = []
-        #             dev_label = []
-        #             for i_dev, dev_batch in enumerate(dev_data_loader):
-        #                 inputs, labels = dev_batch
-        #
-        #                 with torch.no_grad():
-        #                     outputs = model.forward(inputs)
-        #                     loss = loss_func(outputs, labels)
-        #
-        #                     dev_loss_total += loss.sum().item()
-        #                     dev_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
-        #                     dev_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
-        #
-        #             assert len(dev_score) == len(dev_label) == len(dev_run_data), "{} == {} == {}".format(len(dev_score), len(dev_label), len(dev_run_data))
-        #             print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
-        #
-        #             # Store topic query and count number of topics.
-        #             topic_query = None
-        #             original_map_sum = 0.0
-        #             map_sum = 0.0
-        #             topic_counter = 0
-        #             topic_run_data = []
-        #             for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
-        #                 query, doc_id, label_ground_truth = run_data
-        #
-        #                 assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
-        #
-        #                 if (topic_query != None) and (topic_query != query):
-        #                     if topic_query in dev_qrels:
-        #                         R = len(dev_qrels[topic_query])
-        #                     else:
-        #                         R = 0
-        #                     original_run = [i[0] for i in topic_run_data]
-        #                     original_map_sum += EvalTools().get_map(run=original_run, R=R)
-        #                     topic_run_data.sort(key=lambda x: x[1], reverse=True)
-        #                     topic_run = [i[0] for i in topic_run_data]
-        #                     map_sum += EvalTools().get_map(run=topic_run, R=R)
-        #                     # Start new topic run.
-        #                     topic_counter += 1
-        #                     topic_run_data = []
-        #
-        #                 topic_run_data.append([label, score])
-        #                 # Update topic run.
-        #                 topic_query = query
-        #
-        #             if len(topic_run_data) > 0:
-        #                 if topic_query in dev_qrels:
-        #                     R = len(dev_qrels[topic_query])
-        #                 else:
-        #                     R = 0
-        #                 original_run = [i[0] for i in topic_run_data]
-        #                 original_map_sum += EvalTools().get_map(run=original_run, R=R)
-        #                 topic_run_data.sort(key=lambda x: x[1], reverse=True)
-        #                 topic_run = [i[0] for i in topic_run_data]
-        #                 map_sum += EvalTools().get_map(run=topic_run, R=R)
-        #
-        #             print('Original MAP = {}'.format(original_map_sum/topic_counter))
-        #             map = map_sum/topic_counter
-        #             print('MAP = {}'.format(map))
-        #
-        #             if max_map < map:
-        #                 state_dict = model.state_dict()
-        #                 max_map = map
-        #                 print('*** NEW MAX MAP ({}) *** -> update state dict'.format(max_map))
-        #
+                    model.eval()
+                    dev_loss_total = 0.0
+                    dev_score = []
+                    dev_label = []
+                    for i_dev, dev_batch in enumerate(dev_data_loader):
+                        inputs, labels = dev_batch
+
+                        with torch.no_grad():
+                            outputs = model.forward(inputs)
+                            loss = loss_func(outputs, labels)
+
+                            dev_loss_total += loss.sum().item()
+                            dev_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
+                            dev_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
+
+                    assert len(dev_score) == len(dev_label) == len(dev_run_data), "{} == {} == {}".format(len(dev_score), len(dev_label), len(dev_run_data))
+                    print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
+                    #
+                    # # Store topic query and count number of topics.
+                    # topic_query = None
+                    # original_map_sum = 0.0
+                    # map_sum = 0.0
+                    # topic_counter = 0
+                    # topic_run_data = []
+                    # for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
+                    #     query, doc_id, label_ground_truth = run_data
+                    #
+                    #     assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
+                    #
+                    #     if (topic_query != None) and (topic_query != query):
+                    #         if topic_query in dev_qrels:
+                    #             R = len(dev_qrels[topic_query])
+                    #         else:
+                    #             R = 0
+                    #         original_run = [i[0] for i in topic_run_data]
+                    #         original_map_sum += EvalTools().get_map(run=original_run, R=R)
+                    #         topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                    #         topic_run = [i[0] for i in topic_run_data]
+                    #         map_sum += EvalTools().get_map(run=topic_run, R=R)
+                    #         # Start new topic run.
+                    #         topic_counter += 1
+                    #         topic_run_data = []
+                    #
+                    #     topic_run_data.append([label, score])
+                    #     # Update topic run.
+                    #     topic_query = query
+                    #
+                    # if len(topic_run_data) > 0:
+                    #     if topic_query in dev_qrels:
+                    #         R = len(dev_qrels[topic_query])
+                    #     else:
+                    #         R = 0
+                    #     original_run = [i[0] for i in topic_run_data]
+                    #     original_map_sum += EvalTools().get_map(run=original_run, R=R)
+                    #     topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                    #     topic_run = [i[0] for i in topic_run_data]
+                    #     map_sum += EvalTools().get_map(run=topic_run, R=R)
+                    #
+                    # print('Original MAP = {}'.format(original_map_sum/topic_counter))
+                    # map = map_sum/topic_counter
+                    # print('MAP = {}'.format(map))
+                    #
+                    # if max_map < map:
+                    #     state_dict = model.state_dict()
+                    #     max_map = map
+                    #     print('*** NEW MAX MAP ({}) *** -> update state dict'.format(max_map))
+
         # # ========================================
         # #                  Test
         # # ========================================
