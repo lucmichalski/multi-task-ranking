@@ -443,31 +443,39 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
         train_labels_list_N = []
 
         for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if file_name in f]:
-            print(train_query_path)
             query_dict = get_dict_from_json(path=train_query_path)
             query = query_dict['query']['query_id']
-            print(query)
             entity_links_dict = get_dict_from_json(path=train_entity_links_path)
 
             for doc_id in query_dict[task].keys():
-                print(doc_id)
                 doc_cls = query_dict[task][doc_id]['cls_token']
                 relevant = float(query_dict[task][doc_id]['relevant'])
 
                 if task == 'passage':
 
-                    entity_link_list = entity_links_dict[query]
-                    for entity_link in entity_link_list:
-                        if entity_link in query_dict['entity']:
-                            context_cls = query_dict['entity'][entity_link]['cls_token']
-                            input = doc_cls + context_cls
+                    added_data = False
+                    if doc_id in entity_links_dict:
+                        for entity_link in entity_links_dict[doc_id]:
+                            if entity_link in query_dict['entity']:
+                                context_cls = query_dict['entity'][entity_link]['cls_token']
+                                input = doc_cls + context_cls
 
-                            if relevant == 0:
-                                train_input_list_N.append(input)
-                                train_labels_list_N.append([relevant])
-                            else:
-                                train_input_list_R.append(input)
-                                train_labels_list_R.append([relevant])
+                                if relevant == 0:
+                                    train_input_list_N.append(input)
+                                    train_labels_list_N.append([relevant])
+                                else:
+                                    train_input_list_R.append(input)
+                                    train_labels_list_R.append([relevant])
+                                added_data = True
+
+                    if added_data == False:
+                        input = doc_cls + doc_cls
+                        if relevant == 0:
+                            train_input_list_N.append(input)
+                            train_labels_list_N.append([relevant])
+                        else:
+                            train_input_list_R.append(input)
+                            train_labels_list_R.append([relevant])
 
         print('-> {} training R examples'.format(len(train_input_list_R)))
         print('-> {} training N examples'.format(len(train_input_list_N)))
