@@ -508,19 +508,6 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
 
                 if task == 'passage':
 
-                    entity_link_list = entity_links_dict[query]
-                    for entity_link in entity_link_list:
-                        if entity_link in query_dict['entity']:
-                            context_cls = query_dict['entity'][entity_link]['cls_token']
-                            input = doc_cls + context_cls
-
-                            dev_input_list.append(input)
-                            dev_labels_list.append([relevant])
-                            dev_run_data.append([query, doc_id, relevant])
-
-
-                if task == 'passage':
-
                     added_data = False
                     if doc_id in entity_links_dict:
                         for entity_link in list(set(entity_links_dict[doc_id])):
