@@ -451,15 +451,15 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                 doc_cls = query_dict[task][doc_id]['cls_token']
                 relevant = float(query_dict[task][doc_id]['relevant'])
 
-                if task == 'passage':
+                input = doc_cls + doc_cls
+                if relevant == 0:
+                    train_input_list_N.append(input)
+                    train_labels_list_N.append([relevant])
+                else:
+                    train_input_list_R.append(input)
+                    train_labels_list_R.append([relevant])
 
-                    input = doc_cls + doc_cls
-                    if relevant == 0:
-                        train_input_list_N.append(input)
-                        train_labels_list_N.append([relevant])
-                    else:
-                        train_input_list_R.append(input)
-                        train_labels_list_R.append([relevant])
+                if task == 'passage':
 
                     if doc_id in entity_links_dict:
                         for entity_link in list(set(entity_links_dict[doc_id])):
@@ -473,7 +473,8 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                                 else:
                                     train_input_list_R.append(input)
                                     train_labels_list_R.append([relevant])
-
+                else:
+                    pass
 
         print('-> {} training R examples'.format(len(train_input_list_R)))
         print('-> {} training N examples'.format(len(train_input_list_N)))
@@ -504,11 +505,12 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                 doc_cls = query_dict[task][doc_id]['cls_token']
                 relevant = float(query_dict[task][doc_id]['relevant'])
 
+                input = doc_cls + doc_cls
+                dev_input_list.append(input)
+                dev_labels_list.append([relevant])
+                dev_run_data.append([query, doc_id, relevant])
+
                 if task == 'passage':
-                    input = doc_cls + doc_cls
-                    dev_input_list.append(input)
-                    dev_labels_list.append([relevant])
-                    dev_run_data.append([query, doc_id, relevant])
 
                     if doc_id in entity_links_dict:
                         for entity_link in list(set(entity_links_dict[doc_id])):
@@ -519,6 +521,8 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                                 dev_input_list.append(input)
                                 dev_labels_list.append([relevant])
                                 dev_run_data.append([query, doc_id, relevant])
+                else:
+                    pass
 
 
         print('-> {} dev examples'.format(len(dev_labels_list)))
@@ -541,11 +545,12 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                 doc_cls = query_dict[task][doc_id]['cls_token']
                 relevant = float(query_dict[task][doc_id]['relevant'])
 
+                input = doc_cls + doc_cls
+                test_input_list.append(input)
+                test_labels_list.append([relevant])
+                test_run_data.append([query, doc_id, relevant])
+
                 if task == 'passage':
-                    input = doc_cls + doc_cls
-                    test_input_list.append(input)
-                    test_labels_list.append([relevant])
-                    test_run_data.append([query, doc_id, relevant])
 
                     if doc_id in entity_links_dict:
                         for entity_link in list(set(entity_links_dict[doc_id])):
@@ -556,6 +561,9 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                                 test_input_list.append(input)
                                 test_labels_list.append([relevant])
                                 test_run_data.append([query, doc_id, relevant])
+                else:
+                    pass
+
 
         print('-> {} test examples'.format(len(test_labels_list)))
         test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
@@ -646,7 +654,7 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
 
                     # Store topic query and count number of topics.
                     topic_query = None
-                    last_doc_id = None
+                    last_doc_id = 'Not query'
                     original_map_sum = 0.0
                     map_sum = 0.0
                     topic_counter = 0
@@ -669,11 +677,9 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                             # Start new topic run.
                             topic_counter += 1
                             topic_run_data = []
-                            last_doc_id = None
 
-                        if last_doc_id != None and (last_doc_id == doc_id):
-                            current_score = topic_run_data[-1][1]
-                            if score > current_score:
+                        if last_doc_id == doc_id:
+                            if score > topic_run_data[-1][1]:
                                 topic_run_data[-1] = [label, score]
                         else:
                             topic_run_data.append([label, score])
@@ -722,7 +728,7 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
         assert len(test_score) == len(test_label) == len(test_run_data), "{} == {} == {}".format(len(test_score), len(test_label), len(test_run_data))
 
         # Store topic query and count number of topics.
-        last_doc_id = None
+        last_doc_id = 'Not doc_id'
         topic_query = None
         topic_run_data = []
         for label, score, run_data in zip(test_label, test_score, test_run_data):
@@ -743,14 +749,13 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
 
                 # Start new topic run.
                 topic_run_data = []
-                last_doc_id = None
 
-            if last_doc_id != None and (last_doc_id == doc_id):
-                current_score = topic_run_data[-1][1]
-                if score > current_score:
+            if last_doc_id == doc_id:
+                if score > topic_run_data[-1][1]:
                     topic_run_data[-1] = [doc_id, score]
             else:
                 topic_run_data.append([doc_id, score])
+
             # Update topic run.
             topic_query = query
 
