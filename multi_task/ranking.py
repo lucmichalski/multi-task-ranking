@@ -107,6 +107,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         print('===================================')
         print('============= {} ================'.format(task))
         print('===================================')
+        print('====== Bi-encoding = {} ========'.format(bi_encode))
 
         if bi_encode:
             test_run_path = test_dir_path + 'cls_feedforward_bi_encoding_{}.run'.format(task)
