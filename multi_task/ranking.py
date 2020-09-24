@@ -639,55 +639,63 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
 
                     assert len(dev_score) == len(dev_label) == len(dev_run_data), "{} == {} == {}".format(len(dev_score), len(dev_label), len(dev_run_data))
                     print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
-                    #
-                    # # Store topic query and count number of topics.
-                    # topic_query = None
-                    # original_map_sum = 0.0
-                    # map_sum = 0.0
-                    # topic_counter = 0
-                    # topic_run_data = []
-                    # for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
-                    #     query, doc_id, label_ground_truth = run_data
-                    #
-                    #     assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
-                    #
-                    #     if (topic_query != None) and (topic_query != query):
-                    #         if topic_query in dev_qrels:
-                    #             R = len(dev_qrels[topic_query])
-                    #         else:
-                    #             R = 0
-                    #         original_run = [i[0] for i in topic_run_data]
-                    #         original_map_sum += EvalTools().get_map(run=original_run, R=R)
-                    #         topic_run_data.sort(key=lambda x: x[1], reverse=True)
-                    #         topic_run = [i[0] for i in topic_run_data]
-                    #         map_sum += EvalTools().get_map(run=topic_run, R=R)
-                    #         # Start new topic run.
-                    #         topic_counter += 1
-                    #         topic_run_data = []
-                    #
-                    #     topic_run_data.append([label, score])
-                    #     # Update topic run.
-                    #     topic_query = query
-                    #
-                    # if len(topic_run_data) > 0:
-                    #     if topic_query in dev_qrels:
-                    #         R = len(dev_qrels[topic_query])
-                    #     else:
-                    #         R = 0
-                    #     original_run = [i[0] for i in topic_run_data]
-                    #     original_map_sum += EvalTools().get_map(run=original_run, R=R)
-                    #     topic_run_data.sort(key=lambda x: x[1], reverse=True)
-                    #     topic_run = [i[0] for i in topic_run_data]
-                    #     map_sum += EvalTools().get_map(run=topic_run, R=R)
-                    #
-                    # print('Original MAP = {}'.format(original_map_sum/topic_counter))
-                    # map = map_sum/topic_counter
-                    # print('MAP = {}'.format(map))
-                    #
-                    # if max_map < map:
-                    #     state_dict = model.state_dict()
-                    #     max_map = map
-                    #     print('*** NEW MAX MAP ({}) *** -> update state dict'.format(max_map))
+
+                    # Store topic query and count number of topics.
+                    topic_query = None
+                    last_doc_id = None
+                    original_map_sum = 0.0
+                    map_sum = 0.0
+                    topic_counter = 0
+                    topic_run_data = []
+                    for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
+                        query, doc_id, label_ground_truth = run_data
+
+                        assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
+
+                        if (topic_query != None) and (topic_query != query):
+                            if topic_query in dev_qrels:
+                                R = len(dev_qrels[topic_query])
+                            else:
+                                R = 0
+                            original_run = [i[0] for i in topic_run_data]
+                            original_map_sum += EvalTools().get_map(run=original_run, R=R)
+                            topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                            topic_run = [i[0] for i in topic_run_data]
+                            map_sum += EvalTools().get_map(run=topic_run, R=R)
+                            # Start new topic run.
+                            topic_counter += 1
+                            topic_run_data = []
+                            last_doc_id = None
+
+                        if last_doc_id != None and (last_doc_id == doc_id):
+                            current_score = topic_run_data[-1][1]
+                            if score > current_score:
+                                topic_run_data[-1] = [label, score]
+                        else:
+                            topic_run_data.append([label, score])
+                        # Update topic run.
+                        topic_query = query
+                        last_doc_id = doc_id
+
+                    if len(topic_run_data) > 0:
+                        if topic_query in dev_qrels:
+                            R = len(dev_qrels[topic_query])
+                        else:
+                            R = 0
+                        original_run = [i[0] for i in topic_run_data]
+                        original_map_sum += EvalTools().get_map(run=original_run, R=R)
+                        topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                        topic_run = [i[0] for i in topic_run_data]
+                        map_sum += EvalTools().get_map(run=topic_run, R=R)
+
+                    print('Original MAP = {}'.format(original_map_sum/topic_counter))
+                    map = map_sum/topic_counter
+                    print('MAP = {}'.format(map))
+
+                    if max_map < map:
+                        state_dict = model.state_dict()
+                        max_map = map
+                        print('*** NEW MAX MAP ({}) *** -> update state dict'.format(max_map))
 
         # # ========================================
         # #                  Test
