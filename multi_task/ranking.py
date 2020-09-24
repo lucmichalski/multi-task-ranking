@@ -95,7 +95,8 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
         EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
 
 
-def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
+def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/',
+                bi_encode=False):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
@@ -107,18 +108,25 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         print('============= {} ================'.format(task))
         print('===================================')
 
-        test_run_path = test_dir_path + 'cls_feedforward_{}.run'.format(task)
+        if bi_encode:
+            test_run_path = test_dir_path + 'cls_feedforward_bi_encoding_{}.run'.format(task)
+        else:
+            test_run_path = test_dir_path + 'cls_feedforward_{}.run'.format(task)
 
         dev_qrels_path = dataset_metadata['{}_dev'.format(task)][1]
         test_qrels_path = dataset_metadata['{}_test'.format(task)][1]
 
+        if bi_encode:
+            file_name = 'data_bi_encode.json'
+        else:
+            file_name = 'data.json'
         # ==== Build training data ====
         print('Build training data')
         train_input_list_R = []
         train_labels_list_R = []
         train_input_list_N = []
         train_labels_list_N = []
-        for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if 'data.json' in f]:
+        for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if file_name in f]:
 
             query_dict = get_dict_from_json(path=train_query_path)
             query = query_dict['query']['query_id']
@@ -127,7 +135,10 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
             for doc_id in query_dict[task].keys():
                 doc_cls = query_dict[task][doc_id]['cls_token']
                 relevant = float(query_dict[task][doc_id]['relevant'])
-                input = query_cls + doc_cls
+                if bi_encode:
+                    input = query_cls
+                else:
+                    input = query_cls + doc_cls
                 if relevant == 0:
                     train_input_list_N.append(input)
                     train_labels_list_N.append([relevant])
@@ -154,7 +165,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         dev_labels_list = []
         dev_run_data = []
         dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
-        for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if 'data.json' in f]:
+        for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
 
             query_dict = get_dict_from_json(path=dev_query_path)
             query = query_dict['query']['query_id']
@@ -163,8 +174,10 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
             for doc_id in query_dict[task].keys():
                 doc_cls = query_dict[task][doc_id]['cls_token']
                 relevant = float(query_dict[task][doc_id]['relevant'])
-
-                input = query_cls + doc_cls
+                if bi_encode:
+                    input = query_cls
+                else:
+                    input = query_cls + doc_cls
                 dev_input_list.append(input)
                 dev_labels_list.append([relevant])
                 dev_run_data.append([query,doc_id,relevant])
@@ -180,7 +193,7 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         test_labels_list = []
         test_run_data = []
         test_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(test_qrels_path)
-        for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if 'data.json' in f]:
+        for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if file_name in f]:
 
             query_dict = get_dict_from_json(path=test_query_path)
             query = query_dict['query']['query_id']
@@ -189,8 +202,10 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
             for doc_id in query_dict[task].keys():
                 doc_cls = query_dict[task][doc_id]['cls_token']
                 relevant = float(query_dict[task][doc_id]['relevant'])
-
-                input = query_cls + doc_cls
+                if bi_encode:
+                    input = query_cls
+                else:
+                    input = query_cls + doc_cls
                 test_input_list.append(input)
                 test_labels_list.append([relevant])
                 test_run_data.append([query, doc_id, relevant])
@@ -200,14 +215,22 @@ def train_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/e
         test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
 
         # ==== Model setup ====
-
-        model = torch.nn.Sequential(
-            torch.nn.Linear(1536, 1536),
-            torch.nn.ReLU(),
-            torch.nn.Linear(1536, 64),
-            torch.nn.ReLU(),
-            torch.nn.Linear(64, 1),
-        )
+        if bi_encode:
+            model = torch.nn.Sequential(
+                torch.nn.Linear(768, 768),
+                torch.nn.ReLU(),
+                torch.nn.Linear(768, 64),
+                torch.nn.ReLU(),
+                torch.nn.Linear(64, 1),
+            )
+        else:
+            model = torch.nn.Sequential(
+                torch.nn.Linear(1536, 1536),
+                torch.nn.ReLU(),
+                torch.nn.Linear(1536, 64),
+                torch.nn.ReLU(),
+                torch.nn.Linear(64, 1),
+            )
 
         # Use GPUs if available.
         if torch.cuda.is_available():

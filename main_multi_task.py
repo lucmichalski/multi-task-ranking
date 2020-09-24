@@ -9,4 +9,4 @@ if __name__ == '__main__':
     # dataset = 'test'
     # rerank_runs(dataset=dataset)
 
-    train_model()
+    train_model(bi_encode=True)
