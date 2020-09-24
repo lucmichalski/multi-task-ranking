@@ -761,7 +761,7 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                 rank = 1
                 fake_score = 1000
                 for doc_id in topic_run:
-                    f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')) + '\n')
+                    f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward_max_combo')) + '\n')
                     rank += 1
                     fake_score -= 1
 
