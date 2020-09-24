@@ -441,10 +441,12 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
         train_labels_list_R = []
         train_input_list_N = []
         train_labels_list_N = []
+
         for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if file_name in f]:
             print(train_query_path)
             query_dict = get_dict_from_json(path=train_query_path)
             query = query_dict['query']['query_id']
+            print(query)
             entity_links_dict = get_dict_from_json(path=train_entity_links_path)
 
             for doc_id in query_dict[task].keys():
