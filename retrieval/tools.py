@@ -420,7 +420,7 @@ class SearchTools:
                     print('FAILED TO PARSE CONTENTS')
             # Title + contents.
             if isinstance(title, str):
-                news_query = title + ' ' + content_text
+                news_query = title + '. ' + content_text
             else:
                 news_query = content_text
 
