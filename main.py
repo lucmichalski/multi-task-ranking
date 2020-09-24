@@ -375,6 +375,7 @@ if __name__ == '__main__':
 
     gpus = 3
     model_paths = ['/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/multi_task_ranking_bert_2epoch+3e-06lr/epoch2_batch1000/',
+                   '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/multi_task_ranking_bert_2epoch+5e-06lr/epoch1_batch1000/',
                    '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/multi_task_ranking_bert_2epoch+5e-06lr/epoch1_batch1000/']
     head_flags = ['passage', 'entity', 'entity']
     names = ['passage_hier_Y1_test.run', 'entity_auto_Y2_test.run', 'entity_manual_Y2_test.run']
