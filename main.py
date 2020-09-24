@@ -373,7 +373,7 @@ if __name__ == '__main__':
     #                               car_index_path=car_index_path,
     #                               xml_topics_path=xml_topics_path)
 
-    gpus = 3
+    gpus = 2
     model_paths = ['/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/multi_task_ranking_bert_2epoch+3e-06lr/epoch2_batch1000/',
                    '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/multi_task_ranking_bert_2epoch+5e-06lr/epoch1_batch1000/',
                    '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/multi_task_ranking_bert_2epoch+5e-06lr/epoch1_batch1000/']
