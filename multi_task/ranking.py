@@ -527,35 +527,39 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
 
         # ==== Build test data ====
 
-        # print('Build test data')
-        # test_input_list = []
-        # test_labels_list = []
-        # test_run_data = []
-        # entity_links_dict = get_dict_from_json(path=test_entity_links_path)
-        # for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if file_name in f]:
-        #
-        #     query_dict = get_dict_from_json(path=test_query_path)
-        #     query = query_dict['query']['query_id']
-        #
-        #     for doc_id in query_dict[task].keys():
-        #         doc_cls = query_dict[task][doc_id]['cls_token']
-        #         relevant = float(query_dict[task][doc_id]['relevant'])
-        #
-        #         if task == 'passage':
-        #
-        #             entity_link_list = entity_links_dict[query]
-        #             for entity_link in entity_link_list:
-        #                 if entity_link in query_dict['entity']:
-        #                     context_cls = query_dict['entity'][entity_link]['cls_token']
-        #                     input = doc_cls + context_cls
-        #
-        #                     test_input_list.append(input)
-        #                     test_labels_list.append([relevant])
-        #                     test_run_data.append([query, doc_id, relevant])
-        #
-        # print('-> {} test examples'.format(len(test_labels_list)))
-        # test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
-        # test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
+        print('Build test data')
+        test_input_list = []
+        test_labels_list = []
+        test_run_data = []
+        entity_links_dict = get_dict_from_json(path=test_entity_links_path)
+        for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if file_name in f]:
+
+            query_dict = get_dict_from_json(path=test_query_path)
+            query = query_dict['query']['query_id']
+
+            for doc_id in query_dict[task].keys():
+                doc_cls = query_dict[task][doc_id]['cls_token']
+                relevant = float(query_dict[task][doc_id]['relevant'])
+
+                if task == 'passage':
+                    input = doc_cls + doc_cls
+                    test_input_list.append(input)
+                    test_labels_list.append([relevant])
+                    test_run_data.append([query, doc_id, relevant])
+
+                    if doc_id in entity_links_dict:
+                        for entity_link in list(set(entity_links_dict[doc_id])):
+                            if entity_link in query_dict['entity']:
+                                context_cls = query_dict['entity'][entity_link]['cls_token']
+                                input = doc_cls + context_cls
+
+                                test_input_list.append(input)
+                                test_labels_list.append([relevant])
+                                test_run_data.append([query, doc_id, relevant])
+
+        print('-> {} test examples'.format(len(test_labels_list)))
+        test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
+        test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
 
         # ==== Model setup ====
         model = torch.nn.Sequential(
@@ -697,68 +701,76 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                         max_map = map
                         print('*** NEW MAX MAP ({}) *** -> update state dict'.format(max_map))
 
-        # # ========================================
-        # #                  Test
-        # # ========================================
-        # print('LOADING BEST MODEL WEIGHTS')
-        # model.load_state_dict(state_dict)
-        # model.eval()
-        # test_label = []
-        # test_score = []
-        # for i_test, test_batch in enumerate(test_data_loader):
-        #
-        #     inputs, labels = test_batch
-        #
-        #     with torch.no_grad():
-        #         outputs = model.forward(inputs)
-        #
-        #         test_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
-        #         test_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
-        #
-        # assert len(test_score) == len(test_label) == len(test_run_data), "{} == {} == {}".format(len(test_score), len(test_label), len(test_run_data))
-        # # Store topic query and count number of topics.
-        # topic_query = None
-        # topic_run_data = []
-        # for label, score, run_data in zip(test_label, test_score, test_run_data):
-        #     query, doc_id, label_ground_truth = run_data
-        #
-        #     assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
-        #
-        #     if (topic_query != None) and (topic_query != query):
-        #         topic_run_data.sort(key=lambda x: x[1], reverse=True)
-        #         topic_run = [i[0] for i in topic_run_data]
-        #         with open(test_run_path, 'a+') as f:
-        #             rank = 1
-        #             fake_score = 1000
-        #             for doc_id in topic_run:
-        #                 f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')) + '\n')
-        #                 rank += 1
-        #                 fake_score -= 1
-        #
-        #         # Start new topic run.
-        #         topic_run_data = []
-        #
-        #     topic_run_data.append([doc_id, score])
-        #     # Update topic run.
-        #     topic_query = query
-        #
-        # if len(topic_run_data) > 0:
-        #     topic_run_data.sort(key=lambda x: x[1], reverse=True)
-        #     topic_run = [i[0] for i in topic_run_data]
-        #     with open(test_run_path, 'a+') as f:
-        #         rank = 1
-        #         fake_score = 1000
-        #         for doc_id in topic_run:
-        #             f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')) + '\n')
-        #             rank += 1
-        #             fake_score -= 1
-        #
-        # EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
+        # ========================================
+        #                  Test
+        # ========================================
+        print('LOADING BEST MODEL WEIGHTS')
+        model.load_state_dict(state_dict)
+        model.eval()
+        test_label = []
+        test_score = []
+        for i_test, test_batch in enumerate(test_data_loader):
+
+            inputs, labels = test_batch
+
+            with torch.no_grad():
+                outputs = model.forward(inputs)
+
+                test_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
+                test_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
+
+        assert len(test_score) == len(test_label) == len(test_run_data), "{} == {} == {}".format(len(test_score), len(test_label), len(test_run_data))
+
+        # Store topic query and count number of topics.
+        last_doc_id = None
+        topic_query = None
+        topic_run_data = []
+        for label, score, run_data in zip(test_label, test_score, test_run_data):
+            query, doc_id, label_ground_truth = run_data
+
+            assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
+
+            if (topic_query != None) and (topic_query != query):
+                topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                topic_run = [i[0] for i in topic_run_data]
+                with open(test_run_path, 'a+') as f:
+                    rank = 1
+                    fake_score = 1000
+                    for doc_id in topic_run:
+                        f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')) + '\n')
+                        rank += 1
+                        fake_score -= 1
+
+                # Start new topic run.
+                topic_run_data = []
+                last_doc_id = None
+
+            if last_doc_id != None and (last_doc_id == doc_id):
+                current_score = topic_run_data[-1][1]
+                if score > current_score:
+                    topic_run_data[-1] = [doc_id, score]
+            else:
+                topic_run_data.append([doc_id, score])
+            # Update topic run.
+            topic_query = query
+
+        if len(topic_run_data) > 0:
+            topic_run_data.sort(key=lambda x: x[1], reverse=True)
+            topic_run = [i[0] for i in topic_run_data]
+            with open(test_run_path, 'a+') as f:
+                rank = 1
+                fake_score = 1000
+                for doc_id in topic_run:
+                    f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')) + '\n')
+                    rank += 1
+                    fake_score -= 1
+
+        EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
+
+
+
+
+
+
+
+
