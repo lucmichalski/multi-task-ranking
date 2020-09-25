@@ -249,7 +249,6 @@ if __name__ == '__main__':
         '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/multi_task_ranking_bert_train_2epoch+6e-06lr/epoch1_batch1000/',
         '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/multi_task_ranking_bert_train_2epoch+6e-06lr/epoch1_batch1000/',
     ]
-    'trec_news_track/data/5_fold/scaled_5fold_0_data/exp/multi_task_ranking_bert_train_2epoch+6e-06lr'
     for task in ['passage', 'entity']:
         if task == 'passage':
             model_paths = passage_model_paths
