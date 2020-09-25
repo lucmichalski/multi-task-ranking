@@ -288,7 +288,7 @@ if __name__ == '__main__':
                     dev_run_path_entity=dev_run_path_entity,
                 )
 
-            rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/multi_task {}_bert_ranking_1000.run'.format(task, fold)
+            rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/multi_task_{}_bert_ranking_1000.run'.format(fold, task)
             experiments.inference(head_flag=task, rerank_run_path=rerank_run_path, cap_rank=100, do_eval=False)
 
     # hits = 1000
