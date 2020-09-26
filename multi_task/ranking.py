@@ -89,7 +89,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
 
                 entity_run_data.append((doc_id, entity_score))
 
-            write_run_to_file(query=query, run_data=entity_run_data, run_path=entity_run_path, how=how)
+            write_run_to_file(query=query, run_data=entity_run_data, run_path=entity_run_path, how=how, max_rank=max_rank)
 
         # === EVAL RUNS ===
         EvalTools().write_eval_from_qrels_and_run(qrels_path=passage_qrels, run_path=passage_run_path)
