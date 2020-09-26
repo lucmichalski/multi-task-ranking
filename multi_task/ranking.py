@@ -122,96 +122,121 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
 
         # ==== Build training data ====
         print('Build training data')
-        train_input_list_R = []
-        train_labels_list_R = []
-        train_input_list_N = []
-        train_labels_list_N = []
-        for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if file_name in f]:
+        training_dataset_path = parent_dir_path + '{}_biencode_{}train_dataset.pt'.format(task, bi_encode)
+        if os.path.exists(training_dataset_path):
+            print('-> loading existing dataset: {}'.format(training_dataset_path))
+            train_dataset = torch.load(training_dataset_path)
+        else:
+            print('-> dataset not found in path ==> will build: {}'.format(training_dataset_path))
+            train_input_list_R = []
+            train_labels_list_R = []
+            train_input_list_N = []
+            train_labels_list_N = []
+            for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if file_name in f]:
 
-            query_dict = get_dict_from_json(path=train_query_path)
-            query = query_dict['query']['query_id']
-            query_cls = query_dict['query']['cls_token']
+                query_dict = get_dict_from_json(path=train_query_path)
+                query = query_dict['query']['query_id']
+                query_cls = query_dict['query']['cls_token']
 
-            for doc_id in query_dict[task].keys():
-                doc_cls = query_dict[task][doc_id]['cls_token']
-                relevant = float(query_dict[task][doc_id]['relevant'])
-                if bi_encode:
-                    input = doc_cls
-                else:
-                    input = query_cls + doc_cls
-                if relevant == 0:
-                    train_input_list_N.append(input)
-                    train_labels_list_N.append([relevant])
-                else:
-                    train_input_list_R.append(input)
-                    train_labels_list_R.append([relevant])
+                for doc_id in query_dict[task].keys():
+                    doc_cls = query_dict[task][doc_id]['cls_token']
+                    relevant = float(query_dict[task][doc_id]['relevant'])
+                    if bi_encode:
+                        input = doc_cls
+                    else:
+                        input = query_cls + doc_cls
+                    if relevant == 0:
+                        train_input_list_N.append(input)
+                        train_labels_list_N.append([relevant])
+                    else:
+                        train_input_list_R.append(input)
+                        train_labels_list_R.append([relevant])
 
-        print('-> {} training R examples'.format(len(train_input_list_R)))
-        print('-> {} training N examples'.format(len(train_input_list_N)))
-        idx_list = list(range(len(train_input_list_R)))
-        diff = len(train_labels_list_N) - len(train_input_list_R)
-        # randomly sample diff number of samples.
-        for idx in random.choices(idx_list, k=diff):
-            train_input_list_N.append(train_input_list_R[idx])
-            train_labels_list_N.append(train_labels_list_R[idx])
-        print('-> {} class balancing'.format(len(train_labels_list_N)))
-        train_dataset = TensorDataset(torch.tensor(train_input_list_N), torch.tensor(train_labels_list_N))
+            print('-> {} training R examples'.format(len(train_input_list_R)))
+            print('-> {} training N examples'.format(len(train_input_list_N)))
+            idx_list = list(range(len(train_input_list_R)))
+            diff = len(train_labels_list_N) - len(train_input_list_R)
+            # randomly sample diff number of samples.
+            for idx in random.choices(idx_list, k=diff):
+                train_input_list_N.append(train_input_list_R[idx])
+                train_labels_list_N.append(train_labels_list_R[idx])
+            print('-> {} class balancing'.format(len(train_labels_list_N)))
+
+            train_dataset = TensorDataset(torch.tensor(train_input_list_N), torch.tensor(train_labels_list_N))
+            torch.save(obj=train_dataset, f=training_dataset_path)
+
         train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
 
         # ==== Build dev data ====
 
         print('Build dev data')
-        dev_input_list = []
-        dev_labels_list = []
-        dev_run_data = []
-        dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
-        for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
+        dev_dataset_path = parent_dir_path + '{}_biencode_{}_dev_dataset.pt'.format(task, bi_encode)
+        if os.path.exists(dev_dataset_path):
+            print('-> loading existing dataset: {}'.format(dev_dataset_path))
+            dev_dataset = torch.load(dev_dataset_path)
+        else:
+            print('-> dataset not found in path ==> will build: {}'.format(dev_dataset_path))
+            dev_input_list = []
+            dev_labels_list = []
+            dev_run_data = []
+            dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
+            for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
 
-            query_dict = get_dict_from_json(path=dev_query_path)
-            query = query_dict['query']['query_id']
-            query_cls = query_dict['query']['cls_token']
+                query_dict = get_dict_from_json(path=dev_query_path)
+                query = query_dict['query']['query_id']
+                query_cls = query_dict['query']['cls_token']
 
-            for doc_id in query_dict[task].keys():
-                doc_cls = query_dict[task][doc_id]['cls_token']
-                relevant = float(query_dict[task][doc_id]['relevant'])
-                if bi_encode:
-                    input = doc_cls
-                else:
-                    input = query_cls + doc_cls
-                dev_input_list.append(input)
-                dev_labels_list.append([relevant])
-                dev_run_data.append([query,doc_id,relevant])
+                for doc_id in query_dict[task].keys():
+                    doc_cls = query_dict[task][doc_id]['cls_token']
+                    relevant = float(query_dict[task][doc_id]['relevant'])
+                    if bi_encode:
+                        input = doc_cls
+                    else:
+                        input = query_cls + doc_cls
+                    dev_input_list.append(input)
+                    dev_labels_list.append([relevant])
+                    dev_run_data.append([query,doc_id,relevant])
 
-        print('-> {} dev examples'.format(len(dev_labels_list)))
-        dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
+            print('-> {} dev examples'.format(len(dev_labels_list)))
+            dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
+            torch.save(obj=dev_dataset, f=dev_dataset_path)
+
         dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
 
         # ==== Build test data ====
 
         print('Build test data')
-        test_input_list = []
-        test_labels_list = []
-        test_run_data = []
-        test_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(test_qrels_path)
-        for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if file_name in f]:
+        test_dataset_path = parent_dir_path + '{}_biencode_{}_test_dataset.pt'.format(task, bi_encode)
+        if os.path.exists(test_dataset_path):
+            print('-> loading existing dataset: {}'.format(test_dataset_path))
+            test_dataset = torch.load(test_dataset_path)
+        else:
+            print('-> dataset not found in path ==> will build: {}'.format(test_dataset_path))
+            test_input_list = []
+            test_labels_list = []
+            test_run_data = []
+            test_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(test_qrels_path)
+            for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if file_name in f]:
 
-            query_dict = get_dict_from_json(path=test_query_path)
-            query = query_dict['query']['query_id']
-            query_cls = query_dict['query']['cls_token']
+                query_dict = get_dict_from_json(path=test_query_path)
+                query = query_dict['query']['query_id']
+                query_cls = query_dict['query']['cls_token']
 
-            for doc_id in query_dict[task].keys():
-                doc_cls = query_dict[task][doc_id]['cls_token']
-                relevant = float(query_dict[task][doc_id]['relevant'])
-                if bi_encode:
-                    input = doc_cls
-                else:
-                    input = query_cls + doc_cls
-                test_input_list.append(input)
-                test_labels_list.append([relevant])
-                test_run_data.append([query, doc_id, relevant])
+                for doc_id in query_dict[task].keys():
+                    doc_cls = query_dict[task][doc_id]['cls_token']
+                    relevant = float(query_dict[task][doc_id]['relevant'])
+                    if bi_encode:
+                        input = doc_cls
+                    else:
+                        input = query_cls + doc_cls
+                    test_input_list.append(input)
+                    test_labels_list.append([relevant])
+                    test_run_data.append([query, doc_id, relevant])
 
-        print('-> {} test examples'.format(len(test_labels_list)))
-        test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
+            print('-> {} test examples'.format(len(test_labels_list)))
+            test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
+            torch.save(obj=test_dataset, f=test_dataset_path)
+
         test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
 
         # ==== Model setup ====
