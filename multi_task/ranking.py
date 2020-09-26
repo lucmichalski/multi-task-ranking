@@ -806,7 +806,8 @@ def train_cls_model_max_combo(batch_size=256, lr=0.0005, parent_dir_path='/nfs/t
             if (topic_query != None) and (topic_query != query):
                 topic_run_data.sort(key=lambda x: x[1], reverse=True)
                 topic_run = [i[0] for i in topic_run_data]
-                assert len(topic_run_data) <= 100, "{} len {}: {}".format(topic_query, len(topic_run_data), topic_run_data)
+                set([x for x in [i[0] for i in topic_run] if [i[0] for i in topic_run].count(x) > 1])
+                assert len(topic_run_data) <= 100, "{} len {}: {}".format(topic_query, len(topic_run_data), set([x for x in [i[0] for i in topic_run] if [i[0] for i in topic_run].count(x) > 1]))
 
                 with open(test_run_path, 'a+') as f:
                     rank = 1
@@ -820,7 +821,7 @@ def train_cls_model_max_combo(batch_size=256, lr=0.0005, parent_dir_path='/nfs/t
                 topic_run_data = []
 
             if last_doc_id == doc_id:
-                if score > topic_run_data[-1][1]:
+                if score >= topic_run_data[-1][1]:
                     topic_run_data[-1] = [doc_id, score]
             else:
                 topic_run_data.append([doc_id, score])
