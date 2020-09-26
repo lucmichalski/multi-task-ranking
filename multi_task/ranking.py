@@ -122,7 +122,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
 
         # ==== Build training data ====
         print('Build training data')
-        training_dataset_path = parent_dir_path + '{}_biencode_{}train_dataset.pt'.format(task, bi_encode)
+        training_dataset_path = parent_dir_path + '{}_biencode_{}_train_dataset.pt'.format(task, bi_encode)
         if os.path.exists(training_dataset_path):
             print('-> loading existing dataset: {}'.format(training_dataset_path))
             train_dataset = torch.load(training_dataset_path)
