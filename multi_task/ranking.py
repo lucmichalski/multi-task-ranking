@@ -647,18 +647,18 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/tr
             torch.nn.Linear(64, 1),
         )
 
-        # Use GPUs if available.
-        if torch.cuda.is_available():
-            # Tell PyTorch to use the GPU.
-            print('There are %d GPU(s) available.' % torch.cuda.device_count())
-            print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
-            model.cuda()
-            device = torch.device("cuda")
-
-        # Otherwise use CPU.
-        else:
-            print('No GPU available, using the CPU instead.')
-            device = torch.device("cpu")
+        # # Use GPUs if available.
+        # if torch.cuda.is_available():
+        #     # Tell PyTorch to use the GPU.
+        #     print('There are %d GPU(s) available.' % torch.cuda.device_count())
+        #     print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
+        #     model.cuda()
+        #     device = torch.device("cuda")
+        #
+        # # Otherwise use CPU.
+        # else:
+        #     print('No GPU available, using the CPU instead.')
+        #     device = torch.device("cpu")
 
         # ==== Experiments ====
         max_map = 0.0
