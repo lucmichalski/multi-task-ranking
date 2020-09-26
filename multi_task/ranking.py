@@ -660,7 +660,7 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/tr
         # ==== Experiments ====
         max_map = 0.0
         state_dict = None
-        for epoch in range(1,8):
+        for epoch in range(1,5):
 
             train_batches = len(train_data_loader)
             optimizer = torch.optim.Adam(model.parameters(), lr=lr)
