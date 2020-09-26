@@ -9,4 +9,4 @@ if __name__ == '__main__':
     dataset = 'test'
     rerank_runs(dataset=dataset)
 
-    train_cls_model_max_combo()
+    # train_cls_model_max_combo()
