@@ -820,7 +820,7 @@ def train_cls_model_max_combo(batch_size=256, lr=0.0005, parent_dir_path='/nfs/t
                 # Start new topic run.
                 topic_run_data = []
 
-            if last_doc_id == doc_id:
+            if (last_doc_id == doc_id) and (len(topic_run_data) > 0):
                 if score >= topic_run_data[-1][1]:
                     topic_run_data[-1] = [doc_id, score]
             else:
