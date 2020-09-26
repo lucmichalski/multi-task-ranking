@@ -19,7 +19,7 @@ def get_dict_from_json(path):
     return d
 
 
-def write_run_to_file(query, run_data, run_path, how, max_rank):
+def write_run_to_file(query, run_data, run_path, how, max_rank=100):
     """ """
     run_data.sort(key=lambda tup: tup[1], reverse=True)
     rank = 1
@@ -68,7 +68,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
 
                 passage_run_data.append((doc_id, passage_score))
 
-            write_run_to_file(query=query, run_data=passage_run_data, run_path=passage_run_path, how=how)
+            write_run_to_file(query=query, run_data=passage_run_data, run_path=passage_run_path, how=how, max_rank=max_rank)
 
             # === ENTITY DATA ===
             entity_run_data = []
