@@ -227,7 +227,7 @@ if __name__ == '__main__':
         experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
         experiment_name = 'passage_ranking_pegasus_bert_train_{}epoch+{}lr'.format(epochs, lr)
         experiments.run_experiment_single_head(
-            head_flag='entity',
+            head_flag='passage',
             epochs=epochs,
             lr=lr,
             eps=1e-8,
