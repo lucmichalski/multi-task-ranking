@@ -806,7 +806,7 @@ def train_cls_model_max_combo(batch_size=256, lr=0.0005, parent_dir_path='/nfs/t
             if (topic_query != None) and (topic_query != query):
                 topic_run_data.sort(key=lambda x: x[1], reverse=True)
                 topic_run = [i[0] for i in topic_run_data]
-                mylist = [i[0] for i in topic_run]
+                mylist = [i[0] for i in topic_run_data]
                 print(mylist)
                 assert len(topic_run_data) <= 100, "{} len {}: {}".format(topic_query, len(topic_run_data), [i for i in mylist if mylist.count(i) > 1])
 
