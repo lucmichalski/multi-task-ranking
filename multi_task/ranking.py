@@ -528,6 +528,7 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/tr
         print('Build dev data')
         dev_dataset_path = parent_dir_path + '{}_max_combo_dev_dataset.pt'.format(task)
         dev_run_data_path = parent_dir_path + '{}_max_combo_dev_run_data.txt'.format(task)
+        dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
         if os.path.exists(dev_dataset_path):
             print('-> loading existing dataset: {}'.format(dev_dataset_path))
             dev_dataset = torch.load(dev_dataset_path)
@@ -541,7 +542,6 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/tr
             dev_input_list = []
             dev_labels_list = []
             dev_run_data = []
-            dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
             entity_links_dict = get_dict_from_json(path=dev_entity_links_path)
             for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
 
