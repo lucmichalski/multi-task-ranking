@@ -625,9 +625,6 @@ def train_cls_model_max_combo(batch_size=256, lr=0.0005, parent_dir_path='/nfs/t
                                     test_input_list.append(input)
                                     test_labels_list.append([relevant])
                                     test_run_data.append([query, doc_id, relevant])
-                    else:
-                        pass
-
 
             print('-> {} test examples'.format(len(test_labels_list)))
             test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
@@ -830,6 +827,7 @@ def train_cls_model_max_combo(batch_size=256, lr=0.0005, parent_dir_path='/nfs/t
 
             # Update topic run.
             topic_query = query
+            last_doc_id = doc_id
 
         if len(topic_run_data) > 0:
             topic_run_data.sort(key=lambda x: x[1], reverse=True)
