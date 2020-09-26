@@ -585,7 +585,7 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/tr
 
         print('Build test data')
         test_dataset_path = parent_dir_path + '{}_max_combo_test_dataset.pt'.format(task)
-        test_run_data_path = '{}_max_combo_test_run_data.txt'.format(task)
+        test_run_data_path = parent_dir_path + '{}_max_combo_test_run_data.txt'.format(task)
         if os.path.exists(test_dataset_path):
             print('-> loading existing dataset: {}'.format(test_dataset_path))
             test_dataset = torch.load(test_dataset_path)
