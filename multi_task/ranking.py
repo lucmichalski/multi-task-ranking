@@ -96,7 +96,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
         EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
 
 
-def train_cls_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/',
+def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/',
                     bi_encode=False, max_rank=100):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
@@ -248,7 +248,7 @@ def train_cls_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/da
         # ==== Experiments ====
         max_map = 0.0
         state_dict = None
-        for epoch in range(1,10):
+        for epoch in range(1,4):
 
             train_batches = len(train_data_loader)
             dev_batches = len(dev_data_loader)
@@ -275,7 +275,7 @@ def train_cls_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/da
 
                 train_loss_total += loss.sum().item()
 
-                if i_train % 500 == 0:
+                if i_train % 1000 == 0:
 
                     # ========================================
                     #               Validation
