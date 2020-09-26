@@ -19,17 +19,18 @@ def get_dict_from_json(path):
     return d
 
 
-def write_run_to_file(query, run_data, run_path, how):
+def write_run_to_file(query, run_data, run_path, how, max_rank):
     """ """
     run_data.sort(key=lambda tup: tup[1], reverse=True)
     rank = 1
     with open(run_path, 'a+') as f:
         for doc_id, score in run_data:
-            f.write(' '.join((query, 'Q0', doc_id, str(rank), str(score), how)) + '\n')
+            if rank <= max_rank:
+                f.write(' '.join((query, 'Q0', doc_id, str(rank), str(score), how)) + '\n')
             rank += 1
 
 
-def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/'):
+def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/', max_rank=100):
     """ """
     dir_path = parent_dir_path + '{}_data/'.format(dataset)
 
@@ -96,7 +97,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
 
 
 def train_cls_model(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/',
-                    bi_encode=False):
+                    bi_encode=False, max_rank=100):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
