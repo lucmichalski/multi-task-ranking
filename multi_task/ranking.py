@@ -595,7 +595,7 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/tr
                     query, doc_id, relevant = line.strip().split()[0], line.strip().split()[1], line.strip().split()[2]
                     test_run_data.append([query, doc_id, float(relevant)])
         else:
-            print('-> dataset not found in path ==> will build: {}'.format(dev_dataset_path))
+            print('-> dataset not found in path ==> will build: {}'.format(test_dataset_path))
             test_input_list = []
             test_labels_list = []
             test_run_data = []
