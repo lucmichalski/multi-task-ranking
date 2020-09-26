@@ -440,7 +440,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
         EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
 
 
-def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
+def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
@@ -519,6 +519,7 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
                 train_labels_list_N.append(train_labels_list_R[idx])
             print('-> {} class balancing'.format(len(train_labels_list_N)))
             train_dataset = TensorDataset(torch.tensor(train_input_list_N), torch.tensor(train_labels_list_N))
+            torch.save(obj=train_dataset, f=training_dataset_path)
 
         train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
 
@@ -567,6 +568,8 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
 
             print('-> {} dev examples'.format(len(dev_labels_list)))
             dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
+            torch.save(obj=dev_dataset, f=dev_dataset_path)
+
         dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
 
         # ==== Build test data ====
@@ -613,6 +616,7 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
 
             print('-> {} test examples'.format(len(test_labels_list)))
             test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
+            torch.save(obj=test_dataset, f=test_dataset_path)
 
         test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
 
