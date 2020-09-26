@@ -463,136 +463,157 @@ def train_cls_model_max_combo(batch_size=128, lr=0.0005, parent_dir_path='/nfs/t
 
         # ==== Build training data ====
         print('Build training data')
-        train_input_list_R = []
-        train_labels_list_R = []
-        train_input_list_N = []
-        train_labels_list_N = []
 
-        for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if file_name in f]:
-            query_dict = get_dict_from_json(path=train_query_path)
-            query = query_dict['query']['query_id']
-            entity_links_dict = get_dict_from_json(path=train_entity_links_path)
+        training_dataset_path = parent_dir_path + '{}_max_combo_train_dataset.pt'.format(task)
+        if os.path.exists(training_dataset_path):
+            print('-> loading existing dataset: {}'.format(training_dataset_path))
+            train_dataset = torch.load(training_dataset_path)
+        else:
+            print('-> dataset not found in path ==> will build: {}'.format(training_dataset_path))
+            train_input_list_R = []
+            train_labels_list_R = []
+            train_input_list_N = []
+            train_labels_list_N = []
 
-            for doc_id in query_dict[task].keys():
-                doc_cls = query_dict[task][doc_id]['cls_token']
-                relevant = float(query_dict[task][doc_id]['relevant'])
+            for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if file_name in f]:
+                query_dict = get_dict_from_json(path=train_query_path)
+                query = query_dict['query']['query_id']
+                entity_links_dict = get_dict_from_json(path=train_entity_links_path)
 
-                input = doc_cls + doc_cls
-                if relevant == 0:
-                    train_input_list_N.append(input)
-                    train_labels_list_N.append([relevant])
-                else:
-                    train_input_list_R.append(input)
-                    train_labels_list_R.append([relevant])
+                for doc_id in query_dict[task].keys():
+                    doc_cls = query_dict[task][doc_id]['cls_token']
+                    relevant = float(query_dict[task][doc_id]['relevant'])
 
-                if task == 'passage':
+                    input = doc_cls + doc_cls
+                    if relevant == 0:
+                        train_input_list_N.append(input)
+                        train_labels_list_N.append([relevant])
+                    else:
+                        train_input_list_R.append(input)
+                        train_labels_list_R.append([relevant])
 
-                    if doc_id in entity_links_dict:
-                        for entity_link in list(set(entity_links_dict[doc_id])):
-                            if entity_link in query_dict['entity']:
-                                context_cls = query_dict['entity'][entity_link]['cls_token']
-                                input = doc_cls + context_cls
+                    if task == 'passage':
 
-                                if relevant == 0:
-                                    train_input_list_N.append(input)
-                                    train_labels_list_N.append([relevant])
-                                else:
-                                    train_input_list_R.append(input)
-                                    train_labels_list_R.append([relevant])
-                else:
-                    pass
+                        if doc_id in entity_links_dict:
+                            for entity_link in list(set(entity_links_dict[doc_id])):
+                                if entity_link in query_dict['entity']:
+                                    context_cls = query_dict['entity'][entity_link]['cls_token']
+                                    input = doc_cls + context_cls
 
-        print('-> {} training R examples'.format(len(train_input_list_R)))
-        print('-> {} training N examples'.format(len(train_input_list_N)))
-        idx_list = list(range(len(train_input_list_R)))
-        diff = len(train_labels_list_N) - len(train_input_list_R)
-        # randomly sample diff number of samples.
-        for idx in random.choices(idx_list, k=diff):
-            train_input_list_N.append(train_input_list_R[idx])
-            train_labels_list_N.append(train_labels_list_R[idx])
-        print('-> {} class balancing'.format(len(train_labels_list_N)))
-        train_dataset = TensorDataset(torch.tensor(train_input_list_N), torch.tensor(train_labels_list_N))
+                                    if relevant == 0:
+                                        train_input_list_N.append(input)
+                                        train_labels_list_N.append([relevant])
+                                    else:
+                                        train_input_list_R.append(input)
+                                        train_labels_list_R.append([relevant])
+                    else:
+                        pass
+
+            print('-> {} training R examples'.format(len(train_input_list_R)))
+            print('-> {} training N examples'.format(len(train_input_list_N)))
+            idx_list = list(range(len(train_input_list_R)))
+            diff = len(train_labels_list_N) - len(train_input_list_R)
+            # randomly sample diff number of samples.
+            for idx in random.choices(idx_list, k=diff):
+                train_input_list_N.append(train_input_list_R[idx])
+                train_labels_list_N.append(train_labels_list_R[idx])
+            print('-> {} class balancing'.format(len(train_labels_list_N)))
+            train_dataset = TensorDataset(torch.tensor(train_input_list_N), torch.tensor(train_labels_list_N))
+
         train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
 
         # # ==== Build dev data ====
         #
         print('Build dev data')
-        dev_input_list = []
-        dev_labels_list = []
-        dev_run_data = []
-        dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
-        entity_links_dict = get_dict_from_json(path=dev_entity_links_path)
-        for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
+        dev_dataset_path = parent_dir_path + '{}_max_combo_dev_dataset.pt'.format(task)
+        if os.path.exists(dev_dataset_path):
+            print('-> loading existing dataset: {}'.format(dev_dataset_path))
+            dev_dataset = torch.load(dev_dataset_path)
+        else:
+            print('-> dataset not found in path ==> will build: {}'.format(dev_dataset_path))
+            dev_input_list = []
+            dev_labels_list = []
+            dev_run_data = []
+            dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
+            entity_links_dict = get_dict_from_json(path=dev_entity_links_path)
+            for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
 
-            query_dict = get_dict_from_json(path=dev_query_path)
-            query = query_dict['query']['query_id']
+                query_dict = get_dict_from_json(path=dev_query_path)
+                query = query_dict['query']['query_id']
 
-            for doc_id in query_dict[task].keys():
-                doc_cls = query_dict[task][doc_id]['cls_token']
-                relevant = float(query_dict[task][doc_id]['relevant'])
+                for doc_id in query_dict[task].keys():
+                    doc_cls = query_dict[task][doc_id]['cls_token']
+                    relevant = float(query_dict[task][doc_id]['relevant'])
 
-                input = doc_cls + doc_cls
-                dev_input_list.append(input)
-                dev_labels_list.append([relevant])
-                dev_run_data.append([query, doc_id, relevant])
+                    input = doc_cls + doc_cls
+                    dev_input_list.append(input)
+                    dev_labels_list.append([relevant])
+                    dev_run_data.append([query, doc_id, relevant])
 
-                if task == 'passage':
+                    if task == 'passage':
 
-                    if doc_id in entity_links_dict:
-                        for entity_link in list(set(entity_links_dict[doc_id])):
-                            if entity_link in query_dict['entity']:
-                                context_cls = query_dict['entity'][entity_link]['cls_token']
-                                input = doc_cls + context_cls
+                        if doc_id in entity_links_dict:
+                            for entity_link in list(set(entity_links_dict[doc_id])):
+                                if entity_link in query_dict['entity']:
+                                    context_cls = query_dict['entity'][entity_link]['cls_token']
+                                    input = doc_cls + context_cls
 
-                                dev_input_list.append(input)
-                                dev_labels_list.append([relevant])
-                                dev_run_data.append([query, doc_id, relevant])
-                else:
-                    pass
+                                    dev_input_list.append(input)
+                                    dev_labels_list.append([relevant])
+                                    dev_run_data.append([query, doc_id, relevant])
+                    else:
+                        pass
 
 
-        print('-> {} dev examples'.format(len(dev_labels_list)))
-        dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
+            print('-> {} dev examples'.format(len(dev_labels_list)))
+            dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
         dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
 
         # ==== Build test data ====
 
         print('Build test data')
-        test_input_list = []
-        test_labels_list = []
-        test_run_data = []
-        entity_links_dict = get_dict_from_json(path=test_entity_links_path)
-        for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if file_name in f]:
+        test_dataset_path = parent_dir_path + '{}_max_combo_test_dataset.pt'.format(task)
+        if os.path.exists(test_dataset_path):
+            print('-> loading existing dataset: {}'.format(test_dataset_path))
+            test_dataset = torch.load(test_dataset_path)
+        else:
+            print('-> dataset not found in path ==> will build: {}'.format(dev_dataset_path))
+            test_input_list = []
+            test_labels_list = []
+            test_run_data = []
+            entity_links_dict = get_dict_from_json(path=test_entity_links_path)
+            for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if file_name in f]:
 
-            query_dict = get_dict_from_json(path=test_query_path)
-            query = query_dict['query']['query_id']
+                query_dict = get_dict_from_json(path=test_query_path)
+                query = query_dict['query']['query_id']
 
-            for doc_id in query_dict[task].keys():
-                doc_cls = query_dict[task][doc_id]['cls_token']
-                relevant = float(query_dict[task][doc_id]['relevant'])
+                for doc_id in query_dict[task].keys():
+                    doc_cls = query_dict[task][doc_id]['cls_token']
+                    relevant = float(query_dict[task][doc_id]['relevant'])
 
-                input = doc_cls + doc_cls
-                test_input_list.append(input)
-                test_labels_list.append([relevant])
-                test_run_data.append([query, doc_id, relevant])
+                    input = doc_cls + doc_cls
+                    test_input_list.append(input)
+                    test_labels_list.append([relevant])
+                    test_run_data.append([query, doc_id, relevant])
 
-                if task == 'passage':
+                    if task == 'passage':
 
-                    if doc_id in entity_links_dict:
-                        for entity_link in list(set(entity_links_dict[doc_id])):
-                            if entity_link in query_dict['entity']:
-                                context_cls = query_dict['entity'][entity_link]['cls_token']
-                                input = doc_cls + context_cls
+                        if doc_id in entity_links_dict:
+                            for entity_link in list(set(entity_links_dict[doc_id])):
+                                if entity_link in query_dict['entity']:
+                                    context_cls = query_dict['entity'][entity_link]['cls_token']
+                                    input = doc_cls + context_cls
 
-                                test_input_list.append(input)
-                                test_labels_list.append([relevant])
-                                test_run_data.append([query, doc_id, relevant])
-                else:
-                    pass
+                                    test_input_list.append(input)
+                                    test_labels_list.append([relevant])
+                                    test_run_data.append([query, doc_id, relevant])
+                    else:
+                        pass
 
 
-        print('-> {} test examples'.format(len(test_labels_list)))
-        test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
+            print('-> {} test examples'.format(len(test_labels_list)))
+            test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
+
         test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
 
         # ==== Model setup ====
