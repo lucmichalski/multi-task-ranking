@@ -10,4 +10,5 @@ if __name__ == '__main__':
     # rerank_runs(dataset=dataset)
 
     train_cls_model(bi_encode=False)
+    train_cls_model(bi_encode=True)
     # train_cls_model_max_combo()
