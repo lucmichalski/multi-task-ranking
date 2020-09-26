@@ -527,9 +527,15 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/tr
         #
         print('Build dev data')
         dev_dataset_path = parent_dir_path + '{}_max_combo_dev_dataset.pt'.format(task)
+        dev_run_data_path = parent_dir_path + '{}_max_combo_dev_run_data.txt'.format(task)
         if os.path.exists(dev_dataset_path):
             print('-> loading existing dataset: {}'.format(dev_dataset_path))
             dev_dataset = torch.load(dev_dataset_path)
+            dev_run_data = []
+            with open(dev_run_data_path, 'r') as f:
+                for line in f:
+                    query, doc_id, relevant = line.strip().split()[0], line.strip().split()[1], line.strip().split()[2]
+                    dev_run_data.append([query, doc_id, float(relevant)])
         else:
             print('-> dataset not found in path ==> will build: {}'.format(dev_dataset_path))
             dev_input_list = []
@@ -569,6 +575,9 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/tr
             print('-> {} dev examples'.format(len(dev_labels_list)))
             dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
             torch.save(obj=dev_dataset, f=dev_dataset_path)
+            with open(dev_run_data_path, 'w') as f:
+                for data in dev_run_data:
+                    f.write(" ".join((data[0], data[1], str(data[2]))) + '\n')
 
         dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
 
@@ -576,9 +585,15 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/tr
 
         print('Build test data')
         test_dataset_path = parent_dir_path + '{}_max_combo_test_dataset.pt'.format(task)
+        test_run_data_path = '{}_max_combo_test_run_data.txt'.format(task)
         if os.path.exists(test_dataset_path):
             print('-> loading existing dataset: {}'.format(test_dataset_path))
             test_dataset = torch.load(test_dataset_path)
+            test_run_data = []
+            with open(test_run_data_path, 'r') as f:
+                for line in f:
+                    query, doc_id, relevant = line.strip().split()[0], line.strip().split()[1], line.strip().split()[2]
+                    test_run_data.append([query, doc_id, float(relevant)])
         else:
             print('-> dataset not found in path ==> will build: {}'.format(dev_dataset_path))
             test_input_list = []
@@ -617,6 +632,9 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0005, parent_dir_path='/nfs/tr
             print('-> {} test examples'.format(len(test_labels_list)))
             test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
             torch.save(obj=test_dataset, f=test_dataset_path)
+            with open(test_run_data_path, 'w') as f:
+                for data in test_run_data:
+                    f.write(" ".join((data[0], data[1], str(data[2]))) + '\n')
 
         test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
 
