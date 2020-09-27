@@ -292,7 +292,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
                 outputs = model.forward(inputs.to(device))
 
                 # Calculate Loss: softmax --> cross entropy loss
-                loss = loss_func(outputs, labels)
+                loss = loss_func(outputs.cpu(), labels)
                 # Getting gradients w.r.t. parameters
                 loss.sum().backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
