@@ -246,13 +246,13 @@ if __name__ == '__main__':
         '/nfs/trec_news_track/data/5_fold/scaled_5fold_4_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
     ]
     entity_model_paths = [
-        'trec_news_track/data/5_fold/scaled_5fold_0_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
-        'trec_news_track/data/5_fold/scaled_5fold_1_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
-        'trec_news_track/data/5_fold/scaled_5fold_2_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
-        'trec_news_track/data/5_fold/scaled_5fold_3_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
-        'trec_news_track/data/5_fold/scaled_5fold_4_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
+        '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
+        '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
+        '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
+        '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
+        '/nfs/trec_news_track/data/5_fold/scaled_5fold_4_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
     ]
-    for task in ['passage', 'entity']:
+    for task in ['entity']:
         if task == 'passage':
             model_paths = passage_model_paths
         else:
