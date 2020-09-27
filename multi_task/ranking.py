@@ -394,7 +394,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
             inputs, labels = test_batch
 
             with torch.no_grad():
-                outputs = model.forward(inputs)
+                outputs = model.forward(inputs.to(device))
 
                 test_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
                 test_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
