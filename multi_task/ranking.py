@@ -289,7 +289,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
                 model.train()
                 model.zero_grad()
                 inputs, labels = train_batch
-                outputs = model.forward(inputs)
+                outputs = model.forward(inputs.to(device))
 
                 # Calculate Loss: softmax --> cross entropy loss
                 loss = loss_func(outputs, labels)
@@ -322,7 +322,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
                         inputs, labels = dev_batch
 
                         with torch.no_grad():
-                            outputs = model.forward(inputs)
+                            outputs = model.forward(inputs.to(device))
                             loss = loss_func(outputs, labels)
 
                             dev_loss_total += loss.sum().item()
