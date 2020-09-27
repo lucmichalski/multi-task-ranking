@@ -323,7 +323,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
 
                         with torch.no_grad():
                             outputs = model.forward(inputs.to(device))
-                            loss = loss_func(outputs, labels)
+                            loss = loss_func(outputs.cpu(), labels)
 
                             dev_loss_total += loss.sum().item()
                             dev_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
