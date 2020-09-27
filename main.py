@@ -237,7 +237,7 @@ if __name__ == '__main__':
         #     experiment_name=experiment_name,
         #     logging_steps=500)
 
-    gpus = 2
+    gpus = 3
     passage_model_paths = [
         '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
         '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
