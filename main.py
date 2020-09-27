@@ -292,7 +292,7 @@ if __name__ == '__main__':
                 )
 
             rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/{}_pegasus_bert_ranking_1000.run'.format(fold, task)
-            experiments.inference(head_flag=task, rerank_run_path=rerank_run_path, cap_rank=100, do_eval=True)
+            experiments.inference(head_flag=task, rerank_run_path=rerank_run_path, cap_rank=100, do_eval=False)
 
     # hits = 1000
     # printing_step = 50
