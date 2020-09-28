@@ -582,7 +582,7 @@ class MultiTaskDatasetByQuery():
                     self.cls_id += 1
 
                 passage_dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
-                passage_data_loader = DataLoader(dataset, sampler=SequentialSampler(dataset), batch_size=batch_size)
+                passage_data_loader = DataLoader(passage_dataset, sampler=SequentialSampler(passage_dataset), batch_size=batch_size)
 
                 self.cls_id_list = []
                 self.token_list = []
@@ -624,7 +624,7 @@ class MultiTaskDatasetByQuery():
                     self.cls_id += 1
 
                 entity_dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
-                entity_data_loader = DataLoader(dataset, sampler=SequentialSampler(dataset), batch_size=batch_size)
+                entity_data_loader = DataLoader(entity_dataset, sampler=SequentialSampler(entity_dataset), batch_size=batch_size)
 
                 id_list = []
                 cls_tokens = []
