@@ -440,7 +440,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
         EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
 
 
-def train_cls_model_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/'):
+def train_cls_model_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'

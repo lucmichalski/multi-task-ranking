@@ -1,7 +1,7 @@
 
 from metadata import CarPassagePaths, CarEntityPaths
 from retrieval.tools import SearchTools
-from learning.models import BertCLS
+from learning.models import BertCLS, BertMultiTaskRanker
 
 import pandas as pd
 import torch
@@ -477,18 +477,20 @@ class MultiTaskDatasetByQuery():
         return run_dict, qrels_dict
 
 
-    def build_dataset_by_query(self, dir_path, max_rank=100, batch_size=64, bi_encode=False):
+    def build_dataset_by_query(self, dir_path, max_rank=100, batch_size=64, bi_encode=False, passage_model_path=None,
+                               entity_model_path=None):
         """ """
 
-        model = BertCLS.from_pretrained('bert-base-uncased')
-        model.eval()
+        passage_model = BertMultiTaskRanker.from_pretrained(passage_model_path)
+        entity_model = BertMultiTaskRanker.from_pretrained(entity_model_path)
 
         # Use GPUs if available.
         if torch.cuda.is_available():
             # Tell PyTorch to use the GPU.
             print('There are %d GPU(s) available.' % torch.cuda.device_count())
             print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
-            model.cuda()
+            passage_model.cuda()
+            entity_model.cuda()
             device = torch.device("cuda")
         # Otherwise use CPU.
         else:
@@ -579,6 +581,12 @@ class MultiTaskDatasetByQuery():
                     self.token_list.append(input_ids)
                     self.cls_id += 1
 
+                passage_dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
+                passage_data_loader = DataLoader(dataset, sampler=SequentialSampler(dataset), batch_size=batch_size)
+
+                self.cls_id_list = []
+                self.token_list = []
+
                 # ======== PROCESS ENTITY ========
                 entity_run_data = entity_run_dict[query]
                 query_dataset['entity'] = {}
@@ -615,20 +623,28 @@ class MultiTaskDatasetByQuery():
                     self.token_list.append(input_ids)
                     self.cls_id += 1
 
-                # ======== PROCESS BERT CLS ========
-                dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
-                data_loader = DataLoader(dataset, sampler=SequentialSampler(dataset), batch_size=batch_size)
+                entity_dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
+                entity_data_loader = DataLoader(dataset, sampler=SequentialSampler(dataset), batch_size=batch_size)
 
                 id_list = []
                 cls_tokens = []
-                for batch in data_loader:
+                for batch in passage_data_loader:
                     b_id_list = batch[0]
                     b_input_ids = batch[1].to(device)
                     with torch.no_grad():
-                        b_cls_tokens = model.get_BERT_cls_vector(input_ids=b_input_ids)
+                        b_cls_tokens =passage_model.bert.forward(input_ids=b_input_ids)
 
                     id_list.append(b_id_list)
-                    cls_tokens.append(b_cls_tokens.cpu())
+                    cls_tokens.append(b_cls_tokens[0].cpu())
+
+                for batch in entity_data_loader:
+                    b_id_list = batch[0]
+                    b_input_ids = batch[1].to(device)
+                    with torch.no_grad():
+                        b_cls_tokens = entity_model.bert.forward(input_ids=b_input_ids)
+
+                    id_list.append(b_id_list)
+                    cls_tokens.append(b_cls_tokens[0].cpu())
 
                 id_list_tensor = torch.cat(id_list).numpy().tolist()
                 cls_tokens_tensor = torch.cat(cls_tokens).numpy().tolist()
@@ -650,9 +666,9 @@ class MultiTaskDatasetByQuery():
                     query_dataset['passage'][doc_id]['cls_token'] = cls_map[passage_cls_id]
 
                 if bi_encode == False:
-                    query_json_path = dataset_dir_path + '{}_data.json'.format(query_i)
+                    query_json_path = dataset_dir_path + '{}_data_ranker.json'.format(query_i)
                 else:
-                    query_json_path = dataset_dir_path + '{}_data_bi_encode.json'.format(query_i)
+                    query_json_path = dataset_dir_path + '{}_data_bi_encode_ranker.json'.format(query_i)
                 with open(query_json_path, 'w') as f:
                     json.dump(query_dataset, f, indent=4)
 
