@@ -49,7 +49,7 @@ if __name__ == '__main__':
     # =====================================================
     gpus = 3
     model_path = None
-    dev_batch_size = 64 * gpus
+    dev_batch_size = 64 * 4 * gpus
     train_batch_size = 8 * gpus
 
     train_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks/'
