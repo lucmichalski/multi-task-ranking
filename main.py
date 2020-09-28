@@ -47,51 +47,51 @@ if __name__ == '__main__':
     # =====================================================
     # ==================== TREC CAR =======================
     # =====================================================
-    # gpus = 2
-    # model_path = None
-    # dev_batch_size = 64 * gpus
-    # train_batch_size = 8 * gpus
-    #
-    # train_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks/'
-    # dev_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300_chunks/'
-    # dev_qrels_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
-    # dev_run_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300.run'
-    #
-    # train_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks/'
-    # dev_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_hierarchical_passage_dev_100_chunks/'
-    # dev_qrels_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
-    # dev_run_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run'
-    #
-    # experiments = FineTuningReRankingExperiments(
-    #     model_path = None,
-    #     extra_layers = False,
-    #     dev_batch_size = dev_batch_size,
-    #     train_batch_size = train_batch_size,
-    #
-    #     train_data_dir_path_entity = train_data_dir_path_entity,
-    #     dev_data_dir_path_entity = dev_data_dir_path_entity,
-    #     dev_qrels_path_entity = dev_qrels_path_entity,
-    #     dev_run_path_entity = dev_run_path_entity,
-    #
-    #     train_data_dir_path_passage = train_data_dir_path_passage,
-    #     dev_data_dir_path_passage = dev_data_dir_path_passage,
-    #     dev_qrels_path_passage = dev_qrels_path_passage,
-    #     dev_run_path_passage = dev_run_path_passage,
-    # )
-    #
-    # epochs = 2
-    # lr = 3e-6
-    # experiments_dir = '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/'
-    # experiment_name = 'multi_task_ranking_bert_{}epoch+{}lr'.format(epochs, lr)
-    # experiments.run_experiment_multi_head(
-    #     epochs=epochs,
-    #     lr=lr,
-    #     eps=1e-8,
-    #     weight_decay=0.01,
-    #     warmup_percentage=0.1,
-    #     experiments_dir=experiments_dir,
-    #     experiment_name=experiment_name,
-    #     logging_steps=1000)
+    gpus = 3
+    model_path = None
+    dev_batch_size = 64 * gpus
+    train_batch_size = 8 * gpus
+
+    train_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks/'
+    dev_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300_chunks/'
+    dev_qrels_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
+    dev_run_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300.run'
+
+    train_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks/'
+    dev_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_hierarchical_passage_dev_100_chunks/'
+    dev_qrels_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
+    dev_run_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run'
+
+    experiments = FineTuningReRankingExperiments(
+        model_path = None,
+        extra_layers = False,
+        dev_batch_size = dev_batch_size,
+        train_batch_size = train_batch_size,
+
+        train_data_dir_path_entity = train_data_dir_path_entity,
+        dev_data_dir_path_entity = dev_data_dir_path_entity,
+        dev_qrels_path_entity = dev_qrels_path_entity,
+        dev_run_path_entity = dev_run_path_entity,
+
+        train_data_dir_path_passage = train_data_dir_path_passage,
+        dev_data_dir_path_passage = dev_data_dir_path_passage,
+        dev_qrels_path_passage = dev_qrels_path_passage,
+        dev_run_path_passage = dev_run_path_passage,
+    )
+
+    epochs = 2
+    lr = 2e-6
+    experiments_dir = '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/'
+    experiment_name = 'multi_task_ranking_bert_no_sigmoid_{}epoch+{}lr'.format(epochs, lr)
+    experiments.run_experiment_multi_head(
+        epochs=epochs,
+        lr=lr,
+        eps=1e-8,
+        weight_decay=0.01,
+        warmup_percentage=0.1,
+        experiments_dir=experiments_dir,
+        experiment_name=experiment_name,
+        logging_steps=1000)
 
     # =====================================================
     # =====================================================
@@ -237,62 +237,62 @@ if __name__ == '__main__':
         #     experiment_name=experiment_name,
         #     logging_steps=500)
 
-    gpus = 3
-    passage_model_paths = [
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_4_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
-    ]
-    entity_model_paths = [
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
-        '/nfs/trec_news_track/data/5_fold/scaled_5fold_4_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
-    ]
-    for task in ['entity']:
-        if task == 'passage':
-            model_paths = passage_model_paths
-        else:
-            model_paths = entity_model_paths
-        folds = [0, 1, 2, 3, 4]
-        for fold, model_path in zip(folds, model_paths):
-            dev_batch_size = 64 * 8 * gpus
-            train_batch_size = 8 * gpus
-            if task == 'passage':
-                dev_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test_bert_ranking_data_pegasus/'.format(fold)
-                dev_qrels_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test.qrels'.format(fold)
-                dev_run_path_passage= '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test_ranking_1000.run'.format(fold)
-
-                experiments = FineTuningReRankingExperiments(
-                    model_path=model_path,
-                    extra_layers=False,
-                    dev_batch_size=dev_batch_size,
-
-                    dev_data_dir_path_passage=dev_data_dir_path_passage,
-                    dev_qrels_path_passage=dev_qrels_path_passage,
-                    dev_run_path_passage=dev_run_path_passage,
-                )
-
-            else:
-                dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_bert_ranking_data_pegasus/'.format(fold)
-                dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test.qrels'.format(fold)
-                dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_BM25_ranking_1000.run'.format(fold)
-
-                experiments = FineTuningReRankingExperiments(
-                    model_path=model_path,
-                    extra_layers=False,
-                    dev_batch_size=dev_batch_size,
-
-                    dev_data_dir_path_entity=dev_data_dir_path_entity,
-                    dev_qrels_path_entity=dev_qrels_path_entity,
-                    dev_run_path_entity=dev_run_path_entity,
-                )
-
-            rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/{}_pegasus_bert_ranking_1000.run'.format(fold, task)
-            experiments.inference(head_flag=task, rerank_run_path=rerank_run_path, cap_rank=100, do_eval=False)
+    # gpus = 3
+    # passage_model_paths = [
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_4_data/exp/passage_ranking_pegasus_bert_train_2epoch+4e-06lr/epoch1_batch2000/',
+    # ]
+    # entity_model_paths = [
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_2_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_3_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
+    #     '/nfs/trec_news_track/data/5_fold/scaled_5fold_4_data/exp/entity_ranking_pegasus_bert_train_2epoch+8e-06lr/epoch1_batch2500/',
+    # ]
+    # for task in ['entity']:
+    #     if task == 'passage':
+    #         model_paths = passage_model_paths
+    #     else:
+    #         model_paths = entity_model_paths
+    #     folds = [0, 1, 2, 3, 4]
+    #     for fold, model_path in zip(folds, model_paths):
+    #         dev_batch_size = 64 * 8 * gpus
+    #         train_batch_size = 8 * gpus
+    #         if task == 'passage':
+    #             dev_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test_bert_ranking_data_pegasus/'.format(fold)
+    #             dev_qrels_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test.qrels'.format(fold)
+    #             dev_run_path_passage= '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_test_ranking_1000.run'.format(fold)
+    #
+    #             experiments = FineTuningReRankingExperiments(
+    #                 model_path=model_path,
+    #                 extra_layers=False,
+    #                 dev_batch_size=dev_batch_size,
+    #
+    #                 dev_data_dir_path_passage=dev_data_dir_path_passage,
+    #                 dev_qrels_path_passage=dev_qrels_path_passage,
+    #                 dev_run_path_passage=dev_run_path_passage,
+    #             )
+    #
+    #         else:
+    #             dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_bert_ranking_data_pegasus/'.format(fold)
+    #             dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test.qrels'.format(fold)
+    #             dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_BM25_ranking_1000.run'.format(fold)
+    #
+    #             experiments = FineTuningReRankingExperiments(
+    #                 model_path=model_path,
+    #                 extra_layers=False,
+    #                 dev_batch_size=dev_batch_size,
+    #
+    #                 dev_data_dir_path_entity=dev_data_dir_path_entity,
+    #                 dev_qrels_path_entity=dev_qrels_path_entity,
+    #                 dev_run_path_entity=dev_run_path_entity,
+    #             )
+    #
+    #         rerank_run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/{}_pegasus_bert_ranking_1000.run'.format(fold, task)
+    #         experiments.inference(head_flag=task, rerank_run_path=rerank_run_path, cap_rank=100, do_eval=False)
 
     # hits = 1000
     # printing_step = 50
