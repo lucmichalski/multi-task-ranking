@@ -490,13 +490,18 @@ class MultiTaskDatasetByQuery():
             # Tell PyTorch to use the GPU.
             print('There are %d GPU(s) available.' % torch.cuda.device_count())
             print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
-            passage_model.cuda()
-            entity_model.cuda()
-            device = torch.device("cuda")
+
+            passage_device = torch.device("cuda:0")
+            entity_device = torch.device("cuda:1")
+
+            passage_model.to(passage_device)
+            entity_model.to(entity_device)
+
         # Otherwise use CPU.
         else:
             print('No GPU available, using the CPU instead.')
-            device = torch.device("cpu")
+            passage_device = torch.device("cpu")
+            entity_device = torch.device("cpu")
 
         for dataset in ['dev', 'test', 'train']:
 
@@ -631,7 +636,7 @@ class MultiTaskDatasetByQuery():
                 cls_tokens = []
                 for batch in passage_data_loader:
                     b_id_list = batch[0]
-                    b_input_ids = batch[1].to(device)
+                    b_input_ids = batch[1].to(passage_device)
                     with torch.no_grad():
                         b_cls_tokens =passage_model.bert.forward(input_ids=b_input_ids)
 
@@ -640,7 +645,7 @@ class MultiTaskDatasetByQuery():
 
                 for batch in entity_data_loader:
                     b_id_list = batch[0]
-                    b_input_ids = batch[1].to(device)
+                    b_input_ids = batch[1].to(entity_device)
                     with torch.no_grad():
                         b_cls_tokens = entity_model.bert.forward(input_ids=b_input_ids)
 
