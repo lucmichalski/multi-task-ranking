@@ -91,7 +91,7 @@ if __name__ == '__main__':
         warmup_percentage=0.1,
         experiments_dir=experiments_dir,
         experiment_name=experiment_name,
-        logging_steps=1000)
+        logging_steps=500)
 
     # =====================================================
     # =====================================================
