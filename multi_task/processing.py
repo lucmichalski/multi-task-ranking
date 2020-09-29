@@ -660,7 +660,7 @@ class MultiTaskDatasetByQuery():
                     id_list.append(b_id_list)
                     cls_tokens.append(b_cls_tokens[0].cpu())
 
-                print('PROCESS RESULTS')
+                print('PROCESS cls_map')
                 id_list_tensor = torch.cat(id_list).numpy().tolist()
                 cls_tokens_tensor = torch.cat(cls_tokens).numpy().tolist()
                 cls_map = {}
@@ -668,6 +668,7 @@ class MultiTaskDatasetByQuery():
                     cls_map[int(cls_i[0])] = cls_token
 
                 # ======== PROCESS CLS TOKENS ========
+                print('PROCESS CLS TOKENS')
                 # Add query CLS token.
                 query_cls_id = query_dataset['query']['cls_id']
                 query_dataset['query']['cls_token'] = cls_map[query_cls_id]
@@ -679,6 +680,8 @@ class MultiTaskDatasetByQuery():
                 for doc_id in query_dataset['passage'].keys():
                     passage_cls_id = query_dataset['passage'][doc_id]['cls_id']
                     query_dataset['passage'][doc_id]['cls_token'] = cls_map[passage_cls_id]
+
+                print('WRITE TO FILE')
 
                 if bi_encode == False:
                     query_json_path = dataset_dir_path + '{}_data_ranker.json'.format(query_i)
