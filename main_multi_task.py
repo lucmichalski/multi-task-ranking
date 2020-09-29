@@ -14,10 +14,10 @@ if __name__ == '__main__':
     #                                                  entity_model_path=entity_model_path
     #                                                  )
 
-    dataset = 'test'
-    rerank_runs(dataset=dataset)
+    # dataset = 'test'
+    # rerank_runs(dataset=dataset)
 
-    # train_cls_model(bi_encode=False)
+    train_cls_model()
     # train_cls_model(bi_encode=True)
     # train_cls_model_max_combo()
 
