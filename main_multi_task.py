@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     # dataset = 'test'
     # rerank_runs(dataset=dataset)
-
+    # this is the run
     train_cls_model()
     # train_cls_model(bi_encode=True)
     # train_cls_model_max_combo()

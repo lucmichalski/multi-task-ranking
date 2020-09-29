@@ -42,7 +42,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
 
     for how in ['euclidean', 'original', 'cosine_sim']:
 
-        for query_path in [dir_path + f for f in os.listdir(dir_path) if 'data.json' in f]:
+        for query_path in [dir_path + f for f in os.listdir(dir_path) if 'data_bi_encode_ranker.json' in f]:
 
             # === QUERY DATA ===
             query_dict = get_dict_from_json(path=query_path)
@@ -97,7 +97,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
 
 
 def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/',
-                    bi_encode=False, max_rank=100):
+                    max_rank=100):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
@@ -108,21 +108,16 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
         print('===================================')
         print('============= {} ================'.format(task))
         print('===================================')
-        print('====== Bi-encoding = {} ========'.format(bi_encode))
 
-        if bi_encode:
-            test_run_path = test_dir_path + 'cls_feedforward_bi_encoding_{}.run'.format(task)
-            file_name = 'data_bi_encode.json'
-        else:
-            test_run_path = test_dir_path + 'cls_feedforward__{}.run'.format(task)
-            file_name = 'data.json'
+        test_run_path = test_dir_path + 'cls_feedforward_biencode_ranker_{}.run'.format(task)
+        file_name = 'data_bi_encode_ranker.json'
 
         dev_qrels_path = dataset_metadata['{}_dev'.format(task)][1]
         test_qrels_path = dataset_metadata['{}_test'.format(task)][1]
 
         # ==== Build training data ====
         print('Build training data')
-        training_dataset_path = parent_dir_path + '{}_biencode_{}_train_dataset.pt'.format(task, bi_encode)
+        training_dataset_path = parent_dir_path + '{}_biencode_ranker_train_dataset.pt'.format(task)
         if os.path.exists(training_dataset_path):
             print('-> loading existing dataset: {}'.format(training_dataset_path))
             train_dataset = torch.load(training_dataset_path)
@@ -141,10 +136,8 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
                 for doc_id in query_dict[task].keys():
                     doc_cls = query_dict[task][doc_id]['cls_token']
                     relevant = float(query_dict[task][doc_id]['relevant'])
-                    if bi_encode:
-                        input = doc_cls
-                    else:
-                        input = query_cls + doc_cls
+
+                    input = doc_cls
                     if relevant == 0:
                         train_input_list_N.append(input)
                         train_labels_list_N.append([relevant])
@@ -189,10 +182,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
                 for doc_id in query_dict[task].keys():
                     doc_cls = query_dict[task][doc_id]['cls_token']
                     relevant = float(query_dict[task][doc_id]['relevant'])
-                    if bi_encode:
-                        input = doc_cls
-                    else:
-                        input = query_cls + doc_cls
+                    input = doc_cls
                     dev_input_list.append(input)
                     dev_labels_list.append([relevant])
                     dev_run_data.append([query,doc_id,relevant])
@@ -225,10 +215,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
                 for doc_id in query_dict[task].keys():
                     doc_cls = query_dict[task][doc_id]['cls_token']
                     relevant = float(query_dict[task][doc_id]['relevant'])
-                    if bi_encode:
-                        input = doc_cls
-                    else:
-                        input = query_cls + doc_cls
+                    input = doc_cls
                     test_input_list.append(input)
                     test_labels_list.append([relevant])
                     test_run_data.append([query, doc_id, relevant])
@@ -240,22 +227,13 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
         test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
 
         # ==== Model setup ====
-        if bi_encode:
-            model = torch.nn.Sequential(
-                torch.nn.Linear(768, 768),
-                torch.nn.ReLU(),
-                torch.nn.Linear(768, 64),
-                torch.nn.ReLU(),
-                torch.nn.Linear(64, 1),
-            )
-        else:
-            model = torch.nn.Sequential(
-                torch.nn.Linear(1536, 1536),
-                torch.nn.ReLU(),
-                torch.nn.Linear(1536, 64),
-                torch.nn.ReLU(),
-                torch.nn.Linear(64, 1),
-            )
+        model = torch.nn.Sequential(
+            torch.nn.Linear(768, 768),
+            torch.nn.ReLU(),
+            torch.nn.Linear(768, 64),
+            torch.nn.ReLU(),
+            torch.nn.Linear(64, 1),
+        )
 
         # Use GPUs if available.
         if torch.cuda.is_available():
