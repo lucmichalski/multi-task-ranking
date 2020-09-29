@@ -503,7 +503,7 @@ class MultiTaskDatasetByQuery():
             passage_device = torch.device("cpu")
             entity_device = torch.device("cpu")
 
-        for dataset in ['dev', 'test', 'train']:
+        for dataset in ['test', 'train']:
 
             dataset_dir_path = dir_path + '{}_data/'.format(dataset)
             self.__make_dir(dataset_dir_path)
@@ -530,6 +530,8 @@ class MultiTaskDatasetByQuery():
                 self.token_list = []
 
                 # ======== PROCESS QUERY ========
+                print('PROCESS QUERY')
+
                 query_dataset['query'] = {}
                 query_dataset['query']['query_id'] = query
                 query_dataset['query']['cls_id'] = self.cls_id
@@ -553,6 +555,7 @@ class MultiTaskDatasetByQuery():
                 self.cls_id += 1
 
                 # ======== PROCESS PASSAGE ========
+                print('PROCESS PASSAGE')
                 passage_run_data = passage_run_dict[query]
                 query_dataset['passage'] = {}
                 for run_data in passage_run_data:
@@ -594,6 +597,7 @@ class MultiTaskDatasetByQuery():
                 self.token_list = []
 
                 # ======== PROCESS ENTITY ========
+                print('PROCESS ENTITY')
                 entity_run_data = entity_run_dict[query]
                 query_dataset['entity'] = {}
                 for run_data in entity_run_data:
@@ -632,17 +636,21 @@ class MultiTaskDatasetByQuery():
                 entity_dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
                 entity_data_loader = DataLoader(entity_dataset, sampler=SequentialSampler(entity_dataset), batch_size=batch_size)
 
+                print('BERT PASSAGE')
                 id_list = []
                 cls_tokens = []
+                # Passage BERT.
                 for batch in passage_data_loader:
                     b_id_list = batch[0]
                     b_input_ids = batch[1].to(passage_device)
                     with torch.no_grad():
-                        b_cls_tokens =passage_model.bert.forward(input_ids=b_input_ids)
+                        b_cls_tokens = passage_model.bert.forward(input_ids=b_input_ids)
 
                     id_list.append(b_id_list)
                     cls_tokens.append(b_cls_tokens[0].cpu())
 
+                print('BERT ENTITY')
+                # Entity BERT.
                 for batch in entity_data_loader:
                     b_id_list = batch[0]
                     b_input_ids = batch[1].to(entity_device)
@@ -652,6 +660,7 @@ class MultiTaskDatasetByQuery():
                     id_list.append(b_id_list)
                     cls_tokens.append(b_cls_tokens[0].cpu())
 
+                print('PROCESS RESULTS')
                 id_list_tensor = torch.cat(id_list).numpy().tolist()
                 cls_tokens_tensor = torch.cat(cls_tokens).numpy().tolist()
                 cls_map = {}
