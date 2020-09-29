@@ -30,7 +30,7 @@ def write_run_to_file(query, run_data, run_path, how, max_rank=100):
             rank += 1
 
 
-def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/', max_rank=100):
+def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/', max_rank=100):
     """ """
     dir_path = parent_dir_path + '{}_data/'.format(dataset)
 
