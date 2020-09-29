@@ -96,7 +96,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
         EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
 
 
-def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/',
+def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/',
                     max_rank=100):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
@@ -130,19 +130,18 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
             for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if file_name in f]:
 
                 query_dict = get_dict_from_json(path=train_query_path)
-                query = query_dict['query']['query_id']
-                query_cls = query_dict['query']['cls_token']
+                # query = query_dict['query']['query_id']
+                # query_cls = query_dict['query']['cls_token']
 
                 for doc_id in query_dict[task].keys():
                     doc_cls = query_dict[task][doc_id]['cls_token']
                     relevant = float(query_dict[task][doc_id]['relevant'])
 
-                    input = doc_cls
                     if relevant == 0:
-                        train_input_list_N.append(input)
+                        train_input_list_N.append(doc_cls)
                         train_labels_list_N.append([relevant])
                     else:
-                        train_input_list_R.append(input)
+                        train_input_list_R.append(doc_cls)
                         train_labels_list_R.append([relevant])
 
             print('-> {} training R examples'.format(len(train_input_list_R)))
@@ -163,7 +162,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
         # ==== Build dev data ====
 
         print('Build dev data')
-        dev_dataset_path = parent_dir_path + '{}_biencode_{}_dev_dataset.pt'.format(task, bi_encode)
+        dev_dataset_path = parent_dir_path + '{}_biencode_ranker_dev_dataset.pt'.format(task)
         if os.path.exists(dev_dataset_path):
             print('-> loading existing dataset: {}'.format(dev_dataset_path))
             dev_dataset = torch.load(dev_dataset_path)
@@ -177,13 +176,12 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
 
                 query_dict = get_dict_from_json(path=dev_query_path)
                 query = query_dict['query']['query_id']
-                query_cls = query_dict['query']['cls_token']
+                # query_cls = query_dict['query']['cls_token']
 
                 for doc_id in query_dict[task].keys():
                     doc_cls = query_dict[task][doc_id]['cls_token']
                     relevant = float(query_dict[task][doc_id]['relevant'])
-                    input = doc_cls
-                    dev_input_list.append(input)
+                    dev_input_list.append(doc_cls)
                     dev_labels_list.append([relevant])
                     dev_run_data.append([query,doc_id,relevant])
 
@@ -196,7 +194,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
         # ==== Build test data ====
 
         print('Build test data')
-        test_dataset_path = parent_dir_path + '{}_biencode_{}_test_dataset.pt'.format(task, bi_encode)
+        test_dataset_path = parent_dir_path + '{}_biencode_ranker_test_dataset.pt'.format(task)
         if os.path.exists(test_dataset_path):
             print('-> loading existing dataset: {}'.format(test_dataset_path))
             test_dataset = torch.load(test_dataset_path)
@@ -210,13 +208,12 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
 
                 query_dict = get_dict_from_json(path=test_query_path)
                 query = query_dict['query']['query_id']
-                query_cls = query_dict['query']['cls_token']
+                # query_cls = query_dict['query']['cls_token']
 
                 for doc_id in query_dict[task].keys():
                     doc_cls = query_dict[task][doc_id]['cls_token']
                     relevant = float(query_dict[task][doc_id]['relevant'])
-                    input = doc_cls
-                    test_input_list.append(input)
+                    test_input_list.append(doc_cls)
                     test_labels_list.append([relevant])
                     test_run_data.append([query, doc_id, relevant])
 
@@ -251,7 +248,7 @@ def train_cls_model(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/da
         # ==== Experiments ====
         max_map = 0.0
         state_dict = None
-        for epoch in range(1,4):
+        for epoch in range(1,6):
 
             train_batches = len(train_data_loader)
             dev_batches = len(dev_data_loader)
