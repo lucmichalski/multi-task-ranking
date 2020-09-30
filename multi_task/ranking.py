@@ -96,7 +96,7 @@ def rerank_runs(dataset,  parent_dir_path='/nfs/trec_car/data/entity_ranking/mul
         EvalTools().write_eval_from_qrels_and_run(qrels_path=entity_qrels, run_path=entity_run_path)
 
 
-def train_cls_model(batch_size=64, lr=0.001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/',
+def train_cls_model(batch_size=64, lr=0.005, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/',
                     max_rank=100):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
@@ -117,7 +117,7 @@ def train_cls_model(batch_size=64, lr=0.001, parent_dir_path='/nfs/trec_car/data
 
         # ==== Build training data ====
         print('Build training data')
-        training_dataset_path = parent_dir_path + '{}_biencode_ranker_train_dataset.pt'.format(task)
+        training_dataset_path = parent_dir_path + '{}_biencode_ranker_train_dataset_lr_{}_batch_{}.pt'.format(task, lr, batch_size)
 
         if os.path.exists(training_dataset_path):
             print('-> loading existing dataset: {}'.format(training_dataset_path))
