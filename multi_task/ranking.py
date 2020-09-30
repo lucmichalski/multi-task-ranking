@@ -292,9 +292,11 @@ def train_cls_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/dat
                 loss = loss_func(outputs.cpu(), labels)
                 # Getting gradients w.r.t. parameters
                 loss.sum().backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
                 optimizer.step()
                 scheduler.step()
+
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+
 
                 train_loss_total += loss.sum().item()
 
