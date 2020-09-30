@@ -165,6 +165,7 @@ def train_cls_model(batch_size=256, lr=0.005, parent_dir_path='/nfs/trec_car/dat
         print('Build dev data')
         dev_dataset_path = parent_dir_path + '{}_biencode_ranker_dev_dataset.pt'.format(task)
         dev_run_data_path = parent_dir_path + '{}_biencode_ranker_dev_run_data.txt'.format(task)
+        dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
         if os.path.exists(dev_dataset_path):
             print('-> loading existing dataset: {}'.format(dev_dataset_path))
             dev_dataset = torch.load(dev_dataset_path)
@@ -178,7 +179,6 @@ def train_cls_model(batch_size=256, lr=0.005, parent_dir_path='/nfs/trec_car/dat
             dev_input_list = []
             dev_labels_list = []
             dev_run_data = []
-            dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
             for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
 
                 query_dict = get_dict_from_json(path=dev_query_path)
@@ -206,6 +206,7 @@ def train_cls_model(batch_size=256, lr=0.005, parent_dir_path='/nfs/trec_car/dat
         print('Build test data')
         test_dataset_path = parent_dir_path + '{}_biencode_ranker_test_dataset.pt'.format(task)
         test_run_data_path = parent_dir_path + '{}_biencode_ranker_test_run_data.txt'.format(task)
+        test_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(test_qrels_path)
 
         if os.path.exists(test_dataset_path):
             print('-> loading existing dataset: {}'.format(test_dataset_path))
@@ -220,7 +221,6 @@ def train_cls_model(batch_size=256, lr=0.005, parent_dir_path='/nfs/trec_car/dat
             test_input_list = []
             test_labels_list = []
             test_run_data = []
-            test_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(test_qrels_path)
             for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if file_name in f]:
 
                 query_dict = get_dict_from_json(path=test_query_path)
@@ -247,9 +247,7 @@ def train_cls_model(batch_size=256, lr=0.005, parent_dir_path='/nfs/trec_car/dat
         model = torch.nn.Sequential(
             torch.nn.Linear(768, 768),
             torch.nn.ReLU(),
-            torch.nn.Linear(768, 256),
-            torch.nn.ReLU(),
-            torch.nn.Linear(256, 64),
+            torch.nn.Linear(768, 64),
             torch.nn.ReLU(),
             torch.nn.Linear(64, 1),
         )
