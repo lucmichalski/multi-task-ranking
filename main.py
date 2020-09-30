@@ -17,14 +17,13 @@ if __name__ == '__main__':
     passage_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/epoch1_batch14000/'
     entity_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/full_data_v2_hierarchical_10000_hits_300_v2_lr_2e6_num_warmup_steps_0.1_new_pipeline/epoch1_batch420000/'
     MultiTaskDatasetByQuery().build_dataset_by_query(dir_path=dir_path,
-                                                     max_rank=100,
+                                                     max_rank=1000,
                                                      batch_size=64,
-                                                     bi_encode=True,
                                                      passage_model_path=passage_model_path,
                                                      entity_model_path=entity_model_path
                                                      )
 
-    MultiTaskDatasetByQuery().build_dataset_by_query(dir_path=dir_path, max_rank=1000, batch_size=64, bi_encode=True)
+
 
     # =====================================================
     # ================ TREC CAR PROCESSING=================

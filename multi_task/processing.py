@@ -477,7 +477,7 @@ class MultiTaskDatasetByQuery():
         return run_dict, qrels_dict
 
 
-    def build_dataset_by_query(self, dir_path, max_rank=100, batch_size=64, bi_encode=False, passage_model_path=None,
+    def build_dataset_by_query(self, dir_path, max_rank=100, batch_size=64, passage_model_path=None,
                                entity_model_path=None):
         """ """
 
