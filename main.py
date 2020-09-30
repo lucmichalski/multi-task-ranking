@@ -13,15 +13,15 @@ from multi_task.processing import MultiTaskDatasetByQuery
 
 if __name__ == '__main__':
 
-    dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/'
-    passage_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/epoch1_batch14000/'
-    entity_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/full_data_v2_hierarchical_10000_hits_300_v2_lr_2e6_num_warmup_steps_0.1_new_pipeline/epoch1_batch420000/'
-    MultiTaskDatasetByQuery().build_dataset_by_query(dir_path=dir_path,
-                                                     max_rank=1000,
-                                                     batch_size=64,
-                                                     passage_model_path=passage_model_path,
-                                                     entity_model_path=entity_model_path
-                                                     )
+    # dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/'
+    # passage_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/epoch1_batch14000/'
+    # entity_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/full_data_v2_hierarchical_10000_hits_300_v2_lr_2e6_num_warmup_steps_0.1_new_pipeline/epoch1_batch420000/'
+    # MultiTaskDatasetByQuery().build_dataset_by_query(dir_path=dir_path,
+    #                                                  max_rank=1000,
+    #                                                  batch_size=64,
+    #                                                  passage_model_path=passage_model_path,
+    #                                                  entity_model_path=entity_model_path
+    #                                                  )
 
 
 
@@ -56,51 +56,51 @@ if __name__ == '__main__':
     # =====================================================
     # ==================== TREC CAR =======================
     # =====================================================
-    # gpus = 3
-    # model_path = None
-    # dev_batch_size = 64 * 4 * gpus
-    # train_batch_size = 8 * gpus
-    #
-    # train_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks/'
-    # dev_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300_chunks/'
-    # dev_qrels_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
-    # dev_run_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300.run'
-    #
-    # train_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks/'
-    # dev_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_hierarchical_passage_dev_100_chunks/'
-    # dev_qrels_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
-    # dev_run_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run'
-    #
-    # experiments = FineTuningReRankingExperiments(
-    #     model_path = None,
-    #     extra_layers = False,
-    #     dev_batch_size = dev_batch_size,
-    #     train_batch_size = train_batch_size,
-    #
-    #     train_data_dir_path_entity = train_data_dir_path_entity,
-    #     dev_data_dir_path_entity = dev_data_dir_path_entity,
-    #     dev_qrels_path_entity = dev_qrels_path_entity,
-    #     dev_run_path_entity = dev_run_path_entity,
-    #
-    #     train_data_dir_path_passage = train_data_dir_path_passage,
-    #     dev_data_dir_path_passage = dev_data_dir_path_passage,
-    #     dev_qrels_path_passage = dev_qrels_path_passage,
-    #     dev_run_path_passage = dev_run_path_passage,
-    # )
-    #
-    # epochs = 2
-    # lr = 8e-6
-    # experiments_dir = '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/'
-    # experiment_name = 'multi_task_ranking_bert_no_sigmoid_{}epoch+{}lr'.format(epochs, lr)
-    # experiments.run_experiment_multi_head(
-    #     epochs=epochs,
-    #     lr=lr,
-    #     eps=1e-8,
-    #     weight_decay=0.01,
-    #     warmup_percentage=0.1,
-    #     experiments_dir=experiments_dir,
-    #     experiment_name=experiment_name,
-    #     logging_steps=500)
+    gpus = 3
+    model_path = None
+    dev_batch_size = 64 * 4 * gpus
+    train_batch_size = 8 * gpus
+
+    train_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_train_data/benchmarkY1_train_entity_synthetic_300_chunks/'
+    dev_data_dir_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300_chunks/'
+    dev_qrels_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic.qrels'
+    dev_run_path_entity = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_entity_dev_data/benchmarkY1_dev_entity_synthetic_300.run'
+
+    train_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_train_data/benchmarkY1_hierarchical_passage_train_100_chunks/'
+    dev_data_dir_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_hierarchical_passage_dev_100_chunks/'
+    dev_qrels_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
+    dev_run_path_passage = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage_100.run'
+
+    experiments = FineTuningReRankingExperiments(
+        model_path = None,
+        extra_layers = False,
+        dev_batch_size = dev_batch_size,
+        train_batch_size = train_batch_size,
+
+        train_data_dir_path_entity = train_data_dir_path_entity,
+        dev_data_dir_path_entity = dev_data_dir_path_entity,
+        dev_qrels_path_entity = dev_qrels_path_entity,
+        dev_run_path_entity = dev_run_path_entity,
+
+        train_data_dir_path_passage = train_data_dir_path_passage,
+        dev_data_dir_path_passage = dev_data_dir_path_passage,
+        dev_qrels_path_passage = dev_qrels_path_passage,
+        dev_run_path_passage = dev_run_path_passage,
+    )
+
+    epochs = 2
+    lr = 1e-5
+    experiments_dir = '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/'
+    experiment_name = 'multi_task_ranking_bert_no_sigmoid_{}epoch+{}lr'.format(epochs, lr)
+    experiments.run_experiment_multi_head(
+        epochs=epochs,
+        lr=lr,
+        eps=1e-8,
+        weight_decay=0.01,
+        warmup_percentage=0.1,
+        experiments_dir=experiments_dir,
+        experiment_name=experiment_name,
+        logging_steps=500)
 
     # =====================================================
     # =====================================================
