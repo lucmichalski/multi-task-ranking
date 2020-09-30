@@ -80,7 +80,7 @@ if __name__ == '__main__':
     )
 
     epochs = 2
-    lr = 5e-6
+    lr = 8e-6
     experiments_dir = '/nfs/trec_car/data/entity_ranking/testY1_hierarchical_passage_data/exp/'
     experiment_name = 'multi_task_ranking_bert_no_sigmoid_{}epoch+{}lr'.format(epochs, lr)
     experiments.run_experiment_multi_head(
