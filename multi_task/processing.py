@@ -571,17 +571,11 @@ class MultiTaskDatasetByQuery():
                         query_dataset['passage'][doc_id]['relevant'] = 0
 
                     text = search_tools_passage.get_contents_from_docid(doc_id=doc_id)
-                    if bi_encode == False:
-                        input_ids = tokenizer.encode(text=text,
-                                                     max_length=512,
-                                                     add_special_tokens=True,
-                                                     pad_to_max_length=True)
-                    else:
-                        input_ids = tokenizer.encode(text=query,
-                                                     text_pair=text,
-                                                     max_length=512,
-                                                     add_special_tokens=True,
-                                                     pad_to_max_length=True)
+                    input_ids = tokenizer.encode(text=query,
+                                                 text_pair=text,
+                                                 max_length=512,
+                                                 add_special_tokens=True,
+                                                 pad_to_max_length=True)
                     # Add CLS data.
                     self.cls_id_list.append([self.cls_id])
                     self.token_list.append(input_ids)
@@ -613,17 +607,11 @@ class MultiTaskDatasetByQuery():
 
                     text_full = search_tools_entity.get_contents_from_docid(doc_id=doc_id)
                     text = text_full.split('\n')[0]
-                    if bi_encode == False:
-                        input_ids = tokenizer.encode(text=text,
-                                                     max_length=512,
-                                                     add_special_tokens=True,
-                                                     pad_to_max_length=True)
-                    else:
-                        input_ids = tokenizer.encode(text=query,
-                                                     text_pair=text,
-                                                     max_length=512,
-                                                     add_special_tokens=True,
-                                                     pad_to_max_length=True)
+                    input_ids = tokenizer.encode(text=query,
+                                                 text_pair=text,
+                                                 max_length=512,
+                                                 add_special_tokens=True,
+                                                 pad_to_max_length=True)
                     # Add CLS data.
                     self.cls_id_list.append([self.cls_id])
                     self.token_list.append(input_ids)
@@ -673,10 +661,7 @@ class MultiTaskDatasetByQuery():
                     passage_cls_id = query_dataset['passage'][doc_id]['cls_id']
                     query_dataset['passage'][doc_id]['cls_token'] = cls_map[passage_cls_id]
 
-                if bi_encode == False:
-                    query_json_path = dataset_dir_path + '{}_data_ranker.json'.format(query_i)
-                else:
-                    query_json_path = dataset_dir_path + '{}_data_bi_encode_ranker.json'.format(query_i)
+                query_json_path = dataset_dir_path + '{}_data_bi_encode_ranker.json'.format(query_i)
                 with open(query_json_path, 'w') as f:
                     json.dump(query_dataset, f, indent=4)
 
