@@ -273,6 +273,8 @@ def train_cls_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/dat
             train_batches = len(train_data_loader)
             dev_batches = len(dev_data_loader)
             optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, train_batches, eta_min=lr)
+
             loss_func = torch.nn.MSELoss()  # this is for regression mean squared loss
             train_loss_total = 0.0
         #
@@ -292,6 +294,7 @@ def train_cls_model(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/dat
                 loss.sum().backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
                 optimizer.step()
+                scheduler.step()
 
                 train_loss_total += loss.sum().item()
 
