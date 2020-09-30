@@ -232,6 +232,14 @@ def train_cls_model(batch_size=256, lr=0.005, parent_dir_path='/nfs/trec_car/dat
             torch.nn.Linear(64, 1),
         )
 
+        model = torch.nn.Sequential(
+            torch.nn.Linear(768, 768),
+            # torch.nn.ReLU(),
+            # torch.nn.Linear(768, 64),
+            torch.nn.ReLU(),
+            torch.nn.Linear(768, 1),
+        )
+
         # Use GPUs if available.
         if torch.cuda.is_available():
             # Tell PyTorch to use the GPU.
