@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # dataset = 'test'
     # rerank_runs(dataset=dataset)
     # this is the run
-    batch_sizes = [64, 128, 256]
+    batch_sizes = [32, 64, 256]
     lrs = [0.00001, 0.0001, 0.0005, 0.001, 0.005]
     for batch_size in batch_sizes:
         for lr in lrs:
