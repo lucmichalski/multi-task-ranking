@@ -109,7 +109,7 @@ def train_cls_model(batch_size=64, lr=0.005, parent_dir_path='/nfs/trec_car/data
         print('============= {} ================'.format(task))
         print('===================================')
 
-        test_run_path = test_dir_path + 'cls_feedforward_biencode_ranker_{}.run'.format(task)
+        test_run_path = test_dir_path + 'cls_feedforward_biencode_ranker_{}_lr_{}_batch_{}.run'.format(task, lr, batch_size)
         file_name = 'data_bi_encode_ranker.json'
 
         dev_qrels_path = dataset_metadata['{}_dev'.format(task)][1]
@@ -117,7 +117,7 @@ def train_cls_model(batch_size=64, lr=0.005, parent_dir_path='/nfs/trec_car/data
 
         # ==== Build training data ====
         print('Build training data')
-        training_dataset_path = parent_dir_path + '{}_biencode_ranker_train_dataset_lr_{}_batch_{}.pt'.format(task, lr, batch_size)
+        training_dataset_path = parent_dir_path + '{}_biencode_ranker_train_dataset.pt'.format(task)
 
         if os.path.exists(training_dataset_path):
             print('-> loading existing dataset: {}'.format(training_dataset_path))
