@@ -270,7 +270,7 @@ class DatasetProcessing:
 
 
     def build_news_dataset(self, training_dataset=False, chuck_topic_size=1e8, ranking_type='passage',
-                           query_type='title+contents', car_index_path=None, pagasus_dict_path=None):
+                           query_type='title+contents', car_index_path=None, keyword_dict_path=None):
         """ Build TREC News Track dataset and save data chucks of data_dir_path. If sequential flag is True (validation
         dataset) and if False (training dataset). """
 
@@ -286,8 +286,8 @@ class DatasetProcessing:
         # Number of topics processed in each chuck before being processed.
         self.chuck_topic_size = chuck_topic_size
 
-        if pagasus_dict_path != None:
-            with open(pagasus_dict_path, 'r') as f:
+        if keyword_dict_path != None:
+            with open(keyword_dict_path, 'r') as f:
                 pagasus_dict = json.load(f)
 
         search_tools_car = SearchTools(index_path=car_index_path)
@@ -311,11 +311,11 @@ class DatasetProcessing:
                         # write final chuck to file.
                         self.__write_chuck_to_directory()
 
-                if pagasus_dict_path == None:
+                if keyword_dict_path == None:
                     query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
                     query = self.search_tools.process_query_news(query_dict=query_dict, query_type=query_type)
                 else:
-                    query = pagasus_dict[query_id]
+                    query = pagasus_dict[query_id]['query_100_words']
 
                 # Extract text from index using doc_id.
                 if ranking_type == 'passage':
