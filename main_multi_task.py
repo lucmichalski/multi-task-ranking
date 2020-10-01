@@ -17,11 +17,14 @@ if __name__ == '__main__':
     # dataset = 'test'
     # rerank_runs(dataset=dataset)
     # this is the run
-    batch_sizes = [32, 64, 256]
-    lrs = [0.00001, 0.0001, 0.0005, 0.001, 0.005]
-    for batch_size in batch_sizes:
-        for lr in lrs:
-            train_cls_model(batch_size=batch_size, lr=lr)
+    # batch_sizes = [32, 64, 256]
+    # lrs = [0.00001, 0.0001, 0.0005, 0.001, 0.005]
+    # for batch_size in batch_sizes:
+    #     for lr in lrs:
+    #         train_cls_model(batch_size=batch_size, lr=lr)
     # train_cls_model(bi_encode=True)
     # train_cls_model_max_combo()
+    lr = 0.0001
+    batch_size = 64
+    train_cls_model(batch_size=batch_size, lr=lr)
 
