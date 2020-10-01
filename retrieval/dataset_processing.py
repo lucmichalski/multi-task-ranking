@@ -315,8 +315,11 @@ class DatasetProcessing:
                     query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
                     query = self.search_tools.process_query_news(query_dict=query_dict, query_type=query_type)
                 else:
-                    print(query_id)
-                    query = pagasus_dict[query_id]['query_100_words']
+                    try:
+                        query = pagasus_dict[query_id]['query_100_words']
+                    except:
+                        query_dict = json.loads(self.search_tools.get_contents_from_docid(doc_id=query_id))
+                        query = self.search_tools.process_query_news(query_dict=query_dict, query_type=query_type)
 
                 # Extract text from index using doc_id.
                 if ranking_type == 'passage':
