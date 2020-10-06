@@ -13,6 +13,9 @@ from multi_task.processing import MultiTaskDatasetByQuery
 
 if __name__ == '__main__':
     from multi_task.ranking import rerank_runs, train_cls_model_max_combo, train_cls_model
+    import os
+
+    os.system('pip install scipy')
 
     dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'
     # passage_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/epoch1_batch14000/'
