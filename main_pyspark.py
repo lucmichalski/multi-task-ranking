@@ -12,7 +12,7 @@ from pyspark_processing.multi_task import build_passage_to_entity_maps
 
 spark_drive_gbs = 50
 spark_executor_gbs = 3
-cores = 14
+cores = 10
 
 print('\n//////// RUNNING WITH CORES {} //////////'.format(cores))
 spark = SparkSession.\
