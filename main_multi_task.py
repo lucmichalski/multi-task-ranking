@@ -15,7 +15,7 @@ if __name__ == '__main__':
     #                                                  )
 
     dataset = 'test'
-    batch_sizes = [256, 512]
+    batch_sizes = [256, 1024]
     lrs = [0.00001, 0.0001, 0.0005]
     for batch_size in batch_sizes:
         for lr in lrs:
