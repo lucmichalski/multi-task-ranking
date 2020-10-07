@@ -734,6 +734,7 @@ class MultiTaskDatasetByQuery():
                     print("URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
                     query_decoded = search_tools_passage.process_query_car(q=query)
 
+                print('--- Add passage & entity data ---')
                 for passage_id in query_dataset['passage'].keys():
                     # --- Add passage ---
                     passage_text = search_tools_passage.get_contents_from_docid(doc_id=passage_id)
@@ -800,6 +801,7 @@ class MultiTaskDatasetByQuery():
                         self.cls_id += 1
 
                 # --- Build dataloaders ---
+                print('--- Build dataloaders ---')
                 passage_tensor_dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
                 passage_data_loader = DataLoader(passage_tensor_dataset,
                                                  sampler=SequentialSampler(passage_tensor_dataset),
@@ -810,6 +812,7 @@ class MultiTaskDatasetByQuery():
                                                 sampler=SequentialSampler(entity_tensor_dataset),
                                                 batch_size=batch_size)
 
+                print('--- BERT ---')
                 id_list = []
                 cls_tokens = []
                 # Passage BERT.
@@ -832,6 +835,7 @@ class MultiTaskDatasetByQuery():
                     id_list.append(b_id_list)
                     cls_tokens.append(b_cls_tokens[1].cpu())
 
+                print('--- PROCESS CLS TOKENS ---')
                 # Build CLS map.
                 id_list_tensor = torch.cat(id_list).numpy().tolist()
                 cls_tokens_tensor = torch.cat(cls_tokens).numpy().tolist()
@@ -848,6 +852,7 @@ class MultiTaskDatasetByQuery():
                         entity_cls_id = entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['cls_id']
                         entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['cls_token'] = cls_map[entity_cls_id]
 
+                print('--- TO JSON ---')
                 query_json_path = dataset_dir_path + '{}_data_bi_encode_ranker_entity_context.json'.format(query_i)
                 with open(query_json_path, 'w') as f:
                     json.dump(entity_context_dataset, f, indent=4)
