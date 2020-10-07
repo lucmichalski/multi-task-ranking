@@ -764,13 +764,19 @@ class MultiTaskDatasetByQuery():
                     if len(entity_links) == 0:
                         # search
                         entity_links = [search_tools_entity.search(query=passage_text, hits=1)[0][0]]
-                        print('Synthetic entity links:')
-                        print(entity_links)
+                        print('Synthetic entity links:', entity_links)
 
                     for entity_id in list(set(entity_links)):
-                        print(entity_id)
-                        entity_text_full = search_tools_entity.get_contents_from_docid(doc_id=entity_id)
-                        entity_text = entity_text_full.split('\n')[0]
+                        try:
+                            entity_text_full = search_tools_entity.get_contents_from_docid(doc_id=entity_id)
+                            entity_text = entity_text_full.split('\n')[0]
+                        except:
+                            try:
+                                entity_text = search_tools_entity.decode_query_car(q=entity_id)
+                            except ValueError:
+                                print(
+                                    "URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
+                                entity_text = search_tools_entity.process_query_car(q=entity_id)
                         entity_input_ids = tokenizer.encode(text=query_decoded,
                                                              text_pair=entity_text,
                                                              max_length=512,
