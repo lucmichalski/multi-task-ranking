@@ -699,8 +699,8 @@ class MultiTaskDatasetByQuery():
             dataset_dir_path = dir_path + '{}_data/'.format(dataset)
 
             passage_to_entity_path = dataset_dir_path + 'passage_to_entity.json'
-            with open(passage_to_entity_path, 'w') as f:
-                passage_to_entity_dict = json.loads(f)
+            with open(passage_to_entity_path, 'r') as f:
+                passage_to_entity_dict = json.load(f)
 
             entity_run_dict, entity_qrels_dict = self. get_task_run_and_qrels(dataset=dataset, task='entity', max_rank=max_rank)
 
