@@ -26,7 +26,7 @@ spark = SparkSession.\
 
 if __name__ == '__main__':
     content_path = '/nfs/trec_car/data/test_entity/full_data_v3_with_datasets_contents_v4/'
-    dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/'
+    dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'
     max_rank = 1000
     build_passage_to_entity_maps(content_path=content_path, spark=spark, max_rank=max_rank, dir_path=dir_path)
 

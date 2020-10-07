@@ -54,7 +54,7 @@ def build_passage_to_entity_maps(content_path, spark, max_rank, dir_path, datase
     df_entity = df.withColumn("entities", get_ents("content_bytearray"))
     df_entity.printSchema()
 
-    for dataset in ['dev', 'test', 'train']:
+    for dataset in ['dev']:
         dateset_dir = dir_path + '{}_data/'.format(dataset)
         passage_name = 'passage' + '_{}'.format(dataset)
         passage_path = dataset_metadata[passage_name][0]
