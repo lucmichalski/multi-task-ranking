@@ -734,29 +734,30 @@ class MultiTaskDatasetByQuery():
                     print("URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
                     query_decoded = search_tools_passage.process_query_car(q=query)
 
-                for doc_id in query_dataset['passage'].keys():
+                for passage_id in query_dataset['passage'].keys():
+                    print(passage_id)
                     # --- Add passage ---
-                    passage_text = search_tools_passage.get_contents_from_docid(doc_id=doc_id)
+                    passage_text = search_tools_passage.get_contents_from_docid(doc_id=passage_id)
                     passage_input_ids = tokenizer.encode(text=query_decoded,
                                                          text_pair=passage_text,
                                                          max_length=512,
                                                          add_special_tokens=True,
                                                          pad_to_max_length=True)
 
-                    entity_context_dataset['query']['passage'][doc_id] = {}
+                    entity_context_dataset['query']['passage'][passage_id] = {}
 
-                    entity_context_dataset['query']['passage'][doc_id]['rank'] = query_dataset['passage'][doc_id]['rank']
-                    entity_context_dataset['query']['passage'][doc_id]['relevant'] = query_dataset['passage'][doc_id]['relevant']
-                    entity_context_dataset['query']['passage'][doc_id]['cls_id'] = self.cls_id
+                    entity_context_dataset['query']['passage'][passage_id]['rank'] = query_dataset['passage'][passage_id]['rank']
+                    entity_context_dataset['query']['passage'][passage_id]['relevant'] = query_dataset['passage'][passage_id]['relevant']
+                    entity_context_dataset['query']['passage'][passage_id]['cls_id'] = self.cls_id
 
                     self.cls_id_list.append([self.cls_id])
                     self.token_list.append(passage_input_ids)
                     self.cls_id += 1
 
                     # --- Add entities ---
-                    entity_context_dataset['query']['passage'][doc_id]['entity'] = {}
-                    if doc_id in passage_to_entity_dict:
-                        entity_links = passage_to_entity_dict[doc_id]
+                    entity_context_dataset['query']['passage'][passage_id]['entity'] = {}
+                    if passage_id in passage_to_entity_dict:
+                        entity_links = passage_to_entity_dict[passage_id]
                     else:
                         entity_links = []
 
@@ -767,6 +768,7 @@ class MultiTaskDatasetByQuery():
                         print(entity_links)
 
                     for entity_id in list(set(entity_links)):
+                        print(entity_id)
                         entity_text_full = search_tools_entity.get_contents_from_docid(doc_id=entity_id)
                         entity_text = entity_text_full.split('\n')[0]
                         entity_input_ids = tokenizer.encode(text=query_decoded,
@@ -775,15 +777,15 @@ class MultiTaskDatasetByQuery():
                                                              add_special_tokens=True,
                                                              pad_to_max_length=True)
 
-                        entity_context_dataset['query']['passage'][doc_id]['entity'][entity_id] = {}
-                        entity_context_dataset['query']['passage'][doc_id]['entity'][entity_id]['cls_id'] = self.cls_id
+                        entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id] = {}
+                        entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['cls_id'] = self.cls_id
                         if query in entity_qrels_dict:
                             if entity_id in entity_qrels_dict[query]:
-                                entity_context_dataset['query']['passage'][doc_id]['entity'][entity_id]['relevant'] = 1
+                                entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['relevant'] = 1
                             else:
-                                entity_context_dataset['query']['passage'][doc_id]['entity'][entity_id]['relevant'] = 0
+                                entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['relevant'] = 0
                         else:
-                            entity_context_dataset['query']['passage'][doc_id]['entity'][entity_id]['relevant'] = 0
+                            entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['relevant'] = 0
 
                         self.cls_id_list_ent_context.append([self.cls_id])
                         self.token_list_ent_context.append(entity_input_ids)
@@ -830,13 +832,13 @@ class MultiTaskDatasetByQuery():
                     cls_map[int(cls_i[0])] = cls_token
 
                 # ======== PROCESS CLS TOKENS ========
-                for doc_id in entity_context_dataset['query']['passage'].keys():
-                    passage_cls_id = entity_context_dataset['query']['passage'][doc_id]['cls_id']
-                    entity_context_dataset['query']['passage'][doc_id]['cls_token'] = cls_map[passage_cls_id]
+                for passage_id in entity_context_dataset['query']['passage'].keys():
+                    passage_cls_id = entity_context_dataset['query']['passage'][passage_id]['cls_id']
+                    entity_context_dataset['query']['passage'][passage_id]['cls_token'] = cls_map[passage_cls_id]
 
-                    for entity_id in query_dataset['passage'][doc_id]['entity'].keys():
-                        entity_cls_id = entity_context_dataset['passage'][doc_id]['entity'][entity_id]['cls_id']
-                        entity_context_dataset['passage'][doc_id]['entity'][entity_id]['cls_token'] = cls_map[entity_cls_id]
+                    for entity_id in query_dataset['passage'][passage_id]['entity'].keys():
+                        entity_cls_id = entity_context_dataset['passage'][passage_id]['entity'][entity_id]['cls_id']
+                        entity_context_dataset['passage'][passage_id]['entity'][entity_id]['cls_token'] = cls_map[entity_cls_id]
 
                 query_json_path = dataset_dir_path + '{}_data_bi_encode_ranker_entity_context.json'.format(query_i)
                 with open(query_json_path, 'w') as f:
