@@ -767,6 +767,7 @@ class MultiTaskDatasetByQuery():
                         print('Synthetic entity links:', entity_links)
 
                     for entity_id in list(set(entity_links)):
+                        print(entity_id)
                         try:
                             entity_text_full = search_tools_entity.get_contents_from_docid(doc_id=entity_id)
                             entity_text = entity_text_full.split('\n')[0]
