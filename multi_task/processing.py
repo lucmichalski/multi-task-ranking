@@ -853,7 +853,6 @@ class MultiTaskDatasetByQuery():
                 query_json_path = dataset_dir_path + '{}_data_bi_encode_ranker_entity_context.json'.format(query_i)
                 with open(query_json_path, 'w') as f:
                     json.dump(entity_context_dataset, f, indent=4)
-                break
 
 
 def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
