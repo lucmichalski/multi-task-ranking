@@ -245,7 +245,7 @@ if __name__ == '__main__':
     #                               car_index_path=car_index_path,
     #                               keyword_dict_path=keyword_dict_path)
 
-    folds = [2,3,4]
+    folds = [3,4]
     gpus = 2
     for task in ['entity']:
         for fold in folds:
