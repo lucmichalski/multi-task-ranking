@@ -717,6 +717,8 @@ class MultiTaskDatasetByQuery():
                 self.cls_id = 0
                 self.cls_id_list = []
                 self.token_list = []
+                self.token_list_ent_context = []
+                self.cls_id_list_ent_context = []
 
                 with open(query_path, 'r') as f:
                     query_dataset = json.load(f)
