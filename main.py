@@ -12,9 +12,9 @@ from multi_task.processing import MultiTaskDatasetByQuery
 
 
 if __name__ == '__main__':
-    from multi_task.ranking import rerank_runs, train_cls_model_max_combo, train_cls_model
-
-    dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'
+    # from multi_task.ranking import rerank_runs, train_cls_model_max_combo, train_cls_model
+    #
+    # dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'
     # passage_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/epoch1_batch14000/'
     # entity_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/full_data_v2_hierarchical_10000_hits_300_v2_lr_2e6_num_warmup_steps_0.1_new_pipeline/epoch1_batch420000/'
     # MultiTaskDatasetByQuery().build_dataset_by_query(dir_path=dir_path,
@@ -25,12 +25,12 @@ if __name__ == '__main__':
     #                                                  entity_model_path=entity_model_path
     #                                                  )
 
-    dataset = 'test'
-    batch_sizes = [256, 1024]
-    lrs = [0.00001, 0.0001, 0.0005, 0.001]
-    for batch_size in batch_sizes:
-        for lr in lrs:
-            train_cls_model(batch_size=batch_size, lr=lr)
+    # dataset = 'test'
+    # batch_sizes = [256, 1024]
+    # lrs = [0.00001, 0.0001, 0.0005, 0.001]
+    # for batch_size in batch_sizes:
+    #     for lr in lrs:
+    #         train_cls_model(batch_size=batch_size, lr=lr)
 
     # dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/'
     # passage_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/epoch1_batch14000/'
@@ -245,63 +245,63 @@ if __name__ == '__main__':
     #                               car_index_path=car_index_path,
     #                               keyword_dict_path=keyword_dict_path)
 
-    # folds = [0,1,2,3,4]
-    # gpus = 2
-    # for task in ['passage', 'entity']:
-    #     for fold in folds:
-    #         model_path = None
-    #         dev_batch_size = 64 * gpus * 4
-    #         train_batch_size = 8 * gpus
-    #
-    #         train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_ranking_data_keyword/'.format(fold)
-    #         dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_ranking_data_keyword/'.format(fold)
-    #         dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid.qrels'.format(fold)
-    #         dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_BM25_ranking_1000.run'.format(fold)
-    #
-    #         train_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_train_bert_ranking_data_keyword/'.format(fold)
-    #         dev_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_bert_ranking_data_keyword/'.format(fold)
-    #         dev_qrels_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.qrels'.format(fold)
-    #         dev_run_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_ranking_1000.run'.format(fold)
-    #
-    #         if task == 'entity':
-    #             experiments = FineTuningReRankingExperiments(
-    #                 model_path = None,
-    #                 extra_layers = False,
-    #                 dev_batch_size = dev_batch_size,
-    #                 train_batch_size = train_batch_size,
-    #
-    #                 train_data_dir_path_entity = train_data_dir_path_entity,
-    #                 dev_data_dir_path_entity = dev_data_dir_path_entity,
-    #                 dev_qrels_path_entity = dev_qrels_path_entity,
-    #                 dev_run_path_entity = dev_run_path_entity,
-    #             )
-    #         else:
-    #             experiments = FineTuningReRankingExperiments(
-    #                 model_path=None,
-    #                 extra_layers=False,
-    #                 dev_batch_size=dev_batch_size,
-    #                 train_batch_size=train_batch_size,
-    #
-    #                 train_data_dir_path_passage = train_data_dir_path_passage,
-    #                 dev_data_dir_path_passage = dev_data_dir_path_passage,
-    #                 dev_qrels_path_passage = dev_qrels_path_passage,
-    #                 dev_run_path_passage = dev_run_path_passage,
-    #             )
-    #
-    #         epochs = 2
-    #         lr = 8e-6
-    #         experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
-    #         experiment_name = '{}_ranking_keyword_query_bert_train_{}epoch+{}lr'.format(task, epochs, lr)
-    #         experiments.run_experiment_single_head(
-    #             head_flag=task,
-    #             epochs=epochs,
-    #             lr=lr,
-    #             eps=1e-8,
-    #             weight_decay=0.01,
-    #             warmup_percentage=0.1,
-    #             experiments_dir=experiments_dir,
-    #             experiment_name=experiment_name,
-    #             logging_steps=500)
+    folds = [2,3,4]
+    gpus = 2
+    for task in ['entity']:
+        for fold in folds:
+            model_path = None
+            dev_batch_size = 64 * gpus * 4
+            train_batch_size = 8 * gpus
+
+            train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_ranking_data_keyword/'.format(fold)
+            dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_ranking_data_keyword/'.format(fold)
+            dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid.qrels'.format(fold)
+            dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_BM25_ranking_1000.run'.format(fold)
+
+            train_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_train_bert_ranking_data_keyword/'.format(fold)
+            dev_data_dir_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_bert_ranking_data_keyword/'.format(fold)
+            dev_qrels_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid.qrels'.format(fold)
+            dev_run_path_passage = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_valid_ranking_1000.run'.format(fold)
+
+            if task == 'entity':
+                experiments = FineTuningReRankingExperiments(
+                    model_path = None,
+                    extra_layers = False,
+                    dev_batch_size = dev_batch_size,
+                    train_batch_size = train_batch_size,
+
+                    train_data_dir_path_entity = train_data_dir_path_entity,
+                    dev_data_dir_path_entity = dev_data_dir_path_entity,
+                    dev_qrels_path_entity = dev_qrels_path_entity,
+                    dev_run_path_entity = dev_run_path_entity,
+                )
+            else:
+                experiments = FineTuningReRankingExperiments(
+                    model_path=None,
+                    extra_layers=False,
+                    dev_batch_size=dev_batch_size,
+                    train_batch_size=train_batch_size,
+
+                    train_data_dir_path_passage = train_data_dir_path_passage,
+                    dev_data_dir_path_passage = dev_data_dir_path_passage,
+                    dev_qrels_path_passage = dev_qrels_path_passage,
+                    dev_run_path_passage = dev_run_path_passage,
+                )
+
+            epochs = 2
+            lr = 8e-6
+            experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
+            experiment_name = '{}_ranking_keyword_query_bert_train_{}epoch+{}lr'.format(task, epochs, lr)
+            experiments.run_experiment_single_head(
+                head_flag=task,
+                epochs=epochs,
+                lr=lr,
+                eps=1e-8,
+                weight_decay=0.01,
+                warmup_percentage=0.1,
+                experiments_dir=experiments_dir,
+                experiment_name=experiment_name,
+                logging_steps=500)
 
     # gpus = 3
     # passage_model_paths = [
