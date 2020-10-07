@@ -735,7 +735,6 @@ class MultiTaskDatasetByQuery():
                     query_decoded = search_tools_passage.process_query_car(q=query)
 
                 for passage_id in query_dataset['passage'].keys():
-                    print(passage_id)
                     # --- Add passage ---
                     passage_text = search_tools_passage.get_contents_from_docid(doc_id=passage_id)
                     passage_input_ids = tokenizer.encode(text=query_decoded,
@@ -770,7 +769,6 @@ class MultiTaskDatasetByQuery():
                         print('Synthetic entity links:', entity_links)
 
                     for entity_id in list(set(entity_links)):
-                        print(entity_id)
                         try:
                             entity_text_full = search_tools_entity.get_contents_from_docid(doc_id=entity_id)
                             entity_text = entity_text_full.split('\n')[0]
