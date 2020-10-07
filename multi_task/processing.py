@@ -846,9 +846,9 @@ class MultiTaskDatasetByQuery():
                     passage_cls_id = entity_context_dataset['query']['passage'][passage_id]['cls_id']
                     entity_context_dataset['query']['passage'][passage_id]['cls_token'] = cls_map[passage_cls_id]
 
-                    for entity_id in entity_context_dataset['passage'][passage_id]['entity'].keys():
-                        entity_cls_id = entity_context_dataset['passage'][passage_id]['entity'][entity_id]['cls_id']
-                        entity_context_dataset['passage'][passage_id]['entity'][entity_id]['cls_token'] = cls_map[entity_cls_id]
+                    for entity_id in entity_context_dataset['query']['passage'][passage_id]['entity'].keys():
+                        entity_cls_id = entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['cls_id']
+                        entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['cls_token'] = cls_map[entity_cls_id]
 
                 query_json_path = dataset_dir_path + '{}_data_bi_encode_ranker_entity_context.json'.format(query_i)
                 with open(query_json_path, 'w') as f:
