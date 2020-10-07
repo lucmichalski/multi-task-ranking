@@ -745,8 +745,8 @@ class MultiTaskDatasetByQuery():
 
                     entity_context_dataset['query']['passage'][doc_id] = {}
 
-                    entity_context_dataset['query']['passage'][doc_id]['rank'] = query_dataset['passage']['rank']
-                    entity_context_dataset['query']['passage'][doc_id]['relevant'] = query_dataset['passage']['relevant']
+                    entity_context_dataset['query']['passage'][doc_id]['rank'] = query_dataset['passage'][doc_id]['rank']
+                    entity_context_dataset['query']['passage'][doc_id]['relevant'] = query_dataset['passage'][doc_id]['relevant']
                     entity_context_dataset['query']['passage'][doc_id]['cls_id'] = self.cls_id
 
                     self.cls_id_list.append([self.cls_id])
