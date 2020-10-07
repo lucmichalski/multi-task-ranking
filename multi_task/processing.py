@@ -846,7 +846,7 @@ class MultiTaskDatasetByQuery():
                     passage_cls_id = entity_context_dataset['query']['passage'][passage_id]['cls_id']
                     entity_context_dataset['query']['passage'][passage_id]['cls_token'] = cls_map[passage_cls_id]
 
-                    for entity_id in query_dataset['passage'][passage_id]['entity'].keys():
+                    for entity_id in entity_context_dataset['passage'][passage_id]['entity'].keys():
                         entity_cls_id = entity_context_dataset['passage'][passage_id]['entity'][entity_id]['cls_id']
                         entity_context_dataset['passage'][passage_id]['entity'][entity_id]['cls_token'] = cls_map[entity_cls_id]
 
