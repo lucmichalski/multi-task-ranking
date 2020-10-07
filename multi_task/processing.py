@@ -711,7 +711,7 @@ class MultiTaskDatasetByQuery():
             file_name = 'data_bi_encode_ranker.json'
             query_paths = [dataset_dir_path + f for f in os.listdir(dataset_dir_path) if file_name in f]
             for query_i, query_path in enumerate(query_paths):
-                print("Processing {} ({} / {})".format(query_path, i, len(query_paths)))
+                print("Processing {} ({} / {})".format(query_path, query_i, len(query_paths)))
 
                 entity_context_dataset = {}
                 self.cls_id = 0
