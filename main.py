@@ -245,9 +245,9 @@ if __name__ == '__main__':
     #                               car_index_path=car_index_path,
     #                               keyword_dict_path=keyword_dict_path)
 
-    folds = [3,4]
+    folds = [0,1,2,3,4]
     gpus = 2
-    for task in ['entity']:
+    for task in ['entity', 'passage']:
         for fold in folds:
             model_path = None
             dev_batch_size = 64 * gpus * 4
@@ -289,7 +289,7 @@ if __name__ == '__main__':
                 )
 
             epochs = 2
-            lr = 8e-6
+            lr = 2e-5
             experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
             experiment_name = '{}_ranking_keyword_query_bert_train_{}epoch+{}lr'.format(task, epochs, lr)
             experiments.run_experiment_single_head(

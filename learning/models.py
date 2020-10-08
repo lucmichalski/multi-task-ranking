@@ -71,11 +71,11 @@ class BertMultiTaskRanker(BertPreTrainedModel):
         assert head_flag in self.valid_head_flags, "head_flag: {}, valid_head_flags: {}".format(head_flag, self.valid_head_flags)
         # Calculate logits.
         if head_flag == 'passage':
-            #logits = sigmoid(self.passage_head(cls_vector))
-            logits = self.passage_head(cls_vector)
+            logits = sigmoid(self.passage_head(cls_vector))
+            # logits = self.passage_head(cls_vector)
         elif head_flag == 'entity':
-            #logits = sigmoid(self.entity_head(cls_vector))
-            logits = self.entity_head(cls_vector)
+            logits = sigmoid(self.entity_head(cls_vector))
+            # logits = self.entity_head(cls_vector)
         else:
             "NOT VALID HEAD SELECTION"
             raise
