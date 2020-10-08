@@ -770,7 +770,10 @@ class MultiTaskDatasetByQuery():
                         try:
                             entity_links = [search_tools_entity.search(query=passage_text, hits=1)[0][0]]
                         except:
-                            entity_links = [search_tools_entity.search(query=query_decoded, hits=1)[0][0]]
+                            try:
+                                entity_links = [search_tools_entity.search(query=query_decoded, hits=1)[0][0]]
+                            except:
+                                entity_links = [search_tools_entity.search(query=query, hits=1)[0][0]]
                         print('Synthetic entity links:', entity_links)
 
                     for entity_id in list(set(entity_links)):
