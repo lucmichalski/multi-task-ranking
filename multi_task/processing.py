@@ -694,7 +694,8 @@ class MultiTaskDatasetByQuery():
             entity_device = torch.device("cpu")
             passage_device = torch.device("cpu")
 
-        for dataset in ['dev', 'test', 'train']:
+        # for dataset in ['dev', 'test', 'train']:
+        for dataset in ['test']:
 
             dataset_dir_path = dir_path + '{}_data/'.format(dataset)
 
@@ -709,7 +710,8 @@ class MultiTaskDatasetByQuery():
             search_tools_passage = SearchTools(index_path=CarPassagePaths.index)
 
             file_name = 'data_bi_encode_ranker.json'
-            query_paths = [dataset_dir_path + f for f in os.listdir(dataset_dir_path) if file_name in f]
+            #query_paths = [dataset_dir_path + f for f in os.listdir(dataset_dir_path) if file_name in f]
+            query_paths = ['/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/test_data/529_data_bi_encode_ranker.json']
             for query_i, query_path in enumerate(query_paths):
                 print("Processing {} ({} / {})".format(query_path, query_i, len(query_paths)))
 
