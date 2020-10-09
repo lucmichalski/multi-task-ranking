@@ -1015,18 +1015,18 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
             torch.nn.Linear(64, 1),
         )
 
-        # # Use GPUs if available.
-        # if torch.cuda.is_available():
-        #     # Tell PyTorch to use the GPU.
-        #     print('There are %d GPU(s) available.' % torch.cuda.device_count())
-        #     print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
-        #     model.cuda()
-        #     device = torch.device("cuda")
-        #
-        # # Otherwise use CPU.
-        # else:
-        #     print('No GPU available, using the CPU instead.')
-        #     device = torch.device("cpu")
+        # Use GPUs if available.
+        if torch.cuda.is_available():
+            # Tell PyTorch to use the GPU.
+            print('There are %d GPU(s) available.' % torch.cuda.device_count())
+            print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
+            model.cuda()
+            device = torch.device("cuda")
+
+        # Otherwise use CPU.
+        else:
+            print('No GPU available, using the CPU instead.')
+            device = torch.device("cpu")
 
         # ==== Experiments ====
         max_map = 0.0
@@ -1046,10 +1046,10 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
                 model.train()
                 model.zero_grad()
                 inputs, labels = train_batch
-                outputs = model.forward(inputs)
+                outputs = model.forward(inputs.to(device))
 
                 # Calculate Loss: softmax --> cross entropy loss
-                loss = loss_func(outputs, labels)
+                loss = loss_func(outputs, labels.cpu())
                 # Getting gradients w.r.t. parameters
                 loss.sum().backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -1073,14 +1073,15 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
                         inputs, labels = dev_batch
 
                         with torch.no_grad():
-                            outputs = model.forward(inputs)
-                            loss = loss_func(outputs, labels)
+                            outputs = model.forward(inputs.to(device))
+                            loss = loss_func(outputs.cpu(), labels)
 
                             dev_loss_total += loss.sum().item()
                             dev_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
                             dev_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
 
                     assert len(dev_score) == len(dev_label) == len(dev_run_data), "{} == {} == {}".format(len(dev_score), len(dev_label), len(dev_run_data))
+
                     print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
 
                     # Store topic query and count number of topics.
@@ -1152,7 +1153,7 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
             inputs, labels = test_batch
 
             with torch.no_grad():
-                outputs = model.forward(inputs)
+                outputs = model.forward(inputs.to(device))
 
                 test_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
                 test_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
