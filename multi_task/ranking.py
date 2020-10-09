@@ -946,7 +946,7 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
                             entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
                             input = doc_cls + entity_cls
                             dev_input_list.append(input)
-                            dev_labels_list.append([relevant])
+                            dev_labels_list.append([doc_relevant])
                             dev_run_data.append([query, doc_id, doc_relevant])
                     else:
                         print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
@@ -993,7 +993,7 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
                             entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
                             input = doc_cls + entity_cls
                             test_input_list.append(input)
-                            test_labels_list.append([relevant])
+                            test_labels_list.append([doc_relevant])
                             test_run_data.append([query, doc_id, doc_relevant])
                     else:
                         print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
