@@ -1006,216 +1006,210 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
 
         test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
 
-        # # ==== Model setup ====
-        # model = torch.nn.Sequential(
-        #     torch.nn.Linear(1536, 1536),
-        #     torch.nn.ReLU(),
-        #     torch.nn.Linear(1536, 64),
-        #     torch.nn.ReLU(),
-        #     torch.nn.Linear(64, 1),
-        # )
+        # ==== Model setup ====
+        model = torch.nn.Sequential(
+            torch.nn.Linear(1536, 1536),
+            torch.nn.ReLU(),
+            torch.nn.Linear(1536, 64),
+            torch.nn.ReLU(),
+            torch.nn.Linear(64, 1),
+        )
+
+        # # Use GPUs if available.
+        # if torch.cuda.is_available():
+        #     # Tell PyTorch to use the GPU.
+        #     print('There are %d GPU(s) available.' % torch.cuda.device_count())
+        #     print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
+        #     model.cuda()
+        #     device = torch.device("cuda")
         #
-        # # # Use GPUs if available.
-        # # if torch.cuda.is_available():
-        # #     # Tell PyTorch to use the GPU.
-        # #     print('There are %d GPU(s) available.' % torch.cuda.device_count())
-        # #     print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
-        # #     model.cuda()
-        # #     device = torch.device("cuda")
-        # #
-        # # # Otherwise use CPU.
-        # # else:
-        # #     print('No GPU available, using the CPU instead.')
-        # #     device = torch.device("cpu")
+        # # Otherwise use CPU.
+        # else:
+        #     print('No GPU available, using the CPU instead.')
+        #     device = torch.device("cpu")
+
+        # ==== Experiments ====
+        max_map = 0.0
+        state_dict = None
+        for epoch in range(1,10):
+
+            train_batches = len(train_data_loader)
+            optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+            loss_func = torch.nn.MSELoss()  # this is for regression mean squared loss
+            train_loss_total = 0.0
         #
-        # # ==== Experiments ====
-        # max_map = 0.0
-        # state_dict = None
-        # for epoch in range(1,4):
-        #
-        #     train_batches = len(train_data_loader)
-        #     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-        #     loss_func = torch.nn.MSELoss()  # this is for regression mean squared loss
-        #     train_loss_total = 0.0
-        # #
-        #     print('====== EPOCH {} ======'.format(epoch))
-        #     # ========================================
-        #     #               Training
-        #     # ========================================
-        #     for i_train, train_batch in enumerate(train_data_loader):
-        #         model.train()
-        #         model.zero_grad()
-        #         inputs, labels = train_batch
-        #         outputs = model.forward(inputs)
-        #
-        #         # Calculate Loss: softmax --> cross entropy loss
-        #         loss = loss_func(outputs, labels)
-        #         # Getting gradients w.r.t. parameters
-        #         loss.sum().backward()
-        #         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-        #         optimizer.step()
-        #
-        #         train_loss_total += loss.sum().item()
-        #
-        #         if i_train % 500 == 0:
-        #
-        #             # ========================================
-        #             #               Validation
-        #             # ========================================
-        #
-        #             print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/(i_train+1)))
-        #             # print('======= inputs =====')
-        #             # print(inputs)
-        #             # print('======= labels =====')
-        #             # print(labels)
-        #             # print('======= outputs =====')
-        #             # print(outputs)
-        # #
-        #             model.eval()
-        #             dev_loss_total = 0.0
-        #             dev_score = []
-        #             dev_label = []
-        #             for i_dev, dev_batch in enumerate(dev_data_loader):
-        #                 inputs, labels = dev_batch
-        #
-        #                 with torch.no_grad():
-        #                     outputs = model.forward(inputs)
-        #                     loss = loss_func(outputs, labels)
-        #
-        #                     dev_loss_total += loss.sum().item()
-        #                     dev_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
-        #                     dev_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
-        #
-        #             assert len(dev_score) == len(dev_label) == len(dev_run_data), "{} == {} == {}".format(len(dev_score), len(dev_label), len(dev_run_data))
-        #             print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
-        #
-        #             # Store topic query and count number of topics.
-        #             topic_query = None
-        #             last_doc_id = 'Not query'
-        #             original_map_sum = 0.0
-        #             map_sum = 0.0
-        #             topic_counter = 0
-        #             topic_run_data = []
-        #             for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
-        #                 query, doc_id, label_ground_truth = run_data
-        #
-        #                 assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
-        #
-        #                 if (topic_query != None) and (topic_query != query):
-        #                     if topic_query in dev_qrels:
-        #                         R = len(dev_qrels[topic_query])
-        #                     else:
-        #                         R = 0
-        #                     assert len(topic_run_data) <= 100, topic_run_data
-        #                     original_run = [i[0] for i in topic_run_data]
-        #                     original_map_sum += EvalTools().get_map(run=original_run, R=R)
-        #                     topic_run_data.sort(key=lambda x: x[1], reverse=True)
-        #                     topic_run = [i[0] for i in topic_run_data]
-        #                     map_sum += EvalTools().get_map(run=topic_run, R=R)
-        #                     # Start new topic run.
-        #                     topic_counter += 1
-        #                     topic_run_data = []
-        #
-        #                 if last_doc_id == doc_id:
-        #                     if score > topic_run_data[-1][1]:
-        #                         topic_run_data[-1] = [label, score]
-        #                 else:
-        #                     topic_run_data.append([label, score])
-        #                 # Update topic run.
-        #                 topic_query = query
-        #                 last_doc_id = doc_id
-        #
-        #             if len(topic_run_data) > 0:
-        #                 if topic_query in dev_qrels:
-        #                     R = len(dev_qrels[topic_query])
-        #                 else:
-        #                     R = 0
-        #                 original_run = [i[0] for i in topic_run_data]
-        #                 original_map_sum += EvalTools().get_map(run=original_run, R=R)
-        #                 topic_run_data.sort(key=lambda x: x[1], reverse=True)
-        #                 topic_run = [i[0] for i in topic_run_data]
-        #                 map_sum += EvalTools().get_map(run=topic_run, R=R)
-        #
-        #             print('Original MAP = {}'.format(original_map_sum/topic_counter))
-        #             map = map_sum/topic_counter
-        #             print('MAP = {}'.format(map))
-        #
-        #             if max_map < map:
-        #                 state_dict = model.state_dict()
-        #                 max_map = map
-        #                 print('*** NEW MAX MAP ({}) *** -> update state dict'.format(max_map))
-        #
-        # # ========================================
-        # #                  Test
-        # # ========================================
-        # print('LOADING BEST MODEL WEIGHTS')
-        # model.load_state_dict(state_dict)
-        # model.eval()
-        # test_label = []
-        # test_score = []
-        # for i_test, test_batch in enumerate(test_data_loader):
-        #
-        #     inputs, labels = test_batch
-        #
-        #     with torch.no_grad():
-        #         outputs = model.forward(inputs)
-        #
-        #         test_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
-        #         test_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
-        #
-        # assert len(test_score) == len(test_label) == len(test_run_data), "{} == {} == {}".format(len(test_score), len(test_label), len(test_run_data))
-        #
-        # # Store topic query and count number of topics.
-        # last_doc_id = 'Not doc_id'
-        # topic_query = None
-        # topic_run_data = []
-        # for label, score, run_data in zip(test_label, test_score, test_run_data):
-        #     query, doc_id, label_ground_truth = run_data
-        #
-        #     assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
-        #
-        #     if (topic_query != None) and (topic_query != query):
-        #         topic_run_data.sort(key=lambda x: x[1], reverse=True)
-        #         topic_run = [i[0] for i in topic_run_data]
-        #
-        #         assert len(topic_run_data) <= 101, "{} len {}: {}".format(topic_query, len(topic_run_data), [i for i in topic_run if topic_run.count(i) > 1])
-        #
-        #         with open(test_run_path, 'a+') as f:
-        #             rank = 1
-        #             fake_score = 1000
-        #             for doc_id in topic_run:
-        #                 f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward')) + '\n')
-        #                 rank += 1
-        #                 fake_score -= 1
-        #
-        #         # Start new topic run.
-        #         topic_run_data = []
-        #
-        #     if (last_doc_id == doc_id) and (len(topic_run_data) > 0):
-        #         if score >= topic_run_data[-1][1]:
-        #             topic_run_data[-1] = [doc_id, score]
-        #     else:
-        #         topic_run_data.append([doc_id, score])
-        #
-        #     # Update topic run.
-        #     topic_query = query
-        #     last_doc_id = doc_id
-        #
-        # if len(topic_run_data) > 0:
-        #     topic_run_data.sort(key=lambda x: x[1], reverse=True)
-        #     topic_run = [i[0] for i in topic_run_data]
-        #     with open(test_run_path, 'a+') as f:
-        #         rank = 1
-        #         fake_score = 1000
-        #         for doc_id in topic_run:
-        #             f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'cls_feedforward_max_combo')) + '\n')
-        #             rank += 1
-        #             fake_score -= 1
-        #
-        # EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
-        #
-        #
-        #
-        #
-        #
-        #
+            print('====== EPOCH {} ======'.format(epoch))
+            # ========================================
+            #               Training
+            # ========================================
+            for i_train, train_batch in enumerate(train_data_loader):
+                model.train()
+                model.zero_grad()
+                inputs, labels = train_batch
+                outputs = model.forward(inputs)
+
+                # Calculate Loss: softmax --> cross entropy loss
+                loss = loss_func(outputs, labels)
+                # Getting gradients w.r.t. parameters
+                loss.sum().backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                optimizer.step()
+
+                train_loss_total += loss.sum().item()
+
+                if i_train % 500 == 0:
+
+                    # ========================================
+                    #               Validation
+                    # ========================================
+
+                    print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/(i_train+1)))
+
+                    model.eval()
+                    dev_loss_total = 0.0
+                    dev_score = []
+                    dev_label = []
+                    for i_dev, dev_batch in enumerate(dev_data_loader):
+                        inputs, labels = dev_batch
+
+                        with torch.no_grad():
+                            outputs = model.forward(inputs)
+                            loss = loss_func(outputs, labels)
+
+                            dev_loss_total += loss.sum().item()
+                            dev_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
+                            dev_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
+
+                    assert len(dev_score) == len(dev_label) == len(dev_run_data), "{} == {} == {}".format(len(dev_score), len(dev_label), len(dev_run_data))
+                    print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
+
+                    # Store topic query and count number of topics.
+                    topic_query = None
+                    last_doc_id = 'Not query'
+                    original_map_sum = 0.0
+                    map_sum = 0.0
+                    topic_counter = 0
+                    topic_run_data = []
+                    for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
+                        query, doc_id, label_ground_truth = run_data
+
+                        assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
+
+                        if (topic_query != None) and (topic_query != query):
+                            if topic_query in dev_qrels:
+                                R = len(dev_qrels[topic_query])
+                            else:
+                                R = 0
+                            assert len(topic_run_data) <= 100, topic_run_data
+                            original_run = [i[0] for i in topic_run_data]
+                            original_map_sum += EvalTools().get_map(run=original_run, R=R)
+                            topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                            topic_run = [i[0] for i in topic_run_data]
+                            map_sum += EvalTools().get_map(run=topic_run, R=R)
+                            # Start new topic run.
+                            topic_counter += 1
+                            topic_run_data = []
+
+                        if last_doc_id == doc_id:
+                            if score > topic_run_data[-1][1]:
+                                topic_run_data[-1] = [label, score]
+                        else:
+                            topic_run_data.append([label, score])
+                        # Update topic run.
+                        topic_query = query
+                        last_doc_id = doc_id
+
+                    if len(topic_run_data) > 0:
+                        if topic_query in dev_qrels:
+                            R = len(dev_qrels[topic_query])
+                        else:
+                            R = 0
+                        original_run = [i[0] for i in topic_run_data]
+                        original_map_sum += EvalTools().get_map(run=original_run, R=R)
+                        topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                        topic_run = [i[0] for i in topic_run_data]
+                        map_sum += EvalTools().get_map(run=topic_run, R=R)
+
+                    print('Original MAP = {}'.format(original_map_sum/topic_counter))
+                    map = map_sum/topic_counter
+                    print('MAP = {}'.format(map))
+
+                    if max_map < map:
+                        state_dict = model.state_dict()
+                        max_map = map
+                        print('*** NEW MAX MAP ({}) *** -> update state dict'.format(max_map))
+
+        # ========================================
+        #                  Test
+        # ========================================
+        print('LOADING BEST MODEL WEIGHTS')
+        model.load_state_dict(state_dict)
+        model.eval()
+        test_label = []
+        test_score = []
+        for i_test, test_batch in enumerate(test_data_loader):
+
+            inputs, labels = test_batch
+
+            with torch.no_grad():
+                outputs = model.forward(inputs)
+
+                test_label += list(itertools.chain(*labels.cpu().numpy().tolist()))
+                test_score += list(itertools.chain(*outputs.cpu().numpy().tolist()))
+
+        assert len(test_score) == len(test_label) == len(test_run_data), "{} == {} == {}".format(len(test_score), len(test_label), len(test_run_data))
+
+        # Store topic query and count number of topics.
+        last_doc_id = 'Not doc_id'
+        topic_query = None
+        topic_run_data = []
+        for label, score, run_data in zip(test_label, test_score, test_run_data):
+            query, doc_id, label_ground_truth = run_data
+
+            assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
+
+            if (topic_query != None) and (topic_query != query):
+                topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                topic_run = [i[0] for i in topic_run_data]
+
+                assert len(topic_run_data) <= 101, "{} len {}: {}".format(topic_query, len(topic_run_data), [i for i in topic_run if topic_run.count(i) > 1])
+
+                with open(test_run_path, 'a+') as f:
+                    rank = 1
+                    fake_score = 1000
+                    for doc_id in topic_run:
+                        f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'mutant_max_combo')) + '\n')
+                        rank += 1
+                        fake_score -= 1
+
+                # Start new topic run.
+                topic_run_data = []
+
+            if (last_doc_id == doc_id) and (len(topic_run_data) > 0):
+                if score >= topic_run_data[-1][1]:
+                    topic_run_data[-1] = [doc_id, score]
+            else:
+                topic_run_data.append([doc_id, score])
+
+            # Update topic run.
+            topic_query = query
+            last_doc_id = doc_id
+
+        if len(topic_run_data) > 0:
+            topic_run_data.sort(key=lambda x: x[1], reverse=True)
+            topic_run = [i[0] for i in topic_run_data]
+            with open(test_run_path, 'a+') as f:
+                rank = 1
+                fake_score = 1000
+                for doc_id in topic_run:
+                    f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'mutant_max_combo')) + '\n')
+                    rank += 1
+                    fake_score -= 1
+
+        EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
+
+
+
+
+
+
