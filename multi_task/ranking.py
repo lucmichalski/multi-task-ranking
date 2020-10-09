@@ -1229,166 +1229,166 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
     dev_dir_path = parent_dir_path + 'dev_data/'
     test_dir_path = parent_dir_path + 'test_data/'
 
-        print('===================================')
-        print('===================================')
+    print('===================================')
+    print('===================================')
 
-        test_run_path = test_dir_path + 'cls_mutant_multi_task_max_combo_batch_size_{}_lr_{}.run'.format(batch_size, lr)
-        file_name = '_data_bi_encode_ranker_entity_context.json'
-        passage_dev_qrels_path = dataset_metadata['{}_dev'.format('passage')][1]
-        passage_test_qrels_path = dataset_metadata['{}_test'.format('passage')][1]
-        entity_dev_qrels_path = dataset_metadata['{}_dev'.format('entity')][1]
-        entity_test_qrels_path = dataset_metadata['{}_test'.format('entity')][1]
-        # ==== Build training data ====
-        print('Build training data')
+    test_run_path = test_dir_path + 'cls_mutant_multi_task_max_combo_batch_size_{}_lr_{}.run'.format(batch_size, lr)
+    file_name = '_data_bi_encode_ranker_entity_context.json'
+    passage_dev_qrels_path = dataset_metadata['{}_dev'.format('passage')][1]
+    passage_test_qrels_path = dataset_metadata['{}_test'.format('passage')][1]
+    entity_dev_qrels_path = dataset_metadata['{}_dev'.format('entity')][1]
+    entity_test_qrels_path = dataset_metadata['{}_test'.format('entity')][1]
+    # ==== Build training data ====
+    print('Build training data')
 
-        training_dataset_path = parent_dir_path + 'mutant_multi_task_max_combo_train_dataset.pt'
-        if os.path.exists(training_dataset_path):
-            print('-> loading existing dataset: {}'.format(training_dataset_path))
-            train_dataset = torch.load(training_dataset_path)
-        else:
-            print('-> dataset not found in path ==> will build: {}'.format(training_dataset_path))
-            train_input_list_R = []
-            train_labels_list_R = []
-            train_input_list_N = []
-            train_labels_list_N = []
+    training_dataset_path = parent_dir_path + 'mutant_multi_task_max_combo_train_dataset.pt'
+    if os.path.exists(training_dataset_path):
+        print('-> loading existing dataset: {}'.format(training_dataset_path))
+        train_dataset = torch.load(training_dataset_path)
+    else:
+        print('-> dataset not found in path ==> will build: {}'.format(training_dataset_path))
+        train_input_list_R = []
+        train_labels_list_R = []
+        train_input_list_N = []
+        train_labels_list_N = []
 
-            for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if file_name in f]:
-                query_dict = get_dict_from_json(path=train_query_path)
-                query = query_dict['query']['query_id']
+        for train_query_path in [train_dir_path + f for f in os.listdir(train_dir_path) if file_name in f]:
+            query_dict = get_dict_from_json(path=train_query_path)
+            query = query_dict['query']['query_id']
 
-                for doc_id in query_dict['query']['passage'].keys():
-                    doc_cls = query_dict['query']['passage'][doc_id]['cls_token']
-                    doc_relevant = float(query_dict['query']['passage'][doc_id]['relevant'])
+            for doc_id in query_dict['query']['passage'].keys():
+                doc_cls = query_dict['query']['passage'][doc_id]['cls_token']
+                doc_relevant = float(query_dict['query']['passage'][doc_id]['relevant'])
 
-                    if len(query_dict['query']['passage'][doc_id]['entity']) > 0:
-                        for entity_link in query_dict['query']['passage'][doc_id]['entity'].keys():
-                            entity_cls = query_dict['query']['passage'][doc_id]['entity'][entity_link]['cls_token']
-                            entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
-                            input = doc_cls + entity_cls
+                if len(query_dict['query']['passage'][doc_id]['entity']) > 0:
+                    for entity_link in query_dict['query']['passage'][doc_id]['entity'].keys():
+                        entity_cls = query_dict['query']['passage'][doc_id]['entity'][entity_link]['cls_token']
+                        entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
+                        input = doc_cls + entity_cls
 
-                            if (doc_relevant == 0) or (entity_relevant == 0):
-                                train_input_list_N.append(input)
-                                train_labels_list_N.append([doc_relevant, entity_relevant])
-                            else:
-                                train_input_list_R.append(input)
-                                train_labels_list_R.append([doc_relevant, entity_relevant])
+                        if (doc_relevant == 0) or (entity_relevant == 0):
+                            train_input_list_N.append(input)
+                            train_labels_list_N.append([doc_relevant, entity_relevant])
+                        else:
+                            train_input_list_R.append(input)
+                            train_labels_list_R.append([doc_relevant, entity_relevant])
 
-                    else:
-                        print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
+                else:
+                    print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
 
-            print('-> {} training R examples'.format(len(train_input_list_R)))
-            print('-> {} training N examples'.format(len(train_input_list_N)))
-            idx_list = list(range(len(train_input_list_R)))
-            diff = len(train_labels_list_N) - len(train_input_list_R)
-            # randomly sample diff number of samples.
-            for idx in random.choices(idx_list, k=diff):
-                train_input_list_N.append(train_input_list_R[idx])
-                train_labels_list_N.append(train_labels_list_R[idx])
-            print('-> {} class balancing'.format(len(train_labels_list_N)))
-            train_dataset = TensorDataset(torch.tensor(train_input_list_N), torch.tensor(train_labels_list_N))
-            torch.save(obj=train_dataset, f=training_dataset_path)
+        print('-> {} training R examples'.format(len(train_input_list_R)))
+        print('-> {} training N examples'.format(len(train_input_list_N)))
+        idx_list = list(range(len(train_input_list_R)))
+        diff = len(train_labels_list_N) - len(train_input_list_R)
+        # randomly sample diff number of samples.
+        for idx in random.choices(idx_list, k=diff):
+            train_input_list_N.append(train_input_list_R[idx])
+            train_labels_list_N.append(train_labels_list_R[idx])
+        print('-> {} class balancing'.format(len(train_labels_list_N)))
+        train_dataset = TensorDataset(torch.tensor(train_input_list_N), torch.tensor(train_labels_list_N))
+        torch.save(obj=train_dataset, f=training_dataset_path)
 
-        train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
+    train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
 
-        # # ==== Build dev data ====
-        #
-        print('Build dev data')
-        dev_dataset_path = parent_dir_path + 'mutant_multi_task_max_combo_dev_dataset.pt'
-        dev_run_data_path = parent_dir_path + 'mutant_multi_task_max_combo_dev_run_data.txt'
-        passage_dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(passage_dev_qrels_path)
-        entity_dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(entity_dev_qrels_path)
+    # # ==== Build dev data ====
+    #
+    print('Build dev data')
+    dev_dataset_path = parent_dir_path + 'mutant_multi_task_max_combo_dev_dataset.pt'
+    dev_run_data_path = parent_dir_path + 'mutant_multi_task_max_combo_dev_run_data.txt'
+    passage_dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(passage_dev_qrels_path)
+    entity_dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(entity_dev_qrels_path)
 
-        if os.path.exists(dev_dataset_path):
-            print('-> loading existing dataset: {}'.format(dev_dataset_path))
-            dev_dataset = torch.load(dev_dataset_path)
-            dev_run_data = []
-            with open(dev_run_data_path, 'r') as f:
-                for line in f:
-                    query, doc_id, entity_link, doc_relevant, entity_relevant = line.strip().split()
-                    dev_run_data.append([query, doc_id, entity_link, float(doc_relevant), float(entity_relevant)])
-        else:
-            print('-> dataset not found in path ==> will build: {}'.format(dev_dataset_path))
-            dev_input_list = []
-            dev_labels_list = []
-            dev_run_data = []
+    if os.path.exists(dev_dataset_path):
+        print('-> loading existing dataset: {}'.format(dev_dataset_path))
+        dev_dataset = torch.load(dev_dataset_path)
+        dev_run_data = []
+        with open(dev_run_data_path, 'r') as f:
+            for line in f:
+                query, doc_id, entity_link, doc_relevant, entity_relevant = line.strip().split()
+                dev_run_data.append([query, doc_id, entity_link, float(doc_relevant), float(entity_relevant)])
+    else:
+        print('-> dataset not found in path ==> will build: {}'.format(dev_dataset_path))
+        dev_input_list = []
+        dev_labels_list = []
+        dev_run_data = []
 
-            for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
+        for dev_query_path in [dev_dir_path + f for f in os.listdir(dev_dir_path) if file_name in f]:
 
-                query_dict = get_dict_from_json(path=dev_query_path)
-                query = query_dict['query']['query_id']
+            query_dict = get_dict_from_json(path=dev_query_path)
+            query = query_dict['query']['query_id']
 
-                for doc_id in query_dict['query']['passage'].keys():
-                    doc_cls = query_dict['query']['passage'][doc_id]['cls_token']
-                    doc_relevant = float(query_dict['query']['passage'][doc_id]['relevant'])
+            for doc_id in query_dict['query']['passage'].keys():
+                doc_cls = query_dict['query']['passage'][doc_id]['cls_token']
+                doc_relevant = float(query_dict['query']['passage'][doc_id]['relevant'])
 
-                    if len(query_dict['query']['passage'][doc_id]['entity']) > 0:
-                        for entity_link in query_dict['query']['passage'][doc_id]['entity'].keys():
-                            entity_cls = query_dict['query']['passage'][doc_id]['entity'][entity_link]['cls_token']
-                            entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
-                            input = doc_cls + entity_cls
-                            dev_input_list.append(input)
-                            dev_labels_list.append([doc_relevant, entity_relevant])
-                            dev_run_data.append([query, doc_id, entity_link, doc_relevant, entity_relevant])
+                if len(query_dict['query']['passage'][doc_id]['entity']) > 0:
+                    for entity_link in query_dict['query']['passage'][doc_id]['entity'].keys():
+                        entity_cls = query_dict['query']['passage'][doc_id]['entity'][entity_link]['cls_token']
+                        entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
+                        input = doc_cls + entity_cls
+                        dev_input_list.append(input)
+                        dev_labels_list.append([doc_relevant, entity_relevant])
+                        dev_run_data.append([query, doc_id, entity_link, doc_relevant, entity_relevant])
 
-                    else:
-                        print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
+                else:
+                    print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
 
-            print('-> {} dev examples'.format(len(dev_labels_list)))
-            dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
-            torch.save(obj=dev_dataset, f=dev_dataset_path)
-            with open(dev_run_data_path, 'w') as f:
-                for data in dev_run_data:
-                    f.write(" ".join((data[0], data[1], data[2], str(data[3]), str(data[4]))) + '\n')
+        print('-> {} dev examples'.format(len(dev_labels_list)))
+        dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
+        torch.save(obj=dev_dataset, f=dev_dataset_path)
+        with open(dev_run_data_path, 'w') as f:
+            for data in dev_run_data:
+                f.write(" ".join((data[0], data[1], data[2], str(data[3]), str(data[4]))) + '\n')
 
-        dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
+    dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
 
-        # ==== Build test data ====
+    # ==== Build test data ====
 
-        print('Build test data')
-        test_dataset_path = parent_dir_path + 'mutant_multi_task_max_combo_test_dataset.pt'
-        test_run_data_path = parent_dir_path + 'mutant_multi_task_max_combo_test_run_data.txt'
-        if os.path.exists(test_dataset_path):
-            print('-> loading existing dataset: {}'.format(test_dataset_path))
-            test_dataset = torch.load(test_dataset_path)
-            test_run_data = []
-            with open(test_run_data_path, 'r') as f:
-                for line in f:
-                    query, doc_id, entity_link, doc_relevant, entity_relevant = line.strip().split()
-                    test_run_data.append([query, doc_id, entity_link, float(doc_relevant), float(entity_relevant)])
-        else:
-            print('-> dataset not found in path ==> will build: {}'.format(test_dataset_path))
-            test_input_list = []
-            test_labels_list = []
-            test_run_data = []
-            for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if file_name in f]:
+    print('Build test data')
+    test_dataset_path = parent_dir_path + 'mutant_multi_task_max_combo_test_dataset.pt'
+    test_run_data_path = parent_dir_path + 'mutant_multi_task_max_combo_test_run_data.txt'
+    if os.path.exists(test_dataset_path):
+        print('-> loading existing dataset: {}'.format(test_dataset_path))
+        test_dataset = torch.load(test_dataset_path)
+        test_run_data = []
+        with open(test_run_data_path, 'r') as f:
+            for line in f:
+                query, doc_id, entity_link, doc_relevant, entity_relevant = line.strip().split()
+                test_run_data.append([query, doc_id, entity_link, float(doc_relevant), float(entity_relevant)])
+    else:
+        print('-> dataset not found in path ==> will build: {}'.format(test_dataset_path))
+        test_input_list = []
+        test_labels_list = []
+        test_run_data = []
+        for test_query_path in [test_dir_path + f for f in os.listdir(test_dir_path) if file_name in f]:
 
-                query_dict = get_dict_from_json(path=test_query_path)
-                query = query_dict['query']['query_id']
+            query_dict = get_dict_from_json(path=test_query_path)
+            query = query_dict['query']['query_id']
 
-                for doc_id in query_dict['query']['passage'].keys():
-                    doc_cls = query_dict['query']['passage'][doc_id]['cls_token']
-                    doc_relevant = float(query_dict['query']['passage'][doc_id]['relevant'])
+            for doc_id in query_dict['query']['passage'].keys():
+                doc_cls = query_dict['query']['passage'][doc_id]['cls_token']
+                doc_relevant = float(query_dict['query']['passage'][doc_id]['relevant'])
 
-                    if len(query_dict['query']['passage'][doc_id]['entity']) > 0:
-                        for entity_link in query_dict['query']['passage'][doc_id]['entity'].keys():
-                            entity_cls = query_dict['query']['passage'][doc_id]['entity'][entity_link]['cls_token']
-                            entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
-                            input = doc_cls + entity_cls
-                            test_input_list.append(input)
-                            test_labels_list.append([doc_relevant, entity_relevant])
-                            test_run_data.append([query, doc_id, entity_link, doc_relevant, entity_relevant])
+                if len(query_dict['query']['passage'][doc_id]['entity']) > 0:
+                    for entity_link in query_dict['query']['passage'][doc_id]['entity'].keys():
+                        entity_cls = query_dict['query']['passage'][doc_id]['entity'][entity_link]['cls_token']
+                        entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
+                        input = doc_cls + entity_cls
+                        test_input_list.append(input)
+                        test_labels_list.append([doc_relevant, entity_relevant])
+                        test_run_data.append([query, doc_id, entity_link, doc_relevant, entity_relevant])
 
-                    else:
-                        print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
+                else:
+                    print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
 
-            print('-> {} test examples'.format(len(test_labels_list)))
-            test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
-            torch.save(obj=test_dataset, f=test_dataset_path)
-            with open(test_run_data_path, 'w') as f:
-                for data in test_run_data:
-                    f.write(" ".join((data[0], data[1], data[2], str(data[3]), str(data[4]))) + '\n')
+        print('-> {} test examples'.format(len(test_labels_list)))
+        test_dataset = TensorDataset(torch.tensor(test_input_list), torch.tensor(test_labels_list))
+        torch.save(obj=test_dataset, f=test_dataset_path)
+        with open(test_run_data_path, 'w') as f:
+            for data in test_run_data:
+                f.write(" ".join((data[0], data[1], data[2], str(data[3]), str(data[4]))) + '\n')
 
-        test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
+    test_data_loader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=batch_size)
 
         # # ==== Model setup ====
         # model = torch.nn.Sequential(
