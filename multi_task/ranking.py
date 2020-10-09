@@ -888,7 +888,7 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
                             entity_cls = query_dict['query']['passage'][doc_id]['entity'][entity_link]['cls_token']
                             entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
                             input = doc_cls + entity_cls
-                            if relevant == 0:
+                            if doc_relevant == 0:
                                 train_input_list_N.append(input)
                                 train_labels_list_N.append([doc_relevant])
                             else:
