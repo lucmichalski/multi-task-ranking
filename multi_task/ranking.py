@@ -845,7 +845,7 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/tr
 
 
 
-def train_mutant_max_combo(batch_size=128, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/', epoch=2, max_rank=100):
+def train_mutant_max_combo(batch_size=128, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/', epoch=8, max_rank=100):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
