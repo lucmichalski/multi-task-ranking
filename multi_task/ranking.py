@@ -1021,7 +1021,7 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
             print('There are %d GPU(s) available.' % torch.cuda.device_count())
             print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
             model.cuda()
-            device = torch.device("cuda")
+            device = torch.device("cuda:0")
 
         # Otherwise use CPU.
         else:
