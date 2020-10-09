@@ -1031,7 +1031,7 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
         # ==== Experiments ====
         max_map = 0.0
         state_dict = None
-        for epoch in range(1,10):
+        for epoch in range(1,5):
 
             train_batches = len(train_data_loader)
             optimizer = torch.optim.Adam(model.parameters(), lr=lr)
