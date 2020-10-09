@@ -845,18 +845,18 @@ def train_cls_model_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/tr
 
 
 
-def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/'):
+def train_mutant_max_combo(batch_size=128, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/', epoch=5):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
     test_dir_path = parent_dir_path + 'test_data/'
 
-    for task in ['passage']:
+    for task in ['passage', 'entity']:
         print('===================================')
         print('============= {} ================'.format(task))
         print('===================================')
 
-        test_run_path = test_dir_path + 'cls_mutant_max_combo_{}.run'.format(task)
+        test_run_path = test_dir_path + 'cls_mutant_max_combo_{}_batch_size_{}_lr_{}.run'.format(task, batch_size, lr)
         file_name = '_data_bi_encode_ranker_entity_context.json'
         dev_qrels_path = dataset_metadata['{}_dev'.format(task)][1]
         test_qrels_path = dataset_metadata['{}_test'.format(task)][1]
@@ -888,12 +888,20 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
                             entity_cls = query_dict['query']['passage'][doc_id]['entity'][entity_link]['cls_token']
                             entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
                             input = doc_cls + entity_cls
-                            if doc_relevant == 0:
-                                train_input_list_N.append(input)
-                                train_labels_list_N.append([doc_relevant])
+                            if task == 'passage':
+                                if doc_relevant == 0:
+                                    train_input_list_N.append(input)
+                                    train_labels_list_N.append([doc_relevant])
+                                else:
+                                    train_input_list_R.append(input)
+                                    train_labels_list_R.append([doc_relevant])
                             else:
-                                train_input_list_R.append(input)
-                                train_labels_list_R.append([doc_relevant])
+                                if entity_relevant == 0:
+                                    train_input_list_N.append(input)
+                                    train_labels_list_N.append([entity_relevant])
+                                else:
+                                    train_input_list_R.append(input)
+                                    train_labels_list_R.append([entity_relevant])
                     else:
                         print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
 
@@ -946,8 +954,12 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
                             entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
                             input = doc_cls + entity_cls
                             dev_input_list.append(input)
-                            dev_labels_list.append([doc_relevant])
-                            dev_run_data.append([query, doc_id, doc_relevant])
+                            if task == 'passage':
+                                dev_labels_list.append([doc_relevant])
+                                dev_run_data.append([query, doc_id, doc_relevant])
+                            else:
+                                dev_labels_list.append([entity_relevant])
+                                dev_run_data.append([query, entity_link, entity_relevant])
                     else:
                         print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
 
@@ -993,8 +1005,12 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
                             entity_relevant = float(query_dict['query']['passage'][doc_id]['entity'][entity_link]['relevant'])
                             input = doc_cls + entity_cls
                             test_input_list.append(input)
-                            test_labels_list.append([doc_relevant])
-                            test_run_data.append([query, doc_id, doc_relevant])
+                            if task == 'passage':
+                                test_labels_list.append([doc_relevant])
+                                test_run_data.append([query, doc_id, doc_relevant])
+                            else:
+                                test_labels_list.append([entity_relevant])
+                                test_run_data.append([query, entity_link, entity_relevant])
                     else:
                         print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
             print('-> {} test examples'.format(len(test_labels_list)))
@@ -1031,7 +1047,7 @@ def train_mutant_max_combo(batch_size=64, lr=0.0001, parent_dir_path='/nfs/trec_
         # ==== Experiments ====
         max_map = 0.0
         state_dict = None
-        for epoch in range(1,5):
+        for epoch in range(1,epoch+1):
 
             train_batches = len(train_data_loader)
             optimizer = torch.optim.Adam(model.parameters(), lr=lr)
