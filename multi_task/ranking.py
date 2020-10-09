@@ -1209,7 +1209,7 @@ def train_mutant_max_combo(batch_size=128, lr=0.0001, parent_dir_path='/nfs/trec
             # Update topic run.
             topic_query = query
 
-        if len(topic_run_data) > 0:
+        if len(topic_run_data_dict) > 0:
             topic_run_doc_ids = [k for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
             assert len(topic_run_doc_ids) <= max_rank, "{} len {}: {}".format(topic_query, len(topic_run_doc_ids), topic_run_doc_ids)
             with open(test_run_path, 'a+') as f:
