@@ -1516,7 +1516,7 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
 
                 # Store topic query and count number of topics.
                 dev_label_list = [passage_dev_label, entity_dev_label]
-                dev_score_list = [passage_dev_score, passage_dev_label]
+                dev_score_list = [passage_dev_score, entity_dev_score]
                 dev_qrels_list = [passage_dev_qrels, entity_dev_qrels]
                 flags = ['passage', 'entity']
                 for dev_label, dev_score, dev_qrels, flag in zip(dev_label_list, dev_score_list, dev_qrels_list, flags):
