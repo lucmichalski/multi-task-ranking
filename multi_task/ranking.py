@@ -1527,7 +1527,10 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                     topic_counter = 0
                     topic_run_data_dict = {}
                     for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
-                        query, doc_id, label_ground_truth = run_data
+                        if flag == 'passage':
+                            query, doc_id, _, label_ground_truth, _ = run_data
+                        else:
+                            query, _, doc_id, _, label_ground_truth = run_data
 
                         assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label,
                                                                                                        label_ground_truth)
@@ -1537,9 +1540,7 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                                 R = len(dev_qrels[topic_query])
                             else:
                                 R = 0
-                            topic_run_data = [v for k, v in
-                                              sorted(topic_run_data_dict.items(), key=lambda item: item[1][1],
-                                                     reverse=True)][:max_rank]
+                            topic_run_data = [v for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
                             assert len(topic_run_data) <= max_rank, topic_run_data
                             original_run = [i[0] for i in topic_run_data]
                             original_map_sum += EvalTools().get_map(run=original_run, R=R)
