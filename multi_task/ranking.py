@@ -1504,14 +1504,14 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                         loss = passage_loss + entity_loss
 
                         dev_loss_total += loss.sum().item()
-                        # passage_dev_label += list(itertools.chain(*labels[0].cpu().numpy().tolist()))
-                        # passage_dev_score += list(itertools.chain(*passage_output.cpu().numpy().tolist()))
-                        # entity_dev_label += list(itertools.chain(*labels[1].cpu().numpy().tolist()))
-                        # entity_dev_score += list(itertools.chain(*entity_output.cpu().numpy().tolist()))
-    #
-    #             assert len(passage_dev_label) == len(passage_dev_score) == len(dev_run_data), "{} == {} == {}".format(len(passage_dev_label), len(passage_dev_score), len(dev_run_data))
-    #             assert len(entity_dev_label) == len(entity_dev_score) == len(dev_run_data), "{} == {} == {}".format(len(entity_dev_label), len(entity_dev_score), len(dev_run_data))
-    #
+                        passage_dev_label += list(itertools.chain(*labels[:,0].reshape(-1).tolist()))
+                        passage_dev_score += list(itertools.chain(*passage_output.cpu().numpy().tolist()))
+                        entity_dev_label += list(itertools.chain(*labels[:,1].reshape(-1).tolist()))
+                        entity_dev_score += list(itertools.chain(*entity_output.cpu().numpy().tolist()))
+
+                assert len(passage_dev_label) == len(passage_dev_score) == len(dev_run_data), "{} == {} == {}".format(len(passage_dev_label), len(passage_dev_score), len(dev_run_data))
+                assert len(entity_dev_label) == len(entity_dev_score) == len(dev_run_data), "{} == {} == {}".format(len(entity_dev_label), len(entity_dev_score), len(dev_run_data))
+
                 print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
     #
     #             # Store topic query and count number of topics.
