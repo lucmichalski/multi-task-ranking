@@ -266,7 +266,7 @@ if __name__ == '__main__':
     #                               keyword_dict_path=keyword_dict_path)
     #1
 
-    gpus = 3
+    gpus = 2
     passage_model_paths = [
         '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/passage_ranking_keyword_query_bert_train_2epoch+2e-05lr/epoch1_batch1000/',
         '/nfs/trec_news_track/data/5_fold/scaled_5fold_1_data/exp/passage_ranking_keyword_query_bert_train_2epoch+2e-05lr/epoch1_batch1000/',
