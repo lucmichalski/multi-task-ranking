@@ -1572,9 +1572,9 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                         topic_run = [i[0] for i in topic_run_data]
                         map_sum += EvalTools().get_map(run=topic_run, R=R)
 
-                    print('Original MAP = {}'.format(original_map_sum / topic_counter))
+                    print('Original {} MAP = {}'.format(flag, original_map_sum / topic_counter))
                     map = map_sum / topic_counter
-                    print('MAP = {}'.format(map))
+                    print('{} MAP = {}'.format(flag, map))
 
                     if max_map < map:
                         state_dict = model.state_dict()
