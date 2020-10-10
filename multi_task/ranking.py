@@ -1477,42 +1477,42 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
             optimizer.step()
 
             train_loss_total += loss.sum().item()
-    #
-    #         if i_train % 500 == 0:
-    #
-    #             # ========================================
-    #             #               Validation
-    #             # ========================================
-    #
-    #             print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/(i_train+1)))
-    #
-    #             model.eval()
-    #             dev_loss_total = 0.0
-    #             passage_dev_score = []
-    #             passage_dev_label = []
-    #             entity_dev_score = []
-    #             entity_dev_label = []
-    #             for i_dev, dev_batch in enumerate(dev_data_loader):
-    #                 inputs, labels = dev_batch
-    #
-    #                 with torch.no_grad():
-    #                     passage_output, entity_output = model.forward(inputs.to(device))
-    #
-    #                     # Calculate Loss: softmax --> cross entropy loss
-    #                     passage_loss = loss_func(passage_output.cpu(), labels[0])
-    #                     entity_loss = loss_func(entity_output.cpu(), labels[0])
-    #                     loss = passage_loss + entity_loss
-    #
-    #                     dev_loss_total += loss.sum().item()
-    #                     passage_dev_label += list(itertools.chain(*labels[0].cpu().numpy().tolist()))
-    #                     passage_dev_score += list(itertools.chain(*passage_output.cpu().numpy().tolist()))
-    #                     entity_dev_label += list(itertools.chain(*labels[1].cpu().numpy().tolist()))
-    #                     entity_dev_score += list(itertools.chain(*entity_output.cpu().numpy().tolist()))
+
+            if i_train % 500 == 0:
+
+                # ========================================
+                #               Validation
+                # ========================================
+
+                print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/(i_train+1)))
+
+                model.eval()
+                dev_loss_total = 0.0
+                passage_dev_score = []
+                passage_dev_label = []
+                entity_dev_score = []
+                entity_dev_label = []
+                for i_dev, dev_batch in enumerate(dev_data_loader):
+                    inputs, labels = dev_batch
+
+                    with torch.no_grad():
+                        passage_output, entity_output = model.forward(inputs.to(device))
+
+                        # Calculate Loss: softmax --> cross entropy loss
+                        passage_loss = loss_func(passage_output.reshape(-1).cpu(), labels[:,0].reshape(-1))
+                        entity_loss = loss_func(entity_output.reshape(-1).cpu(), labels[:,1].reshape(-1))
+                        loss = passage_loss + entity_loss
+
+                        dev_loss_total += loss.sum().item()
+                        # passage_dev_label += list(itertools.chain(*labels[0].cpu().numpy().tolist()))
+                        # passage_dev_score += list(itertools.chain(*passage_output.cpu().numpy().tolist()))
+                        # entity_dev_label += list(itertools.chain(*labels[1].cpu().numpy().tolist()))
+                        # entity_dev_score += list(itertools.chain(*entity_output.cpu().numpy().tolist()))
     #
     #             assert len(passage_dev_label) == len(passage_dev_score) == len(dev_run_data), "{} == {} == {}".format(len(passage_dev_label), len(passage_dev_score), len(dev_run_data))
     #             assert len(entity_dev_label) == len(entity_dev_score) == len(dev_run_data), "{} == {} == {}".format(len(entity_dev_label), len(entity_dev_score), len(dev_run_data))
     #
-    #             print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
+                print('av. dev loss = {}'.format(dev_loss_total/(i_dev+1)))
     #
     #             # Store topic query and count number of topics.
     #             topic_query = None
