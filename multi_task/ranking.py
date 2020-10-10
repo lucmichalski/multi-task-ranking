@@ -1225,7 +1225,7 @@ def train_mutant_max_combo(batch_size=128, lr=0.0001, parent_dir_path='/nfs/trec
         EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
 
 
-def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/', epoch=5):
+def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/', epoch=5, max_rank=100):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
@@ -1520,26 +1520,27 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                 dev_qrels_list = [passage_dev_qrels, entity_dev_qrels]
                 flags = ['passage', 'entity']
                 for dev_label, dev_score, dev_qrels, flag in zip(dev_label_list, dev_score_list, dev_qrels_list, flags):
+                    # Store topic query and count number of topics.
                     topic_query = None
-                    last_doc_id = 'Not query'
                     original_map_sum = 0.0
                     map_sum = 0.0
                     topic_counter = 0
-                    topic_run_data = []
+                    topic_run_data_dict = {}
                     for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
-                        if flag == 'passage':
-                            query, doc_id, _, label_ground_truth, _ = run_data
-                        else:
-                            query, _, doc_id, _, label_ground_truth = run_data
+                        query, doc_id, label_ground_truth = run_data
 
-                        assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
+                        assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label,
+                                                                                                       label_ground_truth)
 
                         if (topic_query != None) and (topic_query != query):
                             if topic_query in dev_qrels:
                                 R = len(dev_qrels[topic_query])
                             else:
                                 R = 0
-                            assert len(topic_run_data) <= 100, topic_run_data
+                            topic_run_data = [v for k, v in
+                                              sorted(topic_run_data_dict.items(), key=lambda item: item[1][1],
+                                                     reverse=True)][:max_rank]
+                            assert len(topic_run_data) <= max_rank, topic_run_data
                             original_run = [i[0] for i in topic_run_data]
                             original_map_sum += EvalTools().get_map(run=original_run, R=R)
                             topic_run_data.sort(key=lambda x: x[1], reverse=True)
@@ -1547,31 +1548,31 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                             map_sum += EvalTools().get_map(run=topic_run, R=R)
                             # Start new topic run.
                             topic_counter += 1
-                            topic_run_data = []
+                            topic_run_data_dict = {}
 
-                        if last_doc_id == doc_id:
-                            if score > topic_run_data[-1][1]:
-                                topic_run_data[-1] = [label, score]
+                        if doc_id in topic_run_data_dict:
+                            if score > topic_run_data_dict[doc_id][1]:
+                                topic_run_data_dict[doc_id] = [label, score]
                         else:
-                            topic_run_data.append([label, score])
+                            topic_run_data_dict[doc_id] = [label, score]
                         # Update topic run.
                         topic_query = query
-                        last_doc_id = doc_id
 
-                    if len(topic_run_data) > 0:
+                    if len(topic_run_data_dict) > 0:
                         if topic_query in dev_qrels:
                             R = len(dev_qrels[topic_query])
                         else:
                             R = 0
+                        topic_run_data = [v for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1],reverse=True)][:max_rank]
+                        assert len(topic_run_data) <= max_rank, topic_run_data
                         original_run = [i[0] for i in topic_run_data]
                         original_map_sum += EvalTools().get_map(run=original_run, R=R)
                         topic_run_data.sort(key=lambda x: x[1], reverse=True)
                         topic_run = [i[0] for i in topic_run_data]
                         map_sum += EvalTools().get_map(run=topic_run, R=R)
 
-                    print('-- {} --'.format(flag))
-                    print('Original MAP = {}'.format(original_map_sum/topic_counter))
-                    map = map_sum/topic_counter
+                    print('Original MAP = {}'.format(original_map_sum / topic_counter))
+                    map = map_sum / topic_counter
                     print('MAP = {}'.format(map))
 
                     if max_map < map:
