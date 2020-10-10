@@ -1483,6 +1483,7 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
             optimizer.step()
 
             train_loss_total += loss.sum().item()
+            break
     #
     #         if i_train % 500 == 0:
     #
