@@ -1566,13 +1566,10 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                             R = 0
                         topic_run_data = [v for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1],reverse=True)][:max_rank]
                         assert len(topic_run_data) <= max_rank, topic_run_data
-                        original_run = [i[0] for i in topic_run_data]
-                        original_map_sum += EvalTools().get_map(run=original_run, R=R)
                         topic_run_data.sort(key=lambda x: x[1], reverse=True)
                         topic_run = [i[0] for i in topic_run_data]
                         map_sum += EvalTools().get_map(run=topic_run, R=R)
 
-                    print('Original {} MAP = {}'.format(flag, original_map_sum / topic_counter))
                     map = map_sum / topic_counter
                     print('{} MAP = {}'.format(flag, map))
 
