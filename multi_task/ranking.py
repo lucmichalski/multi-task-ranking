@@ -1469,12 +1469,12 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
             print('inputs: {}, labels: {}'.format(inputs.shape, labels.shape))
             print('passage_output: {}, entity_output: {}'.format(passage_output.shape, entity_output.shape))
 
-            print(labels[0], labels[1])
+            print(labels[:,0], labels[:,1])
 
 
             # Calculate Loss: softmax --> cross entropy loss
-            passage_loss = loss_func(passage_output.cpu(), labels[0])
-            entity_loss = loss_func(entity_output.cpu(), labels[1])
+            passage_loss = loss_func(passage_output.cpu(), labels[:,0])
+            entity_loss = loss_func(entity_output.cpu(), labels[:,1])
             loss = passage_loss + entity_loss
             # Getting gradients w.r.t. parameters
             loss.sum().backward()
