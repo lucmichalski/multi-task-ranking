@@ -1471,7 +1471,6 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
             passage_loss = loss_func(passage_output.reshape(-1).cpu(), labels[:,0].reshape(-1))
             entity_loss = loss_func(entity_output.reshape(-1).cpu(), labels[:,1].reshape(-1))
             loss = passage_loss + entity_loss
-            print(loss)
             # Getting gradients w.r.t. parameters
             loss.sum().backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
