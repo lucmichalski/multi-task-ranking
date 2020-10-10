@@ -1469,7 +1469,7 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
             #print('inputs: {}, labels: {}'.format(inputs.shape, labels.shape))
             #print('passage_output: {}, entity_output: {}'.format(passage_output.shape, entity_output.shape))
             print('--------')
-            print(labels[:,0])
+            print(labels[:,0].reshape(-1))
             print(passage_output.cpu())
 
 
