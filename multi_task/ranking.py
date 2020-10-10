@@ -1518,7 +1518,8 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                 dev_label_list = [passage_dev_label, entity_dev_label]
                 dev_score_list = [passage_dev_score, passage_dev_label]
                 dev_qrels_list = [passage_dev_qrels, entity_dev_qrels]
-                for dev_label, dev_score, dev_qrels, in zip(dev_label_list, dev_score_list, dev_qrels_list):
+                flags = ['passage', 'entity']
+                for dev_label, dev_score, dev_qrels, flag in zip(dev_label_list, dev_score_list, dev_qrels_list, flags):
                     topic_query = None
                     last_doc_id = 'Not query'
                     original_map_sum = 0.0
@@ -1526,7 +1527,10 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                     topic_counter = 0
                     topic_run_data = []
                     for label, score, run_data in zip(dev_label, dev_score, dev_run_data):
-                        query, doc_id, label_ground_truth = run_data
+                        if flag == 'passage':
+                            query, doc_id, _, label_ground_truth, _ = run_data
+                        else:
+                            query, _, doc_id, _, label_ground_truth = run_data
 
                         assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
 
@@ -1565,6 +1569,7 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                         topic_run = [i[0] for i in topic_run_data]
                         map_sum += EvalTools().get_map(run=topic_run, R=R)
 
+                    print('-- {} --'.format(flag))
                     print('Original MAP = {}'.format(original_map_sum/topic_counter))
                     map = map_sum/topic_counter
                     print('MAP = {}'.format(map))
