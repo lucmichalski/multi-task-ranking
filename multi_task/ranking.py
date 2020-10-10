@@ -1466,12 +1466,6 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
             model.zero_grad()
             inputs, labels = train_batch
             passage_output, entity_output = model.forward(inputs.to(device))
-            #print('inputs: {}, labels: {}'.format(inputs.shape, labels.shape))
-            #print('passage_output: {}, entity_output: {}'.format(passage_output.shape, entity_output.shape))
-            print('--------')
-            print(labels[:,0].reshape(-1))
-            print(passage_output.reshape(-1).cpu())
-
 
             # Calculate Loss: softmax --> cross entropy loss
             passage_loss = loss_func(passage_output.reshape(-1).cpu(), labels[:,0].reshape(-1))
