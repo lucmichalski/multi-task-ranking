@@ -1483,7 +1483,7 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                 # ========================================
                 #               Validation
                 # ========================================
-
+                print('--------------------------------')
                 print('batch: {} / {} -> av. training loss: {}'.format(i_train+1, train_batches, loss/(i_train+1)))
 
                 model.eval()
