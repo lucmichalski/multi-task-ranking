@@ -1582,15 +1582,15 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                             print('*** NEW MAX MAP {} ({}) *** -> update state dict'.format(flag, map))
 
                     else:
-                        if passage_max_map < map:
+                        if entity_max_map < map:
                             entity_state_dict = model.state_dict()
                             entity_max_map = map
                             print('*** NEW MAX MAP {} ({}) *** -> update state dict'.format(flag, map))
 
 
-    # # ========================================
-    # #                  Test
-    # # ========================================
+    # ========================================
+    #                  Test
+    # ========================================
     # print('LOADING BEST MODEL WEIGHTS')
     # model.load_state_dict(state_dict)
     # model.eval()
