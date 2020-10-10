@@ -1448,8 +1448,10 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
         device = torch.device("cpu")
 
     # ==== Experiments ====
-    max_map = 0.0
-    state_dict = None
+    passage_max_map = 0.0
+    passage_state_dict = None
+    entity_max_map = 0.0
+    entity_state_dict = None
     for epoch in range(1,epoch+1):
 
         train_batches = len(train_data_loader)
@@ -1573,10 +1575,18 @@ def train_mutant_multi_task_max_combo(batch_size=128, lr=0.0001, parent_dir_path
                     map = map_sum / topic_counter
                     print('{} MAP = {}'.format(flag, map))
 
-                    if max_map < map:
-                        state_dict = model.state_dict()
-                        max_map = map
-                        print('*** NEW MAX MAP ({}) *** -> update state dict'.format(max_map))
+                    if flag == 'passage':
+                        if passage_max_map < map:
+                            passage_state_dict = model.state_dict()
+                            passage_max_map = map
+                            print('*** NEW MAX MAP {} ({}) *** -> update state dict'.format(flag, map))
+
+                    else:
+                        if passage_max_map < map:
+                            entity_state_dict = model.state_dict()
+                            entity_max_map = map
+                            print('*** NEW MAX MAP {} ({}) *** -> update state dict'.format(flag, map))
+
 
     # # ========================================
     # #                  Test
