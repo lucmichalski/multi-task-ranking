@@ -1573,7 +1573,7 @@ def train_mutant_multi_task_max_combo(batch_size=256, lr=0.0001, parent_dir_path
                         elif mutant_type == 'mean':
                             if doc_id in topic_run_data_dict:
                                 label_prev, score_sum_prev, doc_count_prev = topic_run_data_dict[doc_id][0], topic_run_data_dict[doc_id][1], topic_run_data_dict[doc_id][2]
-                                score_sum = score_sum_prev + 1
+                                score_sum = score_sum_prev + score
                                 doc_count = doc_count_prev + 1
                                 topic_run_data_dict[doc_id] = [label, score_sum, doc_count]
                             else:
