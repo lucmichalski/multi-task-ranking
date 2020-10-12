@@ -1100,7 +1100,12 @@ class MultiTaskDatasetByQuery():
                     if os.path.isdir(mutant_data_folder) == False:
                         os.mkdir(mutant_data_folder)
 
-                    query_json_path = mutant_data_folder + '{}_mutant_max.json'.format(query_i)
+                    print('--- TO JSON ---')
+                    mutant_data_folder_dataset = mutant_data_folder + dataset + '/'
+                    if os.path.isdir(mutant_data_folder_dataset) == False:
+                        os.mkdir(mutant_data_folder_dataset)
+
+                    query_json_path = mutant_data_folder_dataset + '{}_mutant_max.json'.format(query_i)
                     with open(query_json_path, 'w') as f:
                         json.dump(entity_context_dataset, f, indent=4)
 
