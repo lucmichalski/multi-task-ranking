@@ -1592,8 +1592,7 @@ def train_mutant_multi_task_max_combo(batch_size=256, lr=0.0001, parent_dir_path
                         else:
                             R = 0
                         if mutant_type == 'max':
-                            topic_run_data = [v for k, v in
-                                              sorted(topic_run_data_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
+                            topic_run_data = [v for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
                         elif mutant_type == 'mean':
                             for k in topic_run_data_dict.keys():
                                 label_prev, score_sum_prev, doc_count_prev = topic_run_data_dict[k][0], topic_run_data_dict[k][1], topic_run_data_dict[k][2]
@@ -1622,87 +1621,119 @@ def train_mutant_multi_task_max_combo(batch_size=256, lr=0.0001, parent_dir_path
                             entity_max_map = map
                             print('*** NEW MAX MAP {} ({}) *** -> update state dict'.format(flag, map))
 
-    # # ========================================
-    # #                  Test
-    # # ========================================
-    # for flag in ['passage', 'entity']:
-    #     print('------- test {} ---------'.format(flag))
-    #     print('LOADING BEST MODEL WEIGHTS')
-    #
-    #     if flag == 'passage':
-    #         model.load_state_dict(passage_state_dict)
-    #         test_run_path = passage_test_run_path
-    #         test_qrels_path = passage_test_qrels_path
-    #     else:
-    #         model.load_state_dict(entity_state_dict)
-    #         test_run_path = entity_test_run_path
-    #         test_qrels_path = entity_test_qrels_path
-    #
-    #     model.eval()
-    #     test_label = []
-    #     test_score = []
-    #     for i_test, test_batch in enumerate(test_data_loader):
-    #
-    #         inputs, labels = test_batch
-    #
-    #         with torch.no_grad():
-    #             with torch.no_grad():
-    #                 passage_output, entity_output = model.forward(inputs.to(device))
-    #
-    #                 if flag == 'passage':
-    #                     test_label += labels[:, 0].reshape(-1).tolist()
-    #                     test_score += list(itertools.chain(*passage_output.cpu().numpy().tolist()))
-    #                 else:
-    #                     test_label += labels[:, 1].reshape(-1).tolist()
-    #                     test_score += list(itertools.chain(*entity_output.cpu().numpy().tolist()))
-    #
-    #     assert len(test_score) == len(test_label) == len(test_run_data), "{} == {} == {}".format(len(test_score), len(test_label), len(test_run_data))
-    #
-    #     # Store topic query and count number of topics.
-    #     topic_query = None
-    #     topic_run_data_dict = {}
-    #     for label, score, run_data in zip(test_label, test_score, test_run_data):
-    #         if flag == 'passage':
-    #             query, doc_id, _, label_ground_truth, _ = run_data
-    #         else:
-    #             query, _, doc_id, _, label_ground_truth = run_data
-    #
-    #         assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
-    #
-    #         if (topic_query != None) and (topic_query != query):
-    #             topic_run_doc_ids = [k for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
-    #             assert len(topic_run_doc_ids) <= max_rank, "{} len {}: {}".format(topic_query, len(topic_run_doc_ids), topic_run_doc_ids)
-    #             with open(test_run_path, 'a+') as f:
-    #                 rank = 1
-    #                 fake_score = 1000
-    #                 for doc_id in topic_run_doc_ids:
-    #                     f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'mutant_multi_{}_combo'.format(mutant_type))) + '\n')
-    #                     rank += 1
-    #                     fake_score -= 1
-    #
-    #             # Start new topic run.
-    #             topic_run_data_dict = {}
-    #
-    #         if doc_id in topic_run_data_dict:
-    #             if score > topic_run_data_dict[doc_id][1]:
-    #                 topic_run_data_dict[doc_id] = [label, score]
-    #         else:
-    #             topic_run_data_dict[doc_id] = [label, score]
-    #             # Update topic run.
-    #
-    #         # Update topic run.
-    #         topic_query = query
-    #
-    #     if len(topic_run_data_dict) > 0:
-    #         topic_run_doc_ids = [k for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
-    #         assert len(topic_run_doc_ids) <= max_rank, "{} len {}: {}".format(topic_query, len(topic_run_doc_ids), topic_run_doc_ids)
-    #         with open(test_run_path, 'a+') as f:
-    #             rank = 1
-    #             fake_score = 1000
-    #             for doc_id in topic_run_doc_ids:
-    #                 f.write(
-    #                     " ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'mutant_multi_{}_combo'.format(mutant_type))) + '\n')
-    #                 rank += 1
-    #                 fake_score -= 1
-    #
-    #     EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
+    # ========================================
+    #                  Test
+    # ========================================
+    for flag in ['passage', 'entity']:
+        print('------- test {} ---------'.format(flag))
+        print('LOADING BEST MODEL WEIGHTS')
+
+        if flag == 'passage':
+            model.load_state_dict(passage_state_dict)
+            test_run_path = passage_test_run_path
+            test_qrels_path = passage_test_qrels_path
+        else:
+            model.load_state_dict(entity_state_dict)
+            test_run_path = entity_test_run_path
+            test_qrels_path = entity_test_qrels_path
+
+        model.eval()
+        test_label = []
+        test_score = []
+        for i_test, test_batch in enumerate(test_data_loader):
+
+            inputs, labels = test_batch
+
+            with torch.no_grad():
+                with torch.no_grad():
+                    passage_output, entity_output = model.forward(inputs.to(device))
+
+                    if flag == 'passage':
+                        test_label += labels[:, 0].reshape(-1).tolist()
+                        test_score += list(itertools.chain(*passage_output.cpu().numpy().tolist()))
+                    else:
+                        test_label += labels[:, 1].reshape(-1).tolist()
+                        test_score += list(itertools.chain(*entity_output.cpu().numpy().tolist()))
+
+        assert len(test_score) == len(test_label) == len(test_run_data), "{} == {} == {}".format(len(test_score), len(test_label), len(test_run_data))
+
+        # Store topic query and count number of topics.
+        topic_query = None
+        topic_run_data_dict = {}
+        for label, score, run_data in zip(test_label, test_score, test_run_data):
+            if flag == 'passage':
+                query, doc_id, _, label_ground_truth, _ = run_data
+            else:
+                query, _, doc_id, _, label_ground_truth = run_data
+
+            assert label == label_ground_truth, "score {} == label_ground_truth {}".format(label, label_ground_truth)
+
+            if (topic_query != None) and (topic_query != query):
+                if mutant_type == 'max':
+                    topic_run_doc_ids = [k for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
+                elif mutant_type == 'mean':
+                    for k in topic_run_data_dict.keys():
+                        label_prev, score_sum_prev, doc_count_prev = topic_run_data_dict[k][0], topic_run_data_dict[k][
+                            1], topic_run_data_dict[k][2]
+                        topic_run_data_dict[k] = [label_prev, score_sum_prev / doc_count_prev]
+                    topic_run_doc_ids = [k for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
+                else:
+                    print('NOT VALID mutant_type flag')
+                    raise
+                assert len(topic_run_doc_ids) <= max_rank, "{} len {}: {}".format(topic_query, len(topic_run_doc_ids), topic_run_doc_ids)
+                with open(test_run_path, 'a+') as f:
+                    rank = 1
+                    fake_score = 1000
+                    for doc_id in topic_run_doc_ids:
+                        f.write(" ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'mutant_multi_{}_combo'.format(mutant_type))) + '\n')
+                        rank += 1
+                        fake_score -= 1
+
+                # Start new topic run.
+                topic_run_data_dict = {}
+
+            if mutant_type == 'max':
+                if doc_id in topic_run_data_dict:
+                    if score > topic_run_data_dict[doc_id][1]:
+                        topic_run_data_dict[doc_id] = [label, score]
+                else:
+                    topic_run_data_dict[doc_id] = [label, score]
+            elif mutant_type == 'mean':
+                if doc_id in topic_run_data_dict:
+                    label_prev, score_sum_prev, doc_count_prev = topic_run_data_dict[doc_id][0], topic_run_data_dict[doc_id][1], topic_run_data_dict[doc_id][2]
+                    score_sum = score_sum_prev + 1
+                    doc_count = doc_count_prev + 1
+                    topic_run_data_dict[doc_id] = [label, score_sum, doc_count]
+                else:
+                    score_sum = score
+                    doc_count = 1
+                    topic_run_data_dict[doc_id] = [label, score_sum, doc_count]
+            else:
+                print('NOT VALID mutant_type flag')
+                raise
+
+            # Update topic run.
+            topic_query = query
+
+        if len(topic_run_data_dict) > 0:
+            if mutant_type == 'max':
+                topic_run_doc_ids = [k for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
+            elif mutant_type == 'mean':
+                for k in topic_run_data_dict.keys():
+                    label_prev, score_sum_prev, doc_count_prev = topic_run_data_dict[k][0], topic_run_data_dict[k][1], topic_run_data_dict[k][2]
+                    topic_run_data_dict[k] = [label_prev, score_sum_prev / doc_count_prev]
+                topic_run_doc_ids = [k for k, v in sorted(topic_run_data_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
+            else:
+                print('NOT VALID mutant_type flag')
+                raise
+            assert len(topic_run_doc_ids) <= max_rank, "{} len {}: {}".format(topic_query, len(topic_run_doc_ids), topic_run_doc_ids)
+            with open(test_run_path, 'a+') as f:
+                rank = 1
+                fake_score = 1000
+                for doc_id in topic_run_doc_ids:
+                    f.write(
+                        " ".join((topic_query, 'Q0', doc_id, str(rank), str(fake_score), 'mutant_multi_{}_combo'.format(mutant_type))) + '\n')
+                    rank += 1
+                    fake_score -= 1
+
+        EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
