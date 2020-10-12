@@ -21,7 +21,6 @@ if __name__ == '__main__':
     lrs = [0.000001, 0.00001, 0.0001, 0.0005, 0.001]
     for batch_size in batch_sizes:
         for lr in lrs:
-            train_cls_model(batch_size=batch_size, lr=lr)
             train_mutant_multi_task_max_combo(batch_size=batch_size, lr=lr, mutant_type='mean')
 
 
