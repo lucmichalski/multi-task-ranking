@@ -922,7 +922,7 @@ class MultiTaskDatasetByQuery():
 
         for fold in [0,1,2,3,4]:
 
-            for dataset in ['dev', 'test', 'train']:
+            for dataset in ['valid', 'test', 'train']:
 
                 fold_dir_path = dir_path + 'scaled_5fold_{}_data/'.format(fold)
 
