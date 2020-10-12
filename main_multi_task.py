@@ -6,7 +6,7 @@ if __name__ == '__main__':
     dir_path = '/nfs/trec_news_track/data/5_fold/'
     passage_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/benchmarkY1_passage_100_lr_8e6_num_warmup_steps_1000/epoch1_batch14000/'
     entity_model_path = '/nfs/trec_car/data/bert_reranker_datasets/exp/full_data_v2_hierarchical_10000_hits_300_v2_lr_2e6_num_warmup_steps_0.1_new_pipeline/epoch1_batch420000/'
-    batch_size = 64*6
+    batch_size = 64*2
     max_rank = 100
     MultiTaskDatasetByQuery().build_dataset_by_query_entity_context_news(dir_path=dir_path,
                                                                         max_rank=max_rank,
