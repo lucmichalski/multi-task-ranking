@@ -1006,9 +1006,11 @@ class MultiTaskDatasetByQuery():
                         if len(entity_links) == 0:
                             # search
                             try:
-                                entity_links = [search_tools_entity.search(query=passage_text[:500], hits=1)[0][0]]
+                                passage_title = search_tools_passage.process_query_news(query_dict=passage_dict,
+                                                                                        query_type='title')
+                                entity_links = [search_tools_entity.search(query=passage_title, hits=1)[0][0]]
                             except:
-                                entity_links = [search_tools_entity.search(query=query_decoded[:500], hits=1)[0][0]]
+                                entity_links = [search_tools_entity.search(query=passage_text[:500], hits=1)[0][0]]
                             print('Synthetic entity links:', entity_links)
 
                         for entity_id in list(set(entity_links)):
