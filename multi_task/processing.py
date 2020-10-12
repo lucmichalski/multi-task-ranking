@@ -1,5 +1,5 @@
 
-from metadata import CarPassagePaths, CarEntityPaths
+from metadata import CarPassagePaths, CarEntityPaths, NewsPassagePaths
 from retrieval.tools import SearchTools
 from learning.models import BertCLS, BertMultiTaskRanker
 
@@ -478,6 +478,34 @@ class MultiTaskDatasetByQuery():
 
         return run_dict, qrels_dict
 
+    def get_task_run_and_qrels_news(self, fold_dir_path, dataset, task='entity', max_rank=100):
+        """ """
+        if task == 'entity':
+            run_path = fold_dir_path + '{}_{}_BM25_ranking_1000.run'.format(task, dataset)
+        elif task == 'passage':
+            run_path = fold_dir_path + '{}_{}_ranking_1000.run'.format(task, dataset)
+        else:
+            "NOT VALID TASK"
+            raise
+
+        qrels_path = fold_dir_path + '{}_{}.qrels'.format(task, dataset)
+
+        search_tools = SearchTools()
+        qrels_dict = search_tools.retrieval_utils.get_qrels_binary_dict(qrels_path=qrels_path)
+
+        run_dict = {}
+        with open(run_path, 'r') as f:
+            for line in f:
+                # Unpack run line.
+                query, _, doc_id, rank, _, _ = search_tools.retrieval_utils.unpack_run_line(line)
+
+                if int(rank) <= max_rank:
+                    if query not in run_dict:
+                        run_dict[query] = []
+                    run_dict[query].append([doc_id, rank])
+
+        return run_dict, qrels_dict
+
 
     def build_dataset_by_query(self, dir_path, max_rank=100, batch_size=64, passage_model_path=None,
                                entity_model_path=None):
@@ -510,8 +538,8 @@ class MultiTaskDatasetByQuery():
             dataset_dir_path = dir_path + '{}_data/'.format(dataset)
             self.__make_dir(dataset_dir_path)
 
-            entity_run_dict, entity_qrels_dict = self. get_task_run_and_qrels(dataset=dataset, task='entity', max_rank=max_rank)
-            passage_run_dict, passage_qrels_dict = self. get_task_run_and_qrels(dataset=dataset, task='passage', max_rank=max_rank)
+            entity_run_dict, entity_qrels_dict = self.get_task_run_and_qrels(dataset=dataset, task='entity', max_rank=max_rank)
+            passage_run_dict, passage_qrels_dict = self.get_task_run_and_qrels(dataset=dataset, task='passage', max_rank=max_rank)
 
             entity_query_list = sorted(list(entity_run_dict.keys()))
             passage_query_list = sorted(list(passage_run_dict.keys()))
@@ -863,6 +891,216 @@ class MultiTaskDatasetByQuery():
                 query_json_path = dataset_dir_path + '{}_data_bi_encode_ranker_entity_context.json'.format(query_i)
                 with open(query_json_path, 'w') as f:
                     json.dump(entity_context_dataset, f, indent=4)
+
+
+    def build_dataset_by_query_entity_context_news(self, dir_path='/nfs/trec_news_track/data/5_fold/', max_rank=100, batch_size=64, passage_model_path=None,
+                                                   entity_model_path=None):
+        """ """
+
+        passage_model = BertMultiTaskRanker.from_pretrained(passage_model_path)
+        entity_model = BertMultiTaskRanker.from_pretrained(entity_model_path)
+
+        # Use GPUs if available.
+        if torch.cuda.is_available():
+            print(torch.cuda.get_device_name())
+            # Tell PyTorch to use the GPU.
+            print('There are %d GPU(s) available.' % torch.cuda.device_count())
+            print('We will use the GPU: {}'.format(torch.cuda.get_device_name(0)))
+
+            entity_device = torch.device("cuda:0")
+            entity_model.to(entity_device)
+
+            passage_device = torch.device("cuda:1")
+            passage_model.to(passage_device)
+
+        # Otherwise use CPU.
+        else:
+            print('No GPU available, using the CPU instead.')
+            entity_device = torch.device("cpu")
+            passage_device = torch.device("cpu")
+
+
+        for fold in [0,1,2,3,4]:
+
+            for dataset in ['dev', 'test', 'train']:
+
+                fold_dir_path = dir_path + 'scaled_5fold_{}_data/'.format(fold)
+
+                passage_to_entity_path = dir_path + 'scaled_5fold_0_data/doc_to_entity_map.json'
+                with open(passage_to_entity_path, 'r') as f:
+                    passage_to_entity_dict = json.load(f)
+
+                entity_run_dict, entity_qrels_dict = self.get_task_run_and_qrels_news(fold_dir_path=fold_dir_path,
+                                                                                      dataset=dataset,
+                                                                                      task='entity',
+                                                                                      max_rank=max_rank)
+
+                passage_run_dict, passage_qrels_dict = self.get_task_run_and_qrels_news(fold_dir_path=fold_dir_path,
+                                                                                      dataset=dataset,
+                                                                                      task='passage',
+                                                                                      max_rank=max_rank)
+
+                tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+                search_tools_entity = SearchTools(index_path=CarEntityPaths.index)
+                search_tools_passage = SearchTools(index_path=NewsPassagePaths.index)
+
+                queries = list(set(list(passage_qrels_dict.keys()) + list(entity_qrels_dict.keys())))
+
+                for query_i, query in enumerate(queries):
+                    print("Processing {} ({} / {})".format(query, query_i, len(queries)))
+
+                    entity_context_dataset = {}
+                    self.cls_id = 0
+                    self.cls_id_list = []
+                    self.token_list = []
+                    self.token_list_ent_context = []
+                    self.cls_id_list_ent_context = []
+
+                    entity_context_dataset['query'] = {}
+                    entity_context_dataset['query']['query_id'] = query
+                    entity_context_dataset['query']['passage'] = {}
+
+                    # Update BERT cls input
+                    query_dict = json.loads(search_tools_passage.get_contents_from_docid(query))
+                    query_decoded = search_tools_passage.process_query_news(query_dict=query_dict, query_type='title+contents')
+
+
+                    print('--- Add passage & entity data ---')
+                    for run_data in passage_run_dict[query]:
+                        passage_id = run_data[0]
+                        rank = run_data[1]
+                        # --- Add passage ---
+                        passage_dict = json.loads(search_tools_passage.get_contents_from_docid(passage_id))
+                        passage_text = search_tools_passage.process_query_news(query_dict=passage_dict,
+                                                                                query_type='title+contents')
+                        passage_input_ids = tokenizer.encode(text=query_decoded,
+                                                             text_pair=passage_text,
+                                                             max_length=512,
+                                                             add_special_tokens=True,
+                                                             pad_to_max_length=True)
+
+                        entity_context_dataset['query']['passage'][passage_id] = {}
+
+                        entity_context_dataset['query']['passage'][passage_id]['rank'] = rank
+                        if query in passage_qrels_dict:
+                            if passage_id in passage_qrels_dict[query]:
+                                entity_context_dataset['query']['passage'][passage_id]['relevant'] = 1.0
+                            else:
+                                entity_context_dataset['query']['passage'][passage_id]['relevant'] = 0.0
+                        else:
+                            entity_context_dataset['query']['passage'][passage_id]['relevant'] = 0.0
+
+                        entity_context_dataset['query']['passage'][passage_id]['cls_id'] = self.cls_id
+
+                        self.cls_id_list.append([self.cls_id])
+                        self.token_list.append(passage_input_ids)
+                        self.cls_id += 1
+
+                        # --- Add entities ---
+                        entity_context_dataset['query']['passage'][passage_id]['entity'] = {}
+                        if passage_id in passage_to_entity_dict:
+                            entity_links = passage_to_entity_dict[passage_id]
+                        else:
+                            entity_links = []
+
+                        if len(entity_links) == 0:
+                            # search
+                            try:
+                                entity_links = [search_tools_entity.search(query=passage_text[:500], hits=1)[0][0]]
+                            except:
+                                entity_links = [search_tools_entity.search(query=query_decoded[:500], hits=1)[0][0]]
+                            print('Synthetic entity links:', entity_links)
+
+                        for entity_id in list(set(entity_links)):
+                            try:
+                                entity_text_full = search_tools_entity.get_contents_from_docid(doc_id=entity_id)
+                                entity_text = entity_text_full.split('\n')[0]
+                            except:
+                                try:
+                                    entity_text = search_tools_entity.decode_query_car(q=entity_id)
+                                except ValueError:
+                                    print("URL utf-8 decoding did not work with Pyserini's SimpleSearcher.search()/JString: {}".format(query))
+                                    entity_text = search_tools_entity.process_query_car(q=entity_id)
+                            entity_input_ids = tokenizer.encode(text=query_decoded,
+                                                                 text_pair=entity_text,
+                                                                 max_length=512,
+                                                                 add_special_tokens=True,
+                                                                 pad_to_max_length=True)
+
+                            entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id] = {}
+                            entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['cls_id'] = self.cls_id
+                            if query in entity_qrels_dict:
+                                if entity_id in entity_qrels_dict[query]:
+                                    entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['relevant'] = 1
+                                else:
+                                    entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['relevant'] = 0
+                            else:
+                                entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['relevant'] = 0
+
+                            self.cls_id_list_ent_context.append([self.cls_id])
+                            self.token_list_ent_context.append(entity_input_ids)
+                            self.cls_id += 1
+
+                    # --- Build dataloaders ---
+                    print('--- Build dataloaders ---')
+                    passage_tensor_dataset = TensorDataset(torch.tensor(self.cls_id_list), torch.tensor(self.token_list))
+                    passage_data_loader = DataLoader(passage_tensor_dataset,
+                                                     sampler=SequentialSampler(passage_tensor_dataset),
+                                                     batch_size=batch_size)
+
+                    entity_tensor_dataset = TensorDataset(torch.tensor(self.cls_id_list_ent_context), torch.tensor(self.token_list_ent_context))
+                    entity_data_loader = DataLoader(entity_tensor_dataset,
+                                                    sampler=SequentialSampler(entity_tensor_dataset),
+                                                    batch_size=batch_size)
+
+                    print('--- BERT ---')
+                    id_list = []
+                    cls_tokens = []
+                    # Passage BERT.
+                    for batch in passage_data_loader:
+                        b_id_list = batch[0]
+                        b_input_ids = batch[1].to(passage_device)
+                        with torch.no_grad():
+                            b_cls_tokens = passage_model.bert.forward(input_ids=b_input_ids)
+
+                        id_list.append(b_id_list)
+                        cls_tokens.append(b_cls_tokens[1].cpu())
+
+                    # Entity BERT.
+                    for batch in entity_data_loader:
+                        b_id_list = batch[0]
+                        b_input_ids = batch[1].to(entity_device)
+                        with torch.no_grad():
+                            b_cls_tokens = entity_model.bert.forward(input_ids=b_input_ids)
+
+                        id_list.append(b_id_list)
+                        cls_tokens.append(b_cls_tokens[1].cpu())
+
+                    print('--- PROCESS CLS TOKENS ---')
+                    # Build CLS map.
+                    id_list_tensor = torch.cat(id_list).numpy().tolist()
+                    cls_tokens_tensor = torch.cat(cls_tokens).numpy().tolist()
+                    cls_map = {}
+                    for cls_i, cls_token in zip(id_list_tensor, cls_tokens_tensor):
+                        cls_map[int(cls_i[0])] = cls_token
+
+                    # ======== PROCESS CLS TOKENS ========
+                    for passage_id in entity_context_dataset['query']['passage'].keys():
+                        passage_cls_id = entity_context_dataset['query']['passage'][passage_id]['cls_id']
+                        entity_context_dataset['query']['passage'][passage_id]['cls_token'] = cls_map[passage_cls_id]
+
+                        for entity_id in entity_context_dataset['query']['passage'][passage_id]['entity'].keys():
+                            entity_cls_id = entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['cls_id']
+                            entity_context_dataset['query']['passage'][passage_id]['entity'][entity_id]['cls_token'] = cls_map[entity_cls_id]
+
+                    print('--- TO JSON ---')
+                    mutant_data_folder = fold_dir_path + '/mutant_data/'
+                    if os.path.isdir(mutant_data_folder) == False:
+                        os.mkdir(mutant_data_folder)
+
+                    query_json_path = mutant_data_folder + '{}_mutant_max.json'.format(query_i)
+                    with open(query_json_path, 'w') as f:
+                        json.dump(entity_context_dataset, f, indent=4)
 
 
 def create_extra_queries(dir_path, dataset_metadata=dataset_metadata):
