@@ -1110,7 +1110,7 @@ class MultiTaskDatasetByQuery():
                     query_json_path = mutant_data_folder_dataset + '{}_mutant_max.json'.format(query_i)
                     with open(query_json_path, 'w') as f:
                         json.dump(entity_context_dataset, f, indent=4)
-                print('skipping query: {]'.format(query_i))
+                print('skipping query: {}'.format(query_i))
 
         query_id_to_query_json_path = {}
         for dataset in ['valid', 'test', 'train']:
