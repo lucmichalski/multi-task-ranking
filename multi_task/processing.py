@@ -920,7 +920,7 @@ class MultiTaskDatasetByQuery():
             passage_device = torch.device("cpu")
 
 
-        for fold in [0,1,2,3,4]:
+        for fold in [0]:
 
             for dataset in ['valid', 'test', 'train']:
 
