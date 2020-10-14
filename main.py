@@ -13,20 +13,20 @@ from multi_task.ranking import train_mutant_multi_task_max_combo_news
 
 if __name__ == '__main__':
 
-    dir_path = '/nfs/trec_news_track/data/5_fold/'
-    passage_model_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/'
-    entity_model_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/entity_ranking_bert_train_2epoch+8e-06lr/epoch2_batch6000/'
-    batch_size = 64*2
-    max_rank = 100
-    query_keyword_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_queries_no_stem_107_queries.json'
-    doc_keyword_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_docs_no_stem.json'
-    MultiTaskDatasetByQuery().build_dataset_by_query_entity_context_news_keyword(dir_path=dir_path,
-                                                                                 max_rank=max_rank,
-                                                                                 batch_size=batch_size,
-                                                                                 passage_model_path=passage_model_path,
-                                                                                 entity_model_path=entity_model_path,
-                                                                                 query_keyword_path=query_keyword_path,
-                                                                                 doc_keyword_path=doc_keyword_path)
+    # dir_path = '/nfs/trec_news_track/data/5_fold/'
+    # passage_model_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/passage_ranking_bert_train_2epoch+8e-06lr/epoch1_batch2000/'
+    # entity_model_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/entity_ranking_bert_train_2epoch+8e-06lr/epoch2_batch6000/'
+    # batch_size = 64*2
+    # max_rank = 100
+    # query_keyword_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_queries_no_stem_107_queries.json'
+    # doc_keyword_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_docs_no_stem.json'
+    # MultiTaskDatasetByQuery().build_dataset_by_query_entity_context_news_keyword(dir_path=dir_path,
+    #                                                                              max_rank=max_rank,
+    #                                                                              batch_size=batch_size,
+    #                                                                              passage_model_path=passage_model_path,
+    #                                                                              entity_model_path=entity_model_path,
+    #                                                                              query_keyword_path=query_keyword_path,
+    #                                                                              doc_keyword_path=doc_keyword_path)
     # for batch_size in [64]:
     #     for lr in [0.001, 0.0001]:
     #         train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='max')
@@ -234,73 +234,75 @@ if __name__ == '__main__':
     #                                                words=words,
     #                                                hits=hits,
     #                                                news_index_path=NewsPassagePaths.index)
-    # datasets = ['test', 'valid', 'train']
-    # folds = [0,1,2,3,4]
-    # training_datasets = [False, False, True]
-    # for fold in folds:
-    #     for dataset, training_dataset in zip(datasets, training_datasets):
-    #         qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}.qrels'.format(fold, dataset)
-    #         run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}_ranking_1000.run'.format(fold, dataset)
-    #         index_path = NewsPassagePaths.index
-    #         data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}_bert_ranking_data_keyword/'.format(fold, dataset)
-    #         max_length = 512
-    #         context_path = None
-    #         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    #         binary_qrels = True
-    #         keyword_dict_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_queries_no_stem.json'
-    #         dp = DatasetProcessing(qrels_path=qrels_path,
-    #                                run_path=run_path,
-    #                                index_path=index_path,
-    #                                data_dir_path=data_dir_path,
-    #                                max_length=max_length,
-    #                                context_path=context_path,
-    #                                tokenizer=tokenizer,
-    #                                binary_qrels=binary_qrels)
-    #
-    #         chuck_topic_size = 100
-    #         ranking_type = 'passage'
-    #         query_type = 'title+contents'
-    #         car_index_path = CarEntityPaths.index
-    #         dp.build_news_dataset(training_dataset=training_dataset,
-    #                               chuck_topic_size=chuck_topic_size,
-    #                               ranking_type=ranking_type,
-    #                               query_type=query_type,
-    #                               car_index_path=car_index_path,
-    #                               keyword_dict_path=keyword_dict_path)
-    #
-    # datasets = ['test', 'valid', 'train']
-    # folds = [0,1,2,3,4]
-    # training_datasets = [False, False, True]
-    # for fold in folds:
-    #     for dataset, training_dataset in zip(datasets, training_datasets):
-    #         qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}.qrels'.format(fold, dataset)
-    #         run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_BM25_ranking_1000.run'.format(fold, dataset)
-    #         index_path = NewsPassagePaths.index
-    #         data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_bert_ranking_data_keyword/'.format(fold, dataset)
-    #         max_length = 512
-    #         context_path = None
-    #         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    #         binary_qrels = True
-    #         keyword_dict_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_queries_no_stem.json'
-    #         dp = DatasetProcessing(qrels_path=qrels_path,
-    #                                run_path=run_path,
-    #                                index_path=index_path,
-    #                                data_dir_path=data_dir_path,
-    #                                max_length=max_length,
-    #                                context_path=context_path,
-    #                                tokenizer=tokenizer,
-    #                                binary_qrels=binary_qrels)
-    #
-    #         chuck_topic_size = 100
-    #         ranking_type = 'entity'
-    #         query_type = 'title+contents'
-    #         car_index_path = CarEntityPaths.index
-    #         dp.build_news_dataset(training_dataset=training_dataset,
-    #                               chuck_topic_size=chuck_topic_size,
-    #                               ranking_type=ranking_type,
-    #                               query_type=query_type,
-    #                               car_index_path=car_index_path,
-    #                               keyword_dict_path=keyword_dict_path)
+    datasets = ['test', 'valid', 'train']
+    folds = [0,1,2,3,4]
+    training_datasets = [False, False, True]
+    for fold in folds:
+        for dataset, training_dataset in zip(datasets, training_datasets):
+            qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}.qrels'.format(fold, dataset)
+            run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}_ranking_1000.run'.format(fold, dataset)
+            index_path = NewsPassagePaths.index
+            data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}_bert_ranking_data_keyword/'.format(fold, dataset)
+            max_length = 512
+            context_path = None
+            tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+            binary_qrels = True
+            keyword_dict_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_queries_no_stem_107_queries.json'
+            keyword_passage_dict_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_docs_no_stem.json'
+            dp = DatasetProcessing(qrels_path=qrels_path,
+                                   run_path=run_path,
+                                   index_path=index_path,
+                                   data_dir_path=data_dir_path,
+                                   max_length=max_length,
+                                   context_path=context_path,
+                                   tokenizer=tokenizer,
+                                   binary_qrels=binary_qrels)
+
+            chuck_topic_size = 100
+            ranking_type = 'passage'
+            query_type = 'title+contents'
+            car_index_path = CarEntityPaths.index
+            dp.build_news_dataset(training_dataset=training_dataset,
+                                  chuck_topic_size=chuck_topic_size,
+                                  ranking_type=ranking_type,
+                                  query_type=query_type,
+                                  car_index_path=car_index_path,
+                                  keyword_dict_path=keyword_dict_path,
+                                  keyword_passage_dict_path=keyword_passage_dict_path)
+
+    datasets = ['test', 'valid', 'train']
+    folds = [0,1,2,3,4]
+    training_datasets = [False, False, True]
+    for fold in folds:
+        for dataset, training_dataset in zip(datasets, training_datasets):
+            qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}.qrels'.format(fold, dataset)
+            run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_BM25_ranking_1000.run'.format(fold, dataset)
+            index_path = NewsPassagePaths.index
+            data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_bert_ranking_data_keyword/'.format(fold, dataset)
+            max_length = 512
+            context_path = None
+            tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+            binary_qrels = True
+            keyword_dict_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_queries_no_stem_107_queries.json'
+            dp = DatasetProcessing(qrels_path=qrels_path,
+                                   run_path=run_path,
+                                   index_path=index_path,
+                                   data_dir_path=data_dir_path,
+                                   max_length=max_length,
+                                   context_path=context_path,
+                                   tokenizer=tokenizer,
+                                   binary_qrels=binary_qrels)
+
+            chuck_topic_size = 100
+            ranking_type = 'entity'
+            query_type = 'title+contents'
+            car_index_path = CarEntityPaths.index
+            dp.build_news_dataset(training_dataset=training_dataset,
+                                  chuck_topic_size=chuck_topic_size,
+                                  ranking_type=ranking_type,
+                                  query_type=query_type,
+                                  car_index_path=car_index_path,
+                                  keyword_dict_path=keyword_dict_path)
     #1
 
     # gpus = 2
