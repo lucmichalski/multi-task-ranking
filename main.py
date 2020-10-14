@@ -18,7 +18,7 @@ if __name__ == '__main__':
     entity_model_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/exp/entity_ranking_bert_train_2epoch+8e-06lr/epoch2_batch6000/'
     batch_size = 64*2
     max_rank = 100
-    query_keyword_path = 'nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_queries_no_stem_107_queries.json'
+    query_keyword_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_queries_no_stem_107_queries.json'
     doc_keyword_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/news_tf_idf_docs_no_stem.json'
     MultiTaskDatasetByQuery().build_dataset_by_query_entity_context_news_keyword(dir_path=dir_path,
                                                                                  max_rank=max_rank,
