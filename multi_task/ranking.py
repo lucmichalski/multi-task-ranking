@@ -1745,7 +1745,7 @@ def train_mutant_multi_task_max_combo_news(batch_size=256, lr=0.0001, parent_dir
     train_dir_path = parent_dir_path + 'mutant_data/train/'
     dev_dir_path = parent_dir_path + 'mutant_data/dev/'
     test_dir_path = parent_dir_path + 'mutant_data/test/'
-    mutant_dir_path = parent_dir_path + 'mutant/'
+    mutant_dir_path = parent_dir_path + 'mutant_data/'
 
     print('===================================')
     print('===================================')
