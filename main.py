@@ -324,7 +324,7 @@ if __name__ == '__main__':
         else:
             model_paths = entity_model_paths
         folds = [0, 1, 2, 3, 4]
-        for fold in zip(folds):
+        for fold in folds:
             dev_batch_size = 64 * 8 * gpus
             train_batch_size = 8 * gpus
             experiments_dir = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/exp/'.format(fold)
@@ -353,8 +353,8 @@ if __name__ == '__main__':
                 )
 
             else:
-                train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_ranking_data_keyword_v/'.format(fold)
-                dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_bert_ranking_data_keyword_v/'.format(fold)
+                train_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_train_bert_ranking_data_keyword_v2/'.format(fold)
+                dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_entity_id_list_sortedbert_ranking_data_keyword_v2/'.format(fold)
                 dev_qrels_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid.qrels'.format(fold)
                 dev_run_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_valid_BM25_ranking_1000.run'.format(fold)
                 # dev_data_dir_path_entity = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_test_bert_ranking_data_keyword/'.format(fold)
