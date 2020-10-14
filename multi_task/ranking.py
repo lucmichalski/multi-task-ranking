@@ -1743,7 +1743,7 @@ def train_mutant_multi_task_max_combo_news(batch_size=256, lr=0.0001, data_dir_p
                                            epoch=4, max_rank=100, mutant_type='max'):
     """ """
     for fold in [0,1,2,3,4]:
-        parent_dir_path = data_dir_path + 'scaled_5fold_{}_data/'
+        parent_dir_path = data_dir_path + 'scaled_5fold_{}_data/'.format(fold)
         train_dir_path = parent_dir_path + 'mutant_data/train/'
         dev_dir_path = parent_dir_path + 'mutant_data/valid/'
         test_dir_path = parent_dir_path + 'mutant_data/test/'
