@@ -8,7 +8,7 @@ from retrieval.tools import EvalTools, SearchTools, default_eval_config
 from torch import nn
 
 from multi_task.processing import MultiTaskDataset, create_extra_queries, MultiTaskDatasetByQuery
-from multi_task.ranking import train_mutant_multi_task_max_combo_news
+from multi_task.ranking import train_mutant_multi_task_max_combo_news, train_mutant_multi_task_max_combo
 
 
 if __name__ == '__main__':
@@ -27,12 +27,10 @@ if __name__ == '__main__':
     #                                                                              entity_model_path=entity_model_path,
     #                                                                              query_keyword_path=query_keyword_path,
     #                                                                              doc_keyword_path=doc_keyword_path)
-    for batch_size in [32]:
-        for lr in [0.001, 0.0001]:
-            train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='mean', keyword=True)
-    for batch_size in [32]:
-        for lr in [0.001, 0.0001]:
-            train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='max', keyword=True)
+    for batch_size in [256]:
+        for lr in [0.0005, 0.0001, 0.00001]:
+            train_mutant_multi_task_max_combo(batch_size=batch_size, lr=lr, mutant_type='mean')
+            train_mutant_multi_task_max_combo(batch_size=batch_size, lr=lr, mutant_type='max')
 
 
 

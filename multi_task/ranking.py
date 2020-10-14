@@ -1225,8 +1225,8 @@ def train_mutant_max_combo(batch_size=128, lr=0.0001, parent_dir_path='/nfs/trec
         EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
 
 
-def train_mutant_multi_task_max_combo(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/',
-                                      epoch=7, max_rank=100, mutant_type='max'):
+def train_mutant_multi_task_max_combo(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/',
+                                      epoch=7, max_rank=1000, mutant_type='max'):
     """ """
     train_dir_path = parent_dir_path + 'train_data/'
     dev_dir_path = parent_dir_path + 'dev_data/'
