@@ -242,7 +242,7 @@ if __name__ == '__main__':
             qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}.qrels'.format(fold, dataset)
             run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}_ranking_1000.run'.format(fold, dataset)
             index_path = NewsPassagePaths.index
-            data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}_bert_ranking_data_keyword/'.format(fold, dataset)
+            data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/passage_{}_bert_ranking_data_keyword_v2/'.format(fold, dataset)
             max_length = 512
             context_path = None
             tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -278,7 +278,7 @@ if __name__ == '__main__':
             qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}.qrels'.format(fold, dataset)
             run_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_BM25_ranking_1000.run'.format(fold, dataset)
             index_path = NewsPassagePaths.index
-            data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_bert_ranking_data_keyword/'.format(fold, dataset)
+            data_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_{}_data/entity_{}_bert_ranking_data_keyword_v2/'.format(fold, dataset)
             max_length = 512
             context_path = None
             tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
