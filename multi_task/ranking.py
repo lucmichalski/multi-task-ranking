@@ -1743,7 +1743,7 @@ def train_mutant_multi_task_max_combo_news(batch_size=256, lr=0.0001, parent_dir
                                            epoch=7, max_rank=100, mutant_type='max'):
     """ """
     train_dir_path = parent_dir_path + 'mutant_data/train/'
-    dev_dir_path = parent_dir_path + 'mutant_data/dev/'
+    dev_dir_path = parent_dir_path + 'mutant_data/valid/'
     test_dir_path = parent_dir_path + 'mutant_data/test/'
     mutant_dir_path = parent_dir_path + 'mutant_data/'
 
@@ -1812,9 +1812,9 @@ def train_mutant_multi_task_max_combo_news(batch_size=256, lr=0.0001, parent_dir
 
     # # ==== Build dev data ====
     #
-    print('Build dev data')
-    dev_dataset_path = mutant_dir_path + 'mutant_multi_task_max_combo_dev_dataset.pt'
-    dev_run_data_path = mutant_dir_path + 'mutant_multi_task_max_combo_dev_run_data.txt'
+    print('Build valid data')
+    dev_dataset_path = mutant_dir_path + 'mutant_multi_task_max_combo_valid_dataset.pt'
+    dev_run_data_path = mutant_dir_path + 'mutant_multi_task_max_combo_valid_run_data.txt'
     passage_dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(passage_dev_qrels_path)
     entity_dev_qrels = SearchTools.retrieval_utils.get_qrels_binary_dict(entity_dev_qrels_path)
 
@@ -1853,7 +1853,7 @@ def train_mutant_multi_task_max_combo_news(batch_size=256, lr=0.0001, parent_dir
                 else:
                     print('NO ENTITIES FOUND FROM {} - {}'.format(query, doc_id))
 
-        print('-> {} dev examples'.format(len(dev_labels_list)))
+        print('-> {} valid examples'.format(len(dev_labels_list)))
         dev_dataset = TensorDataset(torch.tensor(dev_input_list), torch.tensor(dev_labels_list))
         torch.save(obj=dev_dataset, f=dev_dataset_path)
         with open(dev_run_data_path, 'w') as f:
