@@ -23,9 +23,9 @@ if __name__ == '__main__':
     # for batch_size in batch_sizes:
     #     for lr in lrs:
     #         train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='mean')
-    batch_size = 32
-    lr = 0.001
-    train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='max')
+    for batch_size in [64]:
+        for lr in [0.001, 0.0001]:
+            train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='max')
 
 
 
