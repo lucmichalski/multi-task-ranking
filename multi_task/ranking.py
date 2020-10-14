@@ -1739,7 +1739,7 @@ def train_mutant_multi_task_max_combo(batch_size=256, lr=0.0001, parent_dir_path
         EvalTools().write_eval_from_qrels_and_run(qrels_path=test_qrels_path, run_path=test_run_path)
 
 
-def train_mutant_multi_task_max_combo_news(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/entity_test_bert_data/',
+def train_mutant_multi_task_max_combo_news(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/',
                                            epoch=7, max_rank=100, mutant_type='max'):
     """ """
     train_dir_path = parent_dir_path + 'mutant_data/train_data/'
