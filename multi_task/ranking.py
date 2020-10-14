@@ -1740,20 +1740,26 @@ def train_mutant_multi_task_max_combo(batch_size=256, lr=0.0001, parent_dir_path
 
 
 def train_mutant_multi_task_max_combo_news(batch_size=256, lr=0.0001, data_dir_path='/nfs/trec_news_track/data/5_fold/',
-                                           epoch=4, max_rank=100, mutant_type='max'):
+                                           epoch=4, max_rank=100, mutant_type='max', keyword=False):
     """ """
     for fold in [0,1,2,3,4]:
         parent_dir_path = data_dir_path + 'scaled_5fold_{}_data/'.format(fold)
-        train_dir_path = parent_dir_path + 'mutant_data/train/'
-        dev_dir_path = parent_dir_path + 'mutant_data/valid/'
-        test_dir_path = parent_dir_path + 'mutant_data/test/'
-        mutant_dir_path = parent_dir_path + 'mutant_data/'
+        if keyword:
+            train_dir_path = parent_dir_path + 'mutant_keyword_data/train/'
+            dev_dir_path = parent_dir_path + 'mutant_keyword_data/valid/'
+            test_dir_path = parent_dir_path + 'mutant_keyword_data/test/'
+            mutant_dir_path = parent_dir_path + 'mutant_keyword_data/'
+        else:
+            train_dir_path = parent_dir_path + 'mutant_data/train/'
+            dev_dir_path = parent_dir_path + 'mutant_data/valid/'
+            test_dir_path = parent_dir_path + 'mutant_data/test/'
+            mutant_dir_path = parent_dir_path + 'mutant_data/'
 
         print('===================================')
         print('===================================')
 
-        passage_test_run_path = test_dir_path + 'passage_cls_mutant_multi_task_{}_combo_batch_size_{}_lr_{}.run'.format(mutant_type, batch_size, lr)
-        entity_test_run_path = test_dir_path + 'entity_cls_mutant_multi_task_{}_combo_batch_size_{}_lr_{}.run'.format(mutant_type, batch_size, lr)
+        passage_test_run_path = test_dir_path + 'passage_cls_mutant_multi_task_{}_combo_batch_size_{}_lr_{}_keyword_{}.run'.format(mutant_type, batch_size, lr, keyword)
+        entity_test_run_path = test_dir_path + 'entity_cls_mutant_multi_task_{}_combo_batch_size_{}_lr_{}_keyword_{}.run'.format(mutant_type, batch_size, lr, keyword)
 
         file_name = '_mutant_max.json'
         passage_dev_qrels_path = parent_dir_path + 'passage_valid.qrels'
