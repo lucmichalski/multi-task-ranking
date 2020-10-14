@@ -24,7 +24,7 @@ if __name__ == '__main__':
     #     for lr in lrs:
     #         train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='mean')
     batch_size = 32
-    lr = 0.0005
+    lr = 0.001
     train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='max')
 
 
