@@ -29,10 +29,10 @@ if __name__ == '__main__':
     #                                                                              doc_keyword_path=doc_keyword_path)
     for batch_size in [32]:
         for lr in [0.001, 0.0001]:
-            train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='mean', keyword=False)
+            train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='mean', keyword=True)
     for batch_size in [32]:
         for lr in [0.001, 0.0001]:
-            train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='max', keyword=False)
+            train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='max', keyword=True)
 
 
 
