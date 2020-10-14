@@ -1742,9 +1742,9 @@ def train_mutant_multi_task_max_combo(batch_size=256, lr=0.0001, parent_dir_path
 def train_mutant_multi_task_max_combo_news(batch_size=256, lr=0.0001, parent_dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/',
                                            epoch=7, max_rank=100, mutant_type='max'):
     """ """
-    train_dir_path = parent_dir_path + 'mutant_data/train_data/'
-    dev_dir_path = parent_dir_path + 'mutant_data/dev_data/'
-    test_dir_path = parent_dir_path + 'mutant_data/test_data/'
+    train_dir_path = parent_dir_path + 'mutant_data/train/'
+    dev_dir_path = parent_dir_path + 'mutant_data/dev/'
+    test_dir_path = parent_dir_path + 'mutant_data/test/'
     mutant_dir_path = parent_dir_path + 'mutant/'
 
     print('===================================')
