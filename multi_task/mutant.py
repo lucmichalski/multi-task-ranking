@@ -5,6 +5,7 @@ from torch.nn import TransformerEncoderLayer, TransformerEncoder
 from torch.utils.data import TensorDataset, DataLoader, SequentialSampler, RandomSampler
 
 import random
+import itertools
 import os
 import json
 
@@ -287,7 +288,8 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
             if i_train % 1000 == 0:
                 print('--------')
                 print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
-
+                dev_labels = []
+                dev_scores = []
                 dev_loss_total = 0
                 for dev_batch in dev_data_loader:
                     bag_of_CLS, type_mask, labels = dev_batch
@@ -301,5 +303,8 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
                     loss = loss_func(outputs.cpu(), labels)
 
                     dev_loss_total += loss.sum().item()
+                    dev_scores += list(itertools.chain(*outputs.cpu().numpy().tolist()))
+                    dev_labels += list(itertools.chain(*labels.cpu().numpy().tolist()))
 
+                assert len(dev_scores) == len(dev_labels) == len(dev_run_data)
                 print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))

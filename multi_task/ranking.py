@@ -299,7 +299,6 @@ def train_cls_model(batch_size=64, lr=0.005, parent_dir_path='/nfs/trec_car/data
 
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
 
-
                 train_loss_total += loss.sum().item()
 
                 if i_train % 500 == 0:
