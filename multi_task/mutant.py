@@ -306,5 +306,5 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
                     dev_scores += list(itertools.chain(*outputs.cpu().numpy().tolist()))
                     dev_labels += list(itertools.chain(*labels.cpu().numpy().tolist()))
 
-                assert len(dev_scores) == len(dev_labels) == len(dev_run_data)
+                assert len(dev_scores) == len(dev_labels) == len(dev_run_data), '{} == {} == {}'.format(len(dev_scores), len(dev_labels), len(dev_run_data))
                 print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
