@@ -137,6 +137,7 @@ def get_dev_dataset(save_path_dataset, save_path_run, dir_path, doc_to_entity_ma
     with open(save_path_run, 'w') as f:
         for data in dev_run_data:
             f.write(" ".join(data) + '\n')
+            f.write(" ".join((str(i) for i in data)) + '\n')
 
 
 # dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
@@ -227,15 +228,18 @@ def get_train_dataset(save_path_dataset, dir_path, doc_to_entity_map_path, file_
     torch.save(obj=train_dataset, f=save_path_dataset)
 
 
-def train_and_dev_mutant(dev_save_path_dict, dev_save_path_dataset, train_save_path_dataset, lr=0.0001, epoch=5, max_seq_len=16, batch_size=32):
+def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_path_dataset, lr=0.0001, epoch=5, max_seq_len=16, batch_size=32):
     """"""
     print('BUILDING TRAINING DATASET')
     train_dataset = torch.load(train_save_path_dataset)
     print('BUILDING DEV DATASET')
     dev_dataset = torch.load(dev_save_path_dataset)
 
-    # with open(dev_save_path_dict, 'r') as f:
-    #     dev_run_dict = json.load(f)
+    dev_run_data = []
+    with open(dev_save_path_run, 'r') as f:
+        for line in f:
+            data = line.strip().split()
+            dev_run_data.append(data)
 
     train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
     dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
