@@ -277,6 +277,7 @@ def train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, e
             train_loss_total += loss.sum().item()
 
             if i_train % 100 == 0:
+                print('--------')
                 print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
 
                 dev_loss_total = 0
@@ -293,7 +294,7 @@ def train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, e
 
                     dev_loss_total += loss.sum().item()
 
-                print('train loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
+                print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
 
 
 
