@@ -77,7 +77,7 @@ def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_m
             seq_mask = []
 
             passage_cls = d['query']['passage'][passage_id]['cls_token']
-            passage_relevant = d['query']['passage'][passage_id]['relevant']
+            passage_relevant = float(d['query']['passage'][passage_id]['relevant'])
             seq_cls.append(passage_cls)
             seq_labels.append([passage_relevant])
             seq_mask.append(1)
@@ -87,13 +87,11 @@ def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_m
 
             if passage_id in doc_to_entity_map:
                 entity_id_list = doc_to_entity_map[passage_id]
-                entity_id_list_sorted = [elem for count, elem in
-                                         sorted(((entity_id_list.count(e), e) for e in set(entity_id_list)),
-                                                reverse=True)]
+                entity_id_list_sorted = [elem for count, elem in sorted(((entity_id_list.count(e), e) for e in set(entity_id_list)), reverse=True)]
                 for entity_id in entity_id_list_sorted:
                     if len(seq_mask) < max_seq_len:
                         entity_cls = d['query']['passage'][passage_id]['entity'][entity_id]['cls_token']
-                        entity_relevant = d['query']['passage'][passage_id]['entity'][entity_id]['relevant']
+                        entity_relevant = float(d['query']['passage'][passage_id]['entity'][entity_id]['relevant'])
                         seq_cls.append(entity_cls)
                         seq_labels.append([entity_relevant])
                         seq_mask.append(2)
@@ -106,7 +104,7 @@ def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_m
                 for entity_id in d['query']['passage'][passage_id]['entity']:
                     if len(seq_mask) < max_seq_len:
                         entity_cls = d['query']['passage'][passage_id]['entity'][entity_id]['cls_token']
-                        entity_relevant = d['query']['passage'][passage_id]['entity'][entity_id]['relevant']
+                        entity_relevant = float(d['query']['passage'][passage_id]['entity'][entity_id]['relevant'])
                         seq_cls.append(entity_cls)
                         seq_labels.append([entity_relevant])
                         seq_mask.append(2)
@@ -117,8 +115,8 @@ def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_m
             if len(seq_mask) < max_seq_len:
                 padding_len = max_seq_len - len(seq_mask)
                 for i in range(padding_len):
-                    seq_cls.append([0] * 768)
-                    seq_labels.append([0])
+                    seq_cls.append([0.0] * 768)
+                    seq_labels.append([0.0])
                     seq_mask.append(0)
 
             bag_of_CLS.append(seq_cls)
