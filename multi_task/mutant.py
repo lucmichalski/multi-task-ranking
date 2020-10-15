@@ -136,7 +136,6 @@ def get_dev_dataset(save_path_dataset, save_path_run, dir_path, doc_to_entity_ma
 
     with open(save_path_run, 'w') as f:
         for data in dev_run_data:
-            f.write(" ".join(data) + '\n')
             f.write(" ".join((str(i) for i in data)) + '\n')
 
 
