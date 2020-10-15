@@ -227,7 +227,7 @@ def train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, e
     print('BUILDING TRAINING DATASET')
     train_dataset = get_train_dataset(train_dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=max_seq_len)
     print('BUILDING DEV DATASET')
-    dev_dataset = get_train_dataset(dev_dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=max_seq_len)
+    dev_dataset, dev_run_data_dict = get_dev_dataset(dev_dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=max_seq_len)
 
     train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
     dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
