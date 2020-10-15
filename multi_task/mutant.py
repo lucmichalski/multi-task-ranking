@@ -233,8 +233,8 @@ def train_and_dev_mutant(dev_save_path_dict, dev_save_path_dataset, train_save_p
     print('BUILDING DEV DATASET')
     dev_dataset = torch.load(dev_save_path_dataset)
 
-    with open(dev_save_path_dict, 'r') as f:
-        dev_run_dict = json.load(f)
+    # with open(dev_save_path_dict, 'r') as f:
+    #     dev_run_dict = json.load(f)
 
     train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
     dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
