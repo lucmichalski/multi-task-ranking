@@ -235,7 +235,6 @@ def unpack_run_data(run_data, max_seq_len=16):
     """"""
     data = []
     for run in run_data:
-        print(run)
         query = run[0]
         results = run[1:]
         loops = int(max_seq_len)
@@ -335,6 +334,6 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
                 assert len(dev_scores) == len(dev_labels) == len(dev_run_data)*max_seq_len == len(unpacked_dev_run_data), '{} == {} == {} == {}'.format(len(dev_scores), len(dev_labels), len(dev_run_data)*max_seq_len, len(unpacked_dev_run_data))
                 print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
                 for dev_label, dev_score, unpack_run in zip(dev_labels, dev_scores, unpacked_dev_run_data):
-                    task, query, doc_id, label = unpacked_dev_run_data
+                    task, query, doc_id, label = unpack_run
                     assert dev_label == label
 
