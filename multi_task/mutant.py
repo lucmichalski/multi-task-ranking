@@ -231,7 +231,28 @@ def get_train_dataset(save_path_dataset, dir_path, doc_to_entity_map_path, file_
     torch.save(obj=train_dataset, f=save_path_dataset)
 
 
-def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_path_dataset, lr=0.0001, epoch=5, max_seq_len=16, batch_size=32):
+def unpack_run_data(run_data, max_seq_length=16):
+    """"""
+    data = []
+    for run in run_data:
+        print(run)
+        query = run[0]
+        results = run[1:]
+        loops = int(max_seq_length)
+        start_i = 0
+        end_i = 1
+        task = 'doc'
+        for i in range(loops):
+            if results[start_i] == 'PAD':
+                task = 'PAD'
+            data.append((task, query, results[start_i], results[end_i]))
+            start_i += 2
+            end_i += 2
+            task = 'entity'
+    return data
+
+
+def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_path_dataset, lr=0.001, epoch=5, max_seq_len=16, batch_size=32):
     """"""
     print('BUILDING TRAINING DATASET')
     train_dataset = torch.load(train_save_path_dataset)
@@ -288,7 +309,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
 
             train_loss_total += loss.sum().item()
 
-            if i_train % 1000 == 0:
+            if i_train % 100 == 0:
                 print('--------')
                 print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
                 dev_labels = []
@@ -309,6 +330,12 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
                     dev_scores += list(itertools.chain(*outputs.permute(1, 0, 2).cpu().numpy().tolist()))
                     dev_labels += list(itertools.chain(*labels.permute(1, 0, 2).cpu().numpy().tolist()))
 
-                print(outputs.shape)
-                assert len(dev_scores) == len(dev_labels) == len(dev_run_data)*max_seq_len, '{} == {} == {}'.format(len(dev_scores), len(dev_labels), len(dev_run_data)*max_seq_len)
+                unpacked_dev_run_data = unpack_run_data(dev_run_data, max_seq_len=max_seq_len)
+
+                assert len(dev_scores) == len(dev_labels) == len(dev_run_data)*max_seq_len == len(unpacked_dev_run_data), '{} == {} == {} == {}'.format(len(dev_scores), len(dev_labels), len(dev_run_data)*max_seq_len, len(unpacked_dev_run_data))
                 print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
+                data = unpack_run_data(dev_run_data, max_seq_len=max_seq_len)
+                for dev_label, dev_score, unpack_run in zip(dev_labels, dev_scores, unpacked_dev_run_data):
+                    task, query, doc_id, label = unpacked_dev_run_data
+                    assert dev_label == label
+
