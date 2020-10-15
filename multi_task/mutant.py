@@ -306,8 +306,8 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
                     loss = loss_func(outputs.cpu(), labels)
 
                     dev_loss_total += loss.sum().item()
-                    dev_scores += list(itertools.chain(*outputs.cpu().numpy().tolist()))
-                    dev_labels += list(itertools.chain(*labels.cpu().numpy().tolist()))
+                    dev_scores += list(itertools.chain(*outputs.permute(1, 0, 2).cpu().numpy().tolist()))
+                    dev_labels += list(itertools.chain(*labels.permute(1, 0, 2).cpu().numpy().tolist()))
 
                 assert len(dev_scores) == len(dev_labels) == len(dev_run_data), '{} == {} == {}'.format(len(dev_scores), len(dev_labels), len(dev_run_data))
                 print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
