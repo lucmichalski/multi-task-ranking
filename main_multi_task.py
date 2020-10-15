@@ -34,11 +34,11 @@ if __name__ == '__main__':
     #train_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
     train_dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/train_data/'
     #dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/valid/'
-    dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/dev_data/'
+    dev_dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/dev_data/'
     doc_to_entity_map_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
     file_name = 'data_bi_encode_ranker_entity_context.json'
     #file_name = '_mutant_max.json'
-    dev_save_path_dict = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/dev_data/mutant.json'
+    dev_save_path_dict = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/dev_data//mutant.json'
     dev_save_path_dataset = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/dev_data/mutant.pt'
     train_save_path_dataset = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/train_data/mutant.pt'
     get_dev_dataset(save_path_dataset=dev_save_path_dict, save_path_dict=dev_save_path_dataset, dir_path=dev_dir_path, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
