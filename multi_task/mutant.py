@@ -256,7 +256,6 @@ def train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, f
         train_loss_total = 0.0
 
         model.train()
-        train_loss_total = 0
         for i_train, train_batch in enumerate(train_data_loader):
 
             bag_of_CLS, type_mask, labels = train_batch
@@ -295,10 +294,3 @@ def train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, f
                     dev_loss_total += loss.sum().item()
 
                 print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
-
-
-
-
-
-
-
