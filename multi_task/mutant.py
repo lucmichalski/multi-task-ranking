@@ -263,7 +263,7 @@ def train_and_dev_mutant(dev_save_path_dict, dev_save_path_dataset, train_save_p
 
             bag_of_CLS, type_mask, labels = train_batch
             bag_of_CLS = bag_of_CLS.permute(1, 0, 2).type(torch.float)
-            type_mask = type_mask.permute(1, 0).type(torch.int)
+            type_mask = type_mask.permute(1, 0)
             labels = labels.permute(1, 0, 2).type(torch.float)
 
             model.zero_grad()
