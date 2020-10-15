@@ -32,7 +32,7 @@ if __name__ == '__main__':
     #
     #
     #train_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
-    train_dir_path ='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/train_data/'
+    train_dir_path ='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/train_data/'
     #dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/valid/'
     dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
     doc_to_entity_map_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
