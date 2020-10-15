@@ -2,6 +2,7 @@
 from multi_task.processing import MultiTaskDatasetByQuery
 from multi_task.ranking import train_cls_model_max_combo, train_cls_model, train_mutant_max_combo, \
     train_mutant_multi_task_max_combo, train_mutant_multi_task_max_combo_news
+from multi_task.mutant import train_and_dev_mutant
 
 if __name__ == '__main__':
     # dir_path = '/nfs/trec_news_track/data/5_fold/'
@@ -20,14 +21,17 @@ if __name__ == '__main__':
 
     # batch_sizes = [64]
     # lrs = [0.000001, 0.00001, 0.0001, 0.0005, 0.001]
-    # for batch_size in batch_sizes:
-    #     for lr in lrs:
-    #         train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='mean')
-    for batch_size in [64]:
-        for lr in [0.001, 0.0001]:
-            train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='max')
-
-
-
-
-
+    # for batch_size in [32]:
+    #     for lr in [0.001, 0.0001]:
+    #         train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='mean', keyword=True)
+    # for batch_size in [32]:
+    #     for lr in [0.001, 0.0001]:
+    #         train_mutant_multi_task_max_combo_news(batch_size=batch_size, lr=lr, mutant_type='max', keyword=True)
+    #
+    #
+    #
+    # 
+    train_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
+    dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/dev/'
+    doc_to_entity_map_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
+    train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, epoch=5, max_seq_len=16, batch_size=32)
