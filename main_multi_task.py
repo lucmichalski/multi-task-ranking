@@ -31,7 +31,11 @@ if __name__ == '__main__':
     #
     #
     #
-    train_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
-    dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/valid/'
+    #train_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
+    train_dir_path ='trec_car/data/entity_ranking/multi_task_data_by_query_1000/train_data/'
+    #dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/valid/'
+    dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
     doc_to_entity_map_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
-    train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, epoch=5, max_seq_len=16, batch_size=32)
+    file_name = 'data_bi_encode_ranker_entity_context.json'
+    #file_name = '_mutant_max.json'
+    train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, file_name, epoch=5, max_seq_len=16, batch_size=32)
