@@ -247,7 +247,7 @@ def train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, e
         print('No GPU available, using the CPU instead.')
         device = torch.device("cpu")
 
-    lr = 0.00001
+    lr = 0.001
 
     print('RUN EXPERIMENT')
     for i in range(epoch):
