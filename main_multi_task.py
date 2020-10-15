@@ -43,7 +43,7 @@ if __name__ == '__main__':
     #dev_dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/dev_data/'
     #file_name = 'data_bi_encode_ranker_entity_context.json'
 
-    get_dev_dataset(save_path_dataset=dev_save_path_dataset, save_path_run=dev_save_path_run, dir_path=dev_dir_path, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
-    get_train_dataset(save_path_dataset=train_save_path_dataset, dir_path=train_dir_path, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
+    # get_dev_dataset(save_path_dataset=dev_save_path_dataset, save_path_run=dev_save_path_run, dir_path=dev_dir_path, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
+    # get_train_dataset(save_path_dataset=train_save_path_dataset, dir_path=train_dir_path, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
 
     train_and_dev_mutant(dev_save_path_run=dev_save_path_run, dev_save_path_dataset=dev_save_path_dataset, train_save_path_dataset=train_save_path_dataset, lr=0.0001, epoch=5, max_seq_len=16, batch_size=32)
