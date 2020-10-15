@@ -2,7 +2,7 @@
 from multi_task.processing import MultiTaskDatasetByQuery
 from multi_task.ranking import train_cls_model_max_combo, train_cls_model, train_mutant_max_combo, \
     train_mutant_multi_task_max_combo, train_mutant_multi_task_max_combo_news
-from multi_task.mutant import train_and_dev_mutant
+from multi_task.mutant import train_and_dev_mutant, get_dev_dataset, get_train_dataset
 
 if __name__ == '__main__':
     # dir_path = '/nfs/trec_news_track/data/5_fold/'
@@ -32,10 +32,16 @@ if __name__ == '__main__':
     #
     #
     #train_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
-    train_dir_path ='/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/train_data/'
+    train_dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/train_data/'
     #dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/valid/'
     dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/dev_data/'
     doc_to_entity_map_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
     file_name = 'data_bi_encode_ranker_entity_context.json'
     #file_name = '_mutant_max.json'
-    train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, file_name, epoch=5, max_seq_len=16, batch_size=32)
+    dev_save_path_dict = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/dev_data/mutant.json'
+    dev_save_path_dataset = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/dev_data/mutant.pt'
+    train_save_path_dataset = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/train_data/mutant.pt'
+    get_dev_dataset(save_path_dataset=dev_save_path_dict, save_path_dict=dev_save_path_dataset, dir_path=dev_dir_path, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
+    get_train_dataset(save_path_dataset=train_save_path_dataset, dir_path=train_dir_path, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
+
+    train_and_dev_mutant(train_save_path_dataset=train_save_path_dataset, dev_save_path_dataset=dev_save_path_dataset, dev_save_path_dict=dev_save_path_dict, lr=0.0001, epoch=5, max_seq_len=16, batch_size=32)

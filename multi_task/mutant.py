@@ -52,7 +52,7 @@ class MUTANT(nn.Module):
 
 # dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
 # doc_to_entity_map_path ='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
-def get_dev_dataset(dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16):
+def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16):
     """ """
 
     bag_of_CLS = []
@@ -132,11 +132,15 @@ def get_dev_dataset(dir_path, doc_to_entity_map_path, file_name='_mutant_max.jso
 
     dev_dataset = TensorDataset(bag_of_CLS_tensor, type_mask_tensor, labels_tensor)
 
-    return dev_dataset, dev_run_data_dict
+    torch.save(obj=dev_dataset, f=save_path_dataset)
+
+    with open(save_path_dict, 'w') as f:
+        json.dump(dev_run_data_dict, f)
+
 
 # dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
 # doc_to_entity_map_path ='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
-def get_train_dataset(dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16):
+def get_train_dataset(save_path_dataset, dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16):
     """ """
 
     bag_of_CLS_R = []
@@ -219,15 +223,18 @@ def get_train_dataset(dir_path, doc_to_entity_map_path, file_name='_mutant_max.j
 
     train_dataset = TensorDataset(bag_of_CLS_tensor, type_mask_tensor, labels_tensor)
 
-    return train_dataset
+    torch.save(obj=train_dataset, f=save_path_dataset)
 
 
-def train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, file_name, epoch=5, max_seq_len=16, batch_size=32):
+def train_and_dev_mutant(dev_save_path_dict, dev_save_path_dataset, train_save_path_dataset, lr=0.0001, epoch=5, max_seq_len=16, batch_size=32):
     """"""
     print('BUILDING TRAINING DATASET')
-    train_dataset = get_train_dataset(train_dir_path, doc_to_entity_map_path, file_name=file_name, max_seq_len=max_seq_len)
+    train_dataset = torch.load(train_save_path_dataset)
     print('BUILDING DEV DATASET')
-    dev_dataset, dev_run_data_dict = get_dev_dataset(dev_dir_path, doc_to_entity_map_path, file_name=file_name, max_seq_len=max_seq_len)
+    dev_dataset = torch.load(dev_save_path_dataset)
+
+    with open(dev_save_path_dict, 'r') as f:
+        dev_run_dict = json.load(f)
 
     train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
     dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
@@ -246,8 +253,6 @@ def train_and_dev_mutant(train_dir_path, dev_dir_path, doc_to_entity_map_path, f
     else:
         print('No GPU available, using the CPU instead.')
         device = torch.device("cpu")
-
-    lr = 0.001
 
     print('RUN EXPERIMENT')
     for i in range(epoch):
