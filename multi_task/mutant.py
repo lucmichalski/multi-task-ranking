@@ -121,6 +121,9 @@ def get_dev_dataset(save_path_dataset, save_path_run, dir_path, doc_to_entity_ma
                     seq_labels.append([0.0])
                     seq_mask.append(0)
 
+                    seq_run.append("PAD")
+                    seq_run.append("PAD")
+
             bag_of_CLS.append(seq_cls)
             labels.append(seq_labels)
             type_mask.append(seq_mask)
