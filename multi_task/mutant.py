@@ -96,8 +96,8 @@ def get_dev_dataset(save_path_dataset, save_path_run, dir_path, doc_to_entity_ma
                         seq_labels.append([entity_relevant])
                         seq_mask.append(2)
 
-                        dev_run_data.append(entity_id)
-                        dev_run_data.append(entity_relevant)
+                        seq_run.append(entity_id)
+                        seq_run.append(entity_relevant)
 
 
             else:
@@ -110,8 +110,8 @@ def get_dev_dataset(save_path_dataset, save_path_run, dir_path, doc_to_entity_ma
                         seq_labels.append([entity_relevant])
                         seq_mask.append(2)
 
-                        dev_run_data.append(entity_id)
-                        dev_run_data.append(entity_relevant)
+                        seq_run.append(entity_id)
+                        seq_run.append(entity_relevant)
 
             if len(seq_mask) < max_seq_len:
                 padding_len = max_seq_len - len(seq_mask)
@@ -123,7 +123,7 @@ def get_dev_dataset(save_path_dataset, save_path_run, dir_path, doc_to_entity_ma
             bag_of_CLS.append(seq_cls)
             labels.append(seq_labels)
             type_mask.append(seq_mask)
-            dev_run_data.append(dev_run_data)
+            dev_run_data.append(seq_run)
 
     bag_of_CLS_tensor = torch.tensor(bag_of_CLS)
     type_mask_tensor = torch.tensor(type_mask)
