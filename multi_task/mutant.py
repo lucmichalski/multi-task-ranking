@@ -52,14 +52,13 @@ class MUTANT(nn.Module):
 
 # dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
 # doc_to_entity_map_path ='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
-def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16):
+def get_dev_dataset(save_path_dataset, save_path_run, dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16):
     """ """
-
     bag_of_CLS = []
     labels = []
     type_mask = []
 
-    dev_run_data_dict = {}
+    dev_run_data = []
 
     with open(doc_to_entity_map_path, 'r') as f:
         doc_to_entity_map = json.load(f)
@@ -68,13 +67,14 @@ def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_m
         with open(path, 'r') as f:
             d = json.load(f)
 
-        query = d['query']['query_id']
-        dev_run_data_dict[query] = {}
-        results_idx = 0
         for passage_id in d['query']['passage'].keys():
             seq_cls = []
             seq_labels = []
             seq_mask = []
+            seq_run = []
+
+            query = d['query']['query_id']
+            seq_run.append(query)
 
             passage_cls = d['query']['passage'][passage_id]['cls_token']
             passage_relevant = float(d['query']['passage'][passage_id]['relevant'])
@@ -82,8 +82,8 @@ def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_m
             seq_labels.append([passage_relevant])
             seq_mask.append(1)
 
-            dev_run_data_dict[query][results_idx] = {'doc_id': passage_id, 'relevant': passage_relevant}
-            results_idx += 1
+            seq_run.append(passage_id)
+            seq_run.append(passage_relevant)
 
             if passage_id in doc_to_entity_map:
                 entity_id_list = doc_to_entity_map[passage_id]
@@ -96,8 +96,9 @@ def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_m
                         seq_labels.append([entity_relevant])
                         seq_mask.append(2)
 
-                        dev_run_data_dict[query][results_idx] = {'doc_id': entity_id, 'relevant': entity_relevant}
-                        results_idx += 1
+                        dev_run_data.append(entity_id)
+                        dev_run_data.append(entity_relevant)
+
 
             else:
                 # print('{} not in doc_to_entity_map'.format(passage_id))
@@ -109,8 +110,8 @@ def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_m
                         seq_labels.append([entity_relevant])
                         seq_mask.append(2)
 
-                        dev_run_data_dict[query][results_idx] = {'doc_id': entity_id, 'relevant': entity_relevant}
-                        results_idx += 1
+                        dev_run_data.append(entity_id)
+                        dev_run_data.append(entity_relevant)
 
             if len(seq_mask) < max_seq_len:
                 padding_len = max_seq_len - len(seq_mask)
@@ -122,6 +123,7 @@ def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_m
             bag_of_CLS.append(seq_cls)
             labels.append(seq_labels)
             type_mask.append(seq_mask)
+            dev_run_data.append(dev_run_data)
 
     bag_of_CLS_tensor = torch.tensor(bag_of_CLS)
     type_mask_tensor = torch.tensor(type_mask)
@@ -132,8 +134,9 @@ def get_dev_dataset(save_path_dataset, save_path_dict, dir_path, doc_to_entity_m
 
     torch.save(obj=dev_dataset, f=save_path_dataset)
 
-    with open(save_path_dict, 'w') as f:
-        json.dump(dev_run_data_dict, f)
+    with open(save_path_run, 'w') as f:
+        for data in dev_run_data:
+            f.write(" ".join(data) + '\n')
 
 
 # dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
