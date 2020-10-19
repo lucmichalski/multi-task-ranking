@@ -1015,14 +1015,13 @@ if __name__ == '__main__':
     #                              fold_path=fold_path)
 
     search_tools = SearchTools()
-    run_file_base = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/anserini_bm25_rm3_default_passage_scaled'
-    fold_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_{}_entity.topics'.format(i) for i in [0,1,2,3,4]]
-    run_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/background.2018.anserini.bm5.rm3.default.run',
-                 '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/background.2019.anserini.bm5.rm3.default.run']
+    run_file_base = '/Users/iain/LocalStorage/coding/github/multi-task-ranking/folds_parade'
+    fold_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/5_fold/scaled_5fold_{}_data/passage_test.topics'.format(i) for i in [0,1,2,3,4]]
+    run_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/parade_qlen100_numpassages16_passagelen100-allqueries.run']
     xml_topics_paths = ['/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2018/newsir18-topics.txt',
                         '/Users/iain/LocalStorage/coding/github/multi-task-ranking/data/temp/TREC-NEWS/2019/newsir19-background-linking-topics.xml']
     ranking_type = 'passage'
-    use_xml = True
+    use_xml = False
     search_tools.write_news_folds_to_runs(run_file_base=run_file_base,
                                           fold_topics_paths=fold_topics_paths,
                                           run_paths=run_paths,
