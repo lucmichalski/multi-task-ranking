@@ -340,7 +340,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
                         print('--- PAD ---')
                         print(task, query, doc_id, label, dev_label[0], dev_score[0])
                     else:
-                        float('--- VALID ---')
+                        print('--- VALID ---')
                         print(task, query, doc_id, label, dev_label[0], dev_score[0])
                         assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
 
