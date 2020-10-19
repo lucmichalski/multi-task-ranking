@@ -326,8 +326,8 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
                     loss = loss_func(outputs.cpu(), labels)
 
                     dev_loss_total += loss.sum().item()
-                    dev_scores += list(itertools.chain(*outputs.cpu().numpy().tolist()))
-                    dev_labels += list(itertools.chain(*labels.cpu().numpy().tolist()))
+                    dev_scores += list(itertools.chain(*outputs.permute(1, 0, 2).cpu().numpy().tolist()))
+                    dev_labels += list(itertools.chain(*labels.permute(1, 0, 2).cpu().numpy().tolist()))
 
                 unpacked_dev_run_data = unpack_run_data(dev_run_data, max_seq_len=max_seq_len)
 
