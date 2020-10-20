@@ -370,7 +370,8 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                         topic_query = query
 
                     # TODO - any left over
-
+                    elif 'entity' == task:
+                        assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
                     else:
                         print('NOT VALID mutant_type flag')
                         raise
