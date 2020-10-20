@@ -347,7 +347,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                     task, query, doc_id, label = unpack_run[0], unpack_run[1], unpack_run[2], unpack_run[3]
                     if 'PAD' == task:
                         pass
-                    elif 'passage' == task:
+                    if 'passage' == task:
                         assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
                         if (topic_query != None) and (topic_query != query):
                             if topic_query in dev_qrels:
@@ -370,11 +370,8 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                         topic_query = query
 
                     # TODO - any left over
-                    elif 'entity' == task:
+                    if 'entity' == task:
                         assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
-                    else:
-                        print('NOT VALID mutant_type flag: {}'.format(task))
-                        raise
 
                 print('MAP: {}'.format(map_sum_passage/topic_counter_passage))
 
