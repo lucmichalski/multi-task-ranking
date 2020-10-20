@@ -373,7 +373,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                     elif 'entity' == task:
                         assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
                     else:
-                        print('NOT VALID mutant_type flag')
+                        print('NOT VALID mutant_type flag: {}'.format(task))
                         raise
 
                 print('MAP: {}'.format(map_sum_passage/topic_counter_passage))
