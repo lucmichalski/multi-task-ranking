@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     train_dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000/train_data/'
     dev_dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query_1000//dev_data/'
-    file_name = '_data.json'
+    file_name = 'data_bi_encode_ranker_entity_context.json'
     dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
 
     dev_save_path_run = dev_dir_path + 'mutant.run_data'
