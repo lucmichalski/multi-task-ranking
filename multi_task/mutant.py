@@ -330,7 +330,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
 
             train_loss_total += loss.sum().item()
 
-            if i_train % 1000 == 0:
+            if i_train % 2500 == 0:
                 print('--------')
                 print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
                 dev_labels = []
