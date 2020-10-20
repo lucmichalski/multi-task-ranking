@@ -31,18 +31,20 @@ if __name__ == '__main__':
     #
     #
     #
-    train_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
-    dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/valid/'
-    doc_to_entity_map_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
-    file_name = '_mutant_max.json'
+    #train_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
+    #dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/valid/'
+    #doc_to_entity_map_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
+    #file_name = '_mutant_max.json'
+    #dev_qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/passage_valid.qrels'
+
+    train_dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/train_data/'
+    dev_dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/dev_data/'
+    file_name = 'data_bi_encode_ranker_entity_context.json'
+    dev_qrels_path = '/nfs/trec_car/data/entity_ranking/benchmarkY1_hierarchical_passage_dev_data/benchmarkY1_dev_passage.qrels'
+
     dev_save_path_run = dev_dir_path + 'mutant.run_data'
     dev_save_path_dataset = dev_dir_path + 'mutant.pt'
     train_save_path_dataset = train_dir_path + 'mutant.pt'
-    dev_qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/passage_valid.qrels'
-
-    #train_dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/train_data/'
-    #dev_dir_path = '/nfs/trec_car/data/entity_ranking/multi_task_data_by_query/dev_data/'
-    #file_name = 'data_bi_encode_ranker_entity_context.json'
 
     # get_dev_dataset(save_path_dataset=dev_save_path_dataset, save_path_run=dev_save_path_run, dir_path=dev_dir_path, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
     # get_train_dataset(save_path_dataset=train_save_path_dataset, dir_path=train_dir_path, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)

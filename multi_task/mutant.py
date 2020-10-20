@@ -287,6 +287,10 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
 
     print('RUN EXPERIMENT')
     for i in range(epoch):
+        print('\\\\\\\\\\\\\\\\\\\\\\\\\\')
+        print('======= EPOCH {} ========'.format(i))
+        print('\\\\\\\\\\\\\\\\\\\\\\\\\\')
+
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
         loss_func = torch.nn.MSELoss()  # this is for regression mean squared loss
         train_loss_total = 0.0
@@ -311,7 +315,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
 
             train_loss_total += loss.sum().item()
 
-            if i_train % 100 == 0:
+            if i_train % 500 == 0:
                 print('--------')
                 print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
                 dev_labels = []
