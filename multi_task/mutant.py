@@ -252,6 +252,21 @@ def unpack_run_data(run_data, max_seq_len=16):
     return data
 
 
+def update_topic_passage_run(topic_query, topic_run_passage_dict, dev_qrels, max_rank):
+    """"""
+    if topic_query in dev_qrels:
+        R = len(dev_qrels[topic_query])
+    else:
+        R = 0
+
+    topic_run_data = [v for k, v in sorted(topic_run_passage_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
+    assert len(topic_run_data) <= max_rank, topic_run_data
+    topic_run_data.sort(key=lambda x: x[1], reverse=True)
+    topic_run = [i[0] for i in topic_run_data]
+    map = EvalTools().get_map(run=topic_run, R=R)
+    return map
+
+
 def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_path, train_save_path_dataset, lr=0.0001, epoch=5,
                          max_seq_len=16, batch_size=32, max_rank=100):
     """"""
@@ -352,17 +367,10 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                     task, query, doc_id, label = unpack_run[0], unpack_run[1], unpack_run[2], unpack_run[3]
                     if 'doc' == task:
                         assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
-                        if (topic_query != None) and (topic_query != query):
-                            if topic_query in dev_qrels:
-                                R = len(dev_qrels[topic_query])
-                            else:
-                                R = 0
 
-                            topic_run_data = [v for k, v in sorted(topic_run_passage_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
-                            assert len(topic_run_data) <= max_rank, topic_run_data
-                            topic_run_data.sort(key=lambda x: x[1], reverse=True)
-                            topic_run = [i[0] for i in topic_run_data]
-                            map_sum_passage += EvalTools().get_map(run=topic_run, R=R)
+                        if (topic_query != None) and (topic_query != query):
+                            run_map = update_topic_passage_run(topic_query, topic_run_passage_dict, dev_qrels, max_rank)
+                            map_sum_passage += run_map
                             # Start new topic run.
                             topic_counter_passage += 1
                             topic_run_passage_dict = {}
@@ -382,6 +390,11 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                     # print(topic_run_passage_dict)
                     # if counter >= 110:
                     #     break
+                if len(topic_run_passage_dict) > 0:
+                    run_map = update_topic_passage_run(topic_query, topic_run_passage_dict, dev_qrels, max_rank)
+                    map_sum_passage += run_map
+                    # Start new topic run.
+                    topic_counter_passage += 1
 
                 print('MAP: {}'.format(map_sum_passage/topic_counter_passage))
 
