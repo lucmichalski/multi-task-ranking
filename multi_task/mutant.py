@@ -346,7 +346,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                 for dev_label, dev_score, unpack_run in zip(dev_labels, dev_scores, unpacked_dev_run_data):
 
                     task, query, doc_id, label = unpack_run[0], unpack_run[1], unpack_run[2], unpack_run[3]
-                    if 'passage' == task:
+                    if 'doc' == task:
                         assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
                         if (topic_query != None) and (topic_query != query):
                             if topic_query in dev_qrels:
