@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from torch.nn import TransformerEncoderLayer, TransformerEncoder
 from torch.utils.data import TensorDataset, DataLoader, SequentialSampler, RandomSampler
-
+from retrieval.tools import SearchTools, EvalTools
 import random
 import itertools
 import os
@@ -145,7 +145,8 @@ def get_dev_dataset(save_path_dataset, save_path_run, dir_path, doc_to_entity_ma
 
 # dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
 # doc_to_entity_map_path ='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
-def get_train_dataset(save_path_dataset, dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16):
+def get_train_dataset(save_path_dataset, dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16,
+                      max_rank=100):
     """ """
 
     bag_of_CLS_R = []
@@ -251,7 +252,8 @@ def unpack_run_data(run_data, max_seq_len=16):
     return data
 
 
-def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_path_dataset, lr=0.001, epoch=5, max_seq_len=16, batch_size=32):
+def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_path, train_save_path_dataset, lr=0.001, epoch=5,
+                         max_seq_len=16, batch_size=32, max_rank=100):
     """"""
     print('BUILDING TRAINING DATASET')
     train_dataset = torch.load(train_save_path_dataset)
@@ -264,6 +266,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
             data = line.strip().split()
             dev_run_data.append(data)
 
+    dev_qrels = SearchTools().retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
     train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
     dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
 
@@ -332,16 +335,45 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, train_save_pa
                 unpacked_dev_run_data = unpack_run_data(dev_run_data, max_seq_len=max_seq_len)
 
                 assert len(dev_scores) == len(dev_labels) == len(dev_run_data)*max_seq_len == len(unpacked_dev_run_data), '{} == {} == {} == {}'.format(len(dev_scores), len(dev_labels), len(dev_run_data)*max_seq_len, len(unpacked_dev_run_data))
+                topic_query = None
+                # original_map_sum = 0.0
+                map_sum_passage = 0.0
+                topic_counter_passage = 0
+                topic_run_passage_dict = {}
+                #topic_run_entity_dict = {}
                 print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
                 for dev_label, dev_score, unpack_run in zip(dev_labels, dev_scores, unpacked_dev_run_data):
-                    print(unpack_run)
+
                     task, query, doc_id, label = unpack_run[0], unpack_run[1], unpack_run[2], unpack_run[3]
                     if 'PAD' == task:
-                        print('--- PAD ---')
-                        print(task, query, doc_id, label, dev_label[0], dev_score[0])
-                    else:
-                        print('--- VALID ---')
-                        print(task, query, doc_id, label, dev_label[0], dev_score[0])
+                        pass
+                    elif 'passage' == task:
                         assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
+                        if (topic_query != None) and (topic_query != query):
+                            if topic_query in dev_qrels:
+                                R = len(dev_qrels[topic_query])
+                            else:
+                                R = 0
 
+                            topic_run_data = [v for k, v in sorted(topic_run_passage_dict.items(), key=lambda item: item[1][1], reverse=True)][:max_rank]
+                            assert len(topic_run_data) <= max_rank, topic_run_data
+                            topic_run_data.sort(key=lambda x: x[1], reverse=True)
+                            topic_run = [i[0] for i in topic_run_data]
+                            map_sum_passage += EvalTools().get_map(run=topic_run, R=R)
+                            # Start new topic run.
+                            topic_counter_passage += 1
+                            topic_run_passage_dict = {}
+
+                        topic_run_passage_dict[doc_id] = [float(label), dev_score]
+
+                        # Update topic run.
+                        topic_query = query
+
+                    # TODO - any left over
+
+                    else:
+                        print('NOT VALID mutant_type flag')
+                        raise
+
+                print('MAP: {}'.format(map_sum_passage/topic_counter_passage))
 
