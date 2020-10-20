@@ -33,7 +33,7 @@ if __name__ == '__main__':
     #
     #train_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
     #dev_dir_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/valid/'
-    #doc_to_entity_map_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
+    doc_to_entity_map_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
     #file_name = '_mutant_max.json'
     #dev_qrels_path = '/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/passage_valid.qrels'
 
