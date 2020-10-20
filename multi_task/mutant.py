@@ -339,6 +339,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                 # original_map_sum = 0.0
                 map_sum_passage = 0.0
                 topic_counter_passage = 0
+                counter = 0
                 topic_run_passage_dict = {}
                 #topic_run_entity_dict = {}
                 print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
@@ -370,6 +371,10 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                     # TODO - any left over
                     if 'entity' == task:
                         assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
+
+                    counter += 1
+                    if counter >= 110:
+                        break
 
                 print('MAP: {}'.format(map_sum_passage/topic_counter_passage))
 
