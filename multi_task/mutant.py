@@ -252,7 +252,7 @@ def unpack_run_data(run_data, max_seq_len=16):
     return data
 
 
-def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_path, train_save_path_dataset, lr=0.001, epoch=5,
+def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_path, train_save_path_dataset, lr=0.0001, epoch=5,
                          max_seq_len=16, batch_size=32, max_rank=100):
     """"""
     print('BUILDING TRAINING DATASET')
