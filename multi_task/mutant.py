@@ -381,7 +381,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                 map_sum_entity = 0.0
                 topic_counter_passage = 0
                 topic_counter_entity = 0
-                passage_score = 0
+                passage_score = 0.0
                 topic_run_passage_dict = {}
                 topic_run_entity_dict = {}
                 print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
