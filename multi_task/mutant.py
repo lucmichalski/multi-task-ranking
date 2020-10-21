@@ -398,11 +398,11 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                             topic_counter_passage += 1
                             topic_run_passage_dict = {}
 
-                        topic_run_passage_dict[doc_id] = [float(label), dev_score]
+                        topic_run_passage_dict[doc_id] = [float(label), float(dev_score)]
 
                         # Update topic run.
                         topic_query_passage = query
-                        passage_score = float(label)
+                        passage_score = float(dev_score)
 
                     if 'entity' == task:
                         assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
@@ -414,7 +414,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                             topic_counter_entity += 1
                             topic_run_entity_dict = {}
 
-                        entity_score = passage_score * dev_score
+                        entity_score = passage_score * float(dev_score)
                         topic_run_entity_dict[doc_id] = [float(label), entity_score]
 
                         if doc_id in topic_run_entity_dict:
