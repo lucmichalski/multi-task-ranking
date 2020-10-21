@@ -437,7 +437,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                     run_map = update_topic_entity_run(topic_query_entity, topic_run_entity_dict, dev_qrels, max_rank)
                     map_sum_passage += run_map
                     # Start new topic run.
-                    topic_counter_passage += 1
+                    topic_counter_entity += 1
 
                 assert topic_counter_passage == topic_counter_entity, "{} == {}".format(topic_counter_passage, topic_counter_entity)
                 print('Passage MAP: {}'.format(map_sum_passage/topic_counter_passage))
