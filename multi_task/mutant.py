@@ -419,9 +419,9 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
 
                         if doc_id in topic_run_entity_dict:
                             if entity_score > topic_run_entity_dict[doc_id][1]:
-                                topic_run_entity_dict[doc_id] = [label, entity_score]
+                                topic_run_entity_dict[doc_id] = [float(label), entity_score]
                         else:
-                            topic_run_entity_dict[doc_id] = [label, entity_score]
+                            topic_run_entity_dict[doc_id] = [float(label), entity_score]
 
                         # Update topic run.
                         topic_query_entity = query
