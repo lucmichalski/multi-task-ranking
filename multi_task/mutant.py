@@ -282,6 +282,99 @@ def update_topic_entity_run(topic_query, topic_run_entity_dict, dev_qrels, max_r
     return map
 
 
+def run_validation(model, dev_data_loader, loss_func, dev_run_data, max_seq_len, device, i_train, dev_qrels, max_rank):
+
+    dev_labels = []
+    dev_scores = []
+    dev_loss_total = 0
+    for dev_batch in dev_data_loader:
+        bag_of_CLS, type_mask, labels = dev_batch
+        bag_of_CLS = bag_of_CLS.permute(1, 0, 2)
+        type_mask = type_mask.permute(1, 0)
+        labels = labels.permute(1, 0, 2).type(torch.float)
+
+        with torch.no_grad():
+            outputs = model.forward(bag_of_CLS.to(device), type_mask=type_mask.to(device))
+
+        loss = loss_func(outputs.cpu(), labels)
+
+        dev_loss_total += loss.sum().item()
+        dev_scores += list(itertools.chain(*outputs.permute(1, 0, 2).cpu().numpy().tolist()))
+        dev_labels += list(itertools.chain(*labels.permute(1, 0, 2).cpu().numpy().tolist()))
+
+    unpacked_dev_run_data = unpack_run_data(dev_run_data, max_seq_len=max_seq_len)
+
+    assert len(dev_scores) == len(dev_labels) == len(dev_run_data)*max_seq_len == len(unpacked_dev_run_data), '{} == {} == {} == {}'.format(len(dev_scores), len(dev_labels), len(dev_run_data)*max_seq_len, len(unpacked_dev_run_data))
+    topic_query_passage = None
+    topic_query_entity = None
+    # original_map_sum = 0.0
+    map_sum_passage = 0.0
+    map_sum_entity = 0.0
+    topic_counter_passage = 0
+    topic_counter_entity = 0
+    passage_score = 0.0
+    topic_run_passage_dict = {}
+    topic_run_entity_dict = {}
+    print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
+    for dev_label, dev_score, unpack_run in zip(dev_labels, dev_scores, unpacked_dev_run_data):
+
+        task, query, doc_id, label = unpack_run[0], unpack_run[1], unpack_run[2], unpack_run[3]
+        if 'doc' == task:
+            assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
+
+            if (topic_query_passage != None) and (topic_query_passage != query):
+                run_map = update_topic_passage_run(topic_query_passage, topic_run_passage_dict, dev_qrels, max_rank)
+                map_sum_passage += run_map
+                # Start new topic run.
+                topic_counter_passage += 1
+                topic_run_passage_dict = {}
+
+            topic_run_passage_dict[doc_id] = [float(label), float(dev_score[0])]
+
+            # Update topic run.
+            topic_query_passage = query
+            passage_score = float(dev_score[0])
+
+        if 'entity' == task:
+            assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
+
+            if (topic_query_entity != None) and (topic_query_entity != query):
+                run_map = update_topic_entity_run(topic_query_entity, topic_run_entity_dict, dev_qrels, max_rank)
+                map_sum_entity += run_map
+                # Start new topic run.
+                topic_counter_entity += 1
+                topic_run_entity_dict = {}
+
+            entity_score = passage_score * float(dev_score[0])
+            topic_run_entity_dict[doc_id] = [float(label), entity_score]
+
+            if doc_id in topic_run_entity_dict:
+                if entity_score > topic_run_entity_dict[doc_id][1]:
+                    topic_run_entity_dict[doc_id] = [float(label), entity_score]
+            else:
+                topic_run_entity_dict[doc_id] = [float(label), entity_score]
+
+            # Update topic run.
+            topic_query_entity = query
+
+
+    if len(topic_run_passage_dict) > 0:
+        run_map = update_topic_passage_run(topic_query_passage, topic_run_passage_dict, dev_qrels, max_rank)
+        map_sum_passage += run_map
+        # Start new topic run.
+        topic_counter_passage += 1
+
+    if len(topic_run_entity_dict) > 0:
+        run_map = update_topic_entity_run(topic_query_entity, topic_run_entity_dict, dev_qrels, max_rank)
+        map_sum_passage += run_map
+        # Start new topic run.
+        topic_counter_entity += 1
+
+    assert topic_counter_passage == topic_counter_entity, "{} == {}".format(topic_counter_passage, topic_counter_entity)
+    print('Passage MAP: {}'.format(map_sum_passage/topic_counter_passage))
+    print('Entity MAP: {}'.format(map_sum_entity/topic_counter_entity))
+
+
 def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_path, train_save_path_dataset, lr=0.0001, epoch=5,
                          max_seq_len=16, batch_size=32, max_rank=100):
     """"""
@@ -353,93 +446,6 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                 #############################################
                 print('--------')
                 print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
-                dev_labels = []
-                dev_scores = []
-                dev_loss_total = 0
-                for dev_batch in dev_data_loader:
-                    bag_of_CLS, type_mask, labels = dev_batch
-                    bag_of_CLS = bag_of_CLS.permute(1, 0, 2)
-                    type_mask = type_mask.permute(1, 0)
-                    labels = labels.permute(1, 0, 2).type(torch.float)
 
-                    with torch.no_grad():
-                        outputs = model.forward(bag_of_CLS.to(device), type_mask=type_mask.to(device))
-
-                    loss = loss_func(outputs.cpu(), labels)
-
-                    dev_loss_total += loss.sum().item()
-                    dev_scores += list(itertools.chain(*outputs.permute(1, 0, 2).cpu().numpy().tolist()))
-                    dev_labels += list(itertools.chain(*labels.permute(1, 0, 2).cpu().numpy().tolist()))
-
-                unpacked_dev_run_data = unpack_run_data(dev_run_data, max_seq_len=max_seq_len)
-
-                assert len(dev_scores) == len(dev_labels) == len(dev_run_data)*max_seq_len == len(unpacked_dev_run_data), '{} == {} == {} == {}'.format(len(dev_scores), len(dev_labels), len(dev_run_data)*max_seq_len, len(unpacked_dev_run_data))
-                topic_query_passage = None
-                topic_query_entity = None
-                # original_map_sum = 0.0
-                map_sum_passage = 0.0
-                map_sum_entity = 0.0
-                topic_counter_passage = 0
-                topic_counter_entity = 0
-                passage_score = 0.0
-                topic_run_passage_dict = {}
-                topic_run_entity_dict = {}
-                print('dev loss @ step {}, {}'.format(i_train, dev_loss_total / (len(dev_data_loader) + 1)))
-                for dev_label, dev_score, unpack_run in zip(dev_labels, dev_scores, unpacked_dev_run_data):
-
-                    task, query, doc_id, label = unpack_run[0], unpack_run[1], unpack_run[2], unpack_run[3]
-                    if 'doc' == task:
-                        assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
-
-                        if (topic_query_passage != None) and (topic_query_passage != query):
-                            run_map = update_topic_passage_run(topic_query_passage, topic_run_passage_dict, dev_qrels, max_rank)
-                            map_sum_passage += run_map
-                            # Start new topic run.
-                            topic_counter_passage += 1
-                            topic_run_passage_dict = {}
-
-                        topic_run_passage_dict[doc_id] = [float(label), float(dev_score[0])]
-
-                        # Update topic run.
-                        topic_query_passage = query
-                        passage_score = float(dev_score[0])
-
-                    if 'entity' == task:
-                        assert float(dev_label[0]) == float(label), '{} == {}'.format(dev_label[0], label)
-
-                        if (topic_query_entity != None) and (topic_query_entity != query):
-                            run_map = update_topic_entity_run(topic_query_entity, topic_run_entity_dict, dev_qrels, max_rank)
-                            map_sum_entity += run_map
-                            # Start new topic run.
-                            topic_counter_entity += 1
-                            topic_run_entity_dict = {}
-
-                        entity_score = passage_score * float(dev_score[0])
-                        topic_run_entity_dict[doc_id] = [float(label), entity_score]
-
-                        if doc_id in topic_run_entity_dict:
-                            if entity_score > topic_run_entity_dict[doc_id][1]:
-                                topic_run_entity_dict[doc_id] = [float(label), entity_score]
-                        else:
-                            topic_run_entity_dict[doc_id] = [float(label), entity_score]
-
-                        # Update topic run.
-                        topic_query_entity = query
-
-
-                if len(topic_run_passage_dict) > 0:
-                    run_map = update_topic_passage_run(topic_query_passage, topic_run_passage_dict, dev_qrels, max_rank)
-                    map_sum_passage += run_map
-                    # Start new topic run.
-                    topic_counter_passage += 1
-
-                if len(topic_run_entity_dict) > 0:
-                    run_map = update_topic_entity_run(topic_query_entity, topic_run_entity_dict, dev_qrels, max_rank)
-                    map_sum_passage += run_map
-                    # Start new topic run.
-                    topic_counter_entity += 1
-
-                assert topic_counter_passage == topic_counter_entity, "{} == {}".format(topic_counter_passage, topic_counter_entity)
-                print('Passage MAP: {}'.format(map_sum_passage/topic_counter_passage))
-                print('Entity MAP: {}'.format(map_sum_entity/topic_counter_entity))
-
+                run_validation(model, dev_data_loader, loss_func, dev_run_data, max_seq_len, device, i_train, dev_qrels,
+                               max_rank)
