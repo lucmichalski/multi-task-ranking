@@ -441,5 +441,5 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
 
                 assert topic_counter_passage == topic_counter_entity
                 print('Passage MAP: {}'.format(map_sum_passage/topic_counter_passage))
-                print('Entity MAP: {}'.format(map_sum_entity/topic_counter_entity)
+                print('Entity MAP: {}'.format(map_sum_entity/topic_counter_entity))
 
