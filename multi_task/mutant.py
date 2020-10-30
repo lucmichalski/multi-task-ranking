@@ -282,6 +282,20 @@ def update_topic_entity_run(topic_query, topic_run_entity_dict, dev_qrels, max_r
     return map
 
 
+def get_loss(outputs, labels, max_seq_len):
+    """"""
+    loss_func = torch.nn.MSELoss()  # this is for regression mean squared loss
+    passage_outputs = outputs[:,0,:]
+    passage_labels = labels[:,0,:]
+    passage_loss = loss_func(passage_outputs, passage_labels) * max_seq_len
+
+    entity_outputs = outputs[:,1:,:]
+    entity_labels = labels[:,1:,:]
+    entity_loss = loss_func(entity_outputs, entity_labels)
+
+    return passage_loss.sum() + entity_loss.sum()
+
+
 def run_validation(model, dev_data_loader, loss_func, dev_run_data, max_seq_len, device, i_train, dev_qrels, max_rank):
 
     dev_labels = []
@@ -296,9 +310,9 @@ def run_validation(model, dev_data_loader, loss_func, dev_run_data, max_seq_len,
         with torch.no_grad():
             outputs = model.forward(bag_of_CLS.to(device), type_mask=type_mask.to(device))
 
-        loss = loss_func(outputs.cpu(), labels)
+        loss = get_loss(outputs.cpu(), labels, max_seq_len)
 
-        dev_loss_total += loss.sum().item()
+        dev_loss_total += loss.item()
         dev_scores += list(itertools.chain(*outputs.permute(1, 0, 2).cpu().numpy().tolist()))
         dev_labels += list(itertools.chain(*labels.permute(1, 0, 2).cpu().numpy().tolist()))
 
@@ -357,7 +371,6 @@ def run_validation(model, dev_data_loader, loss_func, dev_run_data, max_seq_len,
             # Update topic run.
             topic_query_entity = query
 
-
     if len(topic_run_passage_dict) > 0:
         run_map = update_topic_passage_run(topic_query_passage, topic_run_passage_dict, dev_qrels, max_rank)
         map_sum_passage += run_map
@@ -415,7 +428,6 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
         print('\\\\\\\\\\\\\\\\\\\\\\\\\\')
 
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-        loss_func = torch.nn.MSELoss()  # this is for regression mean squared loss
         train_loss_total = 0.0
 
         model.train()
@@ -431,16 +443,14 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
             model.zero_grad()
 
             outputs = model.forward(bag_of_CLS.to(device), type_mask=type_mask.to(device))
-            print(outputs)
-            print(outputs.shape)
 
-            loss = loss_func(outputs.cpu(), labels)
-            loss.sum().backward()
+            loss = get_loss(outputs.cpu(), labels, max_seq_len)
+            loss.backward()
             optimizer.step()
 
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
 
-            train_loss_total += loss.sum().item()
+            train_loss_total += loss.item()
 
             if i_train % 2500 == 0:
                 #############################################
