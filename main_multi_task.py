@@ -46,16 +46,16 @@ if __name__ == '__main__':
 
     dev_save_path_run = dev_dir_path + 'mutant_dev.run_data'
     dev_save_path_dataset = dev_dir_path + 'mutant_dev.pt'
-    train_save_path_dataset = train_dir_paths[0] + 'mutant_train.pt'
+    train_save_path_dataset = train_dir_paths[0] + 'mutant_train_data/'
 
     #get_dev_dataset(save_path_dataset=dev_save_path_dataset, save_path_run=dev_save_path_run, dir_path=dev_dir_path, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
-    get_train_dataset(save_path_dataset=train_save_path_dataset, dir_paths=train_dir_paths, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
+    get_train_dataset(save_path_dataset_dir=train_save_path_dataset, dir_paths=train_dir_paths, doc_to_entity_map_path=doc_to_entity_map_path, file_name=file_name, max_seq_len=16)
 
-    train_and_dev_mutant(dev_save_path_run=dev_save_path_run,
-                         dev_save_path_dataset=dev_save_path_dataset,
-                         dev_qrels_path=dev_qrels_path,
-                         train_save_path_dataset=train_save_path_dataset,
-                         lr=0.00005,
-                         epoch=5,
-                         max_seq_len=16,
-                         batch_size=32)
+    # train_and_dev_mutant(dev_save_path_run=dev_save_path_run,
+    #                      dev_save_path_dataset=dev_save_path_dataset,
+    #                      dev_qrels_path=dev_qrels_path,
+    #                      train_save_path_dataset=train_save_path_dataset,
+    #                      lr=0.00005,
+    #                      epoch=5,
+    #                      max_seq_len=16,
+    #                      batch_size=32)

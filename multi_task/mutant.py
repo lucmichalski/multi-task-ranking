@@ -145,7 +145,7 @@ def get_dev_dataset(save_path_dataset, save_path_run, dir_path, doc_to_entity_ma
 
 # dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
 # doc_to_entity_map_path ='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
-def get_train_dataset(save_path_dataset, dir_paths, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16,
+def get_train_dataset(save_path_dataset_dir, dir_paths, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16,
                       max_rank=100):
     """ """
 
@@ -155,6 +155,11 @@ def get_train_dataset(save_path_dataset, dir_paths, doc_to_entity_map_path, file
     bag_of_CLS_N = []
     labels_N = []
     type_mask_N = []
+    chunk_i = 0
+    counter = 0
+
+    if not os.path.exists(save_path_dataset_dir):
+        os.mkdir(save_path_dataset_dir)
 
     with open(doc_to_entity_map_path, 'r') as f:
         doc_to_entity_map = json.load(f)
@@ -213,24 +218,74 @@ def get_train_dataset(save_path_dataset, dir_paths, doc_to_entity_map_path, file
                     labels_R.append(seq_labels)
                     type_mask_R.append(seq_mask)
 
-    print('-> {} training R examples'.format(len(bag_of_CLS_R)))
-    print('-> {} training N examples'.format(len(bag_of_CLS_N)))
-    idx_list = list(range(len(bag_of_CLS_R)))
-    diff = len(bag_of_CLS_N) - len(bag_of_CLS_R)
-    # randomly sample diff number of samples.
-    for idx in random.choices(idx_list, k=diff):
-        bag_of_CLS_N.append(bag_of_CLS_R[idx])
-        labels_N.append(labels_R[idx])
-        type_mask_N.append(type_mask_R[idx])
+            counter += 1
+            if counter % 100 == 0:
+                # write_batch
+                chunk_path = save_path_dataset_dir + 'chunk_{}.pt'.format(chunk_i)
+                print('------- CHUNK {} -------'.format(chunk_i))
+                print(chunk_path)
+                print('-> {} training R examples'.format(len(bag_of_CLS_R)))
+                print('-> {} training N examples'.format(len(bag_of_CLS_N)))
+                idx_list = list(range(len(bag_of_CLS_R)))
+                diff = len(bag_of_CLS_N) - len(bag_of_CLS_R)
+                # randomly sample diff number of samples.
+                for idx in random.choices(idx_list, k=diff):
+                    bag_of_CLS_N.append(bag_of_CLS_R[idx])
+                    labels_N.append(labels_R[idx])
+                    type_mask_N.append(type_mask_R[idx])
 
-    bag_of_CLS_tensor = torch.tensor(bag_of_CLS_N)
-    type_mask_tensor = torch.tensor(type_mask_N)
-    labels_tensor = torch.tensor(labels_N)
-    print(bag_of_CLS_tensor.shape, type_mask_tensor.shape, labels_tensor.shape)
+                bag_of_CLS_tensor = torch.tensor(bag_of_CLS_N)
+                type_mask_tensor = torch.tensor(type_mask_N)
+                labels_tensor = torch.tensor(labels_N)
+                print(bag_of_CLS_tensor.shape, type_mask_tensor.shape, labels_tensor.shape)
 
-    train_dataset = TensorDataset(bag_of_CLS_tensor, type_mask_tensor, labels_tensor)
+                train_dataset = TensorDataset(bag_of_CLS_tensor, type_mask_tensor, labels_tensor)
 
-    torch.save(obj=train_dataset, f=save_path_dataset)
+                torch.save(obj=train_dataset, f=chunk_path)
+
+                bag_of_CLS_R = []
+                labels_R = []
+                type_mask_R = []
+                bag_of_CLS_N = []
+                labels_N = []
+                type_mask_N = []
+                chunk_i += 1
+
+    if bag_of_CLS_R > 0:
+        
+        chunk_path = save_path_dataset_dir + 'chunk_{}.pt'.format(chunk_i)
+        print('------- CHUNK {} -------'.format(chunk_i))
+        print(chunk_path)
+        print('-> {} training R examples'.format(len(bag_of_CLS_R)))
+        print('-> {} training N examples'.format(len(bag_of_CLS_N)))
+        idx_list = list(range(len(bag_of_CLS_R)))
+        diff = len(bag_of_CLS_N) - len(bag_of_CLS_R)
+        # randomly sample diff number of samples.
+        for idx in random.choices(idx_list, k=diff):
+            bag_of_CLS_N.append(bag_of_CLS_R[idx])
+            labels_N.append(labels_R[idx])
+            type_mask_N.append(type_mask_R[idx])
+
+        bag_of_CLS_tensor = torch.tensor(bag_of_CLS_N)
+        type_mask_tensor = torch.tensor(type_mask_N)
+        labels_tensor = torch.tensor(labels_N)
+        print(bag_of_CLS_tensor.shape, type_mask_tensor.shape, labels_tensor.shape)
+
+        train_dataset = TensorDataset(bag_of_CLS_tensor, type_mask_tensor, labels_tensor)
+
+        torch.save(obj=train_dataset, f=chunk_path)
+
+        bag_of_CLS_R = []
+        labels_R = []
+        type_mask_R = []
+        bag_of_CLS_N = []
+        labels_N = []
+        type_mask_N = []
+        chunk_i += 1
+
+
+
+
 
 
 def unpack_run_data(run_data, max_seq_len=16):
