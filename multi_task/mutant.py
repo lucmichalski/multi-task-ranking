@@ -296,7 +296,7 @@ def get_loss(outputs, labels, max_seq_len):
     return passage_loss.sum() + entity_loss.sum()
 
 
-def run_validation(model, dev_data_loader, loss_func, dev_run_data, max_seq_len, device, i_train, dev_qrels, max_rank):
+def run_validation(model, dev_data_loader, dev_run_data, max_seq_len, device, i_train, dev_qrels, max_rank):
 
     dev_labels = []
     dev_scores = []
@@ -459,16 +459,16 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                 print('--------')
                 print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
 
-                run_validation(model, dev_data_loader, loss_func, dev_run_data, max_seq_len, device, i_train, dev_qrels,
+                run_validation(model, dev_data_loader, dev_run_data, max_seq_len, device, i_train, dev_qrels,
                                max_rank)
 
-    run_validation(model, dev_data_loader, loss_func, dev_run_data, max_seq_len, device, i_train, dev_qrels,
+    run_validation(model, dev_data_loader, dev_run_data, max_seq_len, device, i_train, dev_qrels,
                    max_rank)
 
     print('=========================')
     print('==== EPOCH {} ===='.format(i))
     print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
 
-    run_validation(model, dev_data_loader, loss_func, dev_run_data, max_seq_len, device, i_train, dev_qrels,
+    run_validation(model, dev_data_loader, dev_run_data, max_seq_len, device, i_train, dev_qrels,
                    max_rank)
     print('========================')
