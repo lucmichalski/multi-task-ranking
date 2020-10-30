@@ -697,7 +697,7 @@ class MultiTaskDatasetByQuery():
                     json.dump(query_dataset, f, indent=4)
 
 
-    def build_dataset_by_query_entity_context(self, dir_path, max_rank=100, batch_size=64, passage_model_path=None,
+    def build_dataset_by_query_entity_context(self, dir_path, max_rank=1000, batch_size=64, passage_model_path=None,
                                               entity_model_path=None):
         """ """
 
@@ -723,8 +723,7 @@ class MultiTaskDatasetByQuery():
             entity_device = torch.device("cpu")
             passage_device = torch.device("cpu")
 
-        # for dataset in ['dev', 'test', 'train']:
-        for dataset in ['test', 'train']:
+        for dataset in ['dev', 'test', 'train']:
 
             dataset_dir_path = dir_path + '{}_data/'.format(dataset)
 
@@ -732,7 +731,7 @@ class MultiTaskDatasetByQuery():
             with open(passage_to_entity_path, 'r') as f:
                 passage_to_entity_dict = json.load(f)
 
-            entity_run_dict, entity_qrels_dict = self. get_task_run_and_qrels(dataset=dataset, task='entity', max_rank=max_rank)
+            entity_run_dict, entity_qrels_dict = self.get_task_run_and_qrels(dataset=dataset, task='entity', max_rank=max_rank)
 
             tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
             search_tools_entity = SearchTools(index_path=CarEntityPaths.index)
