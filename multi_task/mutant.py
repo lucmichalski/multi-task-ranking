@@ -10,7 +10,7 @@ import random
 import itertools
 import os
 import json
-
+import re
 
 class MUTANT(nn.Module):
 
@@ -448,8 +448,8 @@ def run_validation(model, dev_data_loader, dev_run_data, max_seq_len, device, i_
 def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_path, train_save_path_dataset, lr=0.0001, epoch=5,
                          max_seq_len=16, batch_size=32, max_rank=100):
     """"""
-    print('BUILDING TRAINING DATASET')
-    train_dataset = MutantDataset(train_save_path_dataset)
+    # print('BUILDING TRAINING DATASET')
+    # train_dataset = MutantDataset(train_save_path_dataset)
     print('BUILDING DEV DATASET')
     dev_dataset = torch.load(dev_save_path_dataset)
 
@@ -460,7 +460,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
             dev_run_data.append(data)
 
     dev_qrels = SearchTools().retrieval_utils.get_qrels_binary_dict(dev_qrels_path)
-    train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
+    # train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
     dev_data_loader = DataLoader(dev_dataset, sampler=SequentialSampler(dev_dataset), batch_size=batch_size)
 
     model = MUTANT(d_model=768, seq_len=max_seq_len, dropout=0.1)
@@ -486,38 +486,53 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
 
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
         train_loss_total = 0.0
+        i_train = 0
 
-        model.train()
-        for i_train, train_batch in enumerate(train_data_loader):
-            #############################################
-            ################## TRAIN ####################
-            #############################################
-            bag_of_CLS, type_mask, labels = train_batch
-            bag_of_CLS = bag_of_CLS.permute(1, 0, 2).type(torch.float)
-            type_mask = type_mask.permute(1, 0)
-            labels = labels.permute(1, 0, 2).type(torch.float)
+        # Unpack dataset in sorted order based on file name.
+        path_list = os.listdir(train_save_path_dataset)
+        path_list = [path for path in path_list if '.pt' in path]
+        path_list.sort(key=lambda f: int(float(re.sub('\D', '', f))))
+        print('ordered files: {}'.format(path_list))
+        for file_name in path_list:
+            if file_name[len(file_name) - 3:] == '.pt':
+                path = os.path.join(train_save_path_dataset, file_name)
+                print('loadings data from: {}'.format(path))
+                train_dataset = torch.load(path)
 
-            model.zero_grad()
+            train_data_loader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
 
-            outputs = model.forward(bag_of_CLS.to(device), type_mask=type_mask.to(device))
-
-            loss = get_loss(outputs.cpu(), labels, max_seq_len)
-            loss.backward()
-            optimizer.step()
-
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-
-            train_loss_total += loss.item()
-
-            if i_train % 2500 == 0:
+            model.train()
+            for train_batch in train_data_loader:
                 #############################################
-                ################## VALID ####################
+                ################## TRAIN ####################
                 #############################################
-                print('--------')
-                print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
+                bag_of_CLS, type_mask, labels = train_batch
+                bag_of_CLS = bag_of_CLS.permute(1, 0, 2).type(torch.float)
+                type_mask = type_mask.permute(1, 0)
+                labels = labels.permute(1, 0, 2).type(torch.float)
 
-                run_validation(model, dev_data_loader, dev_run_data, max_seq_len, device, i_train, dev_qrels,
-                               max_rank)
+                model.zero_grad()
+
+                outputs = model.forward(bag_of_CLS.to(device), type_mask=type_mask.to(device))
+
+                loss = get_loss(outputs.cpu(), labels, max_seq_len)
+                loss.backward()
+                optimizer.step()
+
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+
+                train_loss_total += loss.item()
+                i_train += 1
+
+                if i_train % 2500 == 0:
+                    #############################################
+                    ################## VALID ####################
+                    #############################################
+                    print('--------')
+                    print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
+
+                    run_validation(model, dev_data_loader, dev_run_data, max_seq_len, device, i_train, dev_qrels,
+                                   max_rank)
 
     run_validation(model, dev_data_loader, dev_run_data, max_seq_len, device, i_train, dev_qrels,
                    max_rank)
