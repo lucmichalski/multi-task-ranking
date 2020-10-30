@@ -145,7 +145,7 @@ def get_dev_dataset(save_path_dataset, save_path_run, dir_path, doc_to_entity_ma
 
 # dir_path='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/mutant_data/train/'
 # doc_to_entity_map_path ='/nfs/trec_news_track/data/5_fold/scaled_5fold_0_data/doc_to_entity_map.json'
-def get_train_dataset(save_path_dataset, dir_path, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16,
+def get_train_dataset(save_path_dataset, dir_paths, doc_to_entity_map_path, file_name='_mutant_max.json', max_seq_len=16,
                       max_rank=100):
     """ """
 
@@ -159,58 +159,59 @@ def get_train_dataset(save_path_dataset, dir_path, doc_to_entity_map_path, file_
     with open(doc_to_entity_map_path, 'r') as f:
         doc_to_entity_map = json.load(f)
 
-    for path in [dir_path + f for f in os.listdir(dir_path) if file_name in f]:
-        with open(path, 'r') as f:
-            d = json.load(f)
-        for passage_id in d['query']['passage'].keys():
-            seq_cls = []
-            seq_labels = []
-            seq_mask = []
+    for dir_path in dir_paths:
+        for path in [dir_path + f for f in os.listdir(dir_path) if file_name in f]:
+            with open(path, 'r') as f:
+                d = json.load(f)
+            for passage_id in d['query']['passage'].keys():
+                seq_cls = []
+                seq_labels = []
+                seq_mask = []
 
-            passage_cls = d['query']['passage'][passage_id]['cls_token']
-            passage_relevant = d['query']['passage'][passage_id]['relevant']
-            seq_cls.append(passage_cls)
-            seq_labels.append([passage_relevant])
-            seq_mask.append(1)
+                passage_cls = d['query']['passage'][passage_id]['cls_token']
+                passage_relevant = d['query']['passage'][passage_id]['relevant']
+                seq_cls.append(passage_cls)
+                seq_labels.append([passage_relevant])
+                seq_mask.append(1)
 
-            if passage_id in doc_to_entity_map:
-                entity_id_list = doc_to_entity_map[passage_id]
-                entity_id_list_sorted = [elem for count, elem in
-                                         sorted(((entity_id_list.count(e), e) for e in set(entity_id_list)),
-                                                reverse=True)]
-                for entity_id in entity_id_list_sorted:
-                    if len(seq_mask) < max_seq_len:
-                        entity_cls = d['query']['passage'][passage_id]['entity'][entity_id]['cls_token']
-                        entity_relevant = d['query']['passage'][passage_id]['entity'][entity_id]['relevant']
-                        seq_cls.append(entity_cls)
-                        seq_labels.append([entity_relevant])
-                        seq_mask.append(2)
+                if passage_id in doc_to_entity_map:
+                    entity_id_list = doc_to_entity_map[passage_id]
+                    entity_id_list_sorted = [elem for count, elem in
+                                             sorted(((entity_id_list.count(e), e) for e in set(entity_id_list)),
+                                                    reverse=True)]
+                    for entity_id in entity_id_list_sorted:
+                        if len(seq_mask) < max_seq_len:
+                            entity_cls = d['query']['passage'][passage_id]['entity'][entity_id]['cls_token']
+                            entity_relevant = d['query']['passage'][passage_id]['entity'][entity_id]['relevant']
+                            seq_cls.append(entity_cls)
+                            seq_labels.append([entity_relevant])
+                            seq_mask.append(2)
 
-            else:
-                # print('{} not in doc_to_entity_map'.format(passage_id))
-                for entity_id in d['query']['passage'][passage_id]['entity']:
-                    if len(seq_mask) < max_seq_len:
-                        entity_cls = d['query']['passage'][passage_id]['entity'][entity_id]['cls_token']
-                        entity_relevant = d['query']['passage'][passage_id]['entity'][entity_id]['relevant']
-                        seq_cls.append(entity_cls)
-                        seq_labels.append([entity_relevant])
-                        seq_mask.append(2)
+                else:
+                    # print('{} not in doc_to_entity_map'.format(passage_id))
+                    for entity_id in d['query']['passage'][passage_id]['entity']:
+                        if len(seq_mask) < max_seq_len:
+                            entity_cls = d['query']['passage'][passage_id]['entity'][entity_id]['cls_token']
+                            entity_relevant = d['query']['passage'][passage_id]['entity'][entity_id]['relevant']
+                            seq_cls.append(entity_cls)
+                            seq_labels.append([entity_relevant])
+                            seq_mask.append(2)
 
-            if len(seq_mask) < max_seq_len:
-                padding_len = max_seq_len - len(seq_mask)
-                for i in range(padding_len):
-                    seq_cls.append([0] * 768)
-                    seq_labels.append([0])
-                    seq_mask.append(0)
+                if len(seq_mask) < max_seq_len:
+                    padding_len = max_seq_len - len(seq_mask)
+                    for i in range(padding_len):
+                        seq_cls.append([0] * 768)
+                        seq_labels.append([0])
+                        seq_mask.append(0)
 
-            if passage_relevant == 0:
-                bag_of_CLS_N.append(seq_cls)
-                labels_N.append(seq_labels)
-                type_mask_N.append(seq_mask)
-            else:
-                bag_of_CLS_R.append(seq_cls)
-                labels_R.append(seq_labels)
-                type_mask_R.append(seq_mask)
+                if passage_relevant == 0:
+                    bag_of_CLS_N.append(seq_cls)
+                    labels_N.append(seq_labels)
+                    type_mask_N.append(seq_mask)
+                else:
+                    bag_of_CLS_R.append(seq_cls)
+                    labels_R.append(seq_labels)
+                    type_mask_R.append(seq_mask)
 
     print('-> {} training R examples'.format(len(bag_of_CLS_R)))
     print('-> {} training N examples'.format(len(bag_of_CLS_N)))
@@ -465,9 +466,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
     run_validation(model, dev_data_loader, dev_run_data, max_seq_len, device, i_train, dev_qrels,
                    max_rank)
 
-    print('=========================')
-    print('==== EPOCH {} ===='.format(i))
-    print('train loss @ step {}, {}'.format(i_train, train_loss_total / (i_train + 1)))
+    print('*** EPOCH {} *** train loss @ step {}, {}'.format(i, i_train, train_loss_total / (i_train + 1)))
 
     run_validation(model, dev_data_loader, dev_run_data, max_seq_len, device, i_train, dev_qrels,
                    max_rank)
