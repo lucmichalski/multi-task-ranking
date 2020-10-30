@@ -55,7 +55,7 @@ if __name__ == '__main__':
                          dev_save_path_dataset=dev_save_path_dataset,
                          dev_qrels_path=dev_qrels_path,
                          train_save_path_dataset=train_save_path_dataset,
-                         lr=0.0001,
+                         lr=0.00005,
                          epoch=5,
                          max_seq_len=16,
                          batch_size=32)
