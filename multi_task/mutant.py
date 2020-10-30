@@ -432,7 +432,8 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
 
             outputs = model.forward(bag_of_CLS.to(device), type_mask=type_mask.to(device))
             print(outputs)
-            
+            print(outputs.shape)
+
             loss = loss_func(outputs.cpu(), labels)
             loss.sum().backward()
             optimizer.step()
