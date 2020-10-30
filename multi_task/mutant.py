@@ -3,7 +3,9 @@ import torch
 import torch.nn as nn
 from torch.nn import TransformerEncoderLayer, TransformerEncoder
 from torch.utils.data import TensorDataset, DataLoader, SequentialSampler, RandomSampler
+from learning.utils import MutantDataset
 from retrieval.tools import SearchTools, EvalTools
+
 import random
 import itertools
 import os
@@ -252,7 +254,6 @@ def get_train_dataset(save_path_dataset_dir, dir_paths, doc_to_entity_map_path, 
                 chunk_i += 1
 
     if bag_of_CLS_R > 0:
-        
         chunk_path = save_path_dataset_dir + 'chunk_{}.pt'.format(chunk_i)
         print('------- CHUNK {} -------'.format(chunk_i))
         print(chunk_path)
@@ -448,7 +449,7 @@ def train_and_dev_mutant(dev_save_path_run, dev_save_path_dataset, dev_qrels_pat
                          max_seq_len=16, batch_size=32, max_rank=100):
     """"""
     print('BUILDING TRAINING DATASET')
-    train_dataset = torch.load(train_save_path_dataset)
+    train_dataset = MutantDataset(train_save_path_dataset)
     print('BUILDING DEV DATASET')
     dev_dataset = torch.load(dev_save_path_dataset)
 

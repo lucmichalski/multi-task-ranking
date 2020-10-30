@@ -32,6 +32,30 @@ class BertDataset(Dataset):
         return self.samples[idx]
 
 
+class MutantDataset(Dataset):
+    """ PyTorch subclass that loads a folder of individual datasets into a single iterable object. """
+    def __init__(self, data_dir_path):
+        # Store dataset.
+        self.samples = []
+
+        # Unpack dataset in sorted order based on file name.
+        path_list = os.listdir(data_dir_path)
+        path_list = [path for path in path_list if '.pt' in path]
+        path_list.sort(key=lambda f: int(float(re.sub('\D', '', f))))
+        print('ordered files: {}'.format(path_list))
+        for file_name in path_list:
+            if file_name[len(file_name)-3:] == '.pt':
+                path = os.path.join(data_dir_path, file_name)
+                print('loadings data from: {}'.format(path))
+                dataset = torch.load(path)
+                for td in dataset:
+                    self.samples.append(td)
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        return self.samples[idx]
 
 if __name__ == '__main__':
     data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), '..')), 'data', 'results')
